@@ -1,0 +1,11 @@
+.heroSection {
+  height: 100dvh;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.heroSectionDesc {
+  background-color: var(--mantine-color-gray-5);
+  gap: 22;
+  justify-content: center;
+}

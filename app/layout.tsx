@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 
 import type { Metadata } from "next";
+import { Shell } from "@/components/ui/shell";
 
 export const metadata: Metadata = {
     title: "Achebestan",
@@ -26,7 +27,9 @@ export default function RootLayout({
                 <ColorSchemeScript />
             </head>
             <body>
-                <MantineProvider>{children}</MantineProvider>
+                <MantineProvider>
+                    <Shell>{children}</Shell>
+                </MantineProvider>
             </body>
         </html>
     );

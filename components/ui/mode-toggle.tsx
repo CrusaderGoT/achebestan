@@ -1,5 +1,6 @@
 "use client";
 
+import styles from "@/styles/mode-toggle.module.css";
 import {
     ActionIcon,
     useComputedColorScheme,
@@ -7,7 +8,6 @@ import {
 } from "@mantine/core";
 import { IconMoon, IconSun } from "@tabler/icons-react";
 import cx from "clsx";
-import styles from "@/styles/mode-toggle.module.css";
 
 export function ModeToggle() {
     const { setColorScheme } = useMantineColorScheme();
@@ -22,9 +22,10 @@ export function ModeToggle() {
                     computedColorScheme === "light" ? "dark" : "light"
                 )
             }
-            variant="default"
-            size="xl"
+            variant="light"
+            size="lg"
             aria-label="Toggle color scheme"
+            className={styles.actionIcon}
         >
             <IconSun className={cx(styles.icon, styles.light)} stroke={1.5} />
             <IconMoon className={cx(styles.icon, styles.dark)} stroke={1.5} />
