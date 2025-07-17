@@ -2,6 +2,8 @@
 
 import { defineConfig } from "drizzle-kit";
 
+console.log(process.env.LOCAL_POSTGRES_URL, process.env.NODE_ENV);
+
 const url =
     process.env.NODE_ENV === "production"
         ? process.env.POSTGRES_URL
@@ -9,12 +11,13 @@ const url =
 if (!url)
     throw new Error(
         `Connection string to ${
-            process.env.NODE_ENV ? "Neon" : "local"
+            process.env.NODE_ENV === "production" ? "Neon" : "local"
         } Postgres not found.`
     );
 
 export default defineConfig({
     dialect: "postgresql",
     dbCredentials: { url },
-    schema: "./drizzle/db/schema.ts",
+    schema: "./drizzle/schemas/*.ts",
+    out: "./drizzle/migrations",
 });
