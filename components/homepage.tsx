@@ -11,6 +11,7 @@ import {
 import cx from "clsx";
 import Image from "next/image";
 import Book from "@/components/book";
+import { Book3D } from "./book3D";
 
 export function HomePage() {
     return (
@@ -18,6 +19,14 @@ export function HomePage() {
             <HomeHero />
             <Book
                 image="/images/demo.jpg"
+                title="The Sleepwalkers"
+                subtitle="A novel by Daniel Lundberg"
+                alt="The Sleepwalkers book cover with black and white wave pattern"
+                author="Achebestan"
+                isbn="234456797979"
+            />
+            <Book3D
+                cover="/images/demo.jpg"
                 title="The Sleepwalkers"
                 subtitle="A novel by Daniel Lundberg"
                 alt="The Sleepwalkers book cover with black and white wave pattern"
