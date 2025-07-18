@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "@/styles/home-hero.module.css";
 import { Flex, Image as MantineImage, Stack, Text, Title } from "@mantine/core";
 import Image from "next/image";

@@ -9,8 +9,9 @@ export function HomePage() {
     return (
         <Stack>
             <HomeHero />
+
             <Grid overflow="hidden">
-                <Grid.Col span={4} offset={1}>
+                <Grid.Col span={4} offset={2}>
                     <Book
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
@@ -21,7 +22,7 @@ export function HomePage() {
                     />
                 </Grid.Col>
 
-                <Grid.Col span={4} offset={3}>
+                <Grid.Col span={4} offset={1} mt={"100"}>
                     <Book
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
@@ -41,7 +42,7 @@ export function HomePage() {
                         isbn="234456797979"
                     />
                 </Grid.Col>
-                <Grid.Col span={4} offset={1}>
+                <Grid.Col span={4} offset={1} mt={"100"}>
                     <Book
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"

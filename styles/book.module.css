@@ -4,13 +4,13 @@
   height: 400px;
   min-height: fit-content;
   transform-style: preserve-3d;
-  transform: rotateY(-15deg) rotateX(5deg);
+  transform: rotateY(-8deg) rotateX(2deg);
   transition: transform 0.4s ease, filter 0.3s ease;
   filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.4));
 }
 
 .book:hover {
-  transform: rotateY(-8deg) rotateX(2deg);
+  transform: rotateX(10deg) rotateY(-5deg) rotateZ(-1deg);
   filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.5));
 }
 
@@ -385,10 +385,6 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .bookContainer {
-    padding: 20px;
-  }
-
   .book {
     width: 220px;
     height: 320px;
@@ -405,4 +401,29 @@
   .bookSpine {
     width: 24px;
   }
+}
+
+.title {
+  opacity: 100;
+}
+
+.navigate {
+  opacity: 0;
+  display: none;
+}
+
+.bookContainer:hover .title {
+  opacity: 0;
+  display: none;
+  transition: all 5s ease;
+}
+
+.bookContainer:hover .navigate {
+  opacity: 100;
+  display: block;
+  transition: all 5s ease;
+}
+
+.bookContainer {
+  max-width: min-content;
 }
