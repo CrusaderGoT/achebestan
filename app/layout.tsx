@@ -8,8 +8,8 @@ import {
     mantineHtmlProps,
 } from "@mantine/core";
 
-import type { Metadata } from "next";
 import { Shell } from "@/components/ui/shell";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Achebestan",

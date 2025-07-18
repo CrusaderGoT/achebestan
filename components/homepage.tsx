@@ -1,13 +1,14 @@
 "use client";
 
+import styles from "@/styles/home-hero.module.css";
 import {
     Group,
     Image as MantineImage,
     Stack,
     Text,
     Title,
-    useComputedColorScheme,
 } from "@mantine/core";
+import cx from "clsx";
 import Image from "next/image";
 
 export function HomePage() {
@@ -19,19 +20,11 @@ export function HomePage() {
 }
 
 function HomeHero() {
-    const computedColorScheme = useComputedColorScheme();
-    
     return (
         <Group gap={0}>
             <Stack
                 flex={1}
-                justify="center"
-                style={{
-                    height: "100vh",
-                }}
-                px={"80"}
-                gap={"md"}
-                bg={"gray"}
+                className={cx(styles.heroSection, styles.heroDescSection)}
             >
                 <Title order={1}>Achebestan</Title>
                 <Text>
@@ -43,17 +36,9 @@ function HomeHero() {
             </Stack>
 
             <Stack
-                align="center"
-                justify="end"
-                style={{
-                    height: "100vh",
-                    paddingBottom: "50px",
-                }}
                 flex={1}
-                px={"80"}
-                miw={"50%"}
-                bg={computedColorScheme === "light" ? "gray.1" : "gray.9"}
                 gap={0}
+                className={cx(styles.heroSection, styles.heroImageSection)}
             >
                 <figure>
                     <MantineImage
@@ -68,16 +53,7 @@ function HomeHero() {
                         Winner of the Golden Ink Award, 2035
                     </figcaption>
                 </figure>
-                <Text
-                    style={{
-                        marginLeft: "auto",
-                        transform: "rotateZ(-10deg)",
-                        fontStyle: "italic",
-                        fontSize: "20px",
-                    }}
-                >
-                    Crusader
-                </Text>
+                <Text className={styles.heroSignature}>Crusader</Text>
             </Stack>
         </Group>
     );
