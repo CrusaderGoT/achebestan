@@ -1,19 +1,25 @@
 .heroSection {
   height: 100vh;
-  padding-left: 80px;
-  padding-right: 80px;
   justify-content: center;
+  padding-left: 40px;
+  padding-right: 40px;
+  @mixin larger-than $mantine-breakpoint-xs {
+    padding-left: 80px;
+    padding-right: 80px;
+  }
 }
 
 .heroImageSection {
   min-width: 50%;
   align-items: center;
+  background-color: var(--mantine-color-gray-1);
   @mixin dark {
     background-color: var(--mantine-color-gray-9);
   }
-  @mixin light {
-    background-color: var(--mantine-color-gray-1);
-  }
+}
+
+.heroImage {
+  
 }
 
 .heroSignature {
@@ -25,10 +31,8 @@
 }
 
 .heroDescSection {
+  background-color: var(--mantine-color-gray-4);
   @mixin dark {
     background-color: var(--mantine-color-gray-filled);
-  }
-  @mixin light {
-    background-color: var(--mantine-color-gray-4);
   }
 }

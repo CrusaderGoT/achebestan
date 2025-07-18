@@ -10,11 +10,20 @@ import {
 } from "@mantine/core";
 import cx from "clsx";
 import Image from "next/image";
+import Book from "@/components/book";
 
 export function HomePage() {
     return (
         <Stack>
             <HomeHero />
+            <Book
+                image="/images/demo.jpg"
+                title="The Sleepwalkers"
+                subtitle="A novel by Daniel Lundberg"
+                alt="The Sleepwalkers book cover with black and white wave pattern"
+                author="Achebestan"
+                isbn="234456797979"
+            />
         </Stack>
     );
 }
