@@ -128,7 +128,8 @@
   height: 70%;
   object-fit: cover;
   object-position: center;
-  border-radius: 6px 6px 0 0;
+  border-radius: 3px 6px 0 1px;
+  margin-left: 2px;
   border-bottom: 1px solid rgba(220, 220, 220, 0.6);
 }
 

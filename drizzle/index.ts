@@ -1,4 +1,6 @@
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from "drizzle-orm/neon-http";
 
-export const db = drizzle(process.env.LOCAL_POSTGRES_URL!);
-
+export const db = drizzle({
+    connection: process.env.LOCAL_POSTGRES_URL as string,
+    casing: "snake_case",
+});

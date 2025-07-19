@@ -8,6 +8,20 @@
       "when": 1752758366677,
       "tag": "0000_friendly_darkstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752920414204,
+      "tag": "0001_aberrant_human_cannonball",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752920569190,
+      "tag": "0002_right_korath",
+      "breakpoints": true
     }
   ]
 }

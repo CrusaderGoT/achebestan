@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, Stack } from "@mantine/core";
+import { Container, Grid, Stack } from "@mantine/core";
 
 import Book from "@/components/book";
 import HomeHero from "@/components/home-hero";
@@ -10,7 +10,7 @@ export function HomePage() {
         <Stack>
             <HomeHero />
 
-            <Grid overflow="hidden">
+            <Grid component={Container}>
                 <Grid.Col span={4} offset={2}>
                     <Book
                         image="/images/demo.jpg"

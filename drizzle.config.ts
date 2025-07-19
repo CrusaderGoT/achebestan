@@ -2,8 +2,6 @@
 
 import { defineConfig } from "drizzle-kit";
 
-console.log(process.env.LOCAL_POSTGRES_URL, process.env.NODE_ENV);
-
 const url =
     process.env.NODE_ENV === "production"
         ? process.env.POSTGRES_URL
@@ -18,6 +16,6 @@ if (!url)
 export default defineConfig({
     dialect: "postgresql",
     dbCredentials: { url },
-    schema: "./drizzle/schemas/*.ts",
+    schema: "./drizzle/schemas",
     out: "./drizzle/migrations",
 });

@@ -1,0 +1,16 @@
+.postImage {
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+  max-height: 300px;
+}
+
+.postImageSection {
+  position: relative;
+}
+
+.postBadgeTime {
+  position: absolute;
+  bottom: 5%;
+  left: 10px;
+}
