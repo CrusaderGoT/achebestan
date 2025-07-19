@@ -24,6 +24,7 @@
     "better-auth": "^1.2.12",
     "dotenv": "^17.1.0",
     "drizzle-orm": "^0.44.2",
+    "drizzle-zod": "^0.8.2",
     "next": "15.3.5",
     "next-safe-action": "^8.0.7",
     "postgres": "^3.4.7",

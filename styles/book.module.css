@@ -428,3 +428,15 @@
 .bookContainer {
   max-width: min-content;
 }
+
+.bookParagraph {
+  overflow-wrap: break-word;
+}
+
+.hideParagraph {
+  opacity: 0;
+}
+
+.showParagraph {
+  opacity: 100;
+}
