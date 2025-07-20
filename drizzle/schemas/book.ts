@@ -4,6 +4,14 @@ import { user } from "@/drizzle/schemas/user";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 
+import {
+    createInsertSchema,
+    createSelectSchema,
+    createUpdateSchema,
+} from "drizzle-zod";
+
+import { z } from "zod/v4";
+
 export const books = table(
     "books",
     {
@@ -15,6 +23,7 @@ export const books = table(
             .references(() => user.id)
             .notNull(),
         isbn: t.uuid().defaultRandom().notNull(),
+        content: t.text().notNull(),
         ...timestamps,
         ...image,
     },
@@ -25,3 +34,20 @@ export const books = table(
         t.uniqueIndex("isbn_idx").on(table.isbn),
     ]
 );
+
+export const bookInsertSchema = createInsertSchema(books, {
+    content: (schema) =>
+        schema.min(100, {
+            error: "story content must be at least 100 characters",
+        }),
+});
+
+export type bookInsertType = z.infer<typeof bookInsertSchema>;
+
+export const bookSelectSchema = createSelectSchema(books);
+
+export type bookSelectType = z.infer<typeof bookSelectSchema>;
+
+export const bookUpdateSchema = createUpdateSchema(books);
+
+export type bookUpdateType = z.infer<typeof bookUpdateSchema>;
