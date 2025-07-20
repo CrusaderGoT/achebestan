@@ -48,7 +48,7 @@ function Book({
                             alt={alt || title}
                             className={styles.bookImage}
                         />
-                        <Box className={styles.bookText} flex={1}>
+                        <Box className={styles.bookText}>
                             <Text className={styles.bookTitle}>{title}</Text>
                             <Text className={styles.bookSubtitle}>
                                 {subtitle}
