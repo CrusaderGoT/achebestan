@@ -11,7 +11,7 @@
 }
 
 .book:hover {
-  transform: rotateX(20deg) rotateY(10deg) rotateZ(-3deg);
+  transform: rotateX(20deg) rotateY(10deg) rotateZ(-2deg);
   filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.5));
 }
 
@@ -28,11 +28,11 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #fefefe 0%, #f8f8f8 100%);
+  background: linear-gradient(145deg, #c9c9c9 0%, #b9aeae 100%);
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    inset 0 3px 0 rgba(197, 195, 195, 0.8);
   display: flex;
   flex-direction: column;
   transform: translateZ(15px);
@@ -45,7 +45,7 @@
 [data-mantine-color-scheme="dark"] .bookCover {
   background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 3px 0 rgba(29, 29, 29, 0.1);
   border: 1px solid rgba(60, 60, 60, 0.8);
 }
 
@@ -131,7 +131,7 @@
   object-fit: cover;
   object-position: center;
   border-radius: 3px 6px 0 1px;
-  margin-left: 2px;
+  margin-left: 3px;
   border-bottom: 1px solid rgba(220, 220, 220, 0.6);
 }
 
