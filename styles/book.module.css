@@ -1,7 +1,7 @@
 .book {
   position: relative;
   width: 280px;
-  height: 700px;
+  height: auto;
   transform-style: preserve-3d;
   transform: rotateY(-8deg) rotateX(2deg);
   transition: transform 0.4s ease, filter 0.3s ease;
@@ -124,7 +124,8 @@
 
 .bookImage {
   width: 100%;
-  height: 70%;
+  height: auto;
+  max-height: 70%;
   object-fit: cover;
   object-position: center;
   border-radius: 3px 6px 0 1px;
