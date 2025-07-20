@@ -46,8 +46,8 @@ export type BookInsertType = z.infer<typeof bookInsertSchema>;
 
 export const bookSelectSchema = createSelectSchema(books);
 
-export type bookSelectType = z.infer<typeof bookSelectSchema>;
+export type BookSelectType = z.infer<typeof bookSelectSchema>;
 
 export const bookUpdateSchema = createUpdateSchema(books);
 
-export type bookUpdateType = z.infer<typeof bookUpdateSchema>;
+export type BookUpdateType = z.infer<typeof bookUpdateSchema>;

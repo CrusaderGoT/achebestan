@@ -1,6 +1,8 @@
+"use client";
+
 import { Group, Text } from "@mantine/core";
-import { IconUpload, IconPhoto, IconX } from "@tabler/icons-react";
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
 export function ImageUpload(props: Partial<DropzoneProps>) {
     return (
