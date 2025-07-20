@@ -42,7 +42,7 @@ export const bookInsertSchema = createInsertSchema(books, {
         }),
 });
 
-export type bookInsertType = z.infer<typeof bookInsertSchema>;
+export type BookInsertType = z.infer<typeof bookInsertSchema>;
 
 export const bookSelectSchema = createSelectSchema(books);
 

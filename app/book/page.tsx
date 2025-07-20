@@ -1,4 +1,4 @@
-import Post from "@/components/post";
+import Post from "@/components/ui/post";
 import { Container, Group, Stack } from "@mantine/core";
 import {
     IconBubble,
