@@ -35,7 +35,7 @@
   box-shadow: inset 4px 0 0 rgba(90, 90, 90, 0.6);
   display: flex;
   flex-direction: column;
-  transform: translateZ(15px);
+  transform: translateZ(20px);
   border: 1px solid rgba(220, 220, 220, 0.8);
   transition: transform 0.3s ease;
   backface-visibility: hidden;
@@ -50,7 +50,7 @@
 }
 
 .book:hover .bookCover {
-  transform: rotateX(-2deg) rotateY(20deg) translateZ(7px);
+  transform: rotateY(23deg) translateZ(10px);
   box-shadow: 4px 0 2px rgba(0, 0, 0, 0.6), 20px 15px 6px 4px rgba(0, 0, 0, 0.2);
   box-shadow: inset 4px 0 0 rgba(90, 90, 90, 0.6);
   transition: all 0.3s ease-in-out;
@@ -302,16 +302,17 @@
   height: calc(100% - 4px);
   background: linear-gradient(
     to right,
-    #f8f8f8 0%,
-    #ffffff 20%,
-    #f0f0f0 40%,
-    #e8e8e8 60%,
-    #f0f0f0 80%,
-    #f8f8f8 100%
+    #f4e8d0 0%,
+    #f9f0e0 20%,
+    #f0e5ce 40%,
+    #ead9b8 60%,
+    #f0e5ce 80%,
+    #f4e8d0 100%
   );
   transform: translateZ(12px);
   border-radius: 0 4px 4px 0;
-  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.1), 1px 0 4px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 1px 0 2px rgba(139, 113, 74, 0.2),
+    1px 0 4px rgba(139, 113, 74, 0.15);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -319,14 +320,15 @@
 [data-mantine-color-scheme="dark"] .book::before {
   background: linear-gradient(
     to right,
-    #2a2a2a 0%,
-    #3a3a3a 20%,
-    #2f2f2f 40%,
-    #252525 60%,
-    #2f2f2f 80%,
-    #2a2a2a 100%
+    #3d3529 0%,
+    #4a3f30 20%,
+    #413722 40%,
+    #362e1f 60%,
+    #413722 80%,
+    #3d3529 100%
   );
-  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.3), 1px 0 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 1px 0 10px rgba(218, 192, 143, 0.3),
+    1px 0 4px rgba(0, 0, 0, 0.4);
 }
 
 /* Multiple page layers */
@@ -339,14 +341,15 @@
   height: calc(100% - 6px);
   background: linear-gradient(
     to right,
-    #f0f0f0 0%,
-    #ffffff 30%,
-    #f5f5f5 70%,
-    #e8e8e8 100%
+    #f0e5ce 0%,
+    #f9f0e0 30%,
+    #f5ead3 70%,
+    #ead9b8 100%
   );
   transform: translateZ(8px);
   border-radius: 0 3px 3px 0;
-  box-shadow: inset 1px 0 1px rgba(0, 0, 0, 0.08), 1px 0 3px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 1px 0 1px rgba(139, 113, 74, 0.15),
+    1px 0 3px rgba(139, 113, 74, 0.12);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -354,12 +357,12 @@
 [data-mantine-color-scheme="dark"] .book::after {
   background: linear-gradient(
     to right,
-    #2f2f2f 0%,
-    #3a3a3a 30%,
-    #353535 70%,
-    #252525 100%
+    #413722 0%,
+    #4a3f30 30%,
+    #453b29 70%,
+    #362e1f 100%
   );
-  box-shadow: inset 1px 0 1px rgba(0, 0, 0, 0.2), 1px 0 3px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 1px 0 1px rgba(0, 0, 0, 0.3), 1px 0 3px rgba(0, 0, 0, 0.25);
 }
 
 /* Texture for book text area */
