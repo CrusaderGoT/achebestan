@@ -13,7 +13,7 @@ export function BookFormFields() {
     //const form = useBookFormContext();
 
     return (
-        <Paper withBorder>
+        <Paper withBorder p={"xl"} m={"xl"}>
             <ImageUpload />
         </Paper>
     );

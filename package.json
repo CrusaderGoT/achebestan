@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "npm run upgrade && next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "upgrade": "npx drizzle-kit generate && npx drizzle-kit migrate"
   },
   "dependencies": {
     "@mantine/core": "^8.1.3",

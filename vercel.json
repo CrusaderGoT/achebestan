@@ -1,0 +1,6 @@
+{
+  "installCommand": "npm install && npm run predeploy",
+  "scripts": {
+    "predeploy": "npx drizzle-kit migrate"
+  }
+}
