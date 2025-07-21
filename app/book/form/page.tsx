@@ -1,5 +1,5 @@
-import { BookFormFields } from "@/components/forms/book-form-context";
+import { BookForm } from "@/components/forms/book-form";
 
 export default function Home() {
-    return <BookFormFields />;
+    return <BookForm />;
 }
