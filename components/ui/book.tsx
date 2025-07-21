@@ -22,7 +22,7 @@ interface BookProps {
     author?: string;
     isbn?: string;
     navigate?: boolean;
-    content: string
+    content: string;
 }
 
 function Book({
@@ -33,7 +33,7 @@ function Book({
     author,
     isbn,
     navigate = true,
-    content
+    content,
 }: BookProps) {
     const { ref, width } = useElementSize();
 
@@ -67,7 +67,7 @@ function Book({
                     </Box>
                 </Box>
                 {navigate && (
-                    <Center>
+                    <Center className={styles.bookFooter}>
                         <Text className={styles.title}>{title}</Text>
 
                         <Button variant="outline" className={styles.navigate}>
