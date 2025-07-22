@@ -1,4 +1,4 @@
-import { actionMetadatSchema } from "@/drizzle/schemas/base";
+import { actionMetadatSchema } from "@/zod-schemas/base";
 import { NeonDbError } from "@neondatabase/serverless";
 import { createSafeActionClient } from "next-safe-action";
 
@@ -11,9 +11,5 @@ export const actionClient = createSafeActionClient({
         }
 
         return e.message;
-    },
-
-    defineMetadataSchema() {
-        return actionMetadatSchema;
     },
 });

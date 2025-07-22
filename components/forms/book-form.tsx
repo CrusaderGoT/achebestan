@@ -6,7 +6,7 @@ import {
     useBookForm,
 } from "@/components/forms/book-form-context";
 
-import { bookInsertSchema } from "@/drizzle/schemas/book";
+import { bookInsertSchema } from "@/zod-schemas/book";
 
 import { Button } from "@mantine/core";
 

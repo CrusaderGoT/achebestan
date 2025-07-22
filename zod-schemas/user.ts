@@ -1,0 +1,24 @@
+import { z } from "zod/v4";
+
+export const signupSchema = z.object({
+    email: z.email(),
+    password: z
+        .string({ error: "input must be a string" })
+        .min(8, { error: "minimun of 8 characters" })
+        .max(20, { error: "maximun of 20 characters" })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_+-=;:'",.<>?]).{8,20}/, {
+            error: `
+            password must be within 8-20 characters,
+            contain at least a uppercase letter, 
+            a lowercase letter, a number, 
+            and a special character from !@#$%^&*_+-=;:'",.<>?
+            `,
+        }),
+    name: z
+        .string()
+        .min(3, { error: "name must be at least 3 characters" })
+        .regex(/^[A-Za-z]+$/, { error: "name must be only letters" }),
+    image: z.url().optional(),
+});
+
+export type SignupSchemaType = z.infer<typeof signupSchema>;

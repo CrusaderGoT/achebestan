@@ -2,7 +2,7 @@
 
 import { createFormContext } from "@mantine/form";
 
-import { BookInsertType } from "@/drizzle/schemas/book";
+import { BookInsertType } from "@/zod-schemas/book";
 import { Paper, Stack, TextInput } from "@mantine/core";
 import { ImageUpload } from "../ui/dropzone";
 import { BookRichTextEditor } from "../ui/rich-text-editor";

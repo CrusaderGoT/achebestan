@@ -1,5 +1,5 @@
 import { BookForm } from "@/components/forms/book-form";
 
-export default function Home() {
+export default function BookFormPage() {
     return <BookForm />;
 }

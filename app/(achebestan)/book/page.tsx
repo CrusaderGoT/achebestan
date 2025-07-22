@@ -7,7 +7,7 @@ import {
     IconShare2,
 } from "@tabler/icons-react";
 
-export default function Home() {
+export default function BookPage() {
     return (
         <Stack>
             <Post

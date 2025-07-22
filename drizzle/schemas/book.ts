@@ -4,14 +4,6 @@ import { user } from "@/drizzle/schemas/user";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 
-import {
-    createInsertSchema,
-    createSelectSchema,
-    createUpdateSchema,
-} from "drizzle-zod";
-
-import { z } from "zod/v4";
-
 export const books = table(
     "books",
     {
@@ -36,23 +28,3 @@ export const books = table(
         t.uniqueIndex("isbn_idx").on(table.isbn),
     ]
 );
-
-export const bookInsertSchema = createInsertSchema(books, {
-    title: (schema) =>
-        schema.max(256, { error: "title must not exceed 256 characters" }),
-    content: (schema) =>
-        schema.min(100, {
-            error: "story content must be at least 100 characters",
-        }),
-    authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
-});
-
-export type BookInsertType = z.infer<typeof bookInsertSchema>;
-
-export const bookSelectSchema = createSelectSchema(books);
-
-export type BookSelectType = z.infer<typeof bookSelectSchema>;
-
-export const bookUpdateSchema = createUpdateSchema(books);
-
-export type BookUpdateType = z.infer<typeof bookUpdateSchema>;
