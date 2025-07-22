@@ -16,8 +16,8 @@ export const books = table(
     "books",
     {
         id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-        title: t.varchar({ length: 256 }).notNull(),
-        subtitle: t.varchar({ length: 100 }),
+        title: t.varchar().notNull(),
+        subtitle: t.varchar(),
         authorId: t
             .text()
             .references(() => user.id)
@@ -29,8 +29,10 @@ export const books = table(
     },
     (table) => [
         t.index("title_idx").on(table.title),
+        t.index("subtitle_idx").on(table.subtitle),
         t.uniqueIndex("author_id_idx").on(table.authorId),
         t.index("created_idx").on(table.created),
+        t.index("edited_idx").on(table.edited),
         t.uniqueIndex("isbn_idx").on(table.isbn),
     ]
 );

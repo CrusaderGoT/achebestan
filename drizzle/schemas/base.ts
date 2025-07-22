@@ -7,6 +7,6 @@ export const timestamps = {
 };
 
 export const image = {
-    image: t.varchar().notNull(),
-    imageAlt: t.varchar().notNull(),
+    image: t.varchar(),
+    imageAlt: t.varchar(),
 };

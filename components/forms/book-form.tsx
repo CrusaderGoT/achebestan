@@ -19,7 +19,7 @@ export function BookForm() {
 
     return (
         <BookFormProvider form={form}>
-            <form>
+            <form onSubmit={form.onSubmit(() => console.error(form.errors))}>
                 <BookFormFields />
 
                 <Button type="submit">Submit</Button>

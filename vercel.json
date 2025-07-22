@@ -1,6 +1,4 @@
 {
-  "installCommand": "npm install && npm run predeploy",
-  "scripts": {
-    "predeploy": "npx drizzle-kit migrate"
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install && npx drizzle-kit migrate"
 }

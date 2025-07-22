@@ -32,7 +32,7 @@ export function BookRichTextEditor({
                 style={
                     props.error
                         ? { borderColor: "red", color: "red" }
-                        : { overflowY: "scroll" }
+                        : { overflowY: "auto" }
                 }
             >
                 <RichTextEditor.Toolbar sticky>

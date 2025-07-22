@@ -1,0 +1,15 @@
+.hide {
+  display: none;
+}
+
+.pointerEventsNone {
+  pointer-events: none;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.marginAuto {
+  margin: auto;
+}

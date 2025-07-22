@@ -14,13 +14,21 @@ export function BookFormFields() {
     const form = useBookFormContext();
 
     return (
-        <Paper withBorder p={"xl"} m={"xl"}>
+        <Paper withBorder p={"xl"}>
             <Stack>
-                <ImageUpload />
+                <ImageUpload maxFiles={1} />
 
-                <TextInput label="Title" {...form.getInputProps("title")} />
+                <TextInput
+                    key={form.key("title")}
+                    label="Title"
+                    {...form.getInputProps("title")}
+                />
 
-                <TextInput label="Title" {...form.getInputProps("subtitle")} />
+                <TextInput
+                    label="Subtitle"
+                    key={form.key("subtitle")}
+                    {...form.getInputProps("subtitle")}
+                />
 
                 <BookRichTextEditor
                     key={form.key("content")}
