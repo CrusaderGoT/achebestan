@@ -38,10 +38,13 @@ export const books = table(
 );
 
 export const bookInsertSchema = createInsertSchema(books, {
+    title: (schema) =>
+        schema.max(256, { error: "title must not exceed 256 characters" }),
     content: (schema) =>
         schema.min(100, {
             error: "story content must be at least 100 characters",
         }),
+    authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
 });
 
 export type BookInsertType = z.infer<typeof bookInsertSchema>;
