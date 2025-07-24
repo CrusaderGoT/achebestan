@@ -2,6 +2,7 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { createSafeActionClient } from "next-safe-action";
 
 export const actionClient = createSafeActionClient({
+   
     async handleServerError(e) {
         if (e instanceof NeonDbError) {
             console.error(e);
@@ -12,3 +13,4 @@ export const actionClient = createSafeActionClient({
         return e.message;
     },
 });
+
