@@ -1,16 +1,18 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";
 import { Button, Paper } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { redirect } from "next/navigation";
+import { useState } from "react";
 import {
     SignupFields,
     SignupFormProvider,
     useSignupForm,
 } from "./signup-form-context";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
-import { redirect } from "next/navigation";
+
+import { notifications } from "@mantine/notifications";
 
 export function SignupForm() {
     const [loading, setLoading] = useState(false);
@@ -26,13 +28,16 @@ export function SignupForm() {
             { ...data },
             {
                 onRequest: () => setLoading(true),
-                onError(context) {
+                onError() {
                     setLoading(false);
-                    alert(context.error.cause);
+                    notifications.show({
+                        message: `An Error Occured While Signing You Up`,
+                    });
                 },
                 onSuccess() {
-                    // notify
-                    alert("successful");
+                    notifications.show({
+                        message: "Successfully Signed Up",
+                    });
                     redirect("/");
                 },
             }

@@ -11,6 +11,8 @@ import {
     mantineHtmlProps,
 } from "@mantine/core";
 
+import { Notifications } from "@mantine/notifications";
+
 import { Shell } from "@/components/ui/shell";
 import type { Metadata } from "next";
 
@@ -31,6 +33,7 @@ export default function RootLayout({
             </head>
             <body>
                 <MantineProvider>
+                    <Notifications />
                     <Shell>{children}</Shell>
                 </MantineProvider>
             </body>
