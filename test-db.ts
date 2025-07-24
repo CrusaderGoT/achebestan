@@ -1,18 +1,26 @@
-// test-db.ts - Run this to test your database connection
+// test-db.ts - Updated test
+import "dotenv/config";
+
 import { db } from "./drizzle/index";
-import { sql } from "drizzle-orm";
 
 async function testConnection() {
-    // Debug environment variables
-    console.log("NODE_ENV:", process.env.NODE_ENV);
-    console.log("POSTGRES_URL exists:", !!process.env.POSTGRES_URL);
-    console.log("LOCAL_POSTGRES_URL exists:", !!process.env.LOCAL_POSTGRES_URL);
+    console.log("Testing database connection...");
+    console.log("NODE_ENV:", process.env.NODE_ENV || "development");
 
     try {
-        const result = await db.execute(sql`SELECT NOW() as current_time`);
-        console.log("✅ Database connection successful:", result);
+        // Test with a simple query
+        const result = await db.execute("SELECT 1 as test, NOW() as timestamp");
+        console.log("✅ Database connection successful!");
+        console.log("Result:", result[0]);
+
+        // Test table access (if you have tables)
+        // const users = await db.select().from(userTable).limit(1);
+        // console.log("✅ Table access works");
     } catch (error) {
-        console.error("❌ Database connection failed:", error);
+        console.error("❌ Database connection failed:");
+        console.error(error);
+    } finally {
+        process.exit(0);
     }
 }
 

@@ -10,6 +10,7 @@ import {
 } from "./signup-form-context";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
+import { redirect } from "next/navigation";
 
 export function SignupForm() {
     const [loading, setLoading] = useState(false);
@@ -31,7 +32,8 @@ export function SignupForm() {
                 },
                 onSuccess() {
                     // notify
-                    // redirect
+                    alert("successful");
+                    redirect("/");
                 },
             }
         );

@@ -1,34 +1,21 @@
 // drizzle/index.ts
 
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { WebSocket } from "ws";
+import "dotenv/config";
+
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 const connectionString =
     process.env.NODE_ENV === "production"
-        ? process.env.POSTGRES_URL
-        : process.env.LOCAL_POSTGRES_URL;
+        ? process.env.NEON_DATABASE_URL // Use Neon in production
+        : process.env.LOCAL_DATABASE_URL; // Your local connection
 
 if (!connectionString) {
-    throw new Error(
-        `Connection string to ${
-            process.env.NODE_ENV === "production" ? "Neon" : "local"
-        } Postgres not found.`
-    );
+    throw new Error("Database connection string not found");
 }
 
-if (process.env.NODE_ENV === "production") {
-    neonConfig.webSocketConstructor = WebSocket;
-    neonConfig.poolQueryViaFetch = true;
-} else {
-    neonConfig.wsProxy = (host) => `${host}:5432/v1`;
-    neonConfig.useSecureWebSocket = false;
-    neonConfig.pipelineTLS = false;
-    neonConfig.pipelineConnect = false;
-}
+const client = postgres(connectionString);
 
-const pool = new Pool({ connectionString });
-
-export const db = drizzle(pool, {
+export const db = drizzle(client, {
     casing: "snake_case",
 });
