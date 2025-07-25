@@ -2,21 +2,21 @@
 
 import { createFormContext } from "@mantine/form";
 
-import { BookInsertType } from "@/zod-schemas/book";
+import { StoryInsertType } from "@/zod-schemas/story";
 import { Paper, Stack, TextInput } from "@mantine/core";
-import { ImageUpload } from "../ui/dropzone";
-import { BookRichTextEditor } from "../ui/rich-text-editor";
+import { StoryImageDropzone } from "../ui/dropzone";
+import { StoryRichTextEditor } from "../ui/rich-text-editor";
 
-export const [BookFormProvider, useBookFormContext, useBookForm] =
-    createFormContext<BookInsertType>();
+export const [StoryFormProvider, useStoryFormContext, useStoryForm] =
+    createFormContext<StoryInsertType>();
 
-export function BookFormFields() {
-    const form = useBookFormContext();
+export function StoryFormFields() {
+    const form = useStoryFormContext();
 
     return (
         <Paper withBorder p={"xl"}>
             <Stack>
-                <ImageUpload maxFiles={1} />
+                <StoryImageDropzone maxFiles={1} />
 
                 <TextInput
                     key={form.key("title")}
@@ -30,7 +30,7 @@ export function BookFormFields() {
                     {...form.getInputProps("subtitle")}
                 />
 
-                <BookRichTextEditor
+                <StoryRichTextEditor
                     key={form.key("content")}
                     value={form.values.content}
                     error={form.getInputProps("content").error}

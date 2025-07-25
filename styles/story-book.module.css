@@ -1,4 +1,4 @@
-.book {
+.storybook {
   position: relative;
   width: 280px;
   height: auto;
@@ -11,21 +11,21 @@
   cursor: pointer;
 }
 
-.book:hover {
+.storybook:hover {
   transform: rotateX(20deg) rotateY(10deg) rotateZ(-1deg) translateY(-10px);
   filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.5));
 }
 
 /* Dark mode shadows */
-[data-mantine-color-scheme="dark"] .book {
+[data-mantine-color-scheme="dark"] .storybook {
   filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.7));
 }
 
-[data-mantine-color-scheme="dark"] .book:hover {
+[data-mantine-color-scheme="dark"] .storybook:hover {
   filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.8));
 }
 
-.bookCover {
+.storybookCover {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -43,21 +43,21 @@
 }
 
 /* Dark mode cover */
-[data-mantine-color-scheme="dark"] .bookCover {
+[data-mantine-color-scheme="dark"] .storybookCover {
   background: linear-gradient(145deg, #5d4037 0%, #3e2723 100%);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3),
     inset 4px 0 0 rgba(139, 113, 74, 0.6);
   border: 1px solid rgba(139, 113, 74, 0.8);
 }
 
-.book:hover .bookCover {
+.storybook:hover .storybookCover {
   transform: rotateY(23deg) translateZ(10px);
   box-shadow: 4px 0 2px rgba(0, 0, 0, 0.6), 20px 15px 6px 4px rgba(0, 0, 0, 0.2),
     inset 4px 0 0 rgba(139, 113, 74, 0.6);
   transition: all 0.3s ease-in-out;
 }
 
-.bookSpine {
+.storybookSpine {
   position: absolute;
   left: 0;
   top: 0;
@@ -82,7 +82,7 @@
 }
 
 /* Dark mode spine */
-[data-mantine-color-scheme="dark"] .bookSpine {
+[data-mantine-color-scheme="dark"] .storybookSpine {
   background: linear-gradient(
     to right,
     #3e2723 0%,
@@ -98,7 +98,7 @@
 }
 
 /* Spine lettering effect */
-.bookSpine::before {
+.storybookSpine::before {
   content: "";
   position: absolute;
   top: 15%;
@@ -118,7 +118,7 @@
   box-shadow: 0 0 2px rgba(205, 133, 63, 0.5);
 }
 
-[data-mantine-color-scheme="dark"] .bookSpine::before {
+[data-mantine-color-scheme="dark"] .storybookSpine::before {
   background: linear-gradient(
     to bottom,
     transparent 0%,
@@ -129,7 +129,7 @@
   );
 }
 
-.bookImage {
+.storybookImage {
   width: 100%;
   height: auto;
   max-height: 60%;
@@ -141,11 +141,11 @@
   transition: margin-left 0.3s ease;
 }
 
-.book:hover .bookImage {
+.storybook:hover .storybookImage {
   margin-left: 0px;
 }
 
-.bookText {
+.storybookText {
   flex: 1;
   padding: 20px;
   display: flex;
@@ -159,17 +159,17 @@
   box-shadow: inset 4px 0 0 rgba(139, 113, 74, 0.8);
 }
 
-.book:hover .bookText {
+.storybook:hover .storybookText {
   box-shadow: inset 0px 0 0 rgba(139, 113, 74, 0.8);
   transition: box-shadow 0.3s ease;
 }
 
 /* Dark mode text background */
-[data-mantine-color-scheme="dark"] .bookText {
+[data-mantine-color-scheme="dark"] .storybookText {
   background: linear-gradient(135deg, #4a3b2a 0%, #3d2f1f 100%);
 }
 
-.bookTitle {
+.storybookTitle {
   font-size: 18px;
   font-weight: 700;
   line-height: 1.3;
@@ -183,12 +183,12 @@
 }
 
 /* Dark mode title */
-[data-mantine-color-scheme="dark"] .bookTitle {
+[data-mantine-color-scheme="dark"] .storybookTitle {
   color: #f5deb3;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.bookSubtitle {
+.storybookSubtitle {
   font-size: 12px;
   font-weight: 400;
   color: #5d4037;
@@ -201,11 +201,11 @@
 }
 
 /* Dark mode subtitle */
-[data-mantine-color-scheme="dark"] .bookSubtitle {
+[data-mantine-color-scheme="dark"] .storybookSubtitle {
   color: #deb887;
 }
 
-.bookAuthor {
+.storybookAuthor {
   font-size: 10px;
   color: #6d4c41;
   margin-top: 4px;
@@ -217,7 +217,7 @@
 }
 
 /* Dark mode author */
-[data-mantine-color-scheme="dark"] .bookAuthor {
+[data-mantine-color-scheme="dark"] .storybookAuthor {
   color: #bcaaa4;
 }
 
@@ -236,7 +236,7 @@
 }
 
 /* Enhanced realistic leather texture */
-.bookCover::before {
+.storybookCover::before {
   content: "";
   position: absolute;
   top: 0;
@@ -267,7 +267,7 @@
   transition: opacity 0.6s ease;
 }
 
-[data-mantine-color-scheme="dark"] .bookCover::before {
+[data-mantine-color-scheme="dark"] .storybookCover::before {
   background-image: radial-gradient(
       circle at 25% 25%,
       rgba(161, 136, 127, 0.2) 2px,
@@ -287,7 +287,7 @@
 }
 
 /* Paper texture for text area */
-.bookText::before {
+.storybookText::before {
   content: "";
   position: absolute;
   top: 0;
@@ -316,7 +316,7 @@
   pointer-events: none;
 }
 
-[data-mantine-color-scheme="dark"] .bookText::before {
+[data-mantine-color-scheme="dark"] .storybookText::before {
   background-image: repeating-linear-gradient(
       0deg,
       transparent,
@@ -337,7 +337,7 @@
 }
 
 /* Page edges effect */
-.book::before {
+.storybook::before {
   content: "";
   position: absolute;
   top: 2px;
@@ -361,7 +361,7 @@
 }
 
 /* Dark mode page edges */
-[data-mantine-color-scheme="dark"] .book::before {
+[data-mantine-color-scheme="dark"] .storybook::before {
   background: linear-gradient(
     to right,
     #3d3529 0%,
@@ -376,7 +376,7 @@
 }
 
 /* Multiple page layers */
-.book::after {
+.storybook::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -398,7 +398,7 @@
 }
 
 /* Dark mode multiple page layers */
-[data-mantine-color-scheme="dark"] .book::after {
+[data-mantine-color-scheme="dark"] .storybook::after {
   background: linear-gradient(
     to right,
     #413722 0%,
@@ -410,13 +410,13 @@
 }
 
 /* Container hover effects */
-.bookContainer {
+.storybookContainer {
   max-width: min-content;
   min-height: max-content;
   transition: all 0.6s ease;
 }
 
-.bookFooter {
+.storybookFooter {
   position: relative;
   height: 50px;
 }
@@ -442,17 +442,17 @@
   z-index: 2;
 }
 
-.bookContainer:hover .title {
+.storybookContainer:hover .title {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.bookContainer:hover .navigate {
+.storybookContainer:hover .navigate {
   opacity: 1;
   transition: opacity 0.4s ease;
 }
 
-.bookParagraph {
+.storybookParagraph {
   overflow-wrap: break-word;
   transition: opacity 0.3s ease;
 }
@@ -467,20 +467,20 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .book {
+  .storybook {
     width: 220px;
     height: 320px;
   }
 
-  .bookTitle {
+  .storybookTitle {
     font-size: 16px;
   }
 
-  .bookSubtitle {
+  .storybookSubtitle {
     font-size: 11px;
   }
 
-  .bookSpine {
+  .storybookSpine {
     width: 24px;
   }
 }

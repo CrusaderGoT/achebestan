@@ -10,57 +10,39 @@ import {
     Text,
 } from "@mantine/core";
 
-import {
-    Dropzone,
-    DropzoneProps,
-    FileWithPath,
-    IMAGE_MIME_TYPE,
-} from "@mantine/dropzone";
+import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+
+import { useStoryFormContext } from "../forms/story-form-context";
 
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
 import { useState } from "react";
 
-import styles from "@/styles/post.module.css";
 import stylesPublic from "@/styles/public.module.css";
+import styles from "@/styles/story-page.module.css";
 
 import cx from "clsx";
 
-export function ImageUpload(props: Partial<DropzoneProps>) {
-    const [files, setFiles] = useState<FileWithPath[]>([]);
+export function StoryImageDropzone(props: Partial<DropzoneProps>) {
+    const form = useStoryFormContext();
 
     const [hiddenDropzone, setHiddenDropzone] = useState(false);
-
-    const previews = files.map((file, index) => {
-        const imageUrl = URL.createObjectURL(file);
-        return (
-            <figure
-                key={index}
-                className={cx(stylesPublic.fullWidth, stylesPublic.marginAuto)}
-            >
-                <MantineImage
-                    key={index}
-                    src={imageUrl}
-                    onLoad={() => URL.revokeObjectURL(imageUrl)}
-                    className={styles.postImage}
-                />
-                <figcaption>{file.name}</figcaption>
-            </figure>
-        );
-    });
 
     return (
         <Box>
             <Dropzone
                 onDrop={(files) => {
-                    setFiles(files);
-                    setHiddenDropzone(!hiddenDropzone);
+                    setHiddenDropzone(true);
+                    console.error(files[0].path);
+                    form.setFieldValue("image", files[0]);
                 }}
-                onReject={(files) => console.error("rejected files", files)}
+                onReject={() => {
+                    form.setFieldError("files", "Select images only");
+                }}
                 maxSize={5 * 1024 ** 2}
                 accept={IMAGE_MIME_TYPE}
-                {...props}
                 className={cx(hiddenDropzone ? stylesPublic.hide : "")}
+                {...props}
             >
                 <Group
                     justify="center"
@@ -110,15 +92,38 @@ export function ImageUpload(props: Partial<DropzoneProps>) {
                 gap={5}
             >
                 <ActionIcon
-                    onClick={() => setHiddenDropzone(!hiddenDropzone)}
-                    color="red"
+                    onClick={() => {
+                        setHiddenDropzone(false);
+                        form.setFieldValue("image", undefined);
+                    }}
                     className={cx(stylesPublic.fullWidth)}
                 >
                     <IconX />
                 </ActionIcon>
 
-                <SimpleGrid cols={{ base: 1 }}>{previews}</SimpleGrid>
+                <SimpleGrid cols={{ base: 1 }}>
+                    <PreviewImage file={form.getValues().image} />
+                </SimpleGrid>
             </Stack>
         </Box>
     );
+}
+
+function PreviewImage({ file }: { file: File | undefined }) {
+    if (file) {
+        const imageUrl = URL.createObjectURL(file);
+        return (
+            <figure
+                className={cx(stylesPublic.fullWidth, stylesPublic.marginAuto)}
+            >
+                <MantineImage
+                    src={imageUrl}
+                    onLoad={() => URL.revokeObjectURL(imageUrl)}
+                    className={styles.storyImage}
+                />
+                <figcaption>{file.name}</figcaption>
+            </figure>
+        );
+    }
+    return <IconPhoto />;
 }

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
             "@mantine/hooks",
             "@tabler/icons-react",
         ],
+        serverActions: {
+            bodySizeLimit: "70mb",
+        },
     },
 };
 

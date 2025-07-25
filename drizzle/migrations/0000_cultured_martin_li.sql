@@ -1,3 +1,16 @@
+CREATE TABLE "stories" (
+	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "stories_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"title" varchar NOT NULL,
+	"subtitle" varchar,
+	"author_id" text NOT NULL,
+	"isbn" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"content" text NOT NULL,
+	"created" timestamp DEFAULT now() NOT NULL,
+	"edited" timestamp,
+	"image" varchar,
+	"image_alt" varchar
+);
+--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -46,5 +59,12 @@ CREATE TABLE "verification" (
 	"updated_at" timestamp
 );
 --> statement-breakpoint
+ALTER TABLE "stories" ADD CONSTRAINT "stories_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "title_idx" ON "stories" USING btree ("title");--> statement-breakpoint
+CREATE INDEX "subtitle_idx" ON "stories" USING btree ("subtitle");--> statement-breakpoint
+CREATE UNIQUE INDEX "author_id_idx" ON "stories" USING btree ("author_id");--> statement-breakpoint
+CREATE INDEX "created_idx" ON "stories" USING btree ("created");--> statement-breakpoint
+CREATE INDEX "edited_idx" ON "stories" USING btree ("edited");--> statement-breakpoint
+CREATE UNIQUE INDEX "isbn_idx" ON "stories" USING btree ("isbn");

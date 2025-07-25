@@ -2,7 +2,7 @@
 
 import { Container, Grid, Stack } from "@mantine/core";
 
-import Book from "@/components/ui/book";
+import { StoryBook } from "@/components/ui/story-book";
 import HomeHero from "@/components/ui/home-hero";
 
 export function HomePage() {
@@ -17,7 +17,7 @@ export function HomePage() {
                 justify="center"
             >
                 <Grid.Col span={{ base: 12, xs: 6, md: 4 }}>
-                    <Book
+                    <StoryBook
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
                         subtitle="A novel by Daniel Lundberg"
@@ -77,7 +77,7 @@ export function HomePage() {
                     span={{ base: 12, xs: 6, md: 4 }}
                     mt={{ base: 0, xs: "100" }}
                 >
-                    <Book
+                    <StoryBook
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
                         subtitle="A novel by Daniel Lundberg"
@@ -133,7 +133,7 @@ export function HomePage() {
                     />
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, xs: 6, md: 4 }}>
-                    <Book
+                    <StoryBook
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
                         subtitle="A novel by Daniel Lundberg"
@@ -192,7 +192,7 @@ export function HomePage() {
                     span={{ base: 12, xs: 6, md: 4 }}
                     mt={{ base: 0, xs: "100" }}
                 >
-                    <Book
+                    <StoryBook
                         image="/images/demo.jpg"
                         title="The Sleepwalkers"
                         subtitle="A novel by Daniel Lundberg"

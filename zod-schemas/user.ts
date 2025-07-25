@@ -22,3 +22,14 @@ export const signupSchema = z.object({
 });
 
 export type SignupSchemaType = z.infer<typeof signupSchema>;
+
+export const userUpdateSchema = z.object({
+    name: z
+        .string()
+        .min(3, { error: "name must be at least 3 characters" })
+        .regex(/^[A-Za-z]+$/, { error: "name must be only letters" })
+        .optional(),
+    image: z.url().optional(),
+});
+
+export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;

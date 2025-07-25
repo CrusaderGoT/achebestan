@@ -11,7 +11,7 @@ async function testConnection() {
         // Test with a simple query
         const result = await db.execute("SELECT 1 as test, NOW() as timestamp");
         console.log("✅ Database connection successful!");
-        console.log("Result:", result[0]);
+        console.log("Result:", result);
 
         // Test table access (if you have tables)
         // const users = await db.select().from(userTable).limit(1);

@@ -1,11 +1,11 @@
 {
-  "id": "437aeb0b-c07e-40b2-ab2b-d185db396606",
-  "prevId": "8a37dfd3-a42e-4fa4-95a0-a72b540a0ed6",
+  "id": "c7139ca2-ded1-4796-9804-07253f0f311b",
+  "prevId": "a184a6de-cd07-400c-8bf3-224e7a2dacf1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.books": {
-      "name": "books",
+    "public.stories": {
+      "name": "stories",
       "schema": "",
       "columns": {
         "id": {
@@ -15,7 +15,7 @@
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "books_id_seq",
+            "name": "stories_id_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -27,18 +27,18 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(256)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
         "subtitle": {
           "name": "subtitle",
-          "type": "varchar(100)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "authorId": {
-          "name": "authorId",
+        "author_id": {
+          "name": "author_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -49,6 +49,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "created": {
           "name": "created",
@@ -67,13 +73,7 @@
           "name": "image",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
-        },
-        "imageAlt": {
-          "name": "imageAlt",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false
         }
       },
       "indexes": {
@@ -92,17 +92,32 @@
           "method": "btree",
           "with": {}
         },
-        "author_id_idx": {
-          "name": "author_id_idx",
+        "subtitle_idx": {
+          "name": "subtitle_idx",
           "columns": [
             {
-              "expression": "authorId",
+              "expression": "subtitle",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
           ],
-          "isUnique": true,
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "author_id_idx": {
+          "name": "author_id_idx",
+          "columns": [
+            {
+              "expression": "author_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -112,6 +127,21 @@
           "columns": [
             {
               "expression": "created",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "edited_idx": {
+          "name": "edited_idx",
+          "columns": [
+            {
+              "expression": "edited",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -139,12 +169,12 @@
         }
       },
       "foreignKeys": {
-        "books_authorId_user_id_fk": {
-          "name": "books_authorId_user_id_fk",
-          "tableFrom": "books",
+        "stories_author_id_user_id_fk": {
+          "name": "stories_author_id_user_id_fk",
+          "tableFrom": "stories",
           "tableTo": "user",
           "columnsFrom": [
-            "authorId"
+            "author_id"
           ],
           "columnsTo": [
             "id"

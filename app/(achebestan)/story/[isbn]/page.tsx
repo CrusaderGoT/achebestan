@@ -1,4 +1,4 @@
-import Post from "@/components/ui/post";
+import { Story } from "@/components/ui/story-book";
 import { Group, Stack } from "@mantine/core";
 import {
     IconBubble,
@@ -7,10 +7,10 @@ import {
     IconShare2,
 } from "@tabler/icons-react";
 
-export default function BookPage() {
+export default function StoryPage() {
     return (
         <Stack>
-            <Post
+            <Story
                 image="/images/demo.jpg"
                 title="The Sleepwalkers"
                 author="Achebestan"

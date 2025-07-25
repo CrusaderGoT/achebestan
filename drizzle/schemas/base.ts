@@ -8,5 +8,4 @@ export const timestamps = {
 
 export const image = {
     image: t.varchar(),
-    imageAlt: t.varchar(),
 };

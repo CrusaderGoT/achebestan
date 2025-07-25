@@ -6,16 +6,16 @@ import { Link, RichTextEditor } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
-interface BookRichTextEditorProps extends Omit<InputWrapperProps, "onChange"> {
+interface StoryRichTextEditorProps extends Omit<InputWrapperProps, "onChange"> {
     value: string;
     onChange?(value: string): void;
 }
 
-export function BookRichTextEditor({
+export function StoryRichTextEditor({
     value,
     onChange,
     ...props
-}: BookRichTextEditorProps) {
+}: StoryRichTextEditorProps) {
     const editor = useEditor({
         extensions: [StarterKit, Link],
         content: value,

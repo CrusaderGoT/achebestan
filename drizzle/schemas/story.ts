@@ -1,11 +1,12 @@
 import { image, timestamps } from "@/drizzle/schemas/base";
 import { user } from "@/drizzle/schemas/user";
 
+import { relations } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 
-export const books = table(
-    "books",
+export const story = table(
+    "stories",
     {
         id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
         title: t.varchar().notNull(),
@@ -22,9 +23,16 @@ export const books = table(
     (table) => [
         t.index("title_idx").on(table.title),
         t.index("subtitle_idx").on(table.subtitle),
-        t.uniqueIndex("author_id_idx").on(table.authorId),
+        t.index("author_id_idx").on(table.authorId),
         t.index("created_idx").on(table.created),
         t.index("edited_idx").on(table.edited),
         t.uniqueIndex("isbn_idx").on(table.isbn),
     ]
 );
+
+export const storyRelations = relations(story, ({ one }) => ({
+    author: one(user, {
+        fields: [story.authorId],
+        references: [user.id],
+    }),
+}));
