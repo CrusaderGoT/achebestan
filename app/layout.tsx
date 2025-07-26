@@ -14,6 +14,7 @@ import {
 import { Notifications } from "@mantine/notifications";
 
 import { Shell } from "@/components/ui/shell";
+import { readLatestStories } from "@/lib/actions/story";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,4 +40,12 @@ export default function RootLayout({
             </body>
         </html>
     );
+}
+
+export async function generateStaticParams() {
+    const stories = await readLatestStories(10);
+    // params to prefetch story across child route, when needed
+    return stories?.map((story) => ({
+        isbn: story.isbn,
+    }));
 }

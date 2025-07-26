@@ -78,6 +78,13 @@
       "when": 1753527136758,
       "tag": "0010_outgoing_puck",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1753540272531,
+      "tag": "0011_familiar_human_robot",
+      "breakpoints": true
     }
   ]
 }

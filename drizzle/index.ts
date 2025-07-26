@@ -1,8 +1,10 @@
 // drizzle/index.ts
+import "dotenv/config";
 
 import * as book from "@/drizzle/schemas/book";
 import * as story from "@/drizzle/schemas/story";
 import * as user from "@/drizzle/schemas/user";
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 

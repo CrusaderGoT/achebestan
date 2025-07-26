@@ -1,10 +1,11 @@
 import { image, timestamps } from "@/drizzle/schemas/base";
+import { book } from "@/drizzle/schemas/book";
 import { user } from "@/drizzle/schemas/user";
 
 import { relations } from "drizzle-orm";
+
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
-import { book } from "./book";
 
 export const story = table(
     "stories",

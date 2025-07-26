@@ -2,6 +2,7 @@
 import "dotenv/config";
 
 import { db } from "./drizzle/index";
+import { user } from "./drizzle/schemas/user";
 
 async function testConnection() {
     console.log("Testing database connection...");
@@ -13,9 +14,9 @@ async function testConnection() {
         console.log("✅ Database connection successful!");
         console.log("Result:", result);
 
-        // Test table access (if you have tables)
-        // const users = await db.select().from(userTable).limit(1);
-        // console.log("✅ Table access works");
+        // Test table access
+        const users = await db.select().from(user).limit(1);
+        console.log("✅ Table access works", users);
     } catch (error) {
         console.error("❌ Database connection failed:");
         console.error(error);

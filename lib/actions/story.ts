@@ -37,7 +37,6 @@ export const createStoryAction = authActionClient
 
 export const readStory = async (isbn: string) => {
     try {
-        console.log("called");
         const storyDb = await db.query.story.findFirst({
             where(fields, operators) {
                 return operators.eq(fields.isbn, isbn);
@@ -54,6 +53,7 @@ export const readStory = async (isbn: string) => {
 
 export const readLatestStories = async (latest: number = 10) => {
     try {
+        console.log("called");
         const latestStories = await db.query.story.findMany({
             limit: latest,
             orderBy: (stories, { desc }) => [desc(stories.created)],

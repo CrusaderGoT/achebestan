@@ -33,6 +33,7 @@ export default async function StoryPage({
                 isbn={story.isbn}
                 authorId={story.authorId}
                 subtitle={story.subtitle}
+                bookId={story.bookId}
             />
 
             <Group>
@@ -44,5 +45,3 @@ export default async function StoryPage({
         </Stack>
     );
 }
-
-export const dynamicParams = false

@@ -1,4 +1,6 @@
 // drizzle.config.ts
+import "dotenv/config";
+
 import { defineConfig } from "drizzle-kit";
 
 const isProduction = process.env.NODE_ENV === "production";
