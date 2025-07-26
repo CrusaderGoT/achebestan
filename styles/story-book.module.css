@@ -137,6 +137,10 @@
   object-position: center;
   border-radius: 1px 6px 0 0;
   margin-left: 4px;
+  text-align: justify;
+  text-indent: 4;
+  text-transform: capitalize;
+  font-weight: 700;
   border-bottom: 1px solid rgba(139, 113, 74, 0.8);
   transition: margin-left 0.3s ease;
 }
@@ -150,7 +154,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   text-align: center;
   background: linear-gradient(135deg, #fff8dc 0%, #f5f5dc 100%);
@@ -454,6 +458,7 @@
 
 .storybookParagraph {
   overflow-wrap: break-word;
+  word-break: break-all;
   transition: opacity 0.3s ease;
 }
 

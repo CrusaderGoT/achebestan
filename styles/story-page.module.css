@@ -1,10 +1,14 @@
 .storyImage {
   height: auto;
+  min-height: 100px;
   width: 100%;
   max-height: 300px;
   object-fit: fill;
   object-position: center;
   border-radius: 6px;
+  text-align: center;
+  text-transform: capitalize;
+  font-weight: 700;
 }
 
 .storyImageSection {
@@ -15,4 +19,8 @@
   position: absolute;
   bottom: 5%;
   left: 10px;
+}
+
+.storyCard {
+  heighht: 100dvh;
 }

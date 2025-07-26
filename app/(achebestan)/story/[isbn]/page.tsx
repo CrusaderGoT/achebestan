@@ -1,4 +1,5 @@
 import { Story } from "@/components/ui/story-book";
+import { readStory } from "@/lib/actions/story";
 import { Group, Stack } from "@mantine/core";
 import {
     IconBubble,
@@ -6,17 +7,32 @@ import {
     IconHeart,
     IconShare2,
 } from "@tabler/icons-react";
+import { redirect } from "next/navigation";
 
-export default function StoryPage() {
+export default async function StoryPage({
+    params,
+}: {
+    params: Promise<{ isbn: string }>;
+}) {
+    const { isbn } = await params;
+
+    const story = await readStory(isbn);
+
+    if (!story) redirect("/404");
+
     return (
         <Stack>
             <Story
-                image="/images/demo.jpg"
-                title="The Sleepwalkers"
-                author="Achebestan"
-                content="a bunch of bullshit"
-                created={new Date()}
-                edited={new Date()}
+                image={story.image}
+                title={story.title}
+                author={story.author}
+                content={story.content}
+                created={story.created}
+                edited={story.edited}
+                id={story.id}
+                isbn={story.isbn}
+                authorId={story.authorId}
+                subtitle={story.subtitle}
             />
 
             <Group>
@@ -28,3 +44,5 @@ export default function StoryPage() {
         </Stack>
     );
 }
+
+export const dynamicParams = false

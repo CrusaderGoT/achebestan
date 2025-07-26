@@ -1,0 +1,1 @@
+ALTER TABLE "books" ALTER COLUMN "stories_id" SET NOT NULL;

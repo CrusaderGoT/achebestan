@@ -1,3 +1,5 @@
+import { user } from "@/drizzle/schemas/user";
+import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const signupSchema = z.object({
@@ -36,3 +38,7 @@ export const userUpdateSchema = z.object({
 });
 
 export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
+
+export const userSelectSchema = createSelectSchema(user);
+
+export type userSelectType = z.infer<typeof userSelectSchema>;

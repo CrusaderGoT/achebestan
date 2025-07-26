@@ -34,3 +34,35 @@ export const createStoryAction = authActionClient
 
         return newStory;
     });
+
+export const readStory = async (isbn: string) => {
+    try {
+        console.log("called");
+        const storyDb = await db.query.story.findFirst({
+            where(fields, operators) {
+                return operators.eq(fields.isbn, isbn);
+            },
+            with: {
+                author: true,
+            },
+        });
+        return storyDb;
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+export const readLatestStories = async (latest: number = 10) => {
+    try {
+        const latestStories = await db.query.story.findMany({
+            limit: latest,
+            orderBy: (stories, { desc }) => [desc(stories.created)],
+            with: {
+                author: true,
+            },
+        });
+        return latestStories;
+    } catch (e) {
+        console.log(e);
+    }
+};

@@ -2,252 +2,57 @@
 
 import { Container, Grid, Stack } from "@mantine/core";
 
-import { StoryBook } from "@/components/ui/story-book";
 import HomeHero from "@/components/ui/home-hero";
+import { StoryBook } from "@/components/ui/story-book";
+import { StorySelectType } from "@/zod-schemas/story";
+import { userSelectType } from "@/zod-schemas/user";
 
-export function HomePage() {
+interface StoryBookProp extends StorySelectType {
+    author: userSelectType;
+}
+
+export function HomePage({
+    stories,
+}: {
+    stories: StoryBookProp[] | undefined;
+}) {
     return (
         <Stack>
             <HomeHero />
 
-            <Grid
-                component={Container}
-                px={{ base: "md", md: "xl" }}
-                gutter={{ base: "sm", sm: "md", lg: "xl" }}
-                justify="center"
-            >
-                <Grid.Col span={{ base: 12, xs: 6, md: 4 }}>
-                    <StoryBook
-                        image="/images/demo.jpg"
-                        title="The Sleepwalkers"
-                        subtitle="A novel by Daniel Lundberg"
-                        alt="The Sleepwalkers book cover with black and white wave pattern"
-                        author="Achebestan"
-                        isbn="234456797979"
-                        content="The Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979"
-                    />
-                </Grid.Col>
-
-                <Grid.Col
-                    span={{ base: 12, xs: 6, md: 4 }}
-                    mt={{ base: 0, xs: "100" }}
+            {stories && (
+                <Grid
+                    component={Container}
+                    px={{ base: "md", md: "xl" }}
+                    gutter={{ base: "sm", sm: "md", lg: "xl" }}
+                    justify="center"
                 >
-                    <StoryBook
-                        image="/images/demo.jpg"
-                        title="The Sleepwalkers"
-                        subtitle="A novel by Daniel Lundberg"
-                        alt="The Sleepwalkers book cover with black and white wave pattern"
-                        author="Achebestan"
-                        isbn="234456797979"
-                        content="The Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979"
-                    />
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, xs: 6, md: 4 }}>
-                    <StoryBook
-                        image="/images/demo.jpg"
-                        title="The Sleepwalkers"
-                        subtitle="A novel by Daniel Lundberg"
-                        alt="The Sleepwalkers book cover with black and white wave pattern"
-                        author="Achebestan"
-                        isbn="234456797979"
-                        content="The Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979"
-                    />
-                </Grid.Col>
-                <Grid.Col
-                    span={{ base: 12, xs: 6, md: 4 }}
-                    mt={{ base: 0, xs: "100" }}
-                >
-                    <StoryBook
-                        image="/images/demo.jpg"
-                        title="The Sleepwalkers"
-                        subtitle="A novel by Daniel Lundberg"
-                        alt="The Sleepwalkers book cover with black and white wave pattern"
-                        author="Achebestan"
-                        isbn="234456797979"
-                        content="The Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979 The Sleepwalkers A novel by Daniel Lundberg
-                    Achebestan ISBN: 234456797979 The Sleepwalkers A novel by
-                    Daniel Lundberg Achebestan ISBN: 234456797979 The
-                    Sleepwalkers A novel by Daniel Lundberg Achebestan ISBN:
-                    234456797979"
-                    />
-                </Grid.Col>
-            </Grid>
+                    {stories.map((story, index) => {
+                        return (
+                            <Grid.Col
+                                span={{ base: 12, xs: 6, md: 4 }}
+                                mt={{ base: 0, xs: index % 2 === 0 ? 0 : 100 }}
+                                key={index}
+                            >
+                                <StoryBook
+                                    key={story.id}
+                                    id={story.id}
+                                    image={story.image}
+                                    title={story.title}
+                                    subtitle={story.subtitle}
+                                    alt={story.title}
+                                    authorName={story.author.name}
+                                    isbn={story.isbn}
+                                    content={story.content}
+                                    created={story.created}
+                                    edited={story.edited}
+                                    authorId={story.authorId}
+                                />
+                            </Grid.Col>
+                        );
+                    })}
+                </Grid>
+            )}
         </Stack>
     );
 }

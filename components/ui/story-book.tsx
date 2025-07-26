@@ -1,10 +1,12 @@
 "use client";
 
-import styles from "@/styles/story-book.module.css";
-import storyStyles from "@/styles/story-page.module.css";
+import storybookStyles from "@/styles/story-book.module.css";
+import storypageStyles from "@/styles/story-page.module.css";
 
 import cx from "clsx";
 
+import { StorySelectType } from "@/zod-schemas/story";
+import { userSelectType } from "@/zod-schemas/user";
 import {
     Avatar,
     Badge,
@@ -25,23 +27,18 @@ import {
 import { useElementSize } from "@mantine/hooks";
 import { IconUserCircle } from "@tabler/icons-react";
 
-type StoryBookProps = {
-    image: string;
-    title: string;
-    subtitle: string;
+interface StoryBookProps extends StorySelectType {
     alt?: string;
-    author?: string;
-    isbn?: string;
+    authorName?: string;
     navigate?: boolean;
-    content: string;
-};
+}
 
 export function StoryBook({
     image,
     title,
     subtitle,
     alt,
-    author,
+    authorName,
     isbn,
     navigate = true,
     content,
@@ -50,40 +47,43 @@ export function StoryBook({
 
     return (
         <Flex gap={"xs"}>
-            <Stack className={styles.storybookContainer}>
-                <Box className={styles.storybook}>
-                    <Box className={styles.storybookSpine} />
-                    <Box className={styles.storybookCover}>
+            <Stack className={storybookStyles.storybookContainer}>
+                <Box className={storybookStyles.storybook}>
+                    <Box className={storybookStyles.storybookSpine} />
+                    <Box className={storybookStyles.storybookCover}>
                         <MantineImage
                             src={image}
                             alt={alt || title}
-                            className={styles.storybookImage}
+                            className={storybookStyles.storybookImage}
                         />
-                        <Box className={styles.storybookText}>
-                            <Text className={styles.storybookTitle}>
+                        <Stack className={storybookStyles.storybookText}>
+                            <Text className={storybookStyles.storybookTitle}>
                                 {title}
                             </Text>
-                            <Text className={styles.storybookSubtitle}>
+                            <Text className={storybookStyles.storybookSubtitle}>
                                 {subtitle}
                             </Text>
-                            {author && (
-                                <Text className={styles.storybookAuthor}>
-                                    {author}
-                                </Text>
-                            )}
-                            {isbn && (
-                                <Text className={styles.isbn}>
-                                    ISBN: {isbn}
-                                </Text>
-                            )}
-                        </Box>
+
+                            <Text className={storybookStyles.storybookAuthor}>
+                                {authorName}
+                            </Text>
+
+                            <Text className={storybookStyles.isbn}>
+                                ISBN: {isbn}
+                            </Text>
+                        </Stack>
                     </Box>
                 </Box>
                 {navigate && (
-                    <Center className={styles.storybookFooter}>
-                        <Text className={styles.title}>{title}</Text>
+                    <Center className={storybookStyles.storybookFooter}>
+                        <Text className={storybookStyles.title}>{title}</Text>
 
-                        <Button variant="outline" className={styles.navigate}>
+                        <Button
+                            variant="outline"
+                            className={storybookStyles.navigate}
+                            component="a"
+                            href={`/story/${isbn}`}
+                        >
                             Goto
                         </Button>
                     </Center>
@@ -93,10 +93,15 @@ export function StoryBook({
             <Center
                 ref={ref}
                 className={cx(
-                    width < 120 ? styles.hideParagraph : styles.showParagraph
+                    width < 120
+                        ? storybookStyles.hideParagraph
+                        : storybookStyles.showParagraph
                 )}
             >
-                <Text lineClamp={7} className={styles.storybookParagraph}>
+                <Text
+                    lineClamp={7}
+                    className={storybookStyles.storybookParagraph}
+                >
                     {content}
                 </Text>
             </Center>
@@ -104,14 +109,9 @@ export function StoryBook({
     );
 }
 
-export type StoryProps = {
-    image?: string;
-    author: string;
-    title: string;
-    content: string;
-    created: Date;
-    edited?: Date;
-};
+interface StoryProps extends StorySelectType {
+    author: userSelectType;
+}
 
 export function Story({
     image,
@@ -122,23 +122,27 @@ export function Story({
     edited,
 }: StoryProps) {
     return (
-        <Card className={storyStyles.storyCard} withBorder>
-            <Card.Section className={storyStyles.storyImageSection}>
+        <Card className={storypageStyles.storyCard} withBorder>
+            <Card.Section className={storypageStyles.storyImageSection}>
                 <Image
                     src={image}
                     alt={title}
-                    className={storyStyles.storyImage}
+                    className={storypageStyles.storyImage}
                 />
 
-                <Box className={storyStyles.storyBadgeTime}>
+                <Box className={storypageStyles.storyBadgeTime}>
                     <Badge
                         leftSection={
-                            <Avatar src={null} size={20} variant="filled">
+                            <Avatar
+                                src={author.image}
+                                size={20}
+                                variant="filled"
+                            >
                                 <IconUserCircle />
                             </Avatar>
                         }
                     >
-                        {author}
+                        {author.name}
                     </Badge>
 
                     <Group>
@@ -152,11 +156,13 @@ export function Story({
                 </Box>
             </Card.Section>
 
-            <Title>{title}</Title>
+            <Stack>
+                <Title>{title}</Title>
 
-            <ScrollArea>
-                <Text>{content}</Text>
-            </ScrollArea>
+                <ScrollArea>
+                    <Box dangerouslySetInnerHTML={{ __html: content }} />
+                </ScrollArea>
+            </Stack>
         </Card>
     );
 }

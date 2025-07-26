@@ -1,5 +1,8 @@
 // drizzle/index.ts
 
+import * as book from "@/drizzle/schemas/book";
+import * as story from "@/drizzle/schemas/story";
+import * as user from "@/drizzle/schemas/user";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -16,4 +19,5 @@ const client = postgres(connectionString);
 
 export const db = drizzle(client, {
     casing: "snake_case",
+    schema: { ...story, ...user, ...book },
 });

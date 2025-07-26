@@ -1,0 +1,1 @@
+ALTER TABLE "stories" DROP CONSTRAINT "stories_bookId_unique";
