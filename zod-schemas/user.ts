@@ -1,9 +1,11 @@
 import { z } from "zod/v4";
 
 export const signupSchema = z.object({
-    email: z.email(),
+    email: z.email({ error: "enter a valid email" }),
     password: z
-        .string({ error: "input must be a string" })
+        .string({
+            error: "input must be letter, number, or special character",
+        })
         .min(8, { error: "minimun of 8 characters" })
         .max(20, { error: "maximun of 20 characters" })
         .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_+-=;:'",.<>?]).{8,20}/, {
@@ -15,8 +17,9 @@ export const signupSchema = z.object({
             `,
         }),
     name: z
-        .string()
+        .string({ error: "type in your name as an author" })
         .min(3, { error: "name must be at least 3 characters" })
+        .max(20, { error: "maximum of 20 letters" })
         .regex(/^[A-Za-z]+$/, { error: "name must be only letters" }),
     image: z.url().optional(),
 });

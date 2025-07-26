@@ -4,7 +4,7 @@ import { createFormContext } from "@mantine/form";
 
 import { SignupSchemaType } from "@/zod-schemas/user";
 import { PasswordInput, Stack, TextInput } from "@mantine/core";
-import { IconAt, IconUser } from "@tabler/icons-react";
+import { IconAt, IconLockPassword, IconUser } from "@tabler/icons-react";
 
 export const [SignupFormProvider, useSignupFormContext, useSignupForm] =
     createFormContext<SignupSchemaType>();
@@ -33,7 +33,7 @@ export function SignupFields() {
                 key={form.key("password")}
                 {...form.getInputProps("password")}
                 label="password"
-                leftSection={<IconAt />}
+                leftSection={<IconLockPassword />}
             />
         </Stack>
     );
