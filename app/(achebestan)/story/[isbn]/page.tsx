@@ -1,4 +1,4 @@
-import { Story } from "@/components/ui/story-book";
+import { Story } from "@/components/ui/story-page";
 import { readStory } from "@/lib/actions/story";
 import { Group, Stack } from "@mantine/core";
 import {

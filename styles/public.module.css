@@ -1,3 +1,7 @@
+.show {
+  display: block;
+}
+
 .hide {
   display: none;
 }
@@ -12,4 +16,9 @@
 
 .marginAuto {
   margin: auto;
+}
+
+.forceWrapText {
+  overflow-wrap: break-word;
+  word-break: break-all;
 }

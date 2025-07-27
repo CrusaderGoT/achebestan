@@ -4,7 +4,7 @@ import {
     StoryFormFields,
     StoryFormProvider,
     useStoryForm,
-} from "@/components/forms/story-form-context";
+} from "@/components/forms/story/create-story-form-context";
 
 import { storyInsertSchema, StoryInsertType } from "@/zod-schemas/story";
 
@@ -15,7 +15,7 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { createStoryAction } from "@/lib/actions/story";
 import { useAction } from "next-safe-action/hooks";
 import { redirect } from "next/navigation";
-import { LoadingOverlayWithText } from "../ui/loading-overlay-with-text";
+import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
 export function StoryForm() {
     const form = useStoryForm({
@@ -82,7 +82,12 @@ export function StoryForm() {
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <StoryFormFields />
 
-                    <Button type="submit" loading={isPending || hasSucceeded}>
+                    <Button
+                        type="submit"
+                        mt="md"
+                        color="green"
+                        loading={isPending || hasSucceeded}
+                    >
                         Submit
                     </Button>
                 </form>

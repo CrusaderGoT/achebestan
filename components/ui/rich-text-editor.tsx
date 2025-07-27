@@ -20,7 +20,17 @@ export function StoryRichTextEditor({
         extensions: [StarterKit, Link],
         content: value,
         immediatelyRender: false,
-        onUpdate: ({ editor }) => onChange?.(editor.getHTML()),
+        onUpdate: ({ editor }) => {
+            // remove empty tags
+            let content = editor.getHTML();
+            const json = editor.getJSON();
+
+            if (!json.content?.some((value) => value.content)) {
+                content = ""; // or any other default value
+            }
+
+            onChange?.(content);
+        },
     });
 
     return (
@@ -67,7 +77,7 @@ export function StoryRichTextEditor({
                     </RichTextEditor.ControlsGroup>
                 </RichTextEditor.Toolbar>
 
-                <RichTextEditor.Content />
+                <RichTextEditor.Content mih={"250"} />
             </RichTextEditor>
         </Input.Wrapper>
     );

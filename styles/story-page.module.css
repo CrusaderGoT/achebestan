@@ -1,8 +1,7 @@
 .storyImage {
   height: auto;
-  min-height: 100px;
-  width: 100%;
   max-height: 300px;
+  width: 100%;
   object-fit: fill;
   object-position: center;
   border-radius: 6px;
@@ -11,8 +10,21 @@
   font-weight: 700;
 }
 
-.storyImageSection {
+.storyImageZoneSection {
   position: relative;
+  min-height: 100px;
+  overflow: hidden;
+}
+
+.storyImageFieldToggle {
+  position: absolute;
+  z-index: 20;
+  right: 5px;
+  top: 5px;
+}
+
+.storyImageFieldBox {
+  margin: 10px;
 }
 
 .storyBadgeTime {
@@ -22,5 +34,18 @@
 }
 
 .storyCard {
-  heighht: 100dvh;
+  position: relative;
+}
+
+.storyTitle {
+  text-transform: capitalize;
+}
+
+.storySubtitle::first-letter {
+  text-transform: capitalize;
+}
+
+.storyContent {
+  height: 50dvh;
+  max-height: 100dvh;
 }

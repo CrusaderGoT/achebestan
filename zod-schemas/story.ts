@@ -10,7 +10,7 @@ export const storySelectSchema = createSelectSchema(story);
 
 export const storyUpdateSchema = createUpdateSchema(story, {
     image: z.file().optional(),
-});
+}).omit({ created: true, edited: true, authorId: true, isbn: true });
 
 export const storyInsertSchema = createInsertSchema(story, {
     title: (schema) =>
@@ -21,8 +21,8 @@ export const storyInsertSchema = createInsertSchema(story, {
         }),
     authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
     image: z.file().optional(),
-});
+}).omit({ created: true, edited: true, authorId: true, isbn: true });
 
 export type StoryInsertType = z.infer<typeof storyInsertSchema>;
-export type StorySelectType = z.infer<typeof storySelectSchema>;
 export type StoryUpdateType = z.infer<typeof storyUpdateSchema>;
+export type StorySelectType = z.infer<typeof storySelectSchema>;

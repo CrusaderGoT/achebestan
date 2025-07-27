@@ -4,8 +4,8 @@ import { createFormContext } from "@mantine/form";
 
 import { StoryInsertType } from "@/zod-schemas/story";
 import { Stack, TextInput } from "@mantine/core";
-import { StoryImageDropzone } from "../ui/dropzone";
-import { StoryRichTextEditor } from "../ui/rich-text-editor";
+import { StoryImageDropzone } from "../../ui/dropzone";
+import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
 export const [StoryFormProvider, useStoryFormContext, useStoryForm] =
     createFormContext<StoryInsertType>();
@@ -15,11 +15,16 @@ export function StoryFormFields() {
 
     return (
         <Stack>
-            <StoryImageDropzone maxFiles={1} />
+            <StoryImageDropzone
+                maxFiles={1}
+                action="create"
+                form={form}
+                field="image"
+            />
 
             <TextInput
-                key={form.key("title")}
                 label="Title"
+                key={form.key("title")}
                 {...form.getInputProps("title")}
             />
 
