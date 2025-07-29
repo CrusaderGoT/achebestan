@@ -43,15 +43,15 @@ export function Story({
     bookId,
 }: StoryProps) {
     const [story, setStory] = useState<StorySelectType>({
-        image,
-        title,
-        subtitle,
-        content,
-        created,
-        edited,
-        isbn,
-        id,
-        bookId,
+        image: image,
+        title: title,
+        subtitle: subtitle,
+        content: content,
+        created: created,
+        edited: edited,
+        isbn: isbn,
+        id: id,
+        bookId: bookId,
         authorId: author.id,
     });
 
@@ -87,7 +87,7 @@ export function Story({
         validate: zod4Resolver(storyUpdateSchema),
     });
 
-    const { executeAsync, isPending, hasSucceeded } = useUpdateStory(isbn);
+    const { executeAsync, isPending } = useUpdateStory(isbn);
 
     async function handleSubmit(data: StoryUpdateType) {
         // check if changed values or if image is present
@@ -132,7 +132,7 @@ export function Story({
                     ...submitData,
                 });
 
-                if (hasSucceeded && updatedStory.data) {
+                if (updatedStory.data) {
                     // reset neccessary form status;
                     form.setInitialValues(submitData);
                     form.setValues(submitData);
