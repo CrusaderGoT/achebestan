@@ -60,6 +60,7 @@ export function StoryTitle({
                     color="yellow"
                     size={"xs"}
                     variant="subtle"
+                    disabled={isPending}
                 >
                     <IconPencilMinus />
                 </ActionIcon>

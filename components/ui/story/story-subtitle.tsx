@@ -69,6 +69,7 @@ export function StorySubtitle({
                     color="yellow"
                     size={"xs"}
                     variant="subtle"
+                    disabled={isPending}
                 >
                     {subtitle ? <IconPencilMinus /> : <IconPencilPlus />}
                 </ActionIcon>
