@@ -15,6 +15,7 @@ import { useUpdateStory } from "@/lib/hooks/update-story-hook";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useState } from "react";
 import {
     UpdateStoryFormProvider,
     useUpdateStoryForm,
@@ -38,7 +39,22 @@ export function Story({
     created,
     edited,
     isbn,
+    id,
+    bookId,
 }: StoryProps) {
+    const [story, setStory] = useState<StorySelectType>({
+        image,
+        title,
+        subtitle,
+        content,
+        created,
+        edited,
+        isbn,
+        id,
+        bookId,
+        authorId: author.id,
+    });
+
     const [
         openedImageField,
         { toggle: toggleImageField, close: closeImageField },
@@ -86,7 +102,7 @@ export function Story({
 
             if (form.isDirty("subtitle")) submitData.subtitle = data.subtitle;
 
-            // if image exists in form submittion
+            // if image exists in form submission
             if (form.values.image.length > 0) submitData.image = data.image;
 
             // make sure non empty tag; tag with space will submit
@@ -112,11 +128,11 @@ export function Story({
             });
 
             if (isNotEmpty) {
-                await executeAsync({
+                const updatedStory = await executeAsync({
                     ...submitData,
                 });
 
-                if (hasSucceeded) {
+                if (hasSucceeded && updatedStory.data) {
                     // reset neccessary form status;
                     form.setInitialValues(submitData);
                     form.setValues(submitData);
@@ -125,6 +141,9 @@ export function Story({
                     // clear and close dropzone
                     form.setFieldValue("image", []);
                     closeImageField();
+
+                    // set story reactively
+                    setStory(updatedStory.data);
                 }
             }
         }
@@ -150,12 +169,12 @@ export function Story({
                             />
                         ) : (
                             <StoryImage
-                                image={image}
-                                title={title}
+                                image={story.image}
+                                title={story.title}
+                                created={story.created}
+                                edited={story.edited}
                                 author={author}
                                 openedImageField={openedImageField}
-                                created={created}
-                                edited={edited}
                             />
                         )}
 
@@ -176,24 +195,24 @@ export function Story({
                     <Stack>
                         <Box>
                             <StoryTitle
+                                title={story.title}
                                 toggleTitleField={toggleTitleField}
                                 openedTitleField={openedTitleField}
-                                title={title}
                                 isPending={isPending}
                                 form={form}
                             />
 
                             <StorySubtitle
+                                subtitle={story.subtitle}
                                 toggleSubtitleField={toggleSubtitleField}
                                 openedSubtitleField={openedSubtitleField}
-                                subtitle={subtitle}
                                 isPending={isPending}
                                 form={form}
                             />
                         </Box>
 
                         <StoryContent
-                            content={content}
+                            content={story.content}
                             toggleContentField={toggleContentField}
                             openedContentField={openedContentField}
                             form={form}

@@ -1,12 +1,10 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useMemo } from "react";
 import { updateStoryAction } from "../actions/story";
 
 export const useUpdateStory = (isbn: string) => {
-    const router = useRouter();
-
     const boundUpdateStoryAction = useMemo(
         () => updateStoryAction.bind(null, isbn),
         [isbn]
@@ -21,7 +19,6 @@ export const useUpdateStory = (isbn: string) => {
                 color: "green",
             });
 
-            router.refresh();
             redirect(`/story/${args.data.isbn}`);
         },
         onError(args) {

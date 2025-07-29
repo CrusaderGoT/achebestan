@@ -103,11 +103,7 @@ export const updateStoryAction = authActionClient
                     subtitle: updateData.subtitle,
                 })
                 .where(eq(story.isbn, isbn))
-                .returning({
-                    isbn: story.isbn,
-                    title: story.title,
-                    image: story.image,
-                });
+                .returning();
 
             return updatedStory;
         }
