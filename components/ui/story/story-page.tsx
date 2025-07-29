@@ -192,7 +192,7 @@ export function Story({
                         </ActionIcon>
                     </Card.Section>
 
-                    <Stack>
+                    <Stack mt="md">
                         <Box>
                             <StoryTitle
                                 title={story.title}

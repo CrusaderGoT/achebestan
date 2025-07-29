@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { story } from "@/drizzle/schemas/story";
 import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
 import { handleFileUpload } from "../utils/image-upload";
@@ -98,9 +98,9 @@ export const updateStoryAction = authActionClient
 
                     ...(!!imageUrl && { image: imageUrl }),
 
-                    edited: sql`NOW()`,
-
                     subtitle: updateData.subtitle,
+
+                    edited: new Date(),
                 })
                 .where(eq(story.isbn, isbn))
                 .returning();

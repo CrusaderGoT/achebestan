@@ -7,6 +7,8 @@ import { Stack, TextInput, TextInputProps } from "@mantine/core";
 import { StoryImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
+import storypageStyles from "@/styles/story-page.module.css";
+
 export const [
     UpdateStoryFormProvider,
     useUpdateStoryFormContext,
@@ -72,6 +74,7 @@ export function UpdateStoryContent() {
             value={form.values.content}
             error={form.getInputProps("content").error}
             {...form.getInputProps("content")}
+            className={storypageStyles.storyContent}
         />
     );
 }

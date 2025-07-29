@@ -14,7 +14,6 @@ type StoryTitleType = {
     title: string;
     isPending: boolean;
     toggleTitleField: () => void;
-
     form: UseFormReturnType<StoryUpdateType>;
 };
 

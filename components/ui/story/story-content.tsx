@@ -25,7 +25,7 @@ export function StoryContent({
         <Box>
             <Group justify="space-between" mb={"xs"}>
                 <ActionIcon
-                    onClick={() => toggleContentField()}
+                    loading={form.submitting}
                     title="Submit Update"
                     variant="light"
                     size={"xs"}
@@ -39,13 +39,13 @@ export function StoryContent({
                 <ActionIcon
                     onClick={() => {
                         toggleContentField();
-                        form.resetField("content");
                     }}
                     title="Update Story Content"
                     variant="subtle"
                     color="yellow"
                     size={"xs"}
                     ml={"auto"}
+                    disabled={form.submitting}
                 >
                     <IconEdit />
                 </ActionIcon>
@@ -54,7 +54,7 @@ export function StoryContent({
             {/**Do not use  ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
             <ScrollArea
                 className={cx(
-                    storypageStyles.storyContent,
+                    storypageStyles.storyContentScrollArea,
                     openedContentField && publicStyles.hide
                 )}
                 offsetScrollbars="present"
@@ -63,7 +63,10 @@ export function StoryContent({
                     dangerouslySetInnerHTML={{
                         __html: content,
                     }}
-                    className={publicStyles.forceWrapText}
+                    className={cx(
+                        publicStyles.forceWrapText,
+                        storypageStyles.storyContent
+                    )}
                 />
             </ScrollArea>
 
