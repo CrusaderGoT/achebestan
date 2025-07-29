@@ -12,30 +12,33 @@ cloudinary.config({
     secure: true,
 });
 
-const options: UploadApiOptions = {
-    resource_type: "image",
-    use_filename: false,
-    unique_filename: true,
-    folder: "achebestan",
-};
-
 type CloudinaryResult =
     | { success: true; data: UploadApiResponse }
     | { success: false; error: UploadApiErrorResponse; errorType: "cloudinary" }
     | { success: false; error: { message: string }; errorType: "conversion" };
 
-async function uploadImageFile(file: File): Promise<CloudinaryResult> {
+async function uploadImageFile(
+    file: File,
+    publicId: string | undefined
+): Promise<CloudinaryResult> {
+    const options: UploadApiOptions = {
+        resource_type: "image",
+        folder: "achebestan",
+        ...(publicId && { public_id: publicId }),
+        overwrite: true,
+    };
+
     try {
         const arrayBuffer = await file.arrayBuffer();
         const byteArrayBuffer = Buffer.from(arrayBuffer);
 
         const uploadResult = await new Promise<
             UploadApiResponse | UploadApiErrorResponse
-        >((resolve) => {
+        >((resolve, reject) => {
             cloudinary.uploader
                 .upload_stream(options, (error, uploadResult) => {
                     if (error) {
-                        resolve(error as UploadApiErrorResponse);
+                        reject(error as UploadApiErrorResponse);
                     } else {
                         resolve(uploadResult as UploadApiResponse);
                     }
@@ -69,25 +72,32 @@ async function uploadImageFile(file: File): Promise<CloudinaryResult> {
 // Usage with  discriminated union
 export async function handleFileUpload(
     file: File,
+    publicId: string | undefined,
     { throwOnError = true }: { throwOnError: boolean }
 ) {
-    const result = await uploadImageFile(file);
+    const result = await uploadImageFile(file, publicId);
 
     if (result.success) {
         console.log("Upload successful:", result.data.secure_url);
         return result.data;
     } else {
+        console.log(result);
         switch (result.errorType) {
             case "cloudinary":
-                console.error("Cloudinary error:", result.error.message);
+                console.error(
+                    "Image Upload Error -> Cloudinary error:",
+                    result.error.message
+                );
                 break;
             case "conversion":
-                console.error("File conversion error:", result.error.message);
+                console.error(
+                    "Image Upload Error -> File conversion error:",
+                    result.error.message
+                );
                 break;
         }
         if (throwOnError) {
-            console.log(result.error.message);
-            throw new Error(result.error.message);
+            throw new Error(result.error.message || "Image Upload Failed");
         }
     }
 }

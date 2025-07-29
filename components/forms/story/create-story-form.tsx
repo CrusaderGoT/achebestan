@@ -31,13 +31,6 @@ export function StoryForm() {
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
                 });
 
-                if (args.input.image && !args.data.image) {
-                    notifications.show({
-                        message:
-                            "Image Of The Story Failed To Upload. Try Again Via Editing Story",
-                    });
-                }
-
                 redirect(`/story/${args.data.isbn}`);
             },
             onError(args) {

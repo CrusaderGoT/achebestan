@@ -16,13 +16,7 @@ export const createStoryAction = authActionClient
             flattenValidationErrors(ve).fieldErrors,
     })
     .action(async ({ parsedInput: inputData, ctx }) => {
-        let imageUrl: string | undefined = undefined;
-        if (inputData.image) {
-            const uploadResponse = await handleFileUpload(inputData.image, {
-                throwOnError: false,
-            });
-            imageUrl = uploadResponse?.secure_url;
-        }
+        // insert new story
 
         const [createdStory] = await db
             .insert(story)
@@ -31,13 +25,39 @@ export const createStoryAction = authActionClient
                 title: inputData.title,
                 subtitle: inputData.subtitle,
                 content: inputData.content,
-                image: imageUrl,
             })
             .returning({
                 isbn: story.isbn,
                 title: story.title,
                 image: story.image,
             });
+
+        // upload image using isbn as public id
+        let imageUrl: string | undefined = undefined;
+
+        if (inputData.image.length > 0) {
+            const uploadResponse = await handleFileUpload(
+                inputData.image[0],
+                createdStory.isbn,
+                {
+                    throwOnError: true,
+                }
+            );
+            imageUrl = uploadResponse?.secure_url;
+
+            // insert image url
+            await db
+                .update(story)
+                .set({
+                    image: imageUrl,
+                })
+                .where(eq(story.isbn, createdStory.isbn));
+        }
+
+        // add image url
+        if (imageUrl) {
+            createdStory.image = imageUrl;
+        }
 
         return createdStory;
     });
@@ -51,11 +71,13 @@ export const updateStoryAction = authActionClient
     .action(
         async ({ parsedInput: updateData, bindArgsParsedInputs: [isbn] }) => {
             let imageUrl: string | undefined = undefined;
-            if (updateData.image) {
+
+            if (updateData.image.length > 0) {
                 const uploadResponse = await handleFileUpload(
-                    updateData.image,
+                    updateData.image[0], //upload the last image
+                    isbn, // overwrite this publicId
                     {
-                        throwOnError: false,
+                        throwOnError: true,
                     }
                 );
                 imageUrl = uploadResponse?.secure_url;
