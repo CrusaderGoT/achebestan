@@ -10,6 +10,8 @@ import { handleFileUpload } from "../utils/image-upload";
 
 import z from "zod/v4";
 
+import { sanitizeHTML } from "../utils/sanitize-html";
+
 export const createStoryAction = authActionClient
     .inputSchema(storyInsertSchema, {
         handleValidationErrorsShape: async (ve) =>
@@ -24,7 +26,7 @@ export const createStoryAction = authActionClient
                 authorId: ctx.user.id,
                 title: inputData.title,
                 subtitle: inputData.subtitle,
-                content: inputData.content,
+                content: sanitizeHTML(inputData.content),
             })
             .returning({
                 isbn: story.isbn,
@@ -91,7 +93,7 @@ export const updateStoryAction = authActionClient
                     }),
 
                     ...(!!updateData.content?.trim() && {
-                        content: updateData.content,
+                        content: sanitizeHTML(updateData.content),
                     }),
 
                     ...(!!updateData.bookId && { bookId: updateData.bookId }),

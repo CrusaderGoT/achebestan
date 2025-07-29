@@ -4,6 +4,7 @@ import { ActionIcon, Box, Group, ScrollArea } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconEdit } from "@tabler/icons-react";
 
+import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
@@ -61,7 +62,7 @@ export function StoryContent({
             >
                 <Box
                     dangerouslySetInnerHTML={{
-                        __html: content,
+                        __html: sanitizeHTML(content),
                     }}
                     className={cx(
                         publicStyles.forceWrapText,
