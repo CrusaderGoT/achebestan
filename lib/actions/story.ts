@@ -3,13 +3,15 @@
 import { db } from "@/drizzle";
 import { story } from "@/drizzle/schemas/story";
 import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
 import { handleFileUpload } from "../utils/image-upload";
 
 import z from "zod/v4";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { sanitizeHTML } from "../utils/sanitize-html";
 
 export const createStoryAction = authActionClient
@@ -37,7 +39,7 @@ export const createStoryAction = authActionClient
         // upload image using isbn as public id
         let imageUrl: string | undefined = undefined;
 
-        if (inputData.image.length > 0) {
+        if (inputData.image && inputData.image.length > 0) {
             const uploadResponse = await handleFileUpload(
                 inputData.image[0],
                 createdStory.isbn,
@@ -60,6 +62,8 @@ export const createStoryAction = authActionClient
         if (imageUrl) {
             createdStory.image = imageUrl;
         }
+
+        revalidatePath(`/story`);
 
         return createdStory;
     });
@@ -107,6 +111,9 @@ export const updateStoryAction = authActionClient
                 .where(eq(story.isbn, isbn))
                 .returning();
 
+            revalidatePath(`/story`);
+            revalidatePath(`/story/${updatedStory.isbn}`);
+
             return updatedStory;
         }
     );
@@ -141,3 +148,24 @@ export const readLatestStories = async (latest: number = 10) => {
         console.log(e);
     }
 };
+
+const deleteStorySchema = z.object({
+    isbn: z.uuid(),
+});
+
+export const deleteStory = authActionClient
+    .inputSchema(deleteStorySchema)
+    .action(async ({ ctx, parsedInput: { isbn } }) => {
+        const [deletedStory] = await db
+            .delete(story)
+            .where(and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id)))
+            .returning({ title: story.title });
+
+        if (!deletedStory?.title) {
+            throw redirect("/");
+        }
+
+        revalidatePath("/story");
+
+        return deletedStory;
+    });

@@ -11,7 +11,7 @@ export function Shell({
 }>) {
     return (
         <AppShell header={{ height: 60 }}>
-            <AppShell.Header>
+            <AppShell.Header zIndex={900}>
                 <Group className={styles.headerGroup}>
                     <Title order={3}>Achebestan</Title>
 

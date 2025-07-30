@@ -1,10 +1,11 @@
 .storyImage {
   height: auto;
+  min-height: 100px;
   max-height: 300px;
   width: 100%;
   object-fit: fill;
   object-position: center;
-  border-radius: 6px;
+  border-radius: 6px 6px 0 0;
   text-align: center;
   text-transform: capitalize;
   font-weight: 700;

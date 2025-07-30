@@ -1,10 +1,15 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
-import { redirect } from "next/navigation";
 import { useMemo } from "react";
 import { updateStoryAction } from "../actions/story";
 
+import { usePathname, useRouter } from "next/navigation";
+
 export const useUpdateStory = (isbn: string) => {
+    const router = useRouter();
+
+    const pathname = usePathname();
+
     const boundUpdateStoryAction = useMemo(
         () => updateStoryAction.bind(null, isbn),
         [isbn]
@@ -15,11 +20,15 @@ export const useUpdateStory = (isbn: string) => {
             const storyTitle = args.data.title;
 
             notifications.show({
-                message: `Story '${storyTitle.toUpperCase()}' has been updated`,
+                message: `Story '${storyTitle.toUpperCase()}' Has Been Updated`,
                 color: "green",
             });
 
-            redirect(`/story/${args.data.isbn}`);
+            if (pathname === `/story/${args.data.isbn}`) {
+                router.refresh();
+            } else {
+                router.push(`/story/${args.data.isbn}`);
+            }
         },
         onError(args) {
             if (args.error.validationErrors) {

@@ -49,10 +49,12 @@ export function StoryImageDropzone({
 
     // effect for clearing image if dropzone is visibly
     useEffect(() => {
+        if (!form.values.image) return;
+
         if (!hiddenDropzone && form.values.image.length > 0) {
             form.setFieldValue(field, []);
         }
-    }, [hiddenDropzone, field, form.values.image.length, form]);
+    }, [hiddenDropzone, field, form.values.image?.length, form]);
 
     return (
         <Box>

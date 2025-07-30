@@ -14,10 +14,12 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import { createStoryAction } from "@/lib/actions/story";
 import { useAction } from "next-safe-action/hooks";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
 export function StoryForm() {
+    const router = useRouter();
+
     const form = useStoryForm({
         mode: "uncontrolled",
         validate: zod4Resolver(storyInsertSchema),
@@ -31,7 +33,7 @@ export function StoryForm() {
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
                 });
 
-                redirect(`/story/${args.data.isbn}`);
+                router.push(`/story/${args.data.isbn}`);
             },
             onError(args) {
                 if (args.error.validationErrors) {

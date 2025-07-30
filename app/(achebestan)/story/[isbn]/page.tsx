@@ -1,3 +1,4 @@
+import { DeleteStory } from "@/components/ui/story/delete-story";
 import { Story } from "@/components/ui/story/story-page";
 import { readStory } from "@/lib/actions/story";
 import { Group, Stack } from "@mantine/core";
@@ -7,7 +8,7 @@ import {
     IconHeart,
     IconShare2,
 } from "@tabler/icons-react";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export default async function StoryPage({
     params,
@@ -18,7 +19,7 @@ export default async function StoryPage({
 
     const story = await readStory(isbn);
 
-    if (!story) redirect("/404");
+    if (!story) notFound();
 
     return (
         <Stack>
@@ -41,6 +42,7 @@ export default async function StoryPage({
                 <IconBubble />
                 <IconCurrencyDollar />
                 <IconShare2 />
+                <DeleteStory isbn={story.isbn} storyTitle={story.title} />
             </Group>
         </Stack>
     );
