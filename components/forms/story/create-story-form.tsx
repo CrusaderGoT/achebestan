@@ -17,7 +17,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
-export function StoryForm() {
+export function CreateStoryForm() {
     const router = useRouter();
 
     const form = useStoryForm({

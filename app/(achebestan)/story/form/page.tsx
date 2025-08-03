@@ -1,5 +1,13 @@
-import { StoryForm } from "@/components/forms/story/create-story-form";
+import { CreateStoryForm } from "@/components/forms/story/create-story-form";
+
+import { authClient } from "@/lib/auth-client";
+
+import { notFound } from "next/navigation";
 
 export default function BookFormPage() {
-    return <StoryForm />;
+    const { data: session } = authClient.useSession();
+
+    if (!session) notFound();
+
+    return <CreateStoryForm />;
 }

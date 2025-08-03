@@ -8,6 +8,7 @@ import {
     IconHeart,
     IconShare2,
 } from "@tabler/icons-react";
+
 import { notFound } from "next/navigation";
 
 export default async function StoryPage({
