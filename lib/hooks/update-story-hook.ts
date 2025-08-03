@@ -5,14 +5,14 @@ import { updateStoryAction } from "../actions/story";
 
 import { usePathname, useRouter } from "next/navigation";
 
-export const useUpdateStory = (isbn: string) => {
+export const useUpdateStory = (isbn: string, authorId: string) => {
     const router = useRouter();
 
     const pathname = usePathname();
 
     const boundUpdateStoryAction = useMemo(
-        () => updateStoryAction.bind(null, isbn),
-        [isbn]
+        () => updateStoryAction.bind(null, isbn, authorId),
+        [isbn, authorId]
     );
 
     const action = useAction(boundUpdateStoryAction, {

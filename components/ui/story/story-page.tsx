@@ -88,7 +88,7 @@ export function Story({
         validate: zod4Resolver(storyUpdateSchema),
     });
 
-    const { executeAsync, isPending } = useUpdateStory(isbn);
+    const { executeAsync, isPending } = useUpdateStory(isbn, author.id);
 
     async function handleSubmit(data: StoryUpdateType) {
         // check if changed values or if image is present
@@ -169,6 +169,8 @@ export function Story({
                                 openedImageField={openedImageField}
                                 form={form}
                                 isPending={isPending}
+                                session={session}
+                                storyAuthorId={story.authorId}
                             />
                         ) : (
                             <StoryImage
@@ -228,6 +230,8 @@ export function Story({
                             toggleContentField={toggleContentField}
                             openedContentField={openedContentField}
                             form={form}
+                            session={session}
+                            storyAuthorId={story.authorId}
                         />
                     </Stack>
                 </Card>

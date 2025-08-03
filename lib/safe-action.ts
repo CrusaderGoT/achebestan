@@ -24,7 +24,7 @@ export const authActionClient = actionClient.use(async ({ next }) => {
         throw new Error("Session not found!");
     }
 
-    if (!session.user) {
+    if (!session.user.id) {
         throw new Error("Session is not valid!");
     }
 

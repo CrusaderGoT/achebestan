@@ -11,7 +11,7 @@ import { handleFileUpload } from "../utils/image-upload";
 import z from "zod/v4";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import { sanitizeHTML } from "../utils/sanitize-html";
 
 export const createStoryAction = authActionClient
@@ -73,9 +73,20 @@ export const updateStoryAction = authActionClient
         handleValidationErrorsShape: async (ve) =>
             flattenValidationErrors(ve).fieldErrors,
     })
-    .bindArgsSchemas<[isbn: z.ZodUUID]>([z.uuid()])
+    .bindArgsSchemas<[isbn: z.ZodUUID, authorId: z.ZodString]>([
+        z.uuid(),
+        z.string(),
+    ])
     .action(
-        async ({ parsedInput: updateData, bindArgsParsedInputs: [isbn] }) => {
+        async ({
+            parsedInput: updateData,
+            bindArgsParsedInputs: [isbn, authorId],
+            ctx,
+        }) => {
+            if (ctx.user.id !== authorId) {
+                throw unauthorized();
+            }
+
             let imageUrl: string | undefined = undefined;
 
             if (updateData.image.length > 0) {
@@ -155,17 +166,30 @@ const deleteStorySchema = z.object({
 
 export const deleteStory = authActionClient
     .inputSchema(deleteStorySchema)
-    .action(async ({ ctx, parsedInput: { isbn } }) => {
-        const [deletedStory] = await db
-            .delete(story)
-            .where(and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id)))
-            .returning({ title: story.title });
+    .bindArgsSchemas<[authorId: z.ZodString]>([z.string()])
+    .action(
+        async ({
+            ctx,
+            parsedInput: { isbn },
+            bindArgsParsedInputs: [authorId],
+        }) => {
+            if (ctx.user.id !== authorId) {
+                throw unauthorized();
+            }
 
-        if (!deletedStory?.title) {
-            throw redirect("/");
+            const [deletedStory] = await db
+                .delete(story)
+                .where(
+                    and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id))
+                )
+                .returning({ title: story.title });
+
+            if (!deletedStory?.title) {
+                throw redirect("/");
+            }
+
+            revalidatePath("/story");
+
+            return deletedStory;
         }
-
-        revalidatePath("/story");
-
-        return deletedStory;
-    });
+    );
