@@ -43,7 +43,11 @@ export default async function StoryPage({
                 <IconBubble />
                 <IconCurrencyDollar />
                 <IconShare2 />
-                <DeleteStory isbn={story.isbn} storyTitle={story.title} />
+                <DeleteStory
+                    isbn={story.isbn}
+                    storyTitle={story.title}
+                    authorId={story.authorId}
+                />
             </Group>
         </Stack>
     );

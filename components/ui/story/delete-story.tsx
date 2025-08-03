@@ -20,14 +20,16 @@ import { redirect } from "next/navigation";
 export function DeleteStory({
     isbn,
     storyTitle,
+    authorId,
 }: {
     isbn: string;
     storyTitle: string;
+    authorId: string;
 }) {
     const [opened, { open: openDeleteModal, close: closeDeleteModal }] =
         useDisclosure(false);
 
-    const { executeAsync, isPending } = useDeleteStory();
+    const { executeAsync, isPending } = useDeleteStory(authorId);
 
     return (
         <>

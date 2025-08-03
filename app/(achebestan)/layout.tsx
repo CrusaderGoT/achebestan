@@ -17,5 +17,3 @@ export async function generateStaticParams() {
         isbn: story.isbn,
     }));
 }
-
-export const revalidate = 3600 * 24;
