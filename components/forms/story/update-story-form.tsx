@@ -25,7 +25,7 @@ export function UpdateStoryForm({ story }: { story: StorySelectType }) {
     });
 
     const { executeAsync, isPending, hasSucceeded } = useUpdateStory(
-        story.isbn
+        story.isbn, story.authorId
     );
 
     async function handleSubmit(data: StoryUpdateType) {
