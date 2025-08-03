@@ -7,7 +7,7 @@ export const actionClient = createSafeActionClient({
         if (e.name === "PostgresError") {
             console.error(e);
 
-            return "a database error occured";
+            return "a database error occurred";
         }
         console.error(e);
 
