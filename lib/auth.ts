@@ -19,4 +19,13 @@ export const auth = betterAuth({
         enabled: true,
     },
     plugins: [nextCookies()],
+    session: {
+        cookieCache: {
+            enabled: true,
+        },
+    },
+    rateLimit: {
+        window: 60,
+        max: 50,
+    },
 });
