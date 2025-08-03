@@ -11,6 +11,7 @@ import { ActionIcon, Box, Card, Stack } from "@mantine/core";
 
 import storypageStyles from "@/styles/story-page.module.css";
 
+import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/update-story-hook";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
@@ -154,6 +155,8 @@ export function Story({
         closeContentField();
     }
 
+    const session = authClient.useSession();
+
     return (
         <UpdateStoryFormProvider form={form}>
             <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -187,6 +190,11 @@ export function Story({
                             color="yellow"
                             variant="light"
                             disabled={isPending}
+                            hidden={
+                                story.authorId !== session.data?.user.id ||
+                                session.isPending ||
+                                !!session.error
+                            }
                         >
                             <IconPhotoEdit />
                         </ActionIcon>
@@ -200,6 +208,8 @@ export function Story({
                                 openedTitleField={openedTitleField}
                                 isPending={isPending}
                                 form={form}
+                                session={session}
+                                storyAuthorId={story.authorId}
                             />
 
                             <StorySubtitle
@@ -208,6 +218,8 @@ export function Story({
                                 openedSubtitleField={openedSubtitleField}
                                 isPending={isPending}
                                 form={form}
+                                session={session}
+                                storyAuthorId={story.authorId}
                             />
                         </Box>
 

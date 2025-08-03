@@ -4,6 +4,7 @@ import { ActionIcon, Box, Group, ScrollArea } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconEdit } from "@tabler/icons-react";
 
+import { authClient } from "@/lib/auth-client";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
@@ -14,6 +15,8 @@ type StoryContentType = {
     openedContentField: boolean;
     content: string;
     form: UseFormReturnType<StoryUpdateType>;
+    session: ReturnType<typeof authClient.useSession>;
+    storyAuthorId: string;
 };
 
 export function StoryContent({
@@ -21,6 +24,8 @@ export function StoryContent({
     openedContentField,
     content,
     form,
+    session,
+    storyAuthorId,
 }: StoryContentType) {
     return (
         <Box>
@@ -71,7 +76,10 @@ export function StoryContent({
                 />
             </ScrollArea>
 
-            <Box className={cx(!openedContentField && publicStyles.hide)}>
+            <Box
+                className={cx(!openedContentField && publicStyles.hide)}
+                hidden={storyAuthorId !== session.data?.user.id}
+            >
                 <UpdateStoryContent />
             </Box>
         </Box>

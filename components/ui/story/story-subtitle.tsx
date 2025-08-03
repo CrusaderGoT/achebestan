@@ -9,6 +9,8 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 
+import { authClient } from "@/lib/auth-client";
+
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
@@ -19,6 +21,8 @@ type StorySubtitleType = {
     isPending: boolean;
     toggleSubtitleField: () => void;
     form: UseFormReturnType<StoryUpdateType>;
+    session: ReturnType<typeof authClient.useSession>;
+    storyAuthorId: string;
 };
 
 export function StorySubtitle({
@@ -27,6 +31,8 @@ export function StorySubtitle({
     isPending,
     toggleSubtitleField,
     form,
+    session,
+    storyAuthorId,
 }: StorySubtitleType) {
     const [dirty, setDirty] = useState(false);
 
@@ -35,7 +41,10 @@ export function StorySubtitle({
     });
 
     return (
-        <Group mt={5}>
+        <Group
+            mt={5}
+            hidden={!subtitle && storyAuthorId !== session.data?.user.id}
+        >
             <Box>
                 <Text
                     className={cx(
@@ -59,7 +68,14 @@ export function StorySubtitle({
                 />
             </Box>
 
-            <Group align="center">
+            <Group
+                align="center"
+                hidden={
+                    storyAuthorId !== session.data?.user.id ||
+                    session.isPending ||
+                    !!session.error
+                }
+            >
                 <ActionIcon
                     onClick={() => {
                         toggleSubtitleField();

@@ -7,17 +7,22 @@ import { StoryImageDropzone } from "../dropzone";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
+import { authClient } from "@/lib/auth-client";
 
 type StoryImageFieldType = {
     openedImageField: boolean;
     isPending: boolean;
     form: UseFormReturnType<StoryUpdateType>;
+    session: ReturnType<typeof authClient.useSession>;
+    storyAuthorId: string;
 };
 
 export function StoryImageField({
     openedImageField,
     isPending,
     form,
+    session,
+    storyAuthorId,
 }: StoryImageFieldType) {
     const [image, setImage] = useState(false);
 
@@ -31,6 +36,7 @@ export function StoryImageField({
                 storypageStyles.storyImageFieldBox,
                 openedImageField ? publicStyles.show : publicStyles.hide
             )}
+            hidden={storyAuthorId !== session.data?.user.id}
         >
             <StoryImageDropzone
                 maxFiles={1}

@@ -5,6 +5,7 @@ import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconPencilMinus } from "@tabler/icons-react";
 import { useState } from "react";
 
+import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
@@ -15,6 +16,8 @@ type StoryTitleType = {
     isPending: boolean;
     toggleTitleField: () => void;
     form: UseFormReturnType<StoryUpdateType>;
+    session: ReturnType<typeof authClient.useSession>;
+    storyAuthorId: string;
 };
 
 export function StoryTitle({
@@ -23,6 +26,8 @@ export function StoryTitle({
     isPending,
     toggleTitleField,
     form,
+    session,
+    storyAuthorId,
 }: StoryTitleType) {
     const [dirty, setDirty] = useState(false);
 
@@ -47,10 +52,11 @@ export function StoryTitle({
                     label=""
                     disabled={isPending || !openedTitleField}
                     size="md"
+                    hidden={storyAuthorId !== session.data?.user.id}
                 />
             </Box>
 
-            <Group>
+            <Group hidden={storyAuthorId !== session.data?.user.id}>
                 <ActionIcon
                     onClick={() => {
                         toggleTitleField();
