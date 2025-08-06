@@ -12,7 +12,7 @@ export function LoginButton() {
     return (
         <ActionIcon
             onClick={() => router.push("/login")}
-            color="orange"
+            color="teal"
             size={"lg"}
             variant="subtle"
         >
