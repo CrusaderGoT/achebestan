@@ -13,7 +13,7 @@ import {
 } from "./signup-form-context";
 
 import { notifications } from "@mantine/notifications";
-import { LoadingOverlayWithText } from "../ui/loading-overlay-with-text";
+import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
 export function SignupForm() {
     const [formState, setFormState] = useState<

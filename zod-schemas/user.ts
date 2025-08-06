@@ -42,3 +42,23 @@ export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
 export const userSelectSchema = createSelectSchema(user);
 
 export type userSelectType = z.infer<typeof userSelectSchema>;
+
+export const loginSchema = z.object({
+    email: z.email({ error: "enter a valid email" }),
+    password: z
+        .string({
+            error: "input must be letter, number, or special character",
+        })
+        .min(8, { error: "minimun of 8 characters" })
+        .max(20, { error: "maximun of 20 characters" })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_+-=;:'",.<>?]).{8,20}/, {
+            error: `
+            password must be within 8-20 characters,
+            contain at least a uppercase letter, 
+            a lowercase letter, a number, 
+            and a special character from !@#$%^&*_+-=;:'",.<>?
+            `,
+        }),
+});
+
+export type LoginSchemaType = z.infer<typeof loginSchema>;

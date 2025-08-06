@@ -4,10 +4,10 @@ import { userUpdateSchema } from "@/zod-schemas/user";
 import { auth } from "../auth";
 import { authActionClient } from "../safe-action";
 
-export const createBookAction = authActionClient
+export const updateUserAction = authActionClient
     .inputSchema(userUpdateSchema)
     .action(async ({ parsedInput: { ...inputData }, ctx }) => {
-        await auth.api.updateUser({
+        const { status } = await auth.api.updateUser({
             body: {
                 name: inputData.name || ctx.user.name,
                 image:
@@ -17,5 +17,9 @@ export const createBookAction = authActionClient
             },
         });
 
-        return "user has been updated successfully";
+        if (status) {
+            return "User Has Been Updated Successfully";
+        } else {
+            throw new Error("User Update Failed");
+        }
     });

@@ -12,7 +12,9 @@ export default function StoryLayout({
 export async function generateStaticParams() {
     const stories = await readLatestStories(10);
     // params to prefetch story across child route, when needed
-    return stories?.map((story) => ({
-        isbn: story.isbn,
-    }));
+    return (
+        stories?.map((story) => ({
+            isbn: story.isbn,
+        })) || []
+    );
 }
