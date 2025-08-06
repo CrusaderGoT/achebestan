@@ -9,6 +9,7 @@ import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
+import { useState } from "react";
 
 type StoryContentType = {
     toggleContentField: () => void;
@@ -27,9 +28,21 @@ export function StoryContent({
     session,
     storyAuthorId,
 }: StoryContentType) {
+    const [dirty, setDirty] = useState(false);
+
+    form.watch("content", ({ dirty }) => {
+        setDirty(dirty);
+    });
+
     return (
         <Box>
-            <Group justify="space-between" mb={"xs"}>
+            <Group
+                justify="space-between"
+                mb={"xs"}
+                className={cx(
+                    storyAuthorId !== session.data?.user.id && publicStyles.hide
+                )}
+            >
                 <ActionIcon
                     loading={form.submitting}
                     title="Submit Update"
@@ -37,7 +50,9 @@ export function StoryContent({
                     size={"xs"}
                     type="submit"
                     color="green"
-                    className={cx(!openedContentField && publicStyles.hide)}
+                    className={cx(
+                        (!openedContentField || !dirty) && publicStyles.hide
+                    )}
                 >
                     <IconCheck />
                 </ActionIcon>
@@ -77,8 +92,11 @@ export function StoryContent({
             </ScrollArea>
 
             <Box
-                className={cx(!openedContentField && publicStyles.hide)}
-                hidden={storyAuthorId !== session.data?.user.id}
+                className={cx(
+                    (!openedContentField ||
+                        storyAuthorId !== session.data?.user.id) &&
+                        publicStyles.hide
+                )}
             >
                 <UpdateStoryContent />
             </Box>

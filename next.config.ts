@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
         serverActions: {
             bodySizeLimit: "70mb",
         },
+        authInterrupts: true,
     },
     images: {
         remotePatterns: [

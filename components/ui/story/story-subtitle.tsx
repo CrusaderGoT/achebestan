@@ -43,7 +43,11 @@ export function StorySubtitle({
     return (
         <Group
             mt={5}
-            hidden={!subtitle && storyAuthorId !== session.data?.user.id}
+            className={cx(
+                !subtitle &&
+                    storyAuthorId !== session.data?.user.id &&
+                    publicStyles.hide
+            )}
         >
             <Box>
                 <Text
@@ -70,11 +74,9 @@ export function StorySubtitle({
 
             <Group
                 align="center"
-                hidden={
-                    storyAuthorId !== session.data?.user.id ||
-                    session.isPending ||
-                    !!session.error
-                }
+                className={cx(
+                    storyAuthorId !== session.data?.user.id && publicStyles.hide
+                )}
             >
                 <ActionIcon
                     onClick={() => {

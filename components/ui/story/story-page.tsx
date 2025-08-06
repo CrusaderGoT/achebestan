@@ -9,7 +9,9 @@ import { userSelectType } from "@/zod-schemas/user";
 
 import { ActionIcon, Box, Card, Stack } from "@mantine/core";
 
+import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
+import cx from "clsx";
 
 import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/update-story-hook";
@@ -188,15 +190,14 @@ export function Story({
                                 toggleImageField();
                             }}
                             title="Update Story Image"
-                            className={storypageStyles.storyImageFieldToggle}
+                            className={cx(
+                                storypageStyles.storyImageFieldToggle,
+                                story.authorId !== session.data?.user.id &&
+                                    publicStyles.hide
+                            )}
                             color="yellow"
                             variant="light"
                             disabled={isPending}
-                            hidden={
-                                story.authorId !== session.data?.user.id ||
-                                session.isPending ||
-                                !!session.error
-                            }
                         >
                             <IconPhotoEdit />
                         </ActionIcon>

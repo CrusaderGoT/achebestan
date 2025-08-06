@@ -52,11 +52,14 @@ export function StoryTitle({
                     label=""
                     disabled={isPending || !openedTitleField}
                     size="md"
-                    hidden={storyAuthorId !== session.data?.user.id}
                 />
             </Box>
 
-            <Group hidden={storyAuthorId !== session.data?.user.id}>
+            <Group
+                className={cx(
+                    storyAuthorId !== session.data?.user.id && publicStyles.hide
+                )}
+            >
                 <ActionIcon
                     onClick={() => {
                         toggleTitleField();
@@ -70,6 +73,8 @@ export function StoryTitle({
                 >
                     <IconPencilMinus />
                 </ActionIcon>
+
+                {JSON.stringify(storyAuthorId !== session.data?.user.id)}
 
                 {dirty && openedTitleField && (
                     <ActionIcon

@@ -84,7 +84,7 @@ export const updateStoryAction = authActionClient
             ctx,
         }) => {
             if (ctx.user.id !== authorId) {
-                throw unauthorized();
+                unauthorized();
             }
 
             let imageUrl: string | undefined = undefined;

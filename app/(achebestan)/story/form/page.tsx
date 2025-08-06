@@ -1,13 +1,10 @@
 import { CreateStoryForm } from "@/components/forms/story/create-story-form";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { authClient } from "@/lib/auth-client";
 
 import { notFound } from "next/navigation";
 
-export default async function BookFormPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+export default function BookFormPage() {
+    const { data: session } = authClient.useSession();
 
     if (!session?.session.id) notFound();
 
