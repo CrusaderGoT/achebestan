@@ -1,10 +1,12 @@
 "use client";
 
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { authClient } from "@/lib/auth-client";
 import styles from "@/styles/shell.module.css";
 import { AppShell, Group, Title } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import { LoginButton } from "./login-btn";
+import { LogoutButton } from "./logout-btn";
 
 export function Shell({
     children,
@@ -12,6 +14,8 @@ export function Shell({
     children: React.ReactNode;
 }>) {
     const router = useRouter();
+
+    const { data: session } = authClient.useSession();
 
     return (
         <AppShell header={{ height: 60 }}>
@@ -22,7 +26,8 @@ export function Shell({
                     </Title>
 
                     <Group gap={"xl"}>
-                        <LoginButton />
+                        {session?.user.id ? <LogoutButton /> : <LoginButton />}
+
                         <ModeToggle />
                     </Group>
                 </Group>
