@@ -1,7 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { LoginSchemaType, signupSchema } from "@/zod-schemas/user";
+import { LoginSchemaType, loginSchema } from "@/zod-schemas/user";
 import { Button, Divider, Group, Paper, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
@@ -22,7 +22,7 @@ export function LoginForm() {
 
     const form = useLoginForm({
         mode: "uncontrolled",
-        validate: zod4Resolver(signupSchema),
+        validate: zod4Resolver(loginSchema),
         validateInputOnBlur: true,
     });
 
