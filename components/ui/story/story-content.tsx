@@ -85,7 +85,6 @@ export function StoryContent({
                         __html: sanitizeHTML(content),
                     }}
                     className={cx(
-                        publicStyles.forceWrapText,
                         storypageStyles.storyContent
                     )}
                 />
