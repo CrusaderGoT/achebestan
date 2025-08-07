@@ -63,7 +63,7 @@ export const createStoryAction = authActionClient
             createdStory.image = imageUrl;
         }
 
-        revalidatePath(`/story`);
+        revalidatePath(`/`);
 
         return createdStory;
     });
@@ -122,8 +122,8 @@ export const updateStoryAction = authActionClient
                 .where(eq(story.isbn, isbn))
                 .returning();
 
-            revalidatePath(`/story`);
             revalidatePath(`/story/${updatedStory.isbn}`);
+            revalidatePath("/");
 
             return updatedStory;
         }
@@ -188,7 +188,8 @@ export const deleteStory = authActionClient
                 throw redirect("/");
             }
 
-            revalidatePath("/story");
+            revalidatePath(`/story`, "layout");
+            revalidatePath("/");
 
             return deletedStory;
         }

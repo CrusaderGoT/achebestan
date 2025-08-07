@@ -6,7 +6,7 @@ export default function StoryLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return <Container p={"xl"}> {children}</Container>;
+    return <Container p={"xs"}>{children}</Container>;
 }
 
 export async function generateStaticParams() {
