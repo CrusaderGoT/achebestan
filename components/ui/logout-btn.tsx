@@ -4,7 +4,6 @@ import { authClient } from "@/lib/auth-client";
 import { ActionIcon } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconLogout } from "@tabler/icons-react";
-import { redirect } from "next/navigation";
 
 export function LogoutButton() {
     return (
@@ -16,8 +15,6 @@ export function LogoutButton() {
                     notifications.show({
                         message: "Logged Out",
                     });
-
-                    redirect("/login");
                 } else {
                     notifications.show({
                         message: `Error While Logging Out -> ${

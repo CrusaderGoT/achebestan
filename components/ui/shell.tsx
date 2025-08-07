@@ -21,7 +21,11 @@ export function Shell({
         <AppShell header={{ height: 60 }}>
             <AppShell.Header zIndex={900}>
                 <Group className={styles.headerGroup} flex={1}>
-                    <Title order={3} onClick={() => router.push("/")}>
+                    <Title
+                        order={3}
+                        onClick={() => router.push("/")}
+                        className={styles.websiteName}
+                    >
                         Achebestan
                     </Title>
 

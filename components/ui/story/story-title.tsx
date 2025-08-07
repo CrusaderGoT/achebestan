@@ -74,8 +74,6 @@ export function StoryTitle({
                     <IconPencilMinus />
                 </ActionIcon>
 
-                {JSON.stringify(storyAuthorId !== session.data?.user.id)}
-
                 {dirty && openedTitleField && (
                     <ActionIcon
                         size="xs"
