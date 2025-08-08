@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
         optimizePackageImports: [
             "@mantine/core",
             "@mantine/hooks",
+            "@mantine/dropzone",
+            "@mantine/form",
+            "@mantine/notifications",
+            "@mantine/tiptap",
             "@tabler/icons-react",
         ],
         serverActions: {

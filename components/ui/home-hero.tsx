@@ -1,10 +1,18 @@
 "use client";
 
 import styles from "@/styles/home-hero.module.css";
-import { Flex, Image as MantineImage, Stack, Text, Title } from "@mantine/core";
-import Image from "next/image";
-
+import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
+
+import {
+    Flex,
+    Image as MantineImage,
+    Mark,
+    Stack,
+    Text,
+    Title,
+} from "@mantine/core";
+import Image from "next/image";
 
 function HomeHero() {
     return (
@@ -14,12 +22,18 @@ function HomeHero() {
                 className={cx(styles.heroSection, styles.heroDescSection)}
             >
                 <Title order={1}>Achebestan</Title>
+                <Text>Welcome to a world of Imagination.</Text>
                 <Text>
-                    Daniel Lunsford Author of the best-selling books Life for
-                    Rent, The Sleepwalkers, Infinity Expired and many more
+                    Hi, I am Enemchukwu Chukwuemeka also known as{" "}
+                    <Mark className={publicStyles.highlightText2}>
+                        Achebestan
+                    </Mark>
+                    . And you are currently at my Mind&apos;s Palace, this is a
+                    place we i post my fictional stories, concoctions of my
+                    imagination.
                 </Text>
 
-                <Text>Buy Daniels Books</Text>
+                <Text>Consume Responsibly. . .</Text>
             </Stack>
 
             <Stack
@@ -36,9 +50,7 @@ function HomeHero() {
                         height={998}
                         className={styles.heroImage}
                     />
-                    <figcaption>
-                        Winner of the Golden Ink Award, 2035
-                    </figcaption>
+                    <figcaption>A Mad Man, circa 2025</figcaption>
                 </figure>
                 <Text className={styles.heroSignature}>Crusader</Text>
             </Stack>
