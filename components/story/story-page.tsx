@@ -13,21 +13,25 @@ import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
 
+import { StoryContent } from "@/components/story/story-content";
+import { StoryImage } from "@/components/story/story-image";
+import { StoryImageField } from "@/components/story/story-image-field";
+import { StorySubtitle } from "@/components/story/story-subtitle";
+import { StoryTitle } from "@/components/story/story-title";
+
 import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/update-story-hook";
+
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useState } from "react";
+
 import {
     UpdateStoryFormProvider,
     useUpdateStoryForm,
-} from "../../forms/story/update-story-form-context";
-import { StoryContent } from "./story-content";
-import { StoryImage } from "./story-image";
-import { StoryImageField } from "./story-image-field";
-import { StorySubtitle } from "./story-subtitle";
-import { StoryTitle } from "./story-title";
+} from "@/components/forms/story/update-story-form-context";
+
+import { useState } from "react";
 
 export interface StoryProps extends StorySelectType {
     author: userSelectType;

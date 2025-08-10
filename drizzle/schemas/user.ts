@@ -63,5 +63,5 @@ export const verification = pgTable("verification", {
 });
 
 export const userRelations = relations(user, ({ many }) => ({
-    story: many(story),
+    stories: many(story),
 }));

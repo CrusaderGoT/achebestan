@@ -10,6 +10,10 @@
   pointer-events: none;
 }
 
+.cursorPointer {
+  cursor: pointer;
+}
+
 .fullWidth {
   width: 100%;
 }
@@ -46,4 +50,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.boldText {
+  font-weight: 700;
 }

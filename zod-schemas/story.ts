@@ -1,4 +1,4 @@
-import { story } from "@/drizzle/schemas/story";
+import { rating, story } from "@/drizzle/schemas/story";
 import {
     createInsertSchema,
     createSelectSchema,
@@ -10,7 +10,12 @@ export const storySelectSchema = createSelectSchema(story);
 
 export const storyUpdateSchema = createUpdateSchema(story, {
     image: z.file().array(),
-}).omit({ created: true, edited: true, authorId: true, isbn: true });
+}).omit({
+    created: true,
+    edited: true,
+    authorId: true,
+    isbn: true,
+});
 
 export const storyInsertSchema = createInsertSchema(story, {
     title: (schema) =>
@@ -21,8 +26,26 @@ export const storyInsertSchema = createInsertSchema(story, {
         }),
     authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
     image: z.file().array().optional(),
-}).omit({ created: true, edited: true, authorId: true, isbn: true });
+}).omit({
+    created: true,
+    edited: true,
+    authorId: true,
+    isbn: true,
+});
 
 export type StoryInsertType = z.infer<typeof storyInsertSchema>;
 export type StoryUpdateType = z.infer<typeof storyUpdateSchema>;
 export type StorySelectType = z.infer<typeof storySelectSchema>;
+
+// Story Rating Schemas and Types
+
+export const ratingInsertSchema = createInsertSchema(rating, {
+    stars: (schema) => schema.min(0).max(5),
+    userId: (schema) => schema.optional(), // to allow assigning at rate actions
+});
+
+export type RatingInsertType = z.infer<typeof ratingInsertSchema>;
+
+export const ratingSelectSchema = createSelectSchema(rating);
+
+export type RatingSelectType = z.infer<typeof ratingSelectSchema>;

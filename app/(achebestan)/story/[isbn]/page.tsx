@@ -1,13 +1,9 @@
-import { DeleteStory } from "@/components/ui/story/delete-story";
-import { Story } from "@/components/ui/story/story-page";
-import { readStory } from "@/lib/actions/story";
-import { Group, Stack } from "@mantine/core";
-import {
-    IconBubble,
-    IconCurrencyDollar,
-    IconHeart,
-    IconShare2,
-} from "@tabler/icons-react";
+import { Story } from "@/components/story/story-page";
+import { StoryRating } from "@/components/story/story-rating";
+import { getUserRating, readStory } from "@/lib/actions/story";
+import { auth } from "@/lib/auth";
+import { Stack } from "@mantine/core";
+import { headers } from "next/headers";
 
 import { notFound } from "next/navigation";
 
@@ -18,9 +14,16 @@ export default async function StoryPage({
 }) {
     const { isbn } = await params;
 
-    const story = await readStory(isbn);
+    const [session, story] = await Promise.all([
+        auth.api.getSession({
+            headers: await headers(),
+        }),
+        readStory(isbn),
+    ]);
 
     if (!story) notFound();
+
+    const userRating = await getUserRating(session?.user.id, story.id);
 
     return (
         <Stack>
@@ -37,19 +40,11 @@ export default async function StoryPage({
                 subtitle={story.subtitle}
                 bookId={story.bookId}
             />
-
-            <Group>
-                <IconHeart />
-                <IconBubble />
-                <IconCurrencyDollar />
-                <IconShare2 />
-
-                <DeleteStory
-                    isbn={story.isbn}
-                    storyTitle={story.title}
-                    authorId={story.authorId}
-                />
-            </Group>
+            <StoryRating
+                ratings={story.ratings}
+                storyId={story.id}
+                userRating={userRating}
+            />
         </Stack>
     );
 }

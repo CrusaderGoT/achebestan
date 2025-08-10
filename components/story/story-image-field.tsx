@@ -2,7 +2,7 @@ import { StoryUpdateType } from "@/zod-schemas/story";
 import { Box, Button } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useState } from "react";
-import { StoryImageDropzone } from "../dropzone";
+import { StoryImageDropzone } from "../ui/dropzone";
 
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";

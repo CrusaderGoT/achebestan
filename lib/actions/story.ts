@@ -1,8 +1,12 @@
 "use server";
 
 import { db } from "@/drizzle";
-import { story } from "@/drizzle/schemas/story";
-import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
+import { rating, story } from "@/drizzle/schemas/story";
+import {
+    ratingInsertSchema,
+    storyInsertSchema,
+    storyUpdateSchema,
+} from "@/zod-schemas/story";
 import { and, eq } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
@@ -137,6 +141,7 @@ export const readStory = async (isbn: string) => {
             },
             with: {
                 author: true,
+                ratings: true,
             },
         });
         return storyDb;
@@ -160,12 +165,12 @@ export const readLatestStories = async (latest: number = 10) => {
     }
 };
 
-const deleteStorySchema = z.object({
-    isbn: z.uuid(),
-});
-
-export const deleteStory = authActionClient
-    .inputSchema(deleteStorySchema)
+export const deleteStoryAction = authActionClient
+    .inputSchema(
+        z.object({
+            isbn: z.uuid(),
+        })
+    )
     .bindArgsSchemas<[authorId: z.ZodString]>([z.string()])
     .action(
         async ({
@@ -185,6 +190,7 @@ export const deleteStory = authActionClient
                 .returning({ title: story.title });
 
             if (!deletedStory?.title) {
+                revalidatePath("/");
                 throw redirect("/");
             }
 
@@ -194,3 +200,60 @@ export const deleteStory = authActionClient
             return deletedStory;
         }
     );
+
+// Story Rating Actions
+
+export const rateStoryAction = authActionClient
+    .inputSchema(ratingInsertSchema)
+    .action(async ({ parsedInput, ctx }) => {
+        const [rate] = await db
+            .insert(rating)
+            .values({
+                storyId: parsedInput.storyId,
+                stars: parsedInput.stars,
+                userId: ctx.user.id,
+            })
+            .returning();
+
+        return rate;
+    });
+
+export const deleteStoryRating = authActionClient
+    .inputSchema(
+        z.object({
+            ratingId: z.number(),
+            storyISBN: z.string(),
+        })
+    )
+    .action(async ({ parsedInput }) => {
+        const [deletedRating] = await db
+            .delete(rating)
+            .where(eq(rating.id, parsedInput.ratingId))
+            .returning();
+
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
+
+        return deletedRating;
+    });
+
+export const getUserRating = async (
+    userId: string | undefined,
+    storyId: number
+) => {
+    if (!userId) return;
+
+    try {
+        const userRating = await db.query.rating.findFirst({
+            where(fields, operators) {
+                return operators.and(
+                    operators.eq(fields.storyId, storyId),
+                    operators.eq(fields.userId, userId)
+                );
+            },
+        });
+
+        return userRating;
+    } catch (e) {
+        console.log(e);
+    }
+};

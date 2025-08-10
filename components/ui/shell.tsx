@@ -1,12 +1,12 @@
 "use client";
 
-import { ModeToggle } from "@/components/ui/mode-toggle";
+import { ModeToggle } from "@/components/buttons/mode-toggle";
 import { authClient } from "@/lib/auth-client";
 import styles from "@/styles/shell.module.css";
 import { AppShell, Group, Title } from "@mantine/core";
 import { useRouter } from "next/navigation";
-import { LoginButton } from "./login-btn";
-import { LogoutButton } from "./logout-btn";
+import { LoginButton } from "../buttons/login-btn";
+import { LogoutButton } from "../buttons/logout-btn";
 
 export function Shell({
     children,

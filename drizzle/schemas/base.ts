@@ -9,3 +9,8 @@ export const timestamps = {
 export const image = {
     image: t.varchar(),
 };
+
+export const reactions = {
+    likes: t.integer(),
+    dislikes: t.integer(),
+};
