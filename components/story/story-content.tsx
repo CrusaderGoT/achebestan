@@ -1,3 +1,5 @@
+"use client"
+
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
 import { StoryUpdateType } from "@/zod-schemas/story";
 import { ActionIcon, Box, Group, ScrollArea } from "@mantine/core";
@@ -84,9 +86,7 @@ export function StoryContent({
                     dangerouslySetInnerHTML={{
                         __html: sanitizeHTML(content),
                     }}
-                    className={cx(
-                        storypageStyles.storyContent
-                    )}
+                    className={cx(storypageStyles.storyContent)}
                 />
             </ScrollArea>
 

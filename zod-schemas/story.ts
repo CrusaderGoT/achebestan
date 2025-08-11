@@ -39,13 +39,9 @@ export type StorySelectType = z.infer<typeof storySelectSchema>;
 
 // Story Rating Schemas and Types
 
-export const ratingInsertSchema = createInsertSchema(rating, {
-    stars: (schema) => schema.min(0).max(5),
-    userId: (schema) => schema.optional(), // to allow assigning at rate actions
+export const ratingSelectSchema = createSelectSchema(rating, {
+    id: z.union([z.number(), z.string()]),
+    userId: (schema) => schema.optional(), // assign via ctx in form action
 });
-
-export type RatingInsertType = z.infer<typeof ratingInsertSchema>;
-
-export const ratingSelectSchema = createSelectSchema(rating);
 
 export type RatingSelectType = z.infer<typeof ratingSelectSchema>;

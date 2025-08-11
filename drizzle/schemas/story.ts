@@ -44,10 +44,10 @@ export const rating = table(
     {
         id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
         stars: t.real().notNull(),
-        storyId: t
-            .integer()
+        storyISBN: t
+            .uuid()
             .notNull()
-            .references(() => story.id, { onDelete: "cascade" }),
+            .references(() => story.isbn, { onDelete: "cascade" }),
         userId: t
             .text()
             .notNull()
@@ -56,7 +56,7 @@ export const rating = table(
     (table) => [
         t.index("ratings_stars_idx").on(table.stars),
         t.index("ratings_user_id_idx").on(table.userId),
-        t.index("ratings_story_id_idx").on(table.storyId),
+        t.index("ratings_story_isbn_idx").on(table.storyISBN),
     ]
 );
 
@@ -74,8 +74,8 @@ export const storyRelations = relations(story, ({ one, many }) => ({
 
 export const ratingRelations = relations(rating, ({ one }) => ({
     story: one(story, {
-        fields: [rating.storyId],
-        references: [story.id],
+        fields: [rating.storyISBN],
+        references: [story.isbn],
     }),
     user: one(user, {
         fields: [rating.userId],

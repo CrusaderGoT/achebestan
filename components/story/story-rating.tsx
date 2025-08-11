@@ -8,17 +8,17 @@ import publicStyles from "@/styles/public.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
-import { RatingForm } from "../forms/story/rating-form";
+import { RatingForm } from "../forms/rating/rating-form";
 
 type StoryRatingProps = {
     ratings: RatingSelectType[];
-    storyId: number;
+    storyISBN: string;
     userRating?: RatingSelectType;
 };
 
 export function StoryRating({
     ratings,
-    storyId,
+    storyISBN,
     userRating,
 }: StoryRatingProps) {
     const [opened, { close, toggle }] = useDisclosure(false);
@@ -71,7 +71,7 @@ export function StoryRating({
             <Box className={cx(!opened && publicStyles.hide)}>
                 <RatingForm
                     userRating={userRating}
-                    storyId={storyId}
+                    storyISBN={storyISBN}
                     setRating={setRating}
                     ratings={ratings}
                     closeRatingForm={close}
@@ -81,7 +81,7 @@ export function StoryRating({
             {ratings.length > 0 && (
                 <TooltipFloating label={`${rating.toFixed(1)} stars`}>
                     <Rating
-                        defaultValue={rating}
+                        value={rating}
                         fractions={2}
                         readOnly
                         className={cx(opened && publicStyles.hide)}
@@ -92,14 +92,47 @@ export function StoryRating({
     );
 }
 
-export function calculateRatingsAverage(ratings: RatingSelectType[]) {
-    if (ratings.length < 1) return 0;
+export function calculateRatingsAverage(
+    ratings: RatingSelectType[],
+    updateUserRating?: RatingSelectType
+) {
+    if (ratings.length < 1 && !updateUserRating) return 0;
 
-    const avg = ratings.reduce((acc, cur) => {
-        acc.stars += cur.stars;
-        return acc;
+    // Create a copy of ratings to work with
+    const workingRatings = [...ratings];
+
+    // Handle user rating update/addition
+    if (updateUserRating?.userId) {
+        const existingIndex = workingRatings.findIndex(
+            (r) => r.userId === updateUserRating.userId
+        );
+
+        if (existingIndex >= 0) {
+            // Update existing rating
+            workingRatings[existingIndex] = updateUserRating;
+        } else {
+            // Add new rating
+            workingRatings.push(updateUserRating);
+        }
+    }
+
+    // Remove duplicates by keeping the latest rating per user
+    const uniqueRatings = new Map<string, RatingSelectType>();
+
+    workingRatings.forEach((rating) => {
+        if (rating.userId) {
+            uniqueRatings.set(rating.userId, rating);
+        }
     });
 
-    avg.stars /= ratings.length;
-    return avg.stars;
+    const uniqueRatingsArray = Array.from(uniqueRatings.values());
+
+    if (uniqueRatingsArray.length === 0) return 0;
+
+    // Calculate average from unique ratings
+    const totalStars = uniqueRatingsArray.reduce(
+        (sum, rating) => sum + rating.stars,
+        0
+    );
+    return totalStars / uniqueRatingsArray.length;
 }

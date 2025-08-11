@@ -1,22 +1,17 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
-import { rateStoryAction } from "../actions/story";
+import { deleteStoryRating } from "../actions/story";
 
-export const useRateStory = () => {
-    const action = useAction(rateStoryAction, {
+export const useDeleteRating = () => {
+    const action = useAction(deleteStoryRating, {
         onSuccess(args) {
-            if (!!args?.data?.stars) {
-                // fail safe to ensure rating was a success
+            if (args.data?.id) {
                 notifications.show({
-                    message:
-                        args.data.stars < 3
-                            ? "Sorry You Did Not Like The Story, Hope It Grows On You"
-                            : "Thank You For Rating",
-                    color: "yellow",
+                    message: "Your Rate Has Been Deleted",
                 });
             } else {
                 notifications.show({
-                    message: "Your Rating Failed",
+                    message: "This Rating No Longer Exists",
                 });
             }
         },

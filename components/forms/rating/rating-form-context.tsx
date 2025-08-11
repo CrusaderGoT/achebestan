@@ -1,20 +1,17 @@
 "use client";
 
-import { RatingInsertType } from "@/zod-schemas/story";
+import { RatingSelectType } from "@/zod-schemas/story";
 
 import { Rating, RatingProps } from "@mantine/core";
 import { createFormContext } from "@mantine/form";
 
-export const [
-    InsertRatingFormProvider,
-    useInsertRatingFormContext,
-    useInsertRatingForm,
-] = createFormContext<RatingInsertType>();
+export const [RatingFormProvider, useRatingFormContext, useRatingForm] =
+    createFormContext<RatingSelectType>();
 
 type RatingFieldsProps = Partial<RatingProps>;
 
 export function RatingFields({ ...props }: RatingFieldsProps) {
-    const form = useInsertRatingFormContext();
+    const form = useRatingFormContext();
 
     return (
         <Rating

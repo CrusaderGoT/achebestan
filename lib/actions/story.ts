@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { rating, story } from "@/drizzle/schemas/story";
 import {
-    ratingInsertSchema,
+    ratingSelectSchema,
     storyInsertSchema,
     storyUpdateSchema,
 } from "@/zod-schemas/story";
@@ -204,31 +204,56 @@ export const deleteStoryAction = authActionClient
 // Story Rating Actions
 
 export const rateStoryAction = authActionClient
-    .inputSchema(ratingInsertSchema)
+    .inputSchema(ratingSelectSchema)
     .action(async ({ parsedInput, ctx }) => {
-        const [rate] = await db
-            .insert(rating)
-            .values({
-                storyId: parsedInput.storyId,
-                stars: parsedInput.stars,
-                userId: ctx.user.id,
-            })
-            .returning();
+        if (typeof parsedInput.id === "string") {
+            // create new rating
+            const [newRate] = await db
+                .insert(rating)
+                .values({
+                    storyISBN: parsedInput.storyISBN,
+                    stars: parsedInput.stars,
+                    userId: ctx.user.id,
+                })
+                .returning();
 
-        return rate;
+            return newRate;
+        } else {
+            // update existing rating
+            const [updateRate] = await db
+                .update(rating)
+                .set({
+                    stars: parsedInput.stars,
+                })
+                .where(
+                    and(
+                        eq(rating.storyISBN, parsedInput.storyISBN),
+                        eq(rating.userId, ctx.user.id)
+                    )
+                )
+                .returning();
+
+            revalidatePath(`/story/${parsedInput.storyISBN}`);
+
+            return updateRate;
+        }
     });
 
 export const deleteStoryRating = authActionClient
     .inputSchema(
         z.object({
-            ratingId: z.number(),
             storyISBN: z.string(),
         })
     )
-    .action(async ({ parsedInput }) => {
+    .action(async ({ parsedInput, ctx }) => {
         const [deletedRating] = await db
             .delete(rating)
-            .where(eq(rating.id, parsedInput.ratingId))
+            .where(
+                and(
+                    eq(rating.userId, ctx.user.id),
+                    eq(rating.storyISBN, parsedInput.storyISBN)
+                )
+            )
             .returning();
 
         revalidatePath(`/story/${parsedInput.storyISBN}`);
@@ -238,7 +263,7 @@ export const deleteStoryRating = authActionClient
 
 export const getUserRating = async (
     userId: string | undefined,
-    storyId: number
+    storyISBN: string
 ) => {
     if (!userId) return;
 
@@ -246,7 +271,7 @@ export const getUserRating = async (
         const userRating = await db.query.rating.findFirst({
             where(fields, operators) {
                 return operators.and(
-                    operators.eq(fields.storyId, storyId),
+                    operators.eq(fields.storyISBN, storyISBN),
                     operators.eq(fields.userId, userId)
                 );
             },

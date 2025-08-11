@@ -23,7 +23,7 @@ export default async function StoryPage({
 
     if (!story) notFound();
 
-    const userRating = await getUserRating(session?.user.id, story.id);
+    const userRating = await getUserRating(session?.user.id, story.isbn);
 
     return (
         <Stack>
@@ -42,7 +42,7 @@ export default async function StoryPage({
             />
             <StoryRating
                 ratings={story.ratings}
-                storyId={story.id}
+                storyISBN={story.isbn}
                 userRating={userRating}
             />
         </Stack>
