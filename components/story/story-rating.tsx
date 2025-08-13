@@ -1,9 +1,17 @@
 "use client";
 
 import { RatingSelectType } from "@/zod-schemas/story";
-import { ActionIcon, Box, Group, Rating, TooltipFloating } from "@mantine/core";
+import {
+    ActionIcon,
+    Group,
+    Rating,
+    Stack,
+    Text,
+    TooltipFloating,
+} from "@mantine/core";
 import { useState } from "react";
 
+import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
@@ -68,71 +76,40 @@ export function StoryRating({
                 </ActionIcon>
             </ActionIcon.Group>
 
-            <Box className={cx(!opened && publicStyles.hide)}>
-                <RatingForm
-                    userRating={userRating}
-                    storyISBN={storyISBN}
-                    setRating={setRating}
-                    ratings={ratings}
-                    closeRatingForm={close}
-                />
-            </Box>
+            <RatingForm
+                userRating={userRating}
+                storyISBN={storyISBN}
+                setRating={setRating}
+                ratings={ratings}
+                closeRatingForm={close}
+                position={{ bottom: 20, right: 20 }}
+                className={cx(!opened && publicStyles.hide)}
+            />
 
             {ratings.length > 0 && (
-                <TooltipFloating label={`${rating.toFixed(1)} stars`}>
-                    <Rating
-                        value={rating}
-                        fractions={2}
-                        readOnly
-                        className={cx(opened && publicStyles.hide)}
-                    />
-                </TooltipFloating>
+                <>
+                    <TooltipFloating label={`${rating.toFixed(1)} stars`}>
+                        <Rating
+                            value={rating}
+                            fractions={2}
+                            readOnly
+                            className={cx(opened && publicStyles.hide)}
+                        />
+                    </TooltipFloating>
+                </>
             )}
         </Group>
     );
 }
 
-export function calculateRatingsAverage(
-    ratings: RatingSelectType[],
-    updateUserRating?: RatingSelectType
-) {
-    if (ratings.length < 1 && !updateUserRating) return 0;
-
-    // Create a copy of ratings to work with
-    const workingRatings = [...ratings];
-
-    // Handle user rating update/addition
-    if (updateUserRating?.userId) {
-        const existingIndex = workingRatings.findIndex(
-            (r) => r.userId === updateUserRating.userId
-        );
-
-        if (existingIndex >= 0) {
-            // Update existing rating
-            workingRatings[existingIndex] = updateUserRating;
-        } else {
-            // Add new rating
-            workingRatings.push(updateUserRating);
-        }
-    }
-
-    // Remove duplicates by keeping the latest rating per user
-    const uniqueRatings = new Map<string, RatingSelectType>();
-
-    workingRatings.forEach((rating) => {
-        if (rating.userId) {
-            uniqueRatings.set(rating.userId, rating);
-        }
-    });
-
-    const uniqueRatingsArray = Array.from(uniqueRatings.values());
-
-    if (uniqueRatingsArray.length === 0) return 0;
-
-    // Calculate average from unique ratings
-    const totalStars = uniqueRatingsArray.reduce(
-        (sum, rating) => sum + rating.stars,
-        0
+function Comments({ ratings }: { ratings: RatingSelectType[] }) {
+    return (
+        <Stack>
+            {ratings.map((rating, idx) => {
+                if (rating) {
+                    return <Text key={idx}>{rating.id}</Text>;
+                }
+            })}
+        </Stack>
     );
-    return totalStars / uniqueRatingsArray.length;
 }

@@ -60,6 +60,47 @@ export const rating = table(
     ]
 );
 
+export const ratingRelations = relations(rating, ({ one }) => ({
+    story: one(story, {
+        fields: [rating.storyISBN],
+        references: [story.isbn],
+    }),
+    user: one(user, {
+        fields: [rating.userId],
+        references: [user.id],
+    }),
+    comment: one(comment),
+}));
+
+export const comment = table(
+    "comments",
+    {
+        id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+        text: t.text(),
+        ratingId: t.integer().references(() => rating.id),
+        subCommentId: t.integer(),
+        storyISBN: t
+            .uuid()
+            .notNull()
+            .references(() => story.isbn, { onDelete: "cascade" }),
+    },
+    (table) => [
+        t.foreignKey({
+            columns: [table.subCommentId],
+            foreignColumns: [table.id],
+            name: "comment_subcomment_fk",
+        }),
+    ]
+);
+
+export const commentRelations = relations(comment, ({ one, many }) => ({
+    rating: one(rating, {
+        fields: [comment.ratingId],
+        references: [rating.id],
+    }),
+    subComments: many(comment),
+}));
+
 export const storyRelations = relations(story, ({ one, many }) => ({
     author: one(user, {
         fields: [story.authorId],
@@ -70,15 +111,5 @@ export const storyRelations = relations(story, ({ one, many }) => ({
         references: [book.id],
     }),
     ratings: many(rating),
-}));
-
-export const ratingRelations = relations(rating, ({ one }) => ({
-    story: one(story, {
-        fields: [rating.storyISBN],
-        references: [story.isbn],
-    }),
-    user: one(user, {
-        fields: [rating.userId],
-        references: [user.id],
-    }),
+    comment: one(comment),
 }));

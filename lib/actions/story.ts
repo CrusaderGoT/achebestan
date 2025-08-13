@@ -214,6 +214,9 @@ export const rateStoryAction = authActionClient
                     storyISBN: parsedInput.storyISBN,
                     stars: parsedInput.stars,
                     userId: ctx.user.id,
+                    ...(!!parsedInput.comment?.trim()
+                        ? { comment: parsedInput.comment }
+                        : {}),
                 })
                 .returning();
 

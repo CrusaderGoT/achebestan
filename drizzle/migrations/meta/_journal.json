@@ -113,6 +113,27 @@
       "when": 1754873201333,
       "tag": "0015_sloppy_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1755026327850,
+      "tag": "0016_abnormal_redwing",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1755042183245,
+      "tag": "0017_overrated_kid_colt",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1755045058093,
+      "tag": "0018_absurd_red_hulk",
+      "breakpoints": true
     }
   ]
 }

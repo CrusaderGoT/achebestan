@@ -1,0 +1,2 @@
+ALTER TABLE "comments" ADD COLUMN "story_isbn" uuid NOT NULL;--> statement-breakpoint
+ALTER TABLE "comments" ADD CONSTRAINT "comments_story_isbn_stories_isbn_fk" FOREIGN KEY ("story_isbn") REFERENCES "public"."stories"("isbn") ON DELETE cascade ON UPDATE no action;

@@ -1,8 +1,9 @@
+import { CommentForm } from "@/components/forms/comment/comment-form";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
 import { getUserRating, readStory } from "@/lib/actions/story";
 import { auth } from "@/lib/auth";
-import { Stack } from "@mantine/core";
+import { Divider, Stack } from "@mantine/core";
 import { headers } from "next/headers";
 
 import { notFound } from "next/navigation";
@@ -45,6 +46,10 @@ export default async function StoryPage({
                 storyISBN={story.isbn}
                 userRating={userRating}
             />
+
+            <Divider />
+
+            <CommentForm />
         </Stack>
     );
 }

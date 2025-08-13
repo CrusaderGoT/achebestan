@@ -5,11 +5,12 @@ import {
     RatingFormProvider,
     useRatingForm,
 } from "@/components/forms/rating/rating-form-context";
-import { calculateRatingsAverage } from "@/components/story/story-rating";
 import { useDeleteRating } from "@/lib/hooks/delete-rating-hook";
 import { useRateStory } from "@/lib/hooks/rate-story-hook";
+import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
+import ratingStyles from "@/styles/rating.module.css";
 import { ratingSelectSchema, RatingSelectType } from "@/zod-schemas/story";
-import { ActionIcon, Group } from "@mantine/core";
+import { ActionIcon, Affix, AffixProps, Group, Stack } from "@mantine/core";
 import { IconCheck, IconTrashFilled } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -20,7 +21,7 @@ type RatingFormProps = {
     closeRatingForm: () => void;
     ratings: RatingSelectType[];
     userRating?: RatingSelectType;
-};
+} & Partial<AffixProps>;
 
 export function RatingForm({
     setRating,
@@ -28,6 +29,7 @@ export function RatingForm({
     closeRatingForm,
     userRating,
     storyISBN,
+    ...props
 }: RatingFormProps) {
     const [userRatingState, setUserRatingState] = useState<
         RatingSelectType | undefined
@@ -51,80 +53,93 @@ export function RatingForm({
     } = useDeleteRating();
 
     async function handleSubmit(data: RatingSelectType) {
-        const { data: rated } = await executeAsyncRateStory({
-            stars: data.stars,
-            storyISBN: data.storyISBN,
-            id: userRatingState?.id || "new",
-        });
+        // check if values changed
+        if (form.isDirty()) {
+            const { data: rated } = await executeAsyncRateStory({
+                id: userRatingState?.id || "new",
+                stars: data.stars,
+                storyISBN: data.storyISBN,
+            });
 
-        if (rated) {
-            setUserRatingState(rated);
+            if (rated) {
+                setUserRatingState(rated);
 
-            // Instead of pushing, update the ratings array properly
-            const existingIndex = ratings.findIndex(
-                (r) => r.userId === rated.userId
-            );
+                // Instead of pushing, update the ratings array properly
+                const existingIndex = ratings.findIndex(
+                    (r) => r.userId === rated.userId
+                );
 
-            if (existingIndex >= 0) {
-                // Update existing rating in place
-                ratings[existingIndex] = rated;
-            } else {
-                // Add new rating
-                ratings.push(rated);
+                if (existingIndex >= 0) {
+                    // Update existing rating in place
+                    ratings[existingIndex] = rated;
+                } else {
+                    // Add new rating
+                    ratings.push(rated);
+                }
+
+                // Calculate new average (don't pass rated again since it's already in ratings)
+                setRating(calculateRatingsAverage(ratings));
             }
 
-            // Calculate new average (don't pass rated again since it's already in ratings)
-            setRating(calculateRatingsAverage(ratings));
             closeRatingForm();
         }
     }
 
     return (
-        <RatingFormProvider form={form}>
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-                <Group>
-                    <RatingFields fractions={2} />
-                    <ActionIcon
-                        size={"xs"}
-                        color="green"
-                        type="submit"
-                        title="submit your rating"
-                        variant="light"
-                        loading={form.submitting || isPendingDeleteRating}
-                    >
-                        <IconCheck />
-                    </ActionIcon>
-                    {userRatingState?.id &&
-                        typeof userRatingState.id === "number" && (
-                            <ActionIcon
-                                size={"xs"}
-                                color="red"
-                                title="delete your rating"
-                                variant="light"
-                                loading={
-                                    form.submitting || isPendingDeleteRating
-                                }
-                                onClick={async () => {
-                                    const deletedRate =
-                                        await executeAsyncDeleteRating({
-                                            storyISBN: storyISBN,
-                                        });
+        <Affix {...props}>
+            <RatingFormProvider form={form}>
+                <form onSubmit={form.onSubmit(handleSubmit)}>
+                    <Stack className={ratingStyles.ratingStack}>
+                        <Group justify="space-between">
+                            <RatingFields fractions={2} />
+                            <Group>
+                                <ActionIcon
+                                    size={"xs"}
+                                    color="green"
+                                    type="submit"
+                                    title="submit your rating"
+                                    variant="light"
+                                    loading={form.submitting}
+                                    disabled={isPendingDeleteRating}
+                                >
+                                    <IconCheck />
+                                </ActionIcon>
+                                {userRatingState?.id &&
+                                    typeof userRatingState.id === "number" && (
+                                        <ActionIcon
+                                            size={"xs"}
+                                            color="red"
+                                            title="delete your rating"
+                                            variant="light"
+                                            loading={isPendingDeleteRating}
+                                            disabled={form.submitting}
+                                            onClick={async () => {
+                                                const deletedRate =
+                                                    await executeAsyncDeleteRating(
+                                                        {
+                                                            storyISBN:
+                                                                storyISBN,
+                                                        }
+                                                    );
 
-                                    if (deletedRate) {
-                                        setUserRatingState({
-                                            id: "new",
-                                            stars: 0,
-                                            storyISBN: storyISBN,
-                                        });
-                                        closeRatingForm();
-                                    }
-                                }}
-                            >
-                                <IconTrashFilled />
-                            </ActionIcon>
-                        )}
-                </Group>
-            </form>
-        </RatingFormProvider>
+                                                if (deletedRate) {
+                                                    setUserRatingState({
+                                                        id: "new",
+                                                        stars: 0,
+                                                        storyISBN: storyISBN,
+                                                    });
+                                                    closeRatingForm();
+                                                }
+                                            }}
+                                        >
+                                            <IconTrashFilled />
+                                        </ActionIcon>
+                                    )}
+                            </Group>
+                        </Group>
+                    </Stack>
+                </form>
+            </RatingFormProvider>
+        </Affix>
     );
 }
