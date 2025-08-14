@@ -1,8 +1,10 @@
 "use server";
 
 import { db } from "@/drizzle";
-import { rating, story } from "@/drizzle/schemas/story";
+import { comment, rating, story } from "@/drizzle/schemas/story";
 import {
+    commentInsertSchema,
+    commentUpdateSchema,
     ratingSelectSchema,
     storyInsertSchema,
     storyUpdateSchema,
@@ -214,9 +216,6 @@ export const rateStoryAction = authActionClient
                     storyISBN: parsedInput.storyISBN,
                     stars: parsedInput.stars,
                     userId: ctx.user.id,
-                    ...(!!parsedInput.comment?.trim()
-                        ? { comment: parsedInput.comment }
-                        : {}),
                 })
                 .returning();
 
@@ -246,9 +245,13 @@ export const deleteStoryRating = authActionClient
     .inputSchema(
         z.object({
             storyISBN: z.string(),
+            userId: z.string(),
         })
     )
     .action(async ({ parsedInput, ctx }) => {
+        if (ctx.user.id !== parsedInput.userId) {
+            unauthorized();
+        }
         const [deletedRating] = await db
             .delete(rating)
             .where(
@@ -278,6 +281,9 @@ export const getUserRating = async (
                     operators.eq(fields.userId, userId)
                 );
             },
+            with: {
+                comment: true,
+            },
         });
 
         return userRating;
@@ -285,3 +291,80 @@ export const getUserRating = async (
         console.log(e);
     }
 };
+
+export const createCommentAction = authActionClient
+    .inputSchema(commentInsertSchema)
+    .action(async ({ parsedInput, ctx }) => {
+        const [newComment] = await db
+            .insert(comment)
+            .values({
+                userId: ctx.user.id,
+                storyISBN: parsedInput.storyISBN,
+                text: parsedInput.text.trim(),
+                ...(parsedInput.ratingId
+                    ? { ratingId: parsedInput.ratingId }
+                    : {}),
+                ...(parsedInput.parentCommentId
+                    ? { parentCommentId: parsedInput.parentCommentId }
+                    : {}),
+            })
+            .returning();
+
+        return newComment;
+    });
+
+export const updateCommentAction = authActionClient
+    .inputSchema(
+        z.object({
+            commentId: z.number(),
+            ...commentUpdateSchema.shape,
+        })
+    )
+    .action(async ({ parsedInput, ctx }) => {
+        if (ctx.user.id !== parsedInput.userId) throw unauthorized();
+
+        // update the text
+        const [updatedComment] = await db
+            .update(comment)
+            .set({
+                text: parsedInput.text,
+            })
+            .where(
+                and(
+                    eq(comment.id, parsedInput.commentId),
+                    eq(comment.storyISBN, parsedInput.storyISBN),
+                    eq(comment.userId, parsedInput.userId)
+                )
+            )
+            .returning();
+
+        return updatedComment;
+    });
+
+export const deleteCommentAction = authActionClient
+    .inputSchema(
+        z.object({
+            commentId: z.number(),
+            userId: z.string(),
+        })
+    )
+    .action(async ({ parsedInput, ctx }) => {
+        if (ctx.user.id !== parsedInput.userId) throw unauthorized();
+
+        // delete comment if update contains no text content
+        const [deletedComment] = await db
+            .delete(comment)
+            .where(
+                and(
+                    eq(comment.id, parsedInput.commentId),
+                    eq(comment.userId, parsedInput.userId)
+                )
+            )
+            .returning({ text: comment.text });
+
+        if (!deletedComment) {
+            throw new Error("Comment No Longer Exists");
+        }
+
+        return deletedComment;
+    });

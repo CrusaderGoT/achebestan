@@ -3,7 +3,6 @@ import { useAction } from "next-safe-action/hooks";
 import { rateStoryAction } from "../actions/story";
 
 export const useRateStory = () => {
-    
     const action = useAction(rateStoryAction, {
         onSuccess(args) {
             if (typeof args?.data?.stars == "number") {

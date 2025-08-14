@@ -39,6 +39,19 @@ export const story = table(
     ]
 );
 
+export const storyRelations = relations(story, ({ one, many }) => ({
+    author: one(user, {
+        fields: [story.authorId],
+        references: [user.id],
+    }),
+    book: one(book, {
+        fields: [story.bookId],
+        references: [book.id],
+    }),
+    ratings: many(rating),
+    comments: many(comment),
+}));
+
 export const rating = table(
     "ratings",
     {
@@ -76,40 +89,34 @@ export const comment = table(
     "comments",
     {
         id: t.integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-        text: t.text(),
-        ratingId: t.integer().references(() => rating.id),
-        subCommentId: t.integer(),
+        text: t.text().notNull(),
+        parentCommentId: t.integer(),
+        ratingId: t
+            .integer()
+            .references(() => rating.id, { onDelete: "cascade" }),
+
         storyISBN: t
             .uuid()
             .notNull()
             .references(() => story.isbn, { onDelete: "cascade" }),
+        userId: t
+            .text()
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
     },
     (table) => [
         t.foreignKey({
-            columns: [table.subCommentId],
+            columns: [table.parentCommentId],
             foreignColumns: [table.id],
             name: "comment_subcomment_fk",
         }),
     ]
 );
 
-export const commentRelations = relations(comment, ({ one, many }) => ({
+export const commentRelations = relations(comment, ({ one }) => ({
     rating: one(rating, {
         fields: [comment.ratingId],
         references: [rating.id],
     }),
-    subComments: many(comment),
-}));
-
-export const storyRelations = relations(story, ({ one, many }) => ({
-    author: one(user, {
-        fields: [story.authorId],
-        references: [user.id],
-    }),
-    book: one(book, {
-        fields: [story.bookId],
-        references: [book.id],
-    }),
-    ratings: many(rating),
-    comment: one(comment),
+    parentComment: one(comment),
 }));

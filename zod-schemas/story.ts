@@ -46,6 +46,25 @@ export const ratingSelectSchema = createSelectSchema(rating, {
 
 export type RatingSelectType = z.infer<typeof ratingSelectSchema>;
 
-export const commentInsertSchema = createInsertSchema(comment);
+export const commentInsertSchema = createInsertSchema(comment, {
+    userId: (schema) => schema.optional(),
+    text: (schema) => schema.nonempty(),
+});
 
 export type CommentInsertType = z.infer<typeof commentInsertSchema>;
+
+export const commentSelectSchema = createSelectSchema(comment);
+
+export type CommentSelectType = z.infer<typeof commentSelectSchema>;
+
+export const commentUpdateSchema = createUpdateSchema(comment, {
+    text: z.string().nonempty(),
+    storyISBN: z.uuid(),
+    userId: z.string().nonempty(),
+});
+
+export type CommentUpdateType = z.infer<typeof commentUpdateSchema>;
+
+export interface UserRatingWithComment extends RatingSelectType {
+    comment?: CommentSelectType | null;
+}
