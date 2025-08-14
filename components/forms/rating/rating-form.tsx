@@ -92,145 +92,144 @@ export function RatingForm({
 
     async function handleSubmit(data: RatingSelectType) {
         const trimmedComment = comment?.trim();
+        let finalRatingId = userRatingState?.id;
 
-        // check if values has changed
-        if (form.isDirty()) {
+        const commentInState = !!trimmedComment;
+        const existingCommentId = userRatingState?.comment?.id;
+
+        // --------------------------
+        // Step 1: Save rating first (if changed)
+        // --------------------------
+        if (form.isDirty("stars")) {
             const { data: rated } = await executeAsyncRateStory({
-                id: userRatingState?.id || "new",
+                id: finalRatingId || "new",
                 stars: data.stars,
                 storyISBN: data.storyISBN,
             });
 
-            if (rated) {
-                setUserRatingState(rated);
-
-                // Instead of pushing, update the ratings array properly
-                const existingIndex = ratings.findIndex(
-                    (r) => r.userId === rated.userId
-                );
-
-                if (existingIndex >= 0) {
-                    // Update existing rating in place
-                    ratings[existingIndex] = rated;
-                } else {
-                    // Add new rating
-                    ratings.push(rated);
-                }
-
-                // Calculate new average (don't pass rated again since it's already in ratings)
-                setRating(calculateRatingsAverage(ratings));
+            if (!rated) {
+                notifications.show({
+                    message: "An Error Occurred While Submitting Your Rating",
+                    color: "red",
+                });
+                return; // stop everything if rating fails
             }
+
+            finalRatingId = rated.id;
+
+            // Update UI state
+            setUserRatingState(rated);
+
+            // Update ratings array
+            const existingIndex = ratings.findIndex(
+                (r) => r.userId === rated.userId
+            );
+            if (existingIndex >= 0) {
+                ratings[existingIndex] = rated;
+            } else {
+                ratings.push(rated);
+            }
+            setRating(calculateRatingsAverage(ratings));
+            form.resetDirty()
         }
 
-        const commentInState = !!trimmedComment;
-
-        const existingCommentId = userRatingState?.comment?.id;
-
-        const ratingId = userRatingState?.id;
-
-        const existingRating = typeof ratingId === "number";
-
-        // Handle comment changes if any
-        if (commentChanged && commentInState) {
-            if (existingCommentId) {
-                // Update existing comment
-
-                const { data: updatedComment } =
-                    await executeAsyncUpdateComment({
-                        text: trimmedComment,
-                        storyISBN: storyISBN,
-                        userId: userId,
-                        commentId: existingCommentId,
-                    });
-
-                if (updatedComment) {
-                    // make both comment states same, to indicate comment in textarea and userrating are same
-                    setComment(updatedComment.text);
-
-                    setUserRatingState((prev) =>
-                        prev
-                            ? {
-                                  ...prev,
-                                  comment: updatedComment,
-                              }
-                            : {
-                                  id: "new",
-                                  stars: 0,
-                                  storyISBN: storyISBN,
-                                  comment: updatedComment,
-                              }
-                    );
-                } else {
-                    notifications.show({
-                        message:
-                            "An Error Occurred While Updating Your Comment",
-                        color: "red",
-                    });
-                }
-            } else {
-                // Create new comment only if there was already a rating(number)
-                if (existingRating) {
-                    const { data: newComment } =
-                        await executeAsyncCreateComment({
-                            storyISBN: storyISBN,
-                            ratingId: ratingId,
+        // --------------------------
+        // Step 2: Handle comment changes (after rating is ensured)
+        // --------------------------
+        if (commentChanged) {
+            // Case A: User typed something in the comment box
+            if (commentInState) {
+                if (existingCommentId) {
+                    // Update existing comment
+                    const { data: updatedComment } =
+                        await executeAsyncUpdateComment({
                             text: trimmedComment,
-                            userId: userId, // redundant, set via context in safe action
+                            storyISBN: storyISBN,
+                            userId: userId,
+                            commentId: existingCommentId,
                         });
 
-                    if (newComment) {
-                        setComment(newComment.text);
-
-                        setUserRatingState((prev) =>
-                            prev
-                                ? {
-                                      ...prev,
-                                      comment: newComment,
-                                  }
-                                : {
-                                      id: "new",
-                                      stars: 0,
-                                      storyISBN: storyISBN,
-                                      comment: newComment,
-                                  }
-                        );
-                    } else {
+                    if (!updatedComment) {
                         notifications.show({
                             message:
-                                "An Error Occurred While Adding Your Comment",
+                                "An Error Occurred While Updating Your Comment",
                             color: "red",
                         });
+                    } else {
+                        setComment(updatedComment.text);
+                        setUserRatingState((prev) =>
+                            prev
+                                ? { ...prev, comment: updatedComment }
+                                : {
+                                      id: finalRatingId || "new",
+                                      stars: 0,
+                                      storyISBN: storyISBN,
+                                      comment: updatedComment,
+                                  }
+                        );
                     }
                 } else {
-                    notifications.show({
-                        message:
-                            "You Must Rate The Story, To Make A Comment Here",
-                    });
+                    // Create new comment (only if rating exists)
+                    if (!finalRatingId || typeof finalRatingId !== "number") {
+                        notifications.show({
+                            message:
+                                "You Must Rate The Story, To Make A Comment Here",
+                        });
+                    } else {
+                        const { data: newComment } =
+                            await executeAsyncCreateComment({
+                                storyISBN: storyISBN,
+                                ratingId: finalRatingId,
+                                text: trimmedComment,
+                                userId: userId,
+                            });
+
+                        if (!newComment) {
+                            notifications.show({
+                                message:
+                                    "An Error Occurred While Adding Your Comment",
+                                color: "red",
+                            });
+                        } else {
+                            setComment(newComment.text);
+                            setUserRatingState((prev) =>
+                                prev
+                                    ? { ...prev, comment: newComment }
+                                    : {
+                                          id: finalRatingId,
+                                          stars: 0,
+                                          storyISBN: storyISBN,
+                                          comment: newComment,
+                                      }
+                            );
+                        }
+                    }
                 }
             }
-        } else if (commentChanged && !commentInState && existingCommentId) {
-            await executeAsyncDeleteComment({
-                commentId: existingCommentId,
-                userId: userId, // redundant, set via context in safe action
-            });
+            // Case B: User cleared the comment box but had a comment before → Delete it
+            else if (existingCommentId) {
+                await executeAsyncDeleteComment({
+                    commentId: existingCommentId,
+                    userId: userId,
+                });
 
-            setComment(undefined);
-
-            setUserRatingState((prev) =>
-                prev
-                    ? {
-                          ...prev,
-                          comment: null,
-                      }
-                    : {
-                          id: "new",
-                          stars: 0,
-                          storyISBN: storyISBN,
-                          comment: null,
-                      }
-            );
+                setComment(undefined);
+                setUserRatingState((prev) =>
+                    prev
+                        ? { ...prev, comment: null }
+                        : {
+                              id: finalRatingId || "new",
+                              stars: 0,
+                              storyISBN: storyISBN,
+                              comment: null,
+                          }
+                );
+            }
         }
 
+        // --------------------------
+        // Step 3: Close form
+        // --------------------------
         closeRatingForm();
     }
 
