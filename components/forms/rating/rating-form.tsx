@@ -108,8 +108,14 @@ export function RatingForm({
             return undefined;
         }
 
-        // Update UI state immediately
-        setUserRatingState(rated);
+        // ✅ Preserve existing comment when updating rating
+        const updatedRating = {
+            ...rated,
+            comment: userRatingState?.comment,
+        };
+
+        // Update UI state immediately - preserve comment
+        setUserRatingState(updatedRating);
 
         // Update ratings array
         const existingIndex = ratings.findIndex(
@@ -124,7 +130,7 @@ export function RatingForm({
 
         form.resetDirty();
 
-        return rated; // always return the fresh rating object
+        return updatedRating; // ✅ Return merged data
     }
 
     async function saveComment({
@@ -240,6 +246,12 @@ export function RatingForm({
     async function handleSubmit(data: RatingSelectType) {
         const trimmedComment = comment?.trim();
         const existingCommentId = userRatingState?.comment?.id;
+
+        // ✅ Calculate comment change directly
+        const originalComment = userRating?.comment?.text?.trim() || "";
+        const currentComment = trimmedComment || "";
+        const wasCommentChanged = currentComment !== originalComment;
+
         let freshRating = userRatingState;
         let freshRatingId =
             typeof freshRating?.id === "number" ? freshRating.id : undefined;
@@ -252,19 +264,17 @@ export function RatingForm({
                 typeof freshRating.id === "number" ? freshRating.id : undefined;
         }
 
-        // Step 2: Handle comment - calculate commentChanged here to avoid race conditions
-        const currentComment = trimmedComment || "";
-        const originalComment = userRating?.comment?.text?.trim() || ""; // Use original userRating, not state
-        const isCommentChanged = currentComment !== originalComment;
-
-        await saveComment({
-            trimmedComment,
-            commentChanged: isCommentChanged, // Use calculated value instead of state
-            existingCommentId,
-            ratingId: freshRatingId,
-            storyISBN,
-            userId,
-        });
+        // Step 2: Handle comment - ✅ Only if comment was actually changed
+        if (wasCommentChanged) {
+            await saveComment({
+                trimmedComment,
+                commentChanged: wasCommentChanged,
+                existingCommentId,
+                ratingId: freshRatingId,
+                storyISBN,
+                userId,
+            });
+        }
 
         // Step 3: Close form
         closeRatingForm();
