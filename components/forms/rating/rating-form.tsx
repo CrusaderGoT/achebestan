@@ -257,7 +257,7 @@ export function RatingForm({
             typeof freshRating?.id === "number" ? freshRating.id : undefined;
 
         // Step 1: Save rating first if needed
-        if (form.isDirty("stars")) {
+        if (form.isDirty()) {
             freshRating = await saveRating(data, freshRatingId);
             if (!freshRating) return;
             freshRatingId =
@@ -346,9 +346,12 @@ export function RatingForm({
                                                                 storyISBN:
                                                                     storyISBN,
                                                             });
-                                                            setComment(
-                                                                undefined
+                                                            setComment("");
+                                                            form.setFieldValue(
+                                                                "stars",
+                                                                0
                                                             );
+                                                            form.resetDirty();
                                                             closeRatingForm();
                                                         }
                                                     }}

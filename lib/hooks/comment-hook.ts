@@ -6,13 +6,6 @@ import {
     updateCommentAction,
 } from "../actions/story";
 
-
-
-
-
-
-
-
 export const useCreateComment = () => {
     const action = useAction(createCommentAction, {
         onSuccess() {
