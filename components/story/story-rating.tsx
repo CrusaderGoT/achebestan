@@ -8,7 +8,6 @@ import {
     Text,
     TooltipFloating,
 } from "@mantine/core";
-import { useState } from "react";
 
 import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
 import publicStyles from "@/styles/public.module.css";
@@ -32,9 +31,7 @@ export function StoryRating({
 }: StoryRatingProps) {
     const [opened, { close, toggle }] = useDisclosure(false);
 
-    const [rating, setRating] = useState<number>(
-        calculateRatingsAverage(ratings)
-    );
+    const rating = calculateRatingsAverage(ratings);
 
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
@@ -83,8 +80,6 @@ export function StoryRating({
                         userRating={userRating}
                         storyISBN={storyISBN}
                         userId={userId}
-                        setRating={setRating}
-                        ratings={ratings}
                         closeRatingForm={close}
                         position={{ bottom: 20, right: 20 }}
                         className={cx(!opened && publicStyles.hide)}

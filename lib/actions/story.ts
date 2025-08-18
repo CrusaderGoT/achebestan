@@ -339,7 +339,7 @@ export const updateCommentAction = authActionClient
                 )
             )
             .returning();
-        
+
         revalidatePath(`/story/${parsedInput.storyISBN}`);
 
         return updatedComment;

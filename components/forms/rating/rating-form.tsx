@@ -12,7 +12,6 @@ import {
 } from "@/lib/hooks/comment-hook";
 import { useDeleteRating } from "@/lib/hooks/delete-rating-hook";
 import { useRateStory } from "@/lib/hooks/rate-story-hook";
-import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
 import publicStyles from "@/styles/public.module.css";
 import ratingStyles from "@/styles/rating.module.css";
 import {
@@ -33,38 +32,28 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconTrashFilled } from "@tabler/icons-react";
 import cx from "clsx";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 type RatingFormProps = {
     storyISBN: string;
     userId: string;
-    setRating: Dispatch<SetStateAction<number>>;
     closeRatingForm: () => void;
-    ratings: RatingSelectType[];
     userRating?: UserRatingWithComment;
 } & Partial<AffixProps>;
 
 export function RatingForm({
-    setRating,
-    ratings,
     closeRatingForm,
     userRating,
     storyISBN,
     userId,
     ...props
 }: RatingFormProps) {
-    
-
-    const [userRatingState, setUserRatingState] = useState<
-        UserRatingWithComment | undefined
-    >(userRating);
-
     const [comment, setComment] = useState(userRating?.comment?.text);
 
     const form = useRatingForm({
         initialValues: {
             storyISBN: storyISBN,
-            stars: userRatingState?.stars || 0,
-            id: userRatingState?.id || "new",
+            stars: userRating?.stars || 0,
+            id: userRating?.id || "new",
         },
         mode: "uncontrolled",
         validate: zod4Resolver(ratingSelectSchema),
@@ -87,9 +76,9 @@ export function RatingForm({
 
     useEffect(() => {
         const currentComment = comment?.trim() || "";
-        const existingComment = userRatingState?.comment?.text?.trim() || "";
+        const existingComment = userRating?.comment?.text?.trim() || "";
         setCommentChanged(currentComment !== existingComment);
-    }, [comment, userRatingState?.comment?.text]);
+    }, [comment, userRating?.comment?.text]);
 
     async function saveRating(
         data: RatingSelectType,
@@ -103,55 +92,37 @@ export function RatingForm({
 
         if (!rated) {
             notifications.show({
-                message: "An Error Occurred While Submitting Your Rating",
+                message: "An Error Occurred While Adding Your Comment",
                 color: "red",
             });
-            return undefined;
+            return undefined; // return the undefined if no rating
         }
 
         // ✅ Preserve existing comment when updating rating
-        const updatedRating = {
+        const ratedWithComment = {
             ...rated,
-            comment: userRatingState?.comment,
+            comment: userRating?.comment,
         };
-
-        // Update UI state immediately - preserve comment
-        setUserRatingState(updatedRating);
-
-        // Update ratings array
-        const existingIndex = ratings.findIndex(
-            (r) => r.userId === rated.userId
-        );
-        if (existingIndex >= 0) {
-            ratings[existingIndex] = rated;
-        } else {
-            ratings.push(rated);
-        }
-        setRating(calculateRatingsAverage(ratings));
 
         form.resetDirty();
 
-        return updatedRating; // ✅ Return merged data
+        return ratedWithComment; // ✅ Return merged data
     }
 
     async function saveComment({
         trimmedComment,
-        commentChanged,
         existingCommentId,
         ratingId,
         storyISBN,
         userId,
     }: {
         trimmedComment: string | undefined;
-        commentChanged: boolean;
         existingCommentId?: number;
         ratingId?: number;
         storyISBN: string;
         userId: string;
     }) {
         const commentInState = !!trimmedComment;
-
-        if (!commentChanged) return;
 
         // Case A: User typed something → Create or Update
         if (commentInState) {
@@ -171,20 +142,7 @@ export function RatingForm({
                             "An Error Occurred While Updating Your Comment",
                         color: "red",
                     });
-                    return;
                 }
-
-                setComment(updatedComment.text);
-                setUserRatingState((prev) =>
-                    prev
-                        ? { ...prev, comment: updatedComment }
-                        : {
-                              id: ratingId || "new",
-                              stars: 0,
-                              storyISBN,
-                              comment: updatedComment,
-                          }
-                );
             } else {
                 // Create
                 if (!ratingId || typeof ratingId !== "number") {
@@ -192,38 +150,23 @@ export function RatingForm({
                         message:
                             "You Must Rate The Story, To Make A Comment Here",
                     });
-                    return;
+                } else {
+                    const { data: newComment } =
+                        await executeAsyncCreateComment({
+                            storyISBN,
+                            ratingId,
+                            text: trimmedComment!,
+                            userId,
+                        });
+
+                    if (!newComment) {
+                        notifications.show({
+                            message:
+                                "An Error Occurred While Adding Your Comment",
+                            color: "red",
+                        });
+                    }
                 }
-
-                const { data: newComment } = await executeAsyncCreateComment({
-                    storyISBN,
-                    ratingId,
-                    text: trimmedComment!,
-                    userId,
-                });
-
-                if (!newComment) {
-                    notifications.show({
-                        message: "An Error Occurred While Adding Your Comment",
-                        color: "red",
-                    });
-                    return;
-                }
-
-                setComment(newComment.text);
-
-                setUserRatingState((prev) =>
-                    prev
-                        ? { ...prev, comment: newComment }
-                        : {
-                              id: ratingId,
-                              stars: 0,
-                              storyISBN,
-                              comment: newComment,
-                          }
-                );
-
-                
             }
         }
         // Case B: User cleared comment → Delete
@@ -233,26 +176,14 @@ export function RatingForm({
                 userId,
                 storyISBN,
             });
-
-            setComment(undefined);
-            setUserRatingState((prev) =>
-                prev
-                    ? { ...prev, comment: null }
-                    : {
-                          id: ratingId || "new",
-                          stars: 0,
-                          storyISBN,
-                          comment: null,
-                      }
-            );
         }
     }
 
     async function handleSubmit(data: RatingSelectType) {
         const trimmedComment = comment?.trim();
-        const existingCommentId = userRatingState?.comment?.id;
+        const existingCommentId = userRating?.comment?.id;
 
-        let freshRating = userRatingState;
+        let freshRating = userRating;
         let freshRatingId =
             typeof freshRating?.id === "number" ? freshRating.id : undefined;
 
@@ -268,7 +199,6 @@ export function RatingForm({
         if (commentChanged) {
             await saveComment({
                 trimmedComment,
-                commentChanged: commentChanged,
                 existingCommentId,
                 ratingId: freshRatingId,
                 storyISBN,
@@ -317,8 +247,8 @@ export function RatingForm({
                                         >
                                             <IconCheck />
                                         </ActionIcon>
-                                        {userRatingState?.id &&
-                                            typeof userRatingState.id ===
+                                        {userRating?.id &&
+                                            typeof userRating.id ===
                                                 "number" && (
                                                 <ActionIcon
                                                     size={"xs"}
@@ -340,12 +270,6 @@ export function RatingForm({
                                                             );
 
                                                         if (deletedRate) {
-                                                            setUserRatingState({
-                                                                id: "new",
-                                                                stars: 0,
-                                                                storyISBN:
-                                                                    storyISBN,
-                                                            });
                                                             setComment("");
                                                             form.setFieldValue(
                                                                 "stars",
