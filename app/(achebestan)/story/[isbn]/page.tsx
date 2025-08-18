@@ -1,7 +1,12 @@
 import { CommentForm } from "@/components/forms/comment/comment-form";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
-import { getUserRating, readStory } from "@/lib/actions/story";
+import { CommentTree } from "@/components/ui/comment-tree";
+import {
+    getUserRating,
+    readStory,
+    readStoryComments,
+} from "@/lib/actions/story";
 import { auth } from "@/lib/auth";
 import { Divider, Stack } from "@mantine/core";
 import { headers } from "next/headers";
@@ -15,11 +20,12 @@ export default async function StoryPage({
 }) {
     const { isbn } = await params;
 
-    const [session, story] = await Promise.all([
+    const [session, story, comments] = await Promise.all([
         auth.api.getSession({
             headers: await headers(),
         }),
         readStory(isbn),
+        readStoryComments(isbn),
     ]);
 
     if (!story) notFound();
@@ -51,6 +57,10 @@ export default async function StoryPage({
             <Divider />
 
             <CommentForm storyISBN={story.isbn} />
+
+            <Divider />
+
+            {comments && <CommentTree comments={comments} />}
         </Stack>
     );
 }

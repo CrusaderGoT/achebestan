@@ -310,6 +310,8 @@ export const createCommentAction = authActionClient
             })
             .returning();
 
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
+
         return newComment;
     });
 
@@ -337,6 +339,8 @@ export const updateCommentAction = authActionClient
                 )
             )
             .returning();
+        
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
 
         return updatedComment;
     });
@@ -346,6 +350,7 @@ export const deleteCommentAction = authActionClient
         z.object({
             commentId: z.number(),
             userId: z.string(),
+            storyISBN: z.string(),
         })
     )
     .action(async ({ parsedInput, ctx }) => {
@@ -366,5 +371,25 @@ export const deleteCommentAction = authActionClient
             throw new Error("Comment No Longer Exists");
         }
 
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
+
         return deletedComment;
     });
+
+export const readStoryComments = async (isbn: string) => {
+    try {
+        const storyDb = await db.query.comment.findMany({
+            where(fields, operators) {
+                return operators.eq(fields.storyISBN, isbn);
+            },
+            with: {
+                childComments: true,
+            },
+            orderBy: (comments, { desc }) => [desc(comments.id)],
+        });
+
+        return storyDb;
+    } catch (e) {
+        console.log(e);
+    }
+};

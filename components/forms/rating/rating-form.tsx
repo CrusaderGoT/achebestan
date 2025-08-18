@@ -34,7 +34,6 @@ import { IconCheck, IconTrashFilled } from "@tabler/icons-react";
 import cx from "clsx";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-
 type RatingFormProps = {
     storyISBN: string;
     userId: string;
@@ -53,6 +52,8 @@ export function RatingForm({
     userId,
     ...props
 }: RatingFormProps) {
+    
+
     const [userRatingState, setUserRatingState] = useState<
         UserRatingWithComment | undefined
     >(userRating);
@@ -210,6 +211,7 @@ export function RatingForm({
                 }
 
                 setComment(newComment.text);
+
                 setUserRatingState((prev) =>
                     prev
                         ? { ...prev, comment: newComment }
@@ -220,6 +222,8 @@ export function RatingForm({
                               comment: newComment,
                           }
                 );
+
+                
             }
         }
         // Case B: User cleared comment → Delete
@@ -227,6 +231,7 @@ export function RatingForm({
             await executeAsyncDeleteComment({
                 commentId: existingCommentId,
                 userId,
+                storyISBN,
             });
 
             setComment(undefined);
@@ -247,11 +252,6 @@ export function RatingForm({
         const trimmedComment = comment?.trim();
         const existingCommentId = userRatingState?.comment?.id;
 
-        // ✅ Calculate comment change directly
-        const originalComment = userRating?.comment?.text?.trim() || "";
-        const currentComment = trimmedComment || "";
-        const wasCommentChanged = currentComment !== originalComment;
-
         let freshRating = userRatingState;
         let freshRatingId =
             typeof freshRating?.id === "number" ? freshRating.id : undefined;
@@ -265,10 +265,10 @@ export function RatingForm({
         }
 
         // Step 2: Handle comment - ✅ Only if comment was actually changed
-        if (wasCommentChanged) {
+        if (commentChanged) {
             await saveComment({
                 trimmedComment,
-                commentChanged: wasCommentChanged,
+                commentChanged: commentChanged,
                 existingCommentId,
                 ratingId: freshRatingId,
                 storyISBN,

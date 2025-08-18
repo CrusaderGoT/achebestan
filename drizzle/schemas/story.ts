@@ -103,20 +103,39 @@ export const comment = table(
             .text()
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
+        ...timestamps,
     },
     (table) => [
         t.foreignKey({
             columns: [table.parentCommentId],
             foreignColumns: [table.id],
-            name: "comment_subcomment_fk",
+            name: "comment_parent_comment_fk",
         }),
+        t.index("comment_story_idx").on(table.storyISBN),
+        t.index("comment_user_idx").on(table.userId),
+        t.index("comment_parent_idx").on(table.parentCommentId),
     ]
 );
 
-export const commentRelations = relations(comment, ({ one }) => ({
+export const commentRelations = relations(comment, ({ one, many }) => ({
     rating: one(rating, {
         fields: [comment.ratingId],
         references: [rating.id],
     }),
-    parentComment: one(comment),
+    story: one(story, {
+        fields: [comment.storyISBN],
+        references: [story.isbn],
+    }),
+    user: one(user, {
+        fields: [comment.userId],
+        references: [user.id],
+    }),
+    parentComment: one(comment, {
+        fields: [comment.parentCommentId],
+        references: [comment.id],
+        relationName: "parentChild",
+    }),
+    childComments: many(comment, {
+        relationName: "parentChild",
+    }),
 }));
