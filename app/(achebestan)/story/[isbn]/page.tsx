@@ -56,7 +56,7 @@ export default async function StoryPage({
 
             <Divider />
 
-            <CommentForm storyISBN={story.isbn} />
+            <CommentForm storyISBN={story.isbn} text="" />
 
             <Divider />
 

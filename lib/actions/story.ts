@@ -208,7 +208,7 @@ export const deleteStoryAction = authActionClient
 export const rateStoryAction = authActionClient
     .inputSchema(ratingSelectSchema)
     .action(async ({ parsedInput, ctx }) => {
-        if (typeof parsedInput.id === "string") {
+        if (typeof parsedInput.id === "string" && parsedInput.id === "new") {
             // create new rating
             const [newRate] = await db
                 .insert(rating)
@@ -218,6 +218,8 @@ export const rateStoryAction = authActionClient
                     userId: ctx.user.id,
                 })
                 .returning();
+
+            revalidatePath(`/story/${parsedInput.storyISBN}`);
 
             return newRate;
         } else {

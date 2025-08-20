@@ -2,26 +2,30 @@
 
 import { useCreateComment } from "@/lib/hooks/comment-hook";
 import { commentInsertSchema, CommentInsertType } from "@/zod-schemas/story";
-import { Button, Stack } from "@mantine/core";
+import { Button, Stack, TextareaProps } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useRouter } from "next/navigation";
 import {
     CommentArea,
     CommentFormProvider,
     useCommentForm,
 } from "./comment-form-context";
 
-type CommentFormProps = {
-    storyISBN: string;
-};
+type CommentFormProps = CommentInsertType &
+    TextareaProps & {
+        closeCommentForm?: () => void;
+    };
 
-export function CommentForm({ storyISBN }: CommentFormProps) {
-    const router = useRouter();
-
+export function CommentForm({
+    storyISBN,
+    parentCommentId,
+    closeCommentForm,
+    ...props
+}: CommentFormProps) {
     const form = useCommentForm({
         initialValues: {
             storyISBN: storyISBN,
             text: "",
+            parentCommentId: parentCommentId,
         },
         validate: zod4Resolver(commentInsertSchema),
     });
@@ -34,7 +38,11 @@ export function CommentForm({ storyISBN }: CommentFormProps) {
         });
 
         if (newComment) {
-            router.refresh();
+            form.reset();
+
+            if (closeCommentForm) {
+                closeCommentForm();
+            }
         }
     }
 
@@ -42,7 +50,7 @@ export function CommentForm({ storyISBN }: CommentFormProps) {
         <CommentFormProvider form={form}>
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack>
-                    <CommentArea placeholder="Leave A Comment..." />
+                    <CommentArea placeholder="Leave A Comment..." {...props} />
                     <Button type="submit" size="compact-md">
                         submit
                     </Button>
