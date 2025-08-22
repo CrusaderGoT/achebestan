@@ -1,6 +1,5 @@
 "use client";
 
-
 import styles from "@/styles/comment-tree.module.css";
 import { CommentSelectType } from "@/zod-schemas/story";
 import {
@@ -14,9 +13,8 @@ import {
     Tree,
     TreeNodeData,
 } from "@mantine/core";
-
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-import cx from "clsx";
+import { clsx } from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -107,7 +105,7 @@ export function CommentTree({
     return (
         <Tree
             data={commentsNodeData}
-            levelOffset={0} 
+            levelOffset={0} // We'll handle offset with CSS
             renderNode={({ node, expanded, hasChildren, elementProps, level }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
@@ -118,15 +116,15 @@ export function CommentTree({
                 }
 
                 return (
-                    <div 
-                        className={cx(styles.commentContainer, {
+                    <Box 
+                        className={clsx(styles.commentContainer, {
                             [styles.childComment]: isChildComment
                         })}
                         style={{ '--comment-level': level } as React.CSSProperties}
                         {...elementProps}
                     >
                         {isChildComment && (
-                            <div className={styles.connectionLine} />
+                            <Box className={styles.connectionLine} />
                         )}
                         
                         <Stack gap={2} p="sm" className={styles.commentContent}>
@@ -193,7 +191,7 @@ export function CommentTree({
 
                             <Divider />
                         </Stack>
-                    </div>
+                    </Box>
                 );
             }}
         />
