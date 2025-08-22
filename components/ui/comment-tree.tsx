@@ -1,5 +1,7 @@
 "use client";
 
+
+import styles from "@/styles/comment-tree.module.css";
 import { CommentSelectType } from "@/zod-schemas/story";
 import {
     Avatar,
@@ -14,7 +16,7 @@ import {
 } from "@mantine/core";
 
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-
+import cx from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -105,80 +107,93 @@ export function CommentTree({
     return (
         <Tree
             data={commentsNodeData}
-            levelOffset={23}
-            renderNode={({ node, expanded, hasChildren, elementProps }) => {
+            levelOffset={0} 
+            renderNode={({ node, expanded, hasChildren, elementProps, level }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
+                const isChildComment = level > 0;
                 
                 if (!comment) {
                     return null; // Safety check
                 }
 
                 return (
-                    <Stack gap={2} p="sm" {...elementProps}>
-                        <Group align="flex-start" gap="xs">
-                            <Avatar size="sm">
-                                <IconUser />
-                            </Avatar>
+                    <div 
+                        className={cx(styles.commentContainer, {
+                            [styles.childComment]: isChildComment
+                        })}
+                        style={{ '--comment-level': level } as React.CSSProperties}
+                        {...elementProps}
+                    >
+                        {isChildComment && (
+                            <div className={styles.connectionLine} />
+                        )}
+                        
+                        <Stack gap={2} p="sm" className={styles.commentContent}>
+                            <Group align="flex-start" gap="xs">
+                                <Avatar size="sm">
+                                    <IconUser />
+                                </Avatar>
 
-                            <Stack gap={4} flex={1}>
-                                <Group gap="xs" align="center">
-                                    <Text size="xs" c="dimmed">
-                                        {comment.userId}
-                                    </Text>
+                                <Stack gap={4} flex={1}>
+                                    <Group gap="xs" align="center">
+                                        <Text size="xs" c="dimmed">
+                                            {comment.userId}
+                                        </Text>
+                                        
+                                        <Text size="xs" c="dimmed">
+                                            {comment.edited 
+                                                ? `edited: ${comment.edited.toLocaleDateString()}` 
+                                                : comment.created 
+                                                    ? `created: ${comment.created.toLocaleDateString()}`
+                                                    : ''
+                                            }
+                                        </Text>
+                                    </Group>
                                     
-                                    <Text size="xs" c="dimmed">
-                                        {comment.edited 
-                                            ? `edited: ${comment.edited.toLocaleDateString()}` 
-                                            : comment.created 
-                                                ? `created: ${comment.created.toLocaleDateString()}`
-                                                : ''
-                                        }
-                                    </Text>
-                                </Group>
-                                
-                                <Text size="sm">{node.label}</Text>
-                            </Stack>
+                                    <Text size="sm">{node.label}</Text>
+                                </Stack>
 
-                            {hasChildren && (
-                                <Box>
-                                    <IconChevronDown
-                                        size={18}
-                                        style={{
-                                            transform: expanded
-                                                ? "rotate(180deg)"
-                                                : "rotate(0deg)",
-                                            transition: "transform 0.2s ease",
-                                        }}
+                                {hasChildren && (
+                                    <Box>
+                                        <IconChevronDown
+                                            size={18}
+                                            style={{
+                                                transform: expanded
+                                                    ? "rotate(180deg)"
+                                                    : "rotate(0deg)",
+                                                transition: "transform 0.2s ease",
+                                            }}
+                                        />
+                                    </Box>
+                                )}
+                            </Group>
+
+                            <Group gap="xs" ml={28}>
+                                <Button
+                                    variant="subtle"
+                                    size="xs"
+                                    onClick={() => handleReplyToggle(comment.id)}
+                                >
+                                    {isReplyOpen ? "Cancel" : "Reply"}
+                                </Button>
+                            </Group>
+
+                            {isReplyOpen && (
+                                <Box ml={28} mt="xs">
+                                    <CommentForm
+                                        storyISBN={comment.storyISBN}
+                                        text=""
+                                        parentCommentId={comment.id}
+                                        placeholder={`Reply to ${comment.userId}`}
+                                        closeCommentForm={handleCloseReply}
                                     />
                                 </Box>
                             )}
-                        </Group>
 
-                        <Group gap="xs" ml={28}>
-                            <Button
-                                variant="subtle"
-                                size="xs"
-                                onClick={() => handleReplyToggle(comment.id)}
-                            >
-                                {isReplyOpen ? "Cancel" : "Reply"}
-                            </Button>
-                        </Group>
-
-                        {isReplyOpen && (
-                            <Box ml={28} mt="xs">
-                                <CommentForm
-                                    storyISBN={comment.storyISBN}
-                                    text=""
-                                    parentCommentId={comment.id}
-                                    placeholder={`Reply to ${comment.userId}`}
-                                    closeCommentForm={handleCloseReply}
-                                />
-                            </Box>
-                        )}
-
-                        <Divider />
-                    </Stack>
+                            <Divider />
+                        </Stack>
+                    </div>
                 );
             }}
         />
