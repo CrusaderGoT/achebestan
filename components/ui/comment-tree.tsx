@@ -84,7 +84,7 @@ export function CommentTree({
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
 
-                if (!comment) {
+                if (!comment || !!comment.parentCommentId) {
                     return null; // Safety check
                 }
 
