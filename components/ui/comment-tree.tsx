@@ -105,7 +105,7 @@ export function CommentTree({
     return (
         <Tree
             data={commentsNodeData}
-            levelOffset={0} // We'll handle offset with CSS
+            levelOffset={0} 
             renderNode={({ node, expanded, hasChildren, elementProps, level }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
