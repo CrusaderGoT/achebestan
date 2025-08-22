@@ -12,7 +12,9 @@ import {
     Tree,
     TreeNodeData,
 } from "@mantine/core";
+
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
+
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -20,37 +22,62 @@ type CommentWithCommentsProps = CommentSelectType & {
     childComments?: CommentSelectType[];
 };
 
-function commentsToTreeNodeData(comments: CommentWithCommentsProps[]) {
-    // Filter out comments that have a parentId (child comments) - they should only appear as children
-    const topLevelComments = comments.filter(comment => !comment.parentCommentId);
-    
-    const data: (TreeNodeData & CommentSelectType)[] = topLevelComments.map(
-        (comment) => {
-            const baseNode = {
-                value: `${comment.id}`,
-                label: comment.text,
-                ...comment,
-            };
+function buildCommentHierarchy(comments: CommentSelectType[]): CommentWithCommentsProps[] {
+    const commentMap = new Map<number, CommentWithCommentsProps>();
+    const topLevel: CommentWithCommentsProps[] = [];
 
-            if (comment.childComments?.length) {
-                return {
-                    ...baseNode,
-                    children: commentsToTreeNodeData(comment.childComments),
-                };
+    // First pass: create all comment objects
+    comments.forEach(comment => {
+        commentMap.set(comment.id, { ...comment, childComments: [] });
+    });
+
+    // Second pass: build hierarchy
+    comments.forEach(comment => {
+        const commentWithChildren = commentMap.get(comment.id)!;
+        
+        if (comment.parentCommentId) {
+            // This is a child comment
+            const parent = commentMap.get(comment.parentCommentId);
+            if (parent) {
+                parent.childComments = parent.childComments || [];
+                parent.childComments.push(commentWithChildren);
             }
-
-            return baseNode;
+        } else {
+            // This is a top-level comment
+            topLevel.push(commentWithChildren);
         }
-    );
-    return data;
+    });
+
+    return topLevel;
+}
+
+function commentsToTreeNodeData(comments: CommentWithCommentsProps[]): (TreeNodeData & CommentSelectType)[] {
+    return comments.map((comment) => {
+        const baseNode = {
+            value: `${comment.id}`,
+            label: comment.text,
+            ...comment,
+        };
+
+        if (comment.childComments?.length) {
+            return {
+                ...baseNode,
+                children: commentsToTreeNodeData(comment.childComments),
+            };
+        }
+
+        return baseNode;
+    });
 }
 
 export function CommentTree({
     comments,
 }: {
-    comments: CommentWithCommentsProps[];
+    comments: CommentSelectType[]; // Changed from CommentWithCommentsProps[] to CommentSelectType[]
 }) {
-    const commentsNodeData = commentsToTreeNodeData(comments);
+    // Build the hierarchy first
+    const hierarchicalComments = buildCommentHierarchy(comments);
+    const commentsNodeData = commentsToTreeNodeData(hierarchicalComments);
     const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
     // Create a flattened map for quick lookups
