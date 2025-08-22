@@ -13,7 +13,6 @@ import {
     TreeNodeData,
 } from "@mantine/core";
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-import cx from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
