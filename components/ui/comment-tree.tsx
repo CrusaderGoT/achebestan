@@ -13,9 +13,7 @@ import {
     Tree,
     TreeNodeData,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-import { clsx } from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -23,19 +21,21 @@ type CommentWithCommentsProps = CommentSelectType & {
     childComments?: CommentSelectType[];
 };
 
-function buildCommentHierarchy(comments: CommentSelectType[]): CommentWithCommentsProps[] {
+function buildCommentHierarchy(
+    comments: CommentSelectType[]
+): CommentWithCommentsProps[] {
     const commentMap = new Map<number, CommentWithCommentsProps>();
     const topLevel: CommentWithCommentsProps[] = [];
 
     // First pass: create all comment objects
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
         commentMap.set(comment.id, { ...comment, childComments: [] });
     });
 
     // Second pass: build hierarchy
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
         const commentWithChildren = commentMap.get(comment.id)!;
-        
+
         if (comment.parentCommentId) {
             // This is a child comment
             const parent = commentMap.get(comment.parentCommentId);
@@ -52,7 +52,9 @@ function buildCommentHierarchy(comments: CommentSelectType[]): CommentWithCommen
     return topLevel;
 }
 
-function commentsToTreeNodeData(comments: CommentWithCommentsProps[]): (TreeNodeData & CommentSelectType)[] {
+function commentsToTreeNodeData(
+    comments: CommentWithCommentsProps[]
+): (TreeNodeData & CommentSelectType)[] {
     return comments.map((comment) => {
         const baseNode = {
             value: `${comment.id}`,
@@ -83,16 +85,20 @@ export function CommentTree({
 
     // Create a flattened map for quick lookups
     const commentMap = new Map<string, CommentSelectType>();
-    
-    const flattenComments = (comments: (TreeNodeData & CommentSelectType)[]) => {
-        comments.forEach(comment => {
+
+    const flattenComments = (
+        comments: (TreeNodeData & CommentSelectType)[]
+    ) => {
+        comments.forEach((comment) => {
             commentMap.set(comment.value, comment);
             if (comment.children) {
-                flattenComments(comment.children as (TreeNodeData & CommentSelectType)[]);
+                flattenComments(
+                    comment.children as (TreeNodeData & CommentSelectType)[]
+                );
             }
         });
     };
-    
+
     flattenComments(commentsNodeData);
 
     const handleReplyToggle = (commentId: number) => {
@@ -106,28 +112,30 @@ export function CommentTree({
     return (
         <Tree
             data={commentsNodeData}
-            levelOffset={0} 
-            renderNode={({ node, expanded, hasChildren, elementProps, level }) => {
+            levelOffset={0}
+            renderNode={({
+                node,
+                expanded,
+                hasChildren,
+                elementProps,
+                level,
+            }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
-                const isChildComment = level > 0;
-                
+
                 if (!comment) {
                     return null; // Safety check
                 }
 
+                // make css stylings
+
                 return (
-                    <Box 
-                        className={clsx(styles.commentContainer, {
-                            [styles.childComment]: isChildComment
-                        })}
-                        style={{ '--comment-level': level } as React.CSSProperties}
+                    <Box
                         {...elementProps}
+                        style={{
+                            paddingLeft: `${(level - 1) * 50}px`,
+                        }}
                     >
-                        {isChildComment && (
-                            <Box className={styles.connectionLine} />
-                        )}
-                        
                         <Stack gap={2} p="sm" className={styles.commentContent}>
                             <Group align="flex-start" gap="xs">
                                 <Avatar size="sm">
@@ -139,17 +147,16 @@ export function CommentTree({
                                         <Text size="xs" c="dimmed">
                                             {comment.userId}
                                         </Text>
-                                        
+
                                         <Text size="xs" c="dimmed">
-                                            {comment.edited 
-                                                ? `edited: ${comment.edited.toLocaleDateString()}` 
-                                                : comment.created 
-                                                    ? `created: ${comment.created.toLocaleDateString()}`
-                                                    : ''
-                                            }
+                                            {comment.edited
+                                                ? `edited: ${comment.edited.toLocaleDateString()}`
+                                                : comment.created
+                                                ? `created: ${comment.created.toLocaleDateString()}`
+                                                : ""}
                                         </Text>
                                     </Group>
-                                    
+
                                     <Text size="sm">{node.label}</Text>
                                 </Stack>
 
@@ -161,7 +168,8 @@ export function CommentTree({
                                                 transform: expanded
                                                     ? "rotate(180deg)"
                                                     : "rotate(0deg)",
-                                                transition: "transform 0.2s ease",
+                                                transition:
+                                                    "transform 0.2s ease",
                                             }}
                                         />
                                     </Box>
@@ -172,20 +180,24 @@ export function CommentTree({
                                 <Button
                                     variant="subtle"
                                     size="xs"
-                                    onClick={() => handleReplyToggle(comment.id)}
+                                    onClick={() =>
+                                        handleReplyToggle(comment.id)
+                                    }
                                 >
                                     {isReplyOpen ? "Cancel" : "Reply"}
                                 </Button>
                             </Group>
 
                             {isReplyOpen && (
-                                <Box ml={28} mt="xs">
+                                <Box ml={28} mt="xs" key={comment.id + 6}>
                                     <CommentForm
                                         storyISBN={comment.storyISBN}
                                         text=""
                                         parentCommentId={comment.id}
                                         placeholder={`Reply to ${comment.userId}`}
                                         closeCommentForm={handleCloseReply}
+                                        key={comment.id}
+                                        autoFocus
                                     />
                                 </Box>
                             )}

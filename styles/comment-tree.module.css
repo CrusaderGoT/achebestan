@@ -6,7 +6,7 @@
 
 .childComment {
   /* Add left padding based on nesting level */
-  padding-left: calc(32px * var(--comment-level));
+  padding-left: 32px;
 }
 
 .connectionLine {
