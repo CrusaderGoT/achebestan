@@ -1,5 +1,6 @@
 "use client";
 
+import publicStyles from "@/styles/public.module.css";
 import { CommentSelectType } from "@/zod-schemas/story";
 import {
     Avatar,
@@ -12,7 +13,9 @@ import {
     Tree,
     TreeNodeData,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
+import cx from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -52,20 +55,16 @@ export function CommentTree({
 
     // Create a flattened map for quick lookups
     const commentMap = new Map<string, CommentSelectType>();
-
-    const flattenComments = (
-        comments: (TreeNodeData & CommentSelectType)[]
-    ) => {
-        comments.forEach((comment) => {
+    
+    const flattenComments = (comments: (TreeNodeData & CommentSelectType)[]) => {
+        comments.forEach(comment => {
             commentMap.set(comment.value, comment);
             if (comment.children) {
-                flattenComments(
-                    comment.children as (TreeNodeData & CommentSelectType)[]
-                );
+                flattenComments(comment.children as (TreeNodeData & CommentSelectType)[]);
             }
         });
     };
-
+    
     flattenComments(commentsNodeData);
 
     const handleReplyToggle = (commentId: number) => {
@@ -83,7 +82,7 @@ export function CommentTree({
             renderNode={({ node, expanded, hasChildren, elementProps }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
-
+                
                 if (!comment) {
                     return null; // Safety check
                 }
@@ -100,16 +99,17 @@ export function CommentTree({
                                     <Text size="xs" c="dimmed">
                                         {comment.userId}
                                     </Text>
-
+                                    
                                     <Text size="xs" c="dimmed">
-                                        {comment.edited
-                                            ? `edited: ${comment.edited.toLocaleDateString()}`
-                                            : comment.created
-                                            ? `created: ${comment.created.toLocaleDateString()}`
-                                            : ""}
+                                        {comment.edited 
+                                            ? `edited: ${comment.edited.toLocaleDateString()}` 
+                                            : comment.created 
+                                                ? `created: ${comment.created.toLocaleDateString()}`
+                                                : ''
+                                        }
                                     </Text>
                                 </Group>
-
+                                
                                 <Text size="sm">{node.label}</Text>
                             </Stack>
 
