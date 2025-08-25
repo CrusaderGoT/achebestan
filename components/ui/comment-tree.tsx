@@ -1,6 +1,6 @@
 "use client";
 
-import publicStyles from "@/styles/public.module.css";
+import styles from "@/styles/comment-tree.module.css";
 import { CommentSelectType } from "@/zod-schemas/story";
 import {
     Avatar,
@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-import cx from "clsx";
+import { clsx } from "clsx";
 import { useState } from "react";
 import { CommentForm } from "../forms/comment/comment-form";
 
@@ -23,34 +23,62 @@ type CommentWithCommentsProps = CommentSelectType & {
     childComments?: CommentSelectType[];
 };
 
-function commentsToTreeNodeData(comments: CommentWithCommentsProps[]) {
-    const data: (TreeNodeData & CommentSelectType)[] = comments.map(
-        (comment) => {
-            const baseNode = {
-                value: `${comment.id}`,
-                label: comment.text,
-                ...comment,
-            };
+function buildCommentHierarchy(comments: CommentSelectType[]): CommentWithCommentsProps[] {
+    const commentMap = new Map<number, CommentWithCommentsProps>();
+    const topLevel: CommentWithCommentsProps[] = [];
 
-            if (comment.childComments?.length) {
-                return {
-                    ...baseNode,
-                    children: commentsToTreeNodeData(comment.childComments),
-                };
+    // First pass: create all comment objects
+    comments.forEach(comment => {
+        commentMap.set(comment.id, { ...comment, childComments: [] });
+    });
+
+    // Second pass: build hierarchy
+    comments.forEach(comment => {
+        const commentWithChildren = commentMap.get(comment.id)!;
+        
+        if (comment.parentCommentId) {
+            // This is a child comment
+            const parent = commentMap.get(comment.parentCommentId);
+            if (parent) {
+                parent.childComments = parent.childComments || [];
+                parent.childComments.push(commentWithChildren);
             }
-
-            return baseNode;
+        } else {
+            // This is a top-level comment
+            topLevel.push(commentWithChildren);
         }
-    );
-    return data;
+    });
+
+    return topLevel;
+}
+
+function commentsToTreeNodeData(comments: CommentWithCommentsProps[]): (TreeNodeData & CommentSelectType)[] {
+    return comments.map((comment) => {
+        const baseNode = {
+            value: `${comment.id}`,
+            label: comment.text,
+            ...comment,
+        };
+
+        if (comment.childComments?.length) {
+            return {
+                ...baseNode,
+                children: commentsToTreeNodeData(comment.childComments),
+            };
+        }
+
+        return baseNode;
+    });
 }
 
 export function CommentTree({
     comments,
 }: {
-    comments: CommentWithCommentsProps[];
+    comments: CommentSelectType[]; // Changed from CommentWithCommentsProps[] to CommentSelectType[]
 }) {
-    const commentsNodeData = commentsToTreeNodeData(comments);
+    // Build the hierarchy first
+    const hierarchicalComments = buildCommentHierarchy(comments);
+    const commentsNodeData = commentsToTreeNodeData(hierarchicalComments);
     const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
     // Create a flattened map for quick lookups
@@ -78,80 +106,93 @@ export function CommentTree({
     return (
         <Tree
             data={commentsNodeData}
-            levelOffset={23}
-            renderNode={({ node, expanded, hasChildren, elementProps }) => {
+            levelOffset={0} 
+            renderNode={({ node, expanded, hasChildren, elementProps, level }) => {
                 const comment = commentMap.get(node.value);
                 const isReplyOpen = activeReplyId === Number(node.value);
+                const isChildComment = level > 0;
                 
                 if (!comment) {
                     return null; // Safety check
                 }
 
                 return (
-                    <Stack gap={2} p="sm" {...elementProps}>
-                        <Group align="flex-start" gap="xs">
-                            <Avatar size="sm">
-                                <IconUser />
-                            </Avatar>
+                    <Box 
+                        className={clsx(styles.commentContainer, {
+                            [styles.childComment]: isChildComment
+                        })}
+                        style={{ '--comment-level': level } as React.CSSProperties}
+                        {...elementProps}
+                    >
+                        {isChildComment && (
+                            <Box className={styles.connectionLine} />
+                        )}
+                        
+                        <Stack gap={2} p="sm" className={styles.commentContent}>
+                            <Group align="flex-start" gap="xs">
+                                <Avatar size="sm">
+                                    <IconUser />
+                                </Avatar>
 
-                            <Stack gap={4} flex={1}>
-                                <Group gap="xs" align="center">
-                                    <Text size="xs" c="dimmed">
-                                        {comment.userId}
-                                    </Text>
+                                <Stack gap={4} flex={1}>
+                                    <Group gap="xs" align="center">
+                                        <Text size="xs" c="dimmed">
+                                            {comment.userId}
+                                        </Text>
+                                        
+                                        <Text size="xs" c="dimmed">
+                                            {comment.edited 
+                                                ? `edited: ${comment.edited.toLocaleDateString()}` 
+                                                : comment.created 
+                                                    ? `created: ${comment.created.toLocaleDateString()}`
+                                                    : ''
+                                            }
+                                        </Text>
+                                    </Group>
                                     
-                                    <Text size="xs" c="dimmed">
-                                        {comment.edited 
-                                            ? `edited: ${comment.edited.toLocaleDateString()}` 
-                                            : comment.created 
-                                                ? `created: ${comment.created.toLocaleDateString()}`
-                                                : ''
-                                        }
-                                    </Text>
-                                </Group>
-                                
-                                <Text size="sm">{node.label}</Text>
-                            </Stack>
+                                    <Text size="sm">{node.label}</Text>
+                                </Stack>
 
-                            {hasChildren && (
-                                <Box>
-                                    <IconChevronDown
-                                        size={18}
-                                        style={{
-                                            transform: expanded
-                                                ? "rotate(180deg)"
-                                                : "rotate(0deg)",
-                                            transition: "transform 0.2s ease",
-                                        }}
+                                {hasChildren && (
+                                    <Box>
+                                        <IconChevronDown
+                                            size={18}
+                                            style={{
+                                                transform: expanded
+                                                    ? "rotate(180deg)"
+                                                    : "rotate(0deg)",
+                                                transition: "transform 0.2s ease",
+                                            }}
+                                        />
+                                    </Box>
+                                )}
+                            </Group>
+
+                            <Group gap="xs" ml={28}>
+                                <Button
+                                    variant="subtle"
+                                    size="xs"
+                                    onClick={() => handleReplyToggle(comment.id)}
+                                >
+                                    {isReplyOpen ? "Cancel" : "Reply"}
+                                </Button>
+                            </Group>
+
+                            {isReplyOpen && (
+                                <Box ml={28} mt="xs">
+                                    <CommentForm
+                                        storyISBN={comment.storyISBN}
+                                        text=""
+                                        parentCommentId={comment.id}
+                                        placeholder={`Reply to ${comment.userId}`}
+                                        closeCommentForm={handleCloseReply}
                                     />
                                 </Box>
                             )}
-                        </Group>
 
-                        <Group gap="xs" ml={28}>
-                            <Button
-                                variant="subtle"
-                                size="xs"
-                                onClick={() => handleReplyToggle(comment.id)}
-                            >
-                                {isReplyOpen ? "Cancel" : "Reply"}
-                            </Button>
-                        </Group>
-
-                        {isReplyOpen && (
-                            <Box ml={28} mt="xs">
-                                <CommentForm
-                                    storyISBN={comment.storyISBN}
-                                    text=""
-                                    parentCommentId={comment.id}
-                                    placeholder={`Reply to ${comment.userId}`}
-                                    closeCommentForm={handleCloseReply}
-                                />
-                            </Box>
-                        )}
-
-                        <Divider />
-                    </Stack>
+                            <Divider />
+                        </Stack>
+                    </Box>
                 );
             }}
         />
