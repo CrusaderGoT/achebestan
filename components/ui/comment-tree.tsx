@@ -1,20 +1,27 @@
 "use client";
 
-import styles from "@/styles/comment-tree.module.css";
+import commentTreeStyles from "@/styles/comment-tree.module.css";
+import cx from "clsx";
+
 import { CommentSelectType } from "@/zod-schemas/story";
+
 import {
     Avatar,
     Box,
     Button,
-    Divider,
     Group,
     Stack,
     Text,
     Tree,
     TreeNodeData,
+    useTree,
 } from "@mantine/core";
+
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
-import { useState } from "react";
+
+import { useMemo, useState } from "react"; // Add useMemo import
+
+import { useFocusTrap } from "@mantine/hooks";
 import { CommentForm } from "../forms/comment/comment-form";
 
 type CommentWithCommentsProps = CommentSelectType & {
@@ -73,33 +80,37 @@ function commentsToTreeNodeData(
     });
 }
 
-export function CommentTree({
-    comments,
-}: {
-    comments: CommentSelectType[]; // Changed from CommentWithCommentsProps[] to CommentSelectType[]
-}) {
-    // Build the hierarchy first
-    const hierarchicalComments = buildCommentHierarchy(comments);
-    const commentsNodeData = commentsToTreeNodeData(hierarchicalComments);
+// Move flattenComments outside the component to avoid dependency issues
+const flattenComments = (
+    comments: (TreeNodeData & CommentSelectType)[],
+    map: Map<string, CommentSelectType>
+) => {
+    comments.forEach((comment) => {
+        map.set(comment.value, comment);
+        if (comment.children) {
+            flattenComments(
+                comment.children as (TreeNodeData & CommentSelectType)[],
+                map
+            );
+        }
+    });
+};
+
+export function CommentTree({ comments }: { comments: CommentSelectType[] }) {
     const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
-    // Create a flattened map for quick lookups
-    const commentMap = new Map<string, CommentSelectType>();
+    // Memoize the hierarchical comments and tree data
+    const commentsNodeData = useMemo(() => {
+        const hierarchicalComments = buildCommentHierarchy(comments);
+        return commentsToTreeNodeData(hierarchicalComments);
+    }, [comments]);
 
-    const flattenComments = (
-        comments: (TreeNodeData & CommentSelectType)[]
-    ) => {
-        comments.forEach((comment) => {
-            commentMap.set(comment.value, comment);
-            if (comment.children) {
-                flattenComments(
-                    comment.children as (TreeNodeData & CommentSelectType)[]
-                );
-            }
-        });
-    };
-
-    flattenComments(commentsNodeData);
+    // Memoize the commentMap to prevent infinite re-renders
+    const commentMap = useMemo(() => {
+        const map = new Map<string, CommentSelectType>();
+        flattenComments(commentsNodeData, map);
+        return map;
+    }, [commentsNodeData]);
 
     const handleReplyToggle = (commentId: number) => {
         setActiveReplyId(activeReplyId === commentId ? null : commentId);
@@ -109,10 +120,18 @@ export function CommentTree({
         setActiveReplyId(null);
     };
 
+    const focusTrapRef = useFocusTrap();
+
+    const tree = useTree({ multiple: false });
+
     return (
         <Tree
             data={commentsNodeData}
+            tree={tree}
             levelOffset={0}
+            allowRangeSelection={false}
+            expandOnClick={false}
+            expandOnSpace={false}
             renderNode={({
                 node,
                 expanded,
@@ -127,41 +146,48 @@ export function CommentTree({
                     return null; // Safety check
                 }
 
-                // make css stylings
-
                 return (
-                    <Box
-                        {...elementProps}
-                        style={{
-                            paddingLeft: `${(level - 1) * 50}px`,
-                        }}
-                    >
-                        <Stack gap={2} p="sm" className={styles.commentContent}>
-                            <Group align="flex-start" gap="xs">
-                                <Avatar size="sm">
-                                    <IconUser />
-                                </Avatar>
+                    <>
+                        <Box
+                            {...elementProps}
+                            className={cx(
+                                level > 1 && commentTreeStyles.childCommentLine
+                            )}
+                            style={{
+                                marginLeft: `${(level - 1) * 23}px`,
+                            }}
+                        >
+                            <Stack gap={2} p="sm">
+                                <Group
+                                    align="flex-start"
+                                    gap="xs"
+                                    onClick={() =>
+                                        tree.toggleExpanded(node.value)
+                                    }
+                                >
+                                    <Avatar size="sm">
+                                        <IconUser />
+                                    </Avatar>
 
-                                <Stack gap={4} flex={1}>
-                                    <Group gap="xs" align="center">
-                                        <Text size="xs" c="dimmed">
-                                            {comment.userId}
-                                        </Text>
+                                    <Stack gap={4} flex={1}>
+                                        <Group gap="xs" align="center">
+                                            <Text size="xs" c="dimmed">
+                                                {comment.userId}
+                                            </Text>
 
-                                        <Text size="xs" c="dimmed">
-                                            {comment.edited
-                                                ? `edited: ${comment.edited.toLocaleDateString()}`
-                                                : comment.created
-                                                ? `created: ${comment.created.toLocaleDateString()}`
-                                                : ""}
-                                        </Text>
-                                    </Group>
+                                            <Text size="xs" c="dimmed">
+                                                {comment.edited
+                                                    ? `edited: ${comment.edited.toLocaleDateString()}`
+                                                    : comment.created
+                                                    ? `created: ${comment.created.toLocaleDateString()}`
+                                                    : ""}
+                                            </Text>
+                                        </Group>
 
-                                    <Text size="sm">{node.label}</Text>
-                                </Stack>
+                                        <Text size="sm">{node.label}</Text>
+                                    </Stack>
 
-                                {hasChildren && (
-                                    <Box>
+                                    {hasChildren && (
                                         <IconChevronDown
                                             size={18}
                                             style={{
@@ -172,39 +198,38 @@ export function CommentTree({
                                                     "transform 0.2s ease",
                                             }}
                                         />
+                                    )}
+                                </Group>
+
+                                <Group gap="xs" ml={28}>
+                                    <Button
+                                        variant="subtle"
+                                        size="xs"
+                                        onClick={() =>
+                                            handleReplyToggle(comment.id)
+                                        }
+                                    >
+                                        {isReplyOpen ? "Cancel" : "Reply"}
+                                    </Button>
+                                </Group>
+
+                                {isReplyOpen && (
+                                    <Box ml={28} mt="xs" ref={focusTrapRef}>
+                                        <CommentForm
+                                            storyISBN={comment.storyISBN}
+                                            text=""
+                                            parentCommentId={comment.id}
+                                            placeholder={`Reply to ${comment.userId}`}
+                                            closeCommentForm={handleCloseReply}
+                                            onClick={(e) =>
+                                                e.currentTarget.focus()
+                                            }
+                                        />
                                     </Box>
                                 )}
-                            </Group>
-
-                            <Group gap="xs" ml={28}>
-                                <Button
-                                    variant="subtle"
-                                    size="xs"
-                                    onClick={() =>
-                                        handleReplyToggle(comment.id)
-                                    }
-                                >
-                                    {isReplyOpen ? "Cancel" : "Reply"}
-                                </Button>
-                            </Group>
-
-                            {isReplyOpen && (
-                                <Box ml={28} mt="xs" key={comment.id + 6}>
-                                    <CommentForm
-                                        storyISBN={comment.storyISBN}
-                                        text=""
-                                        parentCommentId={comment.id}
-                                        placeholder={`Reply to ${comment.userId}`}
-                                        closeCommentForm={handleCloseReply}
-                                        key={comment.id}
-                                        autoFocus
-                                    />
-                                </Box>
-                            )}
-
-                            <Divider />
-                        </Stack>
-                    </Box>
+                            </Stack>
+                        </Box>
+                    </>
                 );
             }}
         />

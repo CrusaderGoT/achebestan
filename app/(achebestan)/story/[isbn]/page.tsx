@@ -47,7 +47,7 @@ export default async function StoryPage({
                 subtitle={story.subtitle}
                 bookId={story.bookId}
             />
-            
+
             <StoryRating
                 ratings={story.ratings}
                 storyISBN={story.isbn}
