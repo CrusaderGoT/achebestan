@@ -358,9 +358,12 @@ export const deleteCommentAction = authActionClient
     .action(async ({ parsedInput, ctx }) => {
         if (ctx.user.id !== parsedInput.userId) throw unauthorized();
 
-        // delete comment if update contains no text content
+        // delete comment by marking it as deleted, to preserve child comments
         const [deletedComment] = await db
-            .delete(comment)
+            .update(comment)
+            .set({
+                hasBeenDeleted: true,
+            })
             .where(
                 and(
                     eq(comment.id, parsedInput.commentId),
@@ -368,10 +371,6 @@ export const deleteCommentAction = authActionClient
                 )
             )
             .returning({ text: comment.text });
-
-        if (!deletedComment) {
-            throw new Error("Comment No Longer Exists");
-        }
 
         revalidatePath(`/story/${parsedInput.storyISBN}`);
 
@@ -386,6 +385,7 @@ export const readStoryComments = async (isbn: string) => {
             },
             with: {
                 childComments: true,
+                rating: true,
             },
             orderBy: (comments, { desc }) => [desc(comments.id)],
         });

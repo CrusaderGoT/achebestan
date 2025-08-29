@@ -1,3 +1,7 @@
 .childCommentLine {
   border-left: 0.5px solid gray;
 }
+
+.noHighlightColor {
+  -webkit-tap-highlight-color: transparent;
+}

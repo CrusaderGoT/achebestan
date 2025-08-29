@@ -14,7 +14,7 @@ export function LoadingOverlayWithText({
             <LoadingOverlay
                 {...props}
                 loaderProps={{
-                    children: <Text>{text}</Text>,
+                    children: <Text ta={"center"}>{text}</Text>,
                     mt: 100,
                 }}
             />

@@ -104,6 +104,7 @@ export const comment = table(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         ...timestamps,
+        hasBeenDeleted: t.boolean().default(false),
     },
     (table) => [
         t.foreignKey({

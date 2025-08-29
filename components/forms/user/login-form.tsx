@@ -15,7 +15,13 @@ import {
 import { notifications } from "@mantine/notifications";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
-export function LoginForm() {
+export function LoginForm({
+    redirectAfterSuccess = true,
+    closeModal,
+}: {
+    redirectAfterSuccess?: boolean;
+    closeModal?: () => void;
+}) {
     const [formState, setFormState] = useState<
         "pending" | "success" | "idle" | "error"
     >("idle");
@@ -43,7 +49,14 @@ export function LoginForm() {
                         message: "Successfully Logged In",
                     });
                     setFormState("success");
-                    redirect("/");
+
+                    if (closeModal) {
+                        closeModal();
+                    }
+
+                    if (redirectAfterSuccess) {
+                        redirect("/");
+                    }
                 },
             }
         );
@@ -91,7 +104,7 @@ export function LoginForm() {
                     text={
                         formState === "pending"
                             ? "Logging You In. Write A New Story Today"
-                            : formState === "success"
+                            : formState === "success" && redirectAfterSuccess
                             ? "Redirecting To Home Page"
                             : ""
                     }

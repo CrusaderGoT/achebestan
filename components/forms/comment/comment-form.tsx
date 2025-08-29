@@ -30,7 +30,8 @@ export function CommentForm({
         validate: zod4Resolver(commentInsertSchema),
     });
 
-    const { executeAsync: executeAsyncCreateComment } = useCreateComment();
+    const { executeAsync: executeAsyncCreateComment, isPending } =
+        useCreateComment();
 
     async function handleSubmit(data: CommentInsertType) {
         const { data: newComment } = await executeAsyncCreateComment({
@@ -51,7 +52,7 @@ export function CommentForm({
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack>
                     <CommentArea placeholder="Leave A Comment..." {...props} />
-                    <Button type="submit" size="compact-md">
+                    <Button type="submit" size="compact-md" loading={isPending}>
                         submit
                     </Button>
                 </Stack>

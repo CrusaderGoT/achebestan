@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LoginButton } from "../buttons/login-btn";
 import { LogoutButton } from "../buttons/logout-btn";
+import { LoginModal } from "../forms/user/login-modal";
 import { navlinkData, NavLinks } from "./navlinks";
 
 export function Shell({
@@ -23,7 +24,12 @@ export function Shell({
 
     const { data: session } = authClient.useSession();
 
-    const [opened, { toggle }] = useDisclosure();
+    const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
+
+    const [
+        openedLoginModal,
+        { close: closeLoginModal, toggle: toggleLoginModal },
+    ] = useDisclosure(false);
 
     return (
         <AppShell
@@ -31,7 +37,7 @@ export function Shell({
             navbar={{
                 width: 300,
                 breakpoint: "sm",
-                collapsed: { desktop: true, mobile: !opened },
+                collapsed: { desktop: true, mobile: !openedNavBar },
             }}
         >
             <AppShell.Header zIndex={900}>
@@ -62,13 +68,17 @@ export function Shell({
                     </Group>
 
                     <Group gap={"xl"}>
-                        {session?.user.id ? <LogoutButton /> : <LoginButton />}
+                        {session?.user.id ? (
+                            <LogoutButton />
+                        ) : (
+                            <LoginButton toggleLoginModal={toggleLoginModal} />
+                        )}
 
                         <ModeToggle />
 
                         <Burger
-                            opened={opened}
-                            onClick={toggle}
+                            opened={openedNavBar}
+                            onClick={() => toggleNavbar()}
                             hiddenFrom="sm"
                             size="sm"
                         />
@@ -80,7 +90,10 @@ export function Shell({
                 <NavLinks />
             </AppShell.Navbar>
 
-            <AppShell.Main>{children}</AppShell.Main>
+            <AppShell.Main pos={"relative"}>
+                {children}
+                <LoginModal opened={openedLoginModal} close={closeLoginModal} />
+            </AppShell.Main>
 
             <AppShell.Footer></AppShell.Footer>
         </AppShell>
