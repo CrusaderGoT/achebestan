@@ -45,9 +45,9 @@ export function StoryImage({
                 </Badge>
 
                 <Group>
-                    <Code>created: {created.toLocaleTimeString()}</Code>
+                    <Code>created: {created.toLocaleDateString()}</Code>
                     {edited && (
-                        <Code>last edited: {edited.toLocaleTimeString()}</Code>
+                        <Code>last edited: {edited.toLocaleDateString()}</Code>
                     )}
                 </Group>
             </Box>

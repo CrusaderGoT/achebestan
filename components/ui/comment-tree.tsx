@@ -10,6 +10,7 @@ import {
     Box,
     Button,
     Group,
+    Rating,
     Stack,
     Text,
     Tree,
@@ -19,27 +20,31 @@ import {
 
 import { IconChevronDown, IconUser } from "@tabler/icons-react";
 
-import { useMemo, useState } from "react"; // Add useMemo import
+import { useMemo, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { useDeleteComment } from "@/lib/hooks/comment-hook";
 import { useFocusTrap } from "@mantine/hooks";
 import { CommentForm } from "../forms/comment/comment-form";
 
-type CommentWithCommentsProps = CommentSelectType & {
-    childComments?: CommentSelectType[];
-    rating?: RatingSelectType;
+type CommentTreeProps = CommentSelectType & {
+    childComments?: CommentSelectType[] | null;
+    rating?: RatingSelectType | null;
 };
 
 function buildCommentHierarchy(
-    comments: CommentSelectType[]
-): CommentWithCommentsProps[] {
-    const commentMap = new Map<number, CommentWithCommentsProps>();
-    const topLevel: CommentWithCommentsProps[] = [];
+    comments: CommentTreeProps[]
+): CommentTreeProps[] {
+    const commentMap = new Map<number, CommentTreeProps>();
+    const topLevel: CommentTreeProps[] = [];
 
     // First pass: create all comment objects
     comments.forEach((comment) => {
-        commentMap.set(comment.id, { ...comment, childComments: [] });
+        commentMap.set(comment.id, {
+            ...comment,
+            childComments: [],
+            rating: comment.rating || null,
+        });
     });
 
     // Second pass: build hierarchy
@@ -63,13 +68,14 @@ function buildCommentHierarchy(
 }
 
 function commentsToTreeNodeData(
-    comments: CommentWithCommentsProps[]
-): (TreeNodeData & CommentSelectType)[] {
+    comments: CommentTreeProps[]
+): (TreeNodeData & CommentSelectType & { rating?: RatingSelectType | null })[] {
     return comments.map((comment) => {
         const baseNode = {
             value: `${comment.id}`,
             label: comment.text,
             ...comment,
+            rating: comment.rating,
         };
 
         if (comment.childComments?.length) {
@@ -85,21 +91,23 @@ function commentsToTreeNodeData(
 
 // Move flattenComments outside the component to avoid dependency issues
 const flattenComments = (
-    comments: (TreeNodeData & CommentSelectType)[],
-    map: Map<string, CommentSelectType>
+    comments: (TreeNodeData &
+        CommentSelectType & { rating?: RatingSelectType | null })[],
+    map: Map<string, CommentSelectType & { rating?: RatingSelectType | null }>
 ) => {
     comments.forEach((comment) => {
         map.set(comment.value, comment);
         if (comment.children) {
             flattenComments(
-                comment.children as (TreeNodeData & CommentSelectType)[],
+                comment.children as (TreeNodeData &
+                    CommentSelectType & { rating?: RatingSelectType | null })[],
                 map
             );
         }
     });
 };
 
-export function CommentTree({ comments }: { comments: CommentSelectType[] }) {
+export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
 
     // Memoize the hierarchical comments and tree data
@@ -110,7 +118,10 @@ export function CommentTree({ comments }: { comments: CommentSelectType[] }) {
 
     // Memoize the commentMap to prevent infinite re-renders
     const commentMap = useMemo(() => {
-        const map = new Map<string, CommentSelectType>();
+        const map = new Map<
+            string,
+            CommentSelectType & { rating?: RatingSelectType | null }
+        >();
         flattenComments(commentsNodeData, map);
         return map;
     }, [commentsNodeData]);
@@ -195,6 +206,14 @@ export function CommentTree({ comments }: { comments: CommentSelectType[] }) {
                                                 : ""}
                                         </Text>
                                     </Group>
+
+                                    {comment.rating?.stars && (
+                                        <Rating
+                                            defaultValue={comment.rating.stars}
+                                            readOnly
+                                            fractions={2}
+                                        />
+                                    )}
 
                                     <Text size="sm">
                                         {comment.hasBeenDeleted
