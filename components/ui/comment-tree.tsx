@@ -25,7 +25,13 @@ import { useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useDeleteComment } from "@/lib/hooks/comment-hook";
 import { useFocusTrap } from "@mantine/hooks";
+
 import { CommentForm } from "../forms/comment/comment-form";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 type CommentTreeProps = CommentSelectType & {
     childComments?: CommentSelectType[] | null;
@@ -200,9 +206,13 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                             {comment.hasBeenDeleted
                                                 ? "deleted"
                                                 : comment.edited
-                                                ? `edited: ${comment.edited.toLocaleDateString()}`
+                                                ? `edited ${dayjs(
+                                                      comment.edited
+                                                  ).fromNow()}`
                                                 : comment.created
-                                                ? `created: ${comment.created.toLocaleDateString()}`
+                                                ? `created ${dayjs(
+                                                      comment.created
+                                                  ).fromNow()}`
                                                 : ""}
                                         </Text>
                                     </Group>

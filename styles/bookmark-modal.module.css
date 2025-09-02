@@ -1,0 +1,9 @@
+.contextPreview {
+    font-family: var(--mantine-font-family-monospace);
+    font-style: italic;
+    background-color: var(--mantine-color-gray-0);
+    padding: 12px;
+    border-radius: var(--mantine-radius-sm);
+    border: 1px solid var(--mantine-color-gray-2);
+    line-height: 1.4;
+  }

@@ -5,6 +5,7 @@ import { IconUserCircle } from "@tabler/icons-react";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
+import dayjs from "dayjs";
 
 type StoryImageType = {
     image: string | null;
@@ -45,9 +46,11 @@ export function StoryImage({
                 </Badge>
 
                 <Group>
-                    <Code>created: {created.toLocaleDateString()}</Code>
+                    <Code>created: {dayjs(created).format("YYYY-MM-DD")}</Code>
                     {edited && (
-                        <Code>last edited: {edited.toLocaleDateString()}</Code>
+                        <Code>
+                            last edited: {dayjs(edited).format("YYYY-MM-DD")}
+                        </Code>
                     )}
                 </Group>
             </Box>

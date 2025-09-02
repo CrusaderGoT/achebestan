@@ -1,0 +1,30 @@
+.bookmarkListBox {
+  position: sticky;
+  top: 80px;
+}
+
+.bookmarkList {
+  max-width: 300px;
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-sm);
+}
+
+.bookmarkItem {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: var(--mantine-radius-sm);
+}
+
+.bookmarkItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--mantine-color-blue-0);
+}
+
+.contextText {
+  font-family: var(--mantine-font-family-monospace);
+  background-color: var(--mantine-color-gray-0);
+  padding: 8px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid var(--mantine-color-gray-2);
+}

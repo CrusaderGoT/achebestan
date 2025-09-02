@@ -1,0 +1,110 @@
+/* styles/context-menu.module.css */
+.contextMenu {
+  position: fixed;
+  z-index: 1001;
+  min-width: 200px;
+  max-width: 250px;
+  background: white;
+  border: 1px solid var(--mantine-color-gray-3);
+  animation: contextMenuFadeIn 0.15s ease-out;
+  user-select: none;
+}
+
+.contextMenu::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(
+    45deg,
+    var(--mantine-color-blue-1),
+    var(--mantine-color-blue-0)
+  );
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+.contextPreview {
+  font-family: var(--mantine-font-family-monospace);
+  background-color: var(--mantine-color-gray-0);
+  padding: 6px 8px;
+  border-radius: var(--mantine-radius-xs);
+  border: 1px solid var(--mantine-color-gray-2);
+  font-style: italic;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.menuButton {
+  transition: all 0.2s ease;
+}
+
+.menuButton:hover {
+  transform: scale(1.1);
+}
+
+.menuText {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  flex: 1;
+}
+
+.menuText:hover {
+  color: var(--mantine-color-blue-6);
+  font-weight: 500;
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .contextMenu {
+    background: var(--mantine-color-dark-6);
+    border: 1px solid var(--mantine-color-dark-4);
+  }
+
+  .contextMenu::before {
+    background: linear-gradient(
+      45deg,
+      var(--mantine-color-dark-5),
+      var(--mantine-color-dark-4)
+    );
+  }
+
+  .contextPreview {
+    background-color: var(--mantine-color-dark-7);
+    border: 1px solid var(--mantine-color-dark-4);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .contextMenu {
+    min-width: 180px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .menuButton {
+    min-width: 44px; /* Touch target size */
+    min-height: 44px;
+  }
+
+  .menuText {
+    padding: 8px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
