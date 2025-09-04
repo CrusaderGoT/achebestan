@@ -5,6 +5,8 @@ import "@mantine/dropzone/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/tiptap/styles.css";
 
+import "@/styles/global.css";
+
 import {
     ColorSchemeScript,
     MantineProvider,

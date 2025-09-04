@@ -1,0 +1,22 @@
+:root {
+  @mixin light-root {
+    --mantine-color-body: #f9f9f9;
+  }
+
+  @mixin dark-root {
+    --mantine-color-body: #333;
+  }
+}
+
+/* style this to fit your needs */
+/* and remove [alt] to apply to all images*/
+img:after {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: light-dark(#f9f9f9, #333);
+  content: "";
+}

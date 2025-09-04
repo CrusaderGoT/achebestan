@@ -1,12 +1,10 @@
+import { CommentTree } from "@/components/comment/comment-tree";
 import { CommentForm } from "@/components/forms/comment/comment-form";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
-import { CommentTree } from "@/components/comment/comment-tree";
-import {
-    readStory,
-} from "@/lib/actions/story";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
+import { readStory } from "@/lib/actions/story";
 import { auth } from "@/lib/auth";
 import { Divider, Stack } from "@mantine/core";
 import { headers } from "next/headers";
@@ -61,7 +59,7 @@ export default async function StoryPage({
 
             <Divider />
 
-            {comments && <CommentTree comments={comments} />}
+            {comments ? <CommentTree comments={comments} /> : null}
         </Stack>
     );
 }

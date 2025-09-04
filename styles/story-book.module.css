@@ -1,14 +1,15 @@
 .storybook {
   position: relative;
   width: 280px;
-  height: auto;
-  min-height: 350px;
+  height: fit-content;
+  min-height: 400px;
   max-height: 500px;
   transform-style: preserve-3d;
   transform: rotateX(2deg) rotateY(-8deg);
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.4));
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .storybook:hover {
@@ -132,15 +133,11 @@
 .storybookImage {
   width: 100%;
   height: auto;
-  max-height: 60%;
+  max-height: 200px;
   object-fit: cover;
   object-position: center;
   border-radius: 1px 6px 0 0;
   margin-left: 4px;
-  text-align: justify;
-  text-indent: 4;
-  text-transform: capitalize;
-  font-weight: 700;
   border-bottom: 1px solid rgba(139, 113, 74, 0.8);
   transition: margin-left 0.3s ease;
 }
