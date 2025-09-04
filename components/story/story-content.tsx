@@ -173,6 +173,7 @@ export function StoryContent({
                         __html: sanitizeHTML(content),
                     }}
                     className={cx(storypageStyles.storyContent)}
+                    data-story-content="true"
                     style={{
                         userSelect: "text",
                         WebkitUserSelect: "text",
