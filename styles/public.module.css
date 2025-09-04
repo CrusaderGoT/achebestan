@@ -63,3 +63,7 @@
 .relative {
   position: relative;
 }
+
+.noTapHighlight {
+  -webkit-tap-highlight-color: transparent;
+}

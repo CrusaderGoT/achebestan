@@ -1,6 +1,7 @@
 "use client";
 
 import commentTreeStyles from "@/styles/comment-tree.module.css";
+import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
 import { CommentSelectType } from "@/zod-schemas/comment";
@@ -157,9 +158,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             data={commentsNodeData}
             tree={tree}
             levelOffset={0}
-            allowRangeSelection={false}
-            expandOnClick={false}
-            expandOnSpace={false}
+            className={publicStyles.noTapHighlight}
             renderNode={({
                 node,
                 expanded,
