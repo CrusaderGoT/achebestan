@@ -210,7 +210,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                                       comment.edited
                                                   ).fromNow()}`
                                                 : comment.created
-                                                ? `created ${dayjs(
+                                                ? `${dayjs(
                                                       comment.created
                                                   ).fromNow()}`
                                                 : ""}
@@ -288,7 +288,6 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                         parentCommentId={comment.id}
                                         placeholder={`Reply to ${comment.userId}`}
                                         closeCommentForm={handleCloseReply}
-                                        onClick={(e) => e.currentTarget.focus()}
                                     />
                                 </Box>
                             )}

@@ -112,7 +112,7 @@ export function StoryContent({
         }, 500);
 
         return () => clearTimeout(checkTimer);
-    }, [bookmarks, renderBookmarks]);
+    });
 
     // Re-render bookmarks when context menu is hidden
     useEffect(() => {
@@ -241,11 +241,13 @@ export function StoryContent({
             />
 
             {/* Bookmark List Sidebar */}
-            <BookmarkList
-                bookmarks={bookmarks}
-                onBookmarkClick={scrollToBookmark}
-                onBookmarkRemove={handleBookmarkRemove}
-            />
+            {!openedContentField && (
+                <BookmarkList
+                    bookmarks={bookmarks}
+                    onBookmarkClick={scrollToBookmark}
+                    onBookmarkRemove={handleBookmarkRemove}
+                />
+            )}
 
             {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
             <ScrollArea
