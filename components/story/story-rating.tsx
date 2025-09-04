@@ -1,6 +1,7 @@
 "use client";
 
-import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/story";
+import { UserRatingWithComment } from "@/zod-schemas/rating";
+import { RatingSelectType } from "@/zod-schemas/rating";
 import {
     ActionIcon,
     Group,

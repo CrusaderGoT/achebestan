@@ -2,8 +2,8 @@
 
 import { Container, Grid, Stack } from "@mantine/core";
 
-import HomeHero from "@/components/ui/home-hero";
-import { StoryBook } from "@/components/ui/story-book";
+import HomeHero from "@/components/home/home-hero";
+import { StoryBook } from "@/components/home/story-book";
 import { StorySelectType } from "@/zod-schemas/story";
 import { userSelectType } from "@/zod-schemas/user";
 

@@ -1,7 +1,7 @@
 // hooks/useBookmarks.ts
 import { useLocalStorage } from '@mantine/hooks';
 import { useCallback } from 'react';
-import { Bookmark } from '../types/bookmark';
+import { Bookmark } from '../../types/bookmark';
 
 export function useBookmarks(postId?: string) {
   const storageKey = postId ? `bookmarks-${postId}` : 'bookmarks';

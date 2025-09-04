@@ -1,11 +1,9 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 
-import {
-    createCommentAction,
-    deleteCommentAction,
-    updateCommentAction,
-} from "../actions/story";
+import { deleteCommentAction } from "../../actions/comment";
+import { updateCommentAction } from "../../actions/comment";
+import { createCommentAction } from "../../actions/comment";
 
 export const useCreateComment = () => {
     const action = useAction(createCommentAction, {

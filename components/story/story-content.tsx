@@ -7,8 +7,8 @@ import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconEdit } from "@tabler/icons-react";
 
 import { authClient } from "@/lib/auth-client";
-import { useBookmarks } from "@/lib/hooks/use-bookmarks";
-import { useContextMenuBookmark } from "@/lib/hooks/use-context-menu-bookmark";
+import { useBookmarks } from "@/lib/hooks/bookmark/use-bookmarks";
+import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bookmark";
 import {
     forceRenderBookmarkIndicators,
     renderBookmarkIndicators,
@@ -20,9 +20,9 @@ import storypageStyles from "@/styles/story-page.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BookmarkContextMenu } from "../ui/bookmark-context-menu";
-import { BookmarkList } from "../ui/bookmark-list";
-import { BookmarkModal } from "../ui/bookmark-modal";
+import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
+import { BookmarkList } from "../bookmark/bookmark-list";
+import { BookmarkModal } from "../bookmark/bookmark-modal";
 
 type StoryContentType = {
     toggleContentField: () => void;

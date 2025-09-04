@@ -15,7 +15,7 @@ import {
 import { Button, Paper } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
-import { useUpdateStory } from "@/lib/hooks/update-story-hook";
+import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
 export function UpdateStoryForm({ story }: { story: StorySelectType }) {

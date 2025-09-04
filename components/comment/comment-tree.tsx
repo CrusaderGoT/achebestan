@@ -3,7 +3,8 @@
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 import cx from "clsx";
 
-import { CommentSelectType, RatingSelectType } from "@/zod-schemas/story";
+import { CommentSelectType } from "@/zod-schemas/comment";
+import { RatingSelectType } from "@/zod-schemas/rating";
 
 import {
     Avatar,
@@ -23,7 +24,7 @@ import { IconChevronDown, IconUser } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { useDeleteComment } from "@/lib/hooks/comment-hook";
+import { useDeleteComment } from "@/lib/hooks/comment/comment-hook";
 import { useFocusTrap } from "@mantine/hooks";
 
 import { CommentForm } from "../forms/comment/comment-form";

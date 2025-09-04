@@ -13,12 +13,8 @@ export const book = table(
             .references(() => user.id, { onDelete: "cascade" })
             .notNull(),
         name: t.varchar().notNull(),
-        storiesId: t.json().array().notNull(),
     },
-    (table) => [
-        t.uniqueIndex("books_stories_uidx").on(table.storiesId),
-        t.index("books_author_id_idx").on(table.authorId),
-    ]
+    (table) => [t.index("books_author_id_idx").on(table.authorId)]
 );
 
 export const bookRelations = relations(book, ({ many, one }) => ({

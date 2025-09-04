@@ -169,6 +169,13 @@
       "when": 1756488285987,
       "tag": "0023_dusty_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1757001269838,
+      "tag": "0024_conscious_archangel",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 // components/ui/BookmarkContextMenu.tsx
+import contextMenuStyles from "@/styles/bookmark/bookmark-context-menu.module.css";
 import { ActionIcon, Group, Paper, Portal, Text } from "@mantine/core";
 import { IconBookmarkPlus, IconX } from "@tabler/icons-react";
-import contextMenuStyles from "@/styles/context-menu.module.css";
 
 interface BookmarkContextMenuProps {
     visible: boolean;

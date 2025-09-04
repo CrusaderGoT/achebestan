@@ -1,4 +1,4 @@
-import { RatingSelectType } from "@/zod-schemas/story";
+import { RatingSelectType } from "@/zod-schemas/rating";
 
 
 export function calculateRatingsAverage(

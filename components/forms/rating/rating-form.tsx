@@ -9,16 +9,14 @@ import {
     useCreateComment,
     useDeleteComment,
     useUpdateComment,
-} from "@/lib/hooks/comment-hook";
-import { useDeleteRating } from "@/lib/hooks/delete-rating-hook";
-import { useRateStory } from "@/lib/hooks/rate-story-hook";
+} from "@/lib/hooks/comment/comment-hook";
+import { useDeleteRating } from "@/lib/hooks/rating/delete-rating-hook";
+import { useRateStory } from "@/lib/hooks/rating/rate-story-hook";
 import publicStyles from "@/styles/public.module.css";
 import ratingStyles from "@/styles/rating.module.css";
-import {
-    ratingSelectSchema,
-    RatingSelectType,
-    UserRatingWithComment,
-} from "@/zod-schemas/story";
+import { UserRatingWithComment } from "@/zod-schemas/rating";
+import { RatingSelectType } from "@/zod-schemas/rating";
+import { ratingSelectSchema } from "@/zod-schemas/rating";
 import {
     ActionIcon,
     Affix,

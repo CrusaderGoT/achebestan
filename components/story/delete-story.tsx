@@ -10,7 +10,7 @@ import {
     Stack,
 } from "@mantine/core";
 
-import { useDeleteStory } from "@/lib/hooks/delete-story-hook";
+import { useDeleteStory } from "@/lib/hooks/story/delete-story-hook";
 import { useDisclosure } from "@mantine/hooks";
 import { IconTrashX } from "@tabler/icons-react";
 

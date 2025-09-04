@@ -1,12 +1,12 @@
 import { CommentForm } from "@/components/forms/comment/comment-form";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
-import { CommentTree } from "@/components/ui/comment-tree";
+import { CommentTree } from "@/components/comment/comment-tree";
 import {
-    getUserRating,
     readStory,
-    readStoryComments,
 } from "@/lib/actions/story";
+import { readStoryComments } from "@/lib/actions/comment";
+import { getUserRating } from "@/lib/actions/rating";
 import { auth } from "@/lib/auth";
 import { Divider, Stack } from "@mantine/core";
 import { headers } from "next/headers";

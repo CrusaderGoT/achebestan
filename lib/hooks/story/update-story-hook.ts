@@ -1,7 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
-import { updateStoryAction } from "../actions/story";
+import { updateStoryAction } from "../../actions/story";
 
 import { usePathname, useRouter } from "next/navigation";
 

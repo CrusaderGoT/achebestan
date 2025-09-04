@@ -1,6 +1,6 @@
 // components/BookmarkList.tsx
 import { Bookmark } from "@/lib/types/bookmark";
-import styles from "@/styles/bookmark-list.module.css";
+import styles from "@/styles/bookmark/bookmark-list.module.css";
 import {
     ActionIcon,
     Affix,

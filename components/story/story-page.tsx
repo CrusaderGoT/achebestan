@@ -20,7 +20,7 @@ import { StorySubtitle } from "@/components/story/story-subtitle";
 import { StoryTitle } from "@/components/story/story-title";
 
 import { authClient } from "@/lib/auth-client";
-import { useUpdateStory } from "@/lib/hooks/update-story-hook";
+import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";

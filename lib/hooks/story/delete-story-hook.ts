@@ -1,7 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
-import { deleteStoryAction } from "../actions/story";
+import { deleteStoryAction } from "../../actions/story";
 
 export const useDeleteStory = (authorId: string) => {
     const boundDeleteStoryAction = useMemo(

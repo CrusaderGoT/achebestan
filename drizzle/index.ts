@@ -2,6 +2,8 @@
 import "dotenv/config";
 
 import * as book from "@/drizzle/schemas/book";
+import * as comment from "@/drizzle/schemas/comment";
+import * as rating from "@/drizzle/schemas/rating";
 import * as story from "@/drizzle/schemas/story";
 import * as user from "@/drizzle/schemas/user";
 
@@ -21,5 +23,5 @@ const client = postgres(connectionString);
 
 export const db = drizzle(client, {
     casing: "snake_case",
-    schema: { ...story, ...user, ...book },
+    schema: { ...story, ...user, ...book, ...rating, ...comment },
 });

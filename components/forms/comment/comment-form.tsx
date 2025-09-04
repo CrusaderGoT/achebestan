@@ -1,7 +1,8 @@
 "use client";
 
-import { useCreateComment } from "@/lib/hooks/comment-hook";
-import { commentInsertSchema, CommentInsertType } from "@/zod-schemas/story";
+import { useCreateComment } from "@/lib/hooks/comment/comment-hook";
+import { CommentInsertType } from "@/zod-schemas/comment";
+import { commentInsertSchema } from "@/zod-schemas/comment";
 import { Button, Stack, TextareaProps } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { RatingSelectType } from "@/zod-schemas/story";
+import { RatingSelectType } from "@/zod-schemas/rating";
 
 import { Rating, RatingProps } from "@mantine/core";
 import { createFormContext } from "@mantine/form";

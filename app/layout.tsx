@@ -13,7 +13,7 @@ import {
 
 import { Notifications } from "@mantine/notifications";
 
-import { Shell } from "@/components/ui/shell";
+import { Shell } from "@/components/shell/shell";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

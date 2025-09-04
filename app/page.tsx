@@ -1,4 +1,4 @@
-import { HomePage } from "@/components/ui/homepage";
+import { HomePage } from "@/components/home/homepage";
 import { readLatestStories } from "@/lib/actions/story";
 
 export default async function Home() {

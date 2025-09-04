@@ -1,6 +1,6 @@
 import { Modal, TextInput, Group, Button, Text, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import styles from "@/styles/bookmark-modal.module.css";
+import styles from "@/styles/bookmark/bookmark-modal.module.css";
 
 interface BookmarkModalProps {
     opened: boolean;

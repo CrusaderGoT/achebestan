@@ -1,4 +1,4 @@
-import { comment, rating, story } from "@/drizzle/schemas/story";
+import { story } from "@/drizzle/schemas/story";
 import {
     createInsertSchema,
     createSelectSchema,
@@ -34,37 +34,7 @@ export const storyInsertSchema = createInsertSchema(story, {
 });
 
 export type StoryInsertType = z.infer<typeof storyInsertSchema>;
+
 export type StoryUpdateType = z.infer<typeof storyUpdateSchema>;
+
 export type StorySelectType = z.infer<typeof storySelectSchema>;
-
-// Story Rating and Comment Schemas and Types
-
-export const ratingSelectSchema = createSelectSchema(rating, {
-    id: z.union([z.number(), z.string()]),
-    userId: (schema) => schema.optional(), // assign via ctx in form action
-});
-
-export type RatingSelectType = z.infer<typeof ratingSelectSchema>;
-
-export const commentInsertSchema = createInsertSchema(comment, {
-    userId: (schema) => schema.optional(),
-    text: (schema) => schema.nonempty(),
-});
-
-export type CommentInsertType = z.infer<typeof commentInsertSchema>;
-
-export const commentSelectSchema = createSelectSchema(comment);
-
-export type CommentSelectType = z.infer<typeof commentSelectSchema>;
-
-export const commentUpdateSchema = createUpdateSchema(comment, {
-    text: z.string().nonempty(),
-    storyISBN: z.uuid(),
-    userId: z.string().nonempty(),
-});
-
-export type CommentUpdateType = z.infer<typeof commentUpdateSchema>;
-
-export interface UserRatingWithComment extends RatingSelectType {
-    comment?: CommentSelectType | null;
-}
