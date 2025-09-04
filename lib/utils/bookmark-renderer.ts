@@ -39,7 +39,7 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]) {
 
         let successfulRenders = 0;
 
-        sortedBookmarks.forEach((bookmark, index) => {
+        sortedBookmarks.forEach((bookmark) => {
             try {
                 const container = document.querySelector(
                     bookmark.containerSelector

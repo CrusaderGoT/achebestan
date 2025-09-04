@@ -257,7 +257,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                         {isReplyOpen ? "Cancel" : "Reply"}
                                     </Button>
 
-                                    {session?.user.id === comment.userId && (
+                                    {session?.user.id === comment.userId ? (
                                         <Button
                                             variant="subtle"
                                             size="xs"
@@ -276,7 +276,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                         >
                                             Delete
                                         </Button>
-                                    )}
+                                    ) : null}
                                 </Group>
                             )}
 
