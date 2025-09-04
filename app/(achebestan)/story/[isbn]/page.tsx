@@ -50,7 +50,6 @@ export default async function StoryPage({
                 ratings={story.ratings}
                 storyISBN={story.isbn}
                 userRating={userRating}
-                userId={session?.user.id}
             />
 
             <Divider />

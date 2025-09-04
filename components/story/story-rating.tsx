@@ -1,7 +1,6 @@
 "use client";
 
-import { UserRatingWithComment } from "@/zod-schemas/rating";
-import { RatingSelectType } from "@/zod-schemas/rating";
+import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     ActionIcon,
     Group,
@@ -10,6 +9,7 @@ import {
     TooltipFloating,
 } from "@mantine/core";
 
+import { authClient } from "@/lib/auth-client";
 import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure } from "@mantine/hooks";
@@ -20,7 +20,6 @@ import { RatingForm } from "../forms/rating/rating-form";
 type StoryRatingProps = {
     ratings: RatingSelectType[];
     storyISBN: string;
-    userId?: string;
     userRating?: UserRatingWithComment;
 };
 
@@ -28,15 +27,16 @@ export function StoryRating({
     ratings,
     storyISBN,
     userRating,
-    userId,
 }: StoryRatingProps) {
     const [opened, { close, toggle }] = useDisclosure(false);
 
     const rating = calculateRatingsAverage(ratings);
 
+    const { data: session } = authClient.useSession();
+
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
-            {userId ? (
+            {session?.user.id ? (
                 <>
                     <ActionIcon.Group>
                         <ActionIcon
@@ -80,7 +80,7 @@ export function StoryRating({
                     <RatingForm
                         userRating={userRating}
                         storyISBN={storyISBN}
-                        userId={userId}
+                        userId={session.user.id}
                         closeRatingForm={close}
                         position={{ bottom: 20, right: 20 }}
                         className={cx(!opened && publicStyles.hide)}
