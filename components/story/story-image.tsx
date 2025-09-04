@@ -46,11 +46,11 @@ export function StoryImage({
                 </Badge>
 
                 <Group>
-                    <Code>created: {dayjs(created).format("YYYY-MM-DD")}</Code>
+                    <Code>
+                        published: {dayjs(created).format("DD-MMM-YYYY")}
+                    </Code>
                     {edited && (
-                        <Code>
-                            last edited: {dayjs(edited).format("YYYY-MM-DD")}
-                        </Code>
+                        <Code>last edited: {dayjs(edited).fromNow()}</Code>
                     )}
                 </Group>
             </Box>

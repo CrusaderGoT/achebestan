@@ -1,7 +1,3 @@
 .childCommentLine {
-  border-left: 0.5px solid gray;
-}
-
-.noHighlightColor {
-  -webkit-tap-highlight-color: transparent;
+  border-left: 0.5px solid var(--mantine-color-gray-filled);
 }

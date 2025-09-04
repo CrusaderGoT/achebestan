@@ -56,10 +56,6 @@
   font-weight: 700;
 }
 
-.noHighlightColor {
-  -webkit-tap-highlight-color: transparent;
-}
-
 .relative {
   position: relative;
 }

@@ -4,9 +4,6 @@ import commentTreeStyles from "@/styles/comment-tree.module.css";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
-import { CommentSelectType } from "@/zod-schemas/comment";
-import { RatingSelectType } from "@/zod-schemas/rating";
-
 import {
     Avatar,
     Box,
@@ -25,11 +22,13 @@ import { IconChevronDown, IconUser } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { useDeleteComment } from "@/lib/hooks/comment/comment-hook";
 import { useFocusTrap } from "@mantine/hooks";
 
 import { CommentForm } from "../forms/comment/comment-form";
 
+import { useDeleteComment } from "@/lib/hooks/comment/comment-hook";
+import { CommentSelectType } from "@/zod-schemas/comment";
+import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -158,6 +157,8 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             data={commentsNodeData}
             tree={tree}
             levelOffset={0}
+            expandOnClick={false}
+            expandOnSpace={false}
             className={publicStyles.noTapHighlight}
             renderNode={({
                 node,
@@ -177,8 +178,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     <Box
                         {...elementProps}
                         className={cx(
-                            level > 1 && commentTreeStyles.childCommentLine,
-                            commentTreeStyles.noHighlightColor
+                            level > 1 && commentTreeStyles.childCommentLine
                         )}
                         style={{
                             marginLeft: `${(level - 1) * 23}px`,
