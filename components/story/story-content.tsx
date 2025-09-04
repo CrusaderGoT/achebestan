@@ -9,13 +9,17 @@ import { IconCheck, IconEdit } from "@tabler/icons-react";
 import { authClient } from "@/lib/auth-client";
 import { useBookmarks } from "@/lib/hooks/use-bookmarks";
 import { useContextMenuBookmark } from "@/lib/hooks/use-context-menu-bookmark";
-import { renderBookmarkIndicators } from "@/lib/utils/bookmark-renderer";
+import {
+    forceRenderBookmarkIndicators,
+    renderBookmarkIndicators,
+    shouldReRenderBookmarks,
+} from "@/lib/utils/bookmark-renderer";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../ui/bookmark-context-menu";
 import { BookmarkList } from "../ui/bookmark-list";
 import { BookmarkModal } from "../ui/bookmark-modal";
@@ -38,6 +42,8 @@ export function StoryContent({
     storyAuthorId,
 }: StoryContentType) {
     const [dirty, setDirty] = useState(false);
+    const renderAttempts = useRef(0);
+    const maxRenderAttempts = 3;
 
     form.watch("content", ({ dirty }) => {
         setDirty(dirty);
@@ -62,15 +68,84 @@ export function StoryContent({
         contextText: string;
     } | null>(null);
 
-    // Render bookmark indicators when bookmarks change
+    // Robust bookmark rendering with retry logic
+    const renderBookmarks = useCallback(
+        (force = false) => {
+            if (bookmarks.length === 0) {
+                // Clear any existing indicators if no bookmarks
+                document
+                    .querySelectorAll("[data-bookmark-id]")
+                    .forEach((el) => el.remove());
+                return;
+            }
+
+            if (force) {
+                renderAttempts.current = 0;
+                forceRenderBookmarkIndicators(bookmarks);
+            } else {
+                renderBookmarkIndicators(bookmarks);
+            }
+        },
+        [bookmarks]
+    );
+
+    // Main effect for rendering bookmarks
     useEffect(() => {
-        // Small delay to ensure DOM is ready
         const timer = setTimeout(() => {
-            renderBookmarkIndicators(bookmarks);
+            renderBookmarks();
         }, 100);
 
         return () => clearTimeout(timer);
-    }, [bookmarks]);
+    }, [bookmarks, renderBookmarks]);
+
+    // Additional effect to check and re-render if needed (fallback)
+    useEffect(() => {
+        const checkTimer = setTimeout(() => {
+            if (
+                shouldReRenderBookmarks(bookmarks) &&
+                renderAttempts.current < maxRenderAttempts
+            ) {
+                console.log("Re-rendering bookmarks (fallback check)");
+                renderAttempts.current++;
+                renderBookmarks(true);
+            }
+        }, 500);
+
+        return () => clearTimeout(checkTimer);
+    }, [bookmarks, renderBookmarks]);
+
+    // Re-render bookmarks when context menu is hidden
+    useEffect(() => {
+        if (!showContextMenu && bookmarks.length > 0) {
+            const timer = setTimeout(() => {
+                if (shouldReRenderBookmarks(bookmarks)) {
+                    console.log(
+                        "Re-rendering bookmarks after context menu closed"
+                    );
+                    renderBookmarks(true);
+                }
+            }, 200);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showContextMenu, bookmarks, renderBookmarks]);
+
+    // Force re-render on window focus (in case of any issues)
+    useEffect(() => {
+        const handleFocus = () => {
+            if (document.hasFocus() && bookmarks.length > 0) {
+                setTimeout(() => {
+                    if (shouldReRenderBookmarks(bookmarks)) {
+                        console.log("Re-rendering bookmarks on window focus");
+                        renderBookmarks(true);
+                    }
+                }, 300);
+            }
+        };
+
+        window.addEventListener("focus", handleFocus);
+        return () => window.removeEventListener("focus", handleFocus);
+    }, [bookmarks, renderBookmarks]);
 
     const handleAddBookmark = () => {
         const bookmarkData = getBookmarkData();
@@ -96,10 +171,22 @@ export function StoryContent({
 
     const handleBookmarkRemove = (id: string) => {
         removeBookmark(id);
-        // Re-render indicators after removal
+        // Force immediate re-render after removal
         const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
-        setTimeout(() => renderBookmarkIndicators(remainingBookmarks), 100);
+        setTimeout(() => {
+            forceRenderBookmarkIndicators(remainingBookmarks);
+        }, 50);
     };
+
+    const handleContextMenuClose = useCallback(() => {
+        hideContextMenu();
+        // Small delay to ensure DOM is stable before re-rendering
+        setTimeout(() => {
+            if (bookmarks.length > 0 && shouldReRenderBookmarks(bookmarks)) {
+                renderBookmarks(true);
+            }
+        }, 100);
+    }, [hideContextMenu, bookmarks, renderBookmarks]);
 
     return (
         <Box className={publicStyles.relative}>
@@ -144,7 +231,7 @@ export function StoryContent({
                 visible={showContextMenu}
                 position={menuPosition}
                 onAddBookmark={handleAddBookmark}
-                onClose={hideContextMenu}
+                onClose={handleContextMenuClose}
                 contextText={
                     pendingBookmarkData?.contextText ||
                     getBookmarkData()?.contextText ||
