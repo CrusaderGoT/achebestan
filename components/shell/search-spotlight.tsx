@@ -180,7 +180,7 @@ export function SearchSpotlight() {
 
                     {/* Show creation date */}
                     <Text size="xs" opacity={0.5}>
-                        {dayjs(item.created).format("L")}
+                        {dayjs(item.created).format("DD-MMM-YYYY")}
                     </Text>
                 </Stack>
             </Group>
@@ -200,13 +200,11 @@ export function SearchSpotlight() {
 
             <TextInput
                 visibleFrom="md"
-                value={search}
-                onChange={(e) => {
-                    handleChange(e);
-                    spotlight.open();
-                }}
+                pointer
+                onClick={spotlight.open}
+                radius={"md"}
                 placeholder="Search..."
-                leftSection={<IconSearch stroke={1.5} />}
+                leftSection={<IconSearch stroke={1.5} size={15} />}
                 rightSection={searchState.loading && <Loader size={20} />}
             />
 
@@ -241,7 +239,7 @@ export function SearchSpotlight() {
                         </>
                     ) : (
                         <Spotlight.Empty>
-                            {searchState.hasSearched
+                            {searchState.hasSearched && !!search.trim()
                                 ? `No stories found for "${search}"`
                                 : "Start typing to search stories..."}
                         </Spotlight.Empty>
