@@ -1,5 +1,5 @@
 import { CommentTree } from "@/components/comment/comment-tree";
-import { CommentForm } from "@/components/forms/comment/comment-form";
+import { CreateCommentForm } from "@/components/forms/comment/create-comment-form";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
 import { readStoryComments } from "@/lib/actions/comment";
@@ -54,11 +54,11 @@ export default async function StoryPage({
 
             <Divider />
 
-            <CommentForm storyISBN={story.isbn} text="" />
+            <CreateCommentForm storyISBN={story.isbn} text="" />
 
             <Divider />
 
-            {comments ? <CommentTree comments={comments} /> : null}
+            {comments && <CommentTree comments={comments} />}
         </Stack>
     );
 }

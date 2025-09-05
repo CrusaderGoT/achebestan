@@ -2,8 +2,10 @@
 
 import { db } from "@/drizzle";
 import { comment } from "@/drizzle/schemas/comment";
-import { commentUpdateSchema } from "@/zod-schemas/comment";
-import { commentInsertSchema } from "@/zod-schemas/comment";
+import {
+    commentInsertSchema,
+    commentUpdateSchema,
+} from "@/zod-schemas/comment";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { unauthorized } from "next/navigation";
@@ -25,6 +27,7 @@ export const createCommentAction = authActionClient
                 ...(parsedInput.parentCommentId
                     ? { parentCommentId: parsedInput.parentCommentId }
                     : {}),
+                created: new Date(),
             })
             .returning();
 
@@ -49,6 +52,7 @@ export const updateCommentAction = authActionClient
             .set({
                 text: parsedInput.text,
                 hasBeenDeleted: false,
+                edited: new Date(),
             })
             .where(
                 and(

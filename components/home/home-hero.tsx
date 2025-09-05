@@ -29,8 +29,9 @@ function HomeHero() {
                         Achebestan
                     </Mark>
                     . And you are currently at my Mind&apos;s Palace, this is a
-                    place we i post my fictional stories, concoctions of my
-                    imagination.
+                    place where i post my fictional stories, concoctions of my
+                    imagination, sensations of my life, and maybe a programming
+                    standard or two.
                 </Text>
 
                 <Text>Consume Responsibly. . .</Text>

@@ -64,7 +64,7 @@ export function LoginForm({
 
     return (
         <LoginFormProvider form={form}>
-            <Paper withBorder p={"md"} pos={"relative"}>
+            <Paper withBorder p={"md"}>
                 <Title order={3} ta={"center"} mb={"md"}>
                     Log In To Make Edits!
                 </Title>

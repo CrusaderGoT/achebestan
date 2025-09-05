@@ -12,7 +12,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
 import publicStyles from "@/styles/public.module.css";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
 import { RatingForm } from "../forms/rating/rating-form";
@@ -34,9 +34,11 @@ export function StoryRating({
 
     const { data: session } = authClient.useSession();
 
+    const mounted = useMounted();
+
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
-            {session?.user.id ? (
+            {session?.user.id && mounted ? (
                 <>
                     <ActionIcon.Group>
                         <ActionIcon

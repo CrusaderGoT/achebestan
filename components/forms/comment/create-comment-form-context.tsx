@@ -6,11 +6,14 @@ import { createFormContext } from "@mantine/form";
 
 type CommentAreaProps = Partial<TextareaProps>;
 
-export const [CommentFormProvider, useCommentFormContext, useCommentForm] =
-    createFormContext<CommentInsertType>();
+export const [
+    CreateCommentFormProvider,
+    useCreateCommentFormContext,
+    useCreateCommentForm,
+] = createFormContext<CommentInsertType>();
 
-export function CommentArea({ ...props }: CommentAreaProps) {
-    const form = useCommentFormContext();
+export function CreateCommentArea({ ...props }: CommentAreaProps) {
+    const form = useCreateCommentFormContext();
 
     return (
         <Textarea

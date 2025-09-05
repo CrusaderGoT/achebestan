@@ -14,16 +14,17 @@ import { useDeleteRating } from "@/lib/hooks/rating/delete-rating-hook";
 import { useRateStory } from "@/lib/hooks/rating/rate-story-hook";
 import publicStyles from "@/styles/public.module.css";
 import ratingStyles from "@/styles/rating.module.css";
-import { UserRatingWithComment } from "@/zod-schemas/rating";
-import { RatingSelectType } from "@/zod-schemas/rating";
-import { ratingSelectSchema } from "@/zod-schemas/rating";
+import {
+    ratingSelectSchema,
+    RatingSelectType,
+    UserRatingWithComment,
+} from "@/zod-schemas/rating";
 import {
     ActionIcon,
     Affix,
     AffixProps,
     Group,
     Stack,
-    Text,
     Textarea,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -215,7 +216,6 @@ export function RatingForm({
                     <Stack className={ratingStyles.ratingStack}>
                         <Group justify="space-between">
                             <Stack>
-                                <Text>{JSON.stringify(commentChanged)}</Text>
                                 <Textarea
                                     placeholder="What Did You Think Of The Story?"
                                     value={comment}

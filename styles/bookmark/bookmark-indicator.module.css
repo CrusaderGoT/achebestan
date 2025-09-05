@@ -16,21 +16,39 @@
 }
 
 .pulse {
-  animation: bookmarkPulse 1.5s ease-in-out;
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+  animation: bookmarkPulse 1.2s ease-in-out;
+  animation-fill-mode: both;
 }
 
 @keyframes bookmarkPulse {
-  0%,
+  0% {
+    transform: scale(1);
+    color: var(--mantine-color-blue-6);
+    opacity: 0.9;
+    filter: none;
+    text-shadow: none;
+  }
+  30% {
+    transform: scale(1.5);
+    color: var(--mantine-color-orange-6);
+    opacity: 1;
+    filter: drop-shadow(0 6px 12px rgba(250, 166, 26, 0.25));
+    text-shadow: 0 0 8px rgba(250, 166, 26, 0.45);
+  }
+  60% {
+    transform: scale(1.25);
+    color: var(--mantine-color-orange-6);
+    opacity: 0.98;
+    filter: drop-shadow(0 4px 8px rgba(250, 166, 26, 0.18));
+    text-shadow: 0 0 6px rgba(250, 166, 26, 0.3);
+  }
   100% {
     transform: scale(1);
     color: var(--mantine-color-blue-6);
-  }
-  25% {
-    transform: scale(1.4);
-    color: var(--mantine-color-orange-6);
-  }
-  75% {
-    transform: scale(1.2);
-    color: var(--mantine-color-orange-6);
+    opacity: 0.9;
+    filter: none;
+    text-shadow: none;
   }
 }

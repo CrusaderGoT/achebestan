@@ -237,6 +237,7 @@ export function Story({
                             form={form}
                             session={session}
                             storyAuthorId={story.authorId}
+                            storyISBN={story.isbn}
                         />
                     </Stack>
                 </Card>

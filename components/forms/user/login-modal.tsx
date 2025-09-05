@@ -12,7 +12,13 @@ export function LoginModal({
     close: () => void;
 }) {
     return (
-        <Modal opened={opened} onClose={close} centered withCloseButton={false}>
+        <Modal
+            opened={opened}
+            onClose={close}
+            centered
+            withCloseButton={false}
+            closeOnClickOutside={false}
+        >
             <LoginForm closeModal={close} redirectAfterSuccess={false} />
         </Modal>
     );

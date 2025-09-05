@@ -1,28 +1,27 @@
 "use client";
 
+import {
+    CreateCommentArea,
+    CreateCommentFormProvider,
+    useCreateCommentForm,
+} from "@/components/forms/comment/create-comment-form-context";
 import { useCreateComment } from "@/lib/hooks/comment/comment-hook";
-import { CommentInsertType } from "@/zod-schemas/comment";
-import { commentInsertSchema } from "@/zod-schemas/comment";
+import { commentInsertSchema, CommentInsertType } from "@/zod-schemas/comment";
 import { Button, Stack, TextareaProps } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import {
-    CommentArea,
-    CommentFormProvider,
-    useCommentForm,
-} from "./comment-form-context";
 
 type CommentFormProps = CommentInsertType &
     TextareaProps & {
         closeCommentForm?: () => void;
     };
 
-export function CommentForm({
+export function CreateCommentForm({
     storyISBN,
     parentCommentId,
     closeCommentForm,
     ...props
 }: CommentFormProps) {
-    const form = useCommentForm({
+    const form = useCreateCommentForm({
         initialValues: {
             storyISBN: storyISBN,
             text: "",
@@ -49,15 +48,18 @@ export function CommentForm({
     }
 
     return (
-        <CommentFormProvider form={form}>
+        <CreateCommentFormProvider form={form}>
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <Stack>
-                    <CommentArea placeholder="Leave A Comment..." {...props} />
+                    <CreateCommentArea
+                        placeholder="Leave A Comment..."
+                        {...props}
+                    />
                     <Button type="submit" size="compact-md" loading={isPending}>
                         submit
                     </Button>
                 </Stack>
             </form>
-        </CommentFormProvider>
+        </CreateCommentFormProvider>
     );
 }

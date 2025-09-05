@@ -31,6 +31,7 @@ type StoryContentType = {
     form: UseFormReturnType<StoryUpdateType>;
     session: ReturnType<typeof authClient.useSession>;
     storyAuthorId: string;
+    storyISBN: string;
 };
 
 export function StoryContent({
@@ -40,6 +41,7 @@ export function StoryContent({
     form,
     session,
     storyAuthorId,
+    storyISBN,
 }: StoryContentType) {
     const [dirty, setDirty] = useState(false);
     const renderAttempts = useRef(0);
@@ -50,7 +52,7 @@ export function StoryContent({
     });
 
     const { bookmarks, addBookmark, removeBookmark, scrollToBookmark } =
-        useBookmarks(storyAuthorId);
+        useBookmarks(storyISBN);
 
     const {
         showContextMenu,
