@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { story } from "@/drizzle/schemas/story";
 import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
-import { and, eq } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
 import { handleFileUpload } from "../utils/image-upload";
@@ -133,8 +133,8 @@ export const updateStoryAction = authActionClient
 export const readStory = async (isbn: string) => {
     try {
         const storyDb = await db.query.story.findFirst({
-            where(fields, operators) {
-                return operators.eq(fields.isbn, isbn);
+            where(story, operators) {
+                return operators.eq(story.isbn, isbn);
             },
             with: {
                 author: true,
@@ -197,3 +197,92 @@ export const deleteStoryAction = authActionClient
             return deletedStory;
         }
     );
+
+export interface SearchOptions {
+    limit?: number;
+    offset?: number;
+    sortBy?: "created" | "edited" | "title";
+    sortOrder?: "asc" | "desc";
+    fields?: Array<"title" | "subtitle">;
+}
+
+export async function searchStories(
+    searchText: string,
+    options: SearchOptions = {}
+) {
+    // Input validation
+    if (!searchText?.trim()) {
+        return [];
+    }
+
+    // Sanitize and prepare search text
+    const cleanSearchText = searchText.trim();
+
+    if (cleanSearchText.length === 0) {
+        return [];
+    }
+
+    const {
+        limit = 50,
+        offset = 0,
+        sortBy = "created",
+        sortOrder = "desc",
+        fields = ["title", "subtitle", "isbn"],
+    } = options;
+
+    // Build search conditions based on selected fields
+    const searchConditions = [];
+
+    if (fields.includes("title")) {
+        searchConditions.push(ilike(story.title, `%${cleanSearchText}%`));
+    }
+
+    if (fields.includes("subtitle")) {
+        searchConditions.push(ilike(story.subtitle, `%${cleanSearchText}%`));
+    }
+
+    if (fields.includes("isbn")) {
+        searchConditions.push(ilike(story.isbn, `%${cleanSearchText}%`));
+    }
+
+    // Build order by clause
+    const getOrderBy = () => {
+        const direction = sortOrder === "asc" ? asc : desc;
+
+        switch (sortBy) {
+            case "title":
+                return [direction(story.title)];
+            case "edited":
+                return [direction(story.edited)];
+            case "created":
+            default:
+                return [direction(story.created)];
+        }
+    };
+
+    try {
+        // Execute search with basic conditions (no complex ranking for now)
+        const stories = await db.query.story.findMany({
+            where: or(...searchConditions),
+            orderBy: getOrderBy(),
+            limit: Math.min(limit, 100), // Cap at 100 for performance
+            offset: Math.max(offset, 0),
+            columns: {
+                id: true,
+                title: true,
+                subtitle: true,
+                created: true,
+                edited: true,
+                isbn: true,
+                authorId: true,
+                bookId: true,
+                image: true,
+            },
+        });
+
+        return stories;
+    } catch (error) {
+        console.error("Search error:", error);
+        throw new Error("Failed to search stories");
+    }
+}

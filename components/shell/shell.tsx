@@ -12,6 +12,7 @@ import { LoginButton } from "../buttons/login-btn";
 import { LogoutButton } from "../buttons/logout-btn";
 import { LoginModal } from "../forms/user/login-modal";
 import { navlinkData, NavLinks } from "./navlinks";
+import { SearchSpotlight } from "./search-spotlight";
 
 export function Shell({
     children,
@@ -73,6 +74,8 @@ export function Shell({
                         ) : (
                             <LoginButton toggleLoginModal={toggleLoginModal} />
                         )}
+
+                        <SearchSpotlight />
 
                         <ModeToggle />
 
