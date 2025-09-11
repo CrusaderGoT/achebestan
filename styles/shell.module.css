@@ -31,28 +31,21 @@
   background-color: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
   pointer-events: none;
+}
+
+.mobileNavBar:hover {
+  filter: contrast(70%);
 }
 
 .mobileNavBar:hover::after {
   transform: scaleX(1);
 }
 
-/* Hover background color for non-active items */
-.mobileNavBar:hover {
-  background-color: var(--mantine-color-dark-filled);
-}
-
-@media (prefers-color-scheme: dark) {
-  .mobileNavBar:hover {
-    background-color: var(--mantine-color-white-filled);
-  }
-}
-
 /* Active nav item */
 .mobileNavBarActive {
-  background-color: var(--mantine-color-gray-0);
+  background-color: var(--mantine-color-gray-filled);
 }
 
 /* Disable underline for active items */
@@ -60,12 +53,6 @@
   display: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .mobileNavBarActive {
-    background-color: var(--mantine-color-dark-6);
-  }
-}
-
 .mobileNavBarActive:hover {
-  filter: brightness(90%);
+  filter: brightness(80%);
 }

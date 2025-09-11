@@ -76,10 +76,7 @@ export function LoginForm({
                     <Group justify="space-between" align="center" mt={"md"}>
                         <Button
                             type="submit"
-                            loading={
-                                formState === "pending" ||
-                                formState === "success"
-                            }
+                            loading={formState === "pending"}
                             color="orange"
                         >
                             Login
@@ -90,10 +87,7 @@ export function LoginForm({
                         <Button
                             component="a"
                             href="/signup"
-                            loading={
-                                formState === "pending" ||
-                                formState === "success"
-                            }
+                            loading={formState === "pending"}
                             color="green"
                         >
                             Signup
@@ -109,7 +103,7 @@ export function LoginForm({
                             ? "Redirecting To Home Page"
                             : ""
                     }
-                    visible={formState === "pending" || formState === "success"}
+                    visible={formState === "pending"}
                 />
             </Paper>
         </LoginFormProvider>

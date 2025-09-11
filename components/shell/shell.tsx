@@ -62,7 +62,7 @@ export function Shell({
                             <UnstyledButton
                                 key={index}
                                 component={Link}
-                                href="#required-for-focus"
+                                href={item.href}
                                 className={cx(
                                     shellStyles.mobileNavBar,
                                     pathname === item.href &&
@@ -73,10 +73,12 @@ export function Shell({
                             </UnstyledButton>
                         ))}
 
-                        <SecretLogin
-                            secretValue={secretValue}
-                            setSecretValue={setSecretValue}
-                        />
+                        {!session?.user.id && (
+                            <SecretLogin
+                                secretValue={secretValue}
+                                setSecretValue={setSecretValue}
+                            />
+                        )}
                     </Group>
 
                     <Group gap={"xs"}>
@@ -108,10 +110,12 @@ export function Shell({
             <AppShell.Navbar py="md" px={4}>
                 <NavLinks />
 
-                <SecretLogin
-                    secretValue={secretValue}
-                    setSecretValue={setSecretValue}
-                />
+                {!session?.user.id && (
+                    <SecretLogin
+                        secretValue={secretValue}
+                        setSecretValue={setSecretValue}
+                    />
+                )}
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
