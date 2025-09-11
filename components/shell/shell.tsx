@@ -79,7 +79,7 @@ export function Shell({
                         />
                     </Group>
 
-                    <Group gap={"xl"}>
+                    <Group gap={"xs"}>
                         {session?.user.id ? (
                             <LogoutButton />
                         ) : (
