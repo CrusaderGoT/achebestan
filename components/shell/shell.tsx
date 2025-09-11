@@ -1,18 +1,21 @@
 "use client";
 
+import { LoginButton } from "@/components/buttons/login-btn";
+import { LogoutButton } from "@/components/buttons/logout-btn";
 import { ModeToggle } from "@/components/buttons/mode-toggle";
+import { LoginModal } from "@/components/forms/user/login-modal";
+import { SecretLogin } from "@/components/shell/activate-secret-login";
+import { navlinkData, NavLinks } from "@/components/shell/navlinks";
+import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
-import styles from "@/styles/shell.module.css";
+import publicStyles from "@/styles/public.module.css";
+import shellStyles from "@/styles/shell.module.css";
 import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LoginButton } from "../buttons/login-btn";
-import { LogoutButton } from "../buttons/logout-btn";
-import { LoginModal } from "../forms/user/login-modal";
-import { navlinkData, NavLinks } from "./navlinks";
-import { SearchSpotlight } from "./search-spotlight";
+import { useState } from "react";
 
 export function Shell({
     children,
@@ -23,56 +26,69 @@ export function Shell({
 
     const pathname = usePathname();
 
+    const [secretValue, setSecretValue] = useState<string>("");
+
     const { data: session } = authClient.useSession();
 
     const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
 
-    const [
-        openedLoginModal,
-        { close: closeLoginModal, toggle: toggleLoginModal },
-    ] = useDisclosure(false);
+    const [openedLoginModal, { close: closeLoginModal, open: openLoginModal }] =
+        useDisclosure(false);
 
     return (
         <AppShell
             header={{ height: 60 }}
             navbar={{
                 width: 300,
-                breakpoint: "sm",
+                breakpoint: "lg",
                 collapsed: { desktop: true, mobile: !openedNavBar },
             }}
         >
             <AppShell.Header zIndex={900}>
-                <Group className={styles.headerGroup} flex={1} gap={"xl"}>
+                <Group className={shellStyles.headerGroup} flex={1} gap={"xl"}>
                     <Title
                         order={3}
                         onClick={() => router.push("/")}
-                        className={styles.websiteName}
+                        className={cx(
+                            shellStyles.websiteName,
+                            publicStyles.noTapHighlight
+                        )}
                     >
                         Achebestan
                     </Title>
 
-                    <Group justify="space-around" visibleFrom="sm" flex={1}>
+                    <Group justify="space-around" visibleFrom="lg" flex={1}>
                         {navlinkData.map((item, index) => (
                             <UnstyledButton
                                 key={index}
                                 component={Link}
                                 href="#required-for-focus"
                                 className={cx(
-                                    styles.mobileNavBar,
+                                    shellStyles.mobileNavBar,
                                     pathname === item.href &&
-                                        styles.mobileNavBarActive
+                                        shellStyles.mobileNavBarActive
                                 )}
                             >
                                 {item.label}
                             </UnstyledButton>
                         ))}
+
+                        <SecretLogin
+                            secretValue={secretValue}
+                            setSecretValue={setSecretValue}
+                        />
                     </Group>
 
                     <Group gap={"xl"}>
                         {session?.user.id ? (
                             <LogoutButton />
                         ) : (
-                            <LoginButton toggleLoginModal={toggleLoginModal} />
+                            secretValue.trim().toLowerCase() === "logmein" && (
+                                <LoginButton
+                                    openLoginModal={openLoginModal}
+                                    disabled={openedLoginModal}
+                                />
+                            )
                         )}
 
                         <SearchSpotlight />
@@ -82,7 +98,7 @@ export function Shell({
                         <Burger
                             opened={openedNavBar}
                             onClick={() => toggleNavbar()}
-                            hiddenFrom="sm"
+                            hiddenFrom="lg"
                             size="sm"
                         />
                     </Group>
@@ -91,6 +107,11 @@ export function Shell({
 
             <AppShell.Navbar py="md" px={4}>
                 <NavLinks />
+
+                <SecretLogin
+                    secretValue={secretValue}
+                    setSecretValue={setSecretValue}
+                />
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>

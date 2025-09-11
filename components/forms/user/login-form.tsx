@@ -5,27 +5,28 @@ import { LoginSchemaType, loginSchema } from "@/zod-schemas/user";
 import { Button, Divider, Group, Paper, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
-import { useState } from "react";
 import {
     LoginFields,
     LoginFormProvider,
     useLoginForm,
 } from "./login-form-context";
 
+import { LoginFormState } from "@/lib/types/login";
 import { notifications } from "@mantine/notifications";
+import { Dispatch, SetStateAction } from "react";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
 export function LoginForm({
     redirectAfterSuccess = true,
     closeModal,
+    formState,
+    setFormState,
 }: {
     redirectAfterSuccess?: boolean;
     closeModal?: () => void;
+    formState: LoginFormState;
+    setFormState: Dispatch<SetStateAction<LoginFormState>>;
 }) {
-    const [formState, setFormState] = useState<
-        "pending" | "success" | "idle" | "error"
-    >("idle");
-
     const form = useLoginForm({
         mode: "uncontrolled",
         validate: zod4Resolver(loginSchema),

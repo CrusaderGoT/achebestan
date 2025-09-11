@@ -2,6 +2,8 @@
 
 import { Modal } from "@mantine/core";
 
+import { LoginFormState } from "@/lib/types/login";
+import { useState } from "react";
 import { LoginForm } from "./login-form";
 
 export function LoginModal({
@@ -11,15 +13,22 @@ export function LoginModal({
     opened: boolean;
     close: () => void;
 }) {
+    const [formState, setFormState] = useState<LoginFormState>("idle");
+
     return (
         <Modal
             opened={opened}
             onClose={close}
             centered
-            withCloseButton={false}
-            closeOnClickOutside={false}
+            withCloseButton={formState !== "pending"}
+            closeOnClickOutside={formState !== "pending"}
         >
-            <LoginForm closeModal={close} redirectAfterSuccess={false} />
+            <LoginForm
+                closeModal={close}
+                redirectAfterSuccess={false}
+                formState={formState}
+                setFormState={setFormState}
+            />
         </Modal>
     );
 }

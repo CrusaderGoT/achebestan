@@ -1,33 +1,23 @@
 "use client";
 
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, ActionIconProps } from "@mantine/core";
 
 import { IconLogin2 } from "@tabler/icons-react";
 
-import { useRouter } from "next/navigation";
+type LoginButtonType = {
+    openLoginModal: () => void;
+} & ActionIconProps;
 
-type LoginButtonType =
-    | { gotoLoginPage: true; toggleLoginModal?: never }
-    | { gotoLoginPage?: never; toggleLoginModal: () => void };
-
-export function LoginButton({
-    gotoLoginPage,
-    toggleLoginModal: openLoginModal,
-}: LoginButtonType) {
-    const router = useRouter();
-
+export function LoginButton({ openLoginModal, ...props }: LoginButtonType) {
     return (
         <ActionIcon
             onClick={() => {
-                if (gotoLoginPage || !openLoginModal) {
-                    router.push("/login");
-                } else {
-                    openLoginModal();
-                }
+                openLoginModal();
             }}
             color="teal"
             size={"lg"}
             variant="subtle"
+            {...props}
         >
             <IconLogin2 />
         </ActionIcon>

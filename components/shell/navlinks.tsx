@@ -2,28 +2,36 @@
 
 import { NavLink } from "@mantine/core";
 import {
-    IconActivity,
-    IconChevronRight,
-    IconFingerprint,
-    IconGauge,
+    IconCoffee,
+    IconMail,
+    IconMoneybagPlus,
+    IconPlus,
+    IconWriting,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export const navlinkData = [
     {
-        icon: IconGauge,
-        label: "Dashboard",
-        description: "Item with description",
-        href: "/",
+        icon: IconWriting,
+        label: "New Story",
+        href: "/story/new",
+        description: "Write a new story",
+        rightSection: <IconPlus size={16} stroke={1.5} />,
     },
     {
-        icon: IconFingerprint,
-        label: "Security",
-        rightSection: <IconChevronRight size={16} stroke={1.5} />,
-        href: "/random",
+        icon: IconMail,
+        label: "Contact",
+        description: "Business inquiries or fan mail welcome",
+        href: "/#",
     },
-    { icon: IconActivity, label: "Activity", href: "/search" },
+    {
+        icon: IconCoffee,
+        label: "Buy Me Coffe",
+        description: "Support me",
+        href: "/#",
+        rightSection: <IconMoneybagPlus size={16} stroke={1.5} />,
+    },
 ];
 
 export function NavLinks() {

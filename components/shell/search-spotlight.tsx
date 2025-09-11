@@ -193,19 +193,17 @@ export function SearchSpotlight() {
                 onClick={spotlight.open}
                 variant="subtle"
                 aria-label="Open search"
-                hiddenFrom="md"
+                hiddenFrom="sm"
             >
                 <IconSearch stroke={1.5} />
             </ActionIcon>
 
             <TextInput
-                visibleFrom="md"
-                pointer
+                visibleFrom="sm"
                 onClick={spotlight.open}
                 radius={"md"}
                 placeholder="Search..."
                 leftSection={<IconSearch stroke={1.5} size={15} />}
-                rightSection={searchState.loading && <Loader size={20} />}
             />
 
             <Spotlight.Root
