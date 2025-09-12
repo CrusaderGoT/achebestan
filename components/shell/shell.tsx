@@ -3,7 +3,7 @@
 import { LoginButton } from "@/components/buttons/login-btn";
 import { LogoutButton } from "@/components/buttons/logout-btn";
 import { ModeToggle } from "@/components/buttons/mode-toggle";
-import { LoginModal } from "@/components/forms/user/login-modal";
+import { LoginModal } from "@/components/forms/user/auth-modal";
 import { SecretLogin } from "@/components/shell/activate-secret-login";
 import { navlinkData, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";

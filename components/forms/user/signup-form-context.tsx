@@ -20,6 +20,7 @@ export function SignupFields() {
                 {...form.getInputProps("email")}
                 label="Email"
                 leftSection={<IconAt />}
+                autoComplete="off"
             />
 
             <TextInput
@@ -27,6 +28,7 @@ export function SignupFields() {
                 {...form.getInputProps("name")}
                 label="name"
                 leftSection={<IconUser />}
+                autoComplete="off"
             />
 
             <PasswordInput
@@ -34,6 +36,7 @@ export function SignupFields() {
                 {...form.getInputProps("password")}
                 label="password"
                 leftSection={<IconLockPassword />}
+                autoComplete="off"
             />
         </Stack>
     );

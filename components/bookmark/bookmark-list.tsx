@@ -77,7 +77,7 @@ export function BookmarkList({
                             <CloseButton
                                 variant="subtle"
                                 size="sm"
-                                onClick={toggle}
+                                onClick={close}
                             />
                         </Group>
 
@@ -90,9 +90,10 @@ export function BookmarkList({
                                         withBorder
                                         radius="sm"
                                         className={styles.bookmarkItem}
-                                        onClick={() =>
-                                            onBookmarkClick(bookmark)
-                                        }
+                                        onClick={() => {
+                                            onBookmarkClick(bookmark);
+                                            close();
+                                        }}
                                     >
                                         <Group
                                             justify="space-between"
@@ -152,6 +153,7 @@ export function BookmarkList({
                                                             onBookmarkClick(
                                                                 bookmark
                                                             );
+                                                            close();
                                                         }}
                                                     >
                                                         <IconExternalLink

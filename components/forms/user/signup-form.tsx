@@ -2,24 +2,31 @@
 
 import { authClient } from "@/lib/auth-client";
 import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";
-import { Button, Divider, Group, Paper, Title } from "@mantine/core";
+import { Button, Paper, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import {
     SignupFields,
     SignupFormProvider,
     useSignupForm,
 } from "./signup-form-context";
 
+import { LoginFormState } from "@/lib/types/login";
 import { notifications } from "@mantine/notifications";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
-export function SignupForm() {
-    const [formState, setFormState] = useState<
-        "pending" | "success" | "idle" | "error"
-    >("idle");
-
+export function SignupForm({
+    redirectAfterSuccess = true,
+    closeModal,
+    formState,
+    setFormState,
+}: {
+    redirectAfterSuccess?: boolean;
+    closeModal?: () => void;
+    formState: LoginFormState;
+    setFormState: Dispatch<SetStateAction<LoginFormState>>;
+}) {
     const form = useSignupForm({
         mode: "uncontrolled",
         validate: zod4Resolver(signupSchema),
@@ -42,8 +49,16 @@ export function SignupForm() {
                     notifications.show({
                         message: "Successfully Signed Up",
                     });
+
                     setFormState("success");
-                    redirect("/");
+
+                    if (closeModal) {
+                        closeModal();
+                    }
+
+                    if (redirectAfterSuccess) {
+                        redirect("/");
+                    }
                 },
             }
         );
@@ -57,9 +72,9 @@ export function SignupForm() {
                 </Title>
 
                 <form onSubmit={form.onSubmit(handleSubmit)}>
-                    <SignupFields />
+                    <Stack>
+                        <SignupFields />
 
-                    <Group justify="space-between" align="center" mt={"md"}>
                         <Button
                             type="submit"
                             loading={
@@ -70,28 +85,14 @@ export function SignupForm() {
                         >
                             Signup
                         </Button>
-
-                        <Divider label="or" />
-
-                        <Button
-                            component="a"
-                            href="/login"
-                            loading={
-                                formState === "pending" ||
-                                formState === "success"
-                            }
-                            color="orange"
-                        >
-                            Login
-                        </Button>
-                    </Group>
+                    </Stack>
                 </form>
 
                 <LoadingOverlayWithText
                     text={
                         formState === "pending"
                             ? "If Only It Was That Easy To Become A Writer. Anyway Signing Up New User"
-                            : formState === "success"
+                            : formState === "success" && redirectAfterSuccess
                             ? "Redirecting To Home Page"
                             : ""
                     }

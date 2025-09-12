@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { LoginSchemaType, loginSchema } from "@/zod-schemas/user";
-import { Button, Divider, Group, Paper, Title } from "@mantine/core";
+import { Button, Paper, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import {
@@ -71,9 +71,9 @@ export function LoginForm({
                 </Title>
 
                 <form onSubmit={form.onSubmit(handleSubmit)}>
-                    <LoginFields />
+                    <Stack>
+                        <LoginFields />
 
-                    <Group justify="space-between" align="center" mt={"md"}>
                         <Button
                             type="submit"
                             loading={formState === "pending"}
@@ -81,18 +81,7 @@ export function LoginForm({
                         >
                             Login
                         </Button>
-
-                        <Divider label="or" />
-
-                        <Button
-                            component="a"
-                            href="/signup"
-                            loading={formState === "pending"}
-                            color="green"
-                        >
-                            Signup
-                        </Button>
-                    </Group>
+                    </Stack>
                 </form>
 
                 <LoadingOverlayWithText
