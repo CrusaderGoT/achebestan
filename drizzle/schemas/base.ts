@@ -3,7 +3,7 @@ import * as t from "drizzle-orm/pg-core";
 
 export const timestamps = {
     created: t.timestamp().defaultNow().notNull(),
-    edited: t.timestamp(),
+    edited: t.timestamp().$onUpdate(() => /* @__PURE__ */ new Date()),
 };
 
 export const image = {
