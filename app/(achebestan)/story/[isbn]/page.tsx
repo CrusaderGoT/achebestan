@@ -1,5 +1,6 @@
 import { CommentTree } from "@/components/comment/comment-tree";
 import { CreateCommentForm } from "@/components/forms/comment/create-comment-form";
+import { StoryActions } from "@/components/story/story-action-btns";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
 import { readStoryComments } from "@/lib/actions/comment";
@@ -50,6 +51,12 @@ export default async function StoryPage({
                 ratings={story.ratings}
                 storyISBN={story.isbn}
                 userRating={userRating}
+            />
+
+            <StoryActions
+                isbn={story.isbn}
+                authorId={story.authorId}
+                storyTitle={story.title}
             />
 
             <Divider />

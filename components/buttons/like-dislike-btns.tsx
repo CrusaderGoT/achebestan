@@ -76,6 +76,7 @@ export function LikeDislikeButton({
                 disabled={isPendingDislikeComment}
                 loading={isPendingLikeComment}
                 size={"md"}
+                title={reaction ? "remove like" : "like"}
             >
                 {reaction ? (
                     <IconThumbUpFilled
@@ -120,6 +121,11 @@ export function LikeDislikeButton({
                 disabled={isPendingLikeComment}
                 loading={isPendingDislikeComment}
                 size={"md"}
+                title={
+                    !reaction && reaction !== undefined
+                        ? "remove dislike"
+                        : "dislike"
+                }
             >
                 {!reaction && reaction !== undefined ? (
                     <IconThumbDownFilled
