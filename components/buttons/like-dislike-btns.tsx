@@ -1,8 +1,12 @@
 "use client";
 
-import { useDislikeComment, useLikeComment } from "@/lib/hooks/reaction/comment-reaction-hook";
+import {
+    useDislikeComment,
+    useLikeComment,
+} from "@/lib/hooks/reaction/comment-reaction-hook";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
 import { ActionIcon } from "@mantine/core";
+import { useCounter } from "@mantine/hooks";
 import {
     IconThumbDown,
     IconThumbDownFilled,
@@ -31,6 +35,14 @@ export function LikeDislikeButton({
         isPending: isPendingLikeComment,
     } = useLikeComment();
 
+    const [like, { increment: incrementLike, decrement: decrementLike }] =
+        useCounter(likes);
+
+    const [
+        dislike,
+        { increment: incrementDislike, decrement: decrementDislike },
+    ] = useCounter(dislikes);
+
     const {
         executeAsync: executeAsyncDislikeComment,
         isPending: isPendingDislikeComment,
@@ -52,8 +64,13 @@ export function LikeDislikeButton({
 
                     if (result.data?.deleted) {
                         setReaction(undefined);
+                        decrementLike();
                     } else if (result.data?.liked) {
+                        if (!reaction && reaction !== undefined) {
+                            decrementDislike();
+                        }
                         setReaction(true);
+                        incrementLike();
                     }
                 }}
                 disabled={isPendingDislikeComment}
@@ -78,7 +95,7 @@ export function LikeDislikeButton({
                 bg="var(--mantine-color-body)"
                 size={"md"}
             >
-                {likes}
+                {like}
             </ActionIcon.GroupSection>
 
             <ActionIcon
@@ -91,8 +108,13 @@ export function LikeDislikeButton({
 
                     if (result.data?.deleted) {
                         setReaction(undefined);
+                        decrementDislike();
                     } else if (result.data?.disliked) {
+                        if (reaction) {
+                            decrementLike();
+                        }
                         setReaction(false);
+                        incrementDislike();
                     }
                 }}
                 disabled={isPendingLikeComment}
@@ -117,7 +139,7 @@ export function LikeDislikeButton({
                 bg="var(--mantine-color-body)"
                 size={"md"}
             >
-                {dislikes}
+                {dislike}
             </ActionIcon.GroupSection>
         </ActionIcon.Group>
     );
