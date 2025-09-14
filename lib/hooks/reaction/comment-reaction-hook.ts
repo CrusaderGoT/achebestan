@@ -1,12 +1,12 @@
-import { dislikeAction, likeAction } from "@/lib/actions/comment";
+import { dislikeCommentAction, likeCommentAction } from "@/lib/actions/comment";
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
-export const useLike = () => {
+export const useLikeComment = () => {
     const router = useRouter();
 
-    const action = useAction(likeAction, {
+    const action = useAction(likeCommentAction, {
         onSuccess() {
             router.refresh();
         },
@@ -56,10 +56,10 @@ export const useLike = () => {
     return action;
 };
 
-export const useDislike = () => {
+export const useDislikeComment = () => {
     const router = useRouter();
 
-    const action = useAction(dislikeAction, {
+    const action = useAction(dislikeCommentAction, {
         onSuccess() {
             router.refresh();
         },

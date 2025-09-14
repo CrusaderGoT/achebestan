@@ -1,6 +1,6 @@
 "use client";
 
-import { useDislike, useLike } from "@/lib/hooks/comment/comment-reaction-hook";
+import { useDislikeComment, useLikeComment } from "@/lib/hooks/reaction/comment-reaction-hook";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
 import { ActionIcon } from "@mantine/core";
 import {
@@ -29,12 +29,12 @@ export function LikeDislikeButton({
     const {
         executeAsync: executeAsyncLikeComment,
         isPending: isPendingLikeComment,
-    } = useLike();
+    } = useLikeComment();
 
     const {
         executeAsync: executeAsyncDislikeComment,
         isPending: isPendingDislikeComment,
-    } = useDislike();
+    } = useDislikeComment();
 
     const [reaction, setReaction] = useState<boolean | undefined>(
         userReaction?.liked ?? userReaction?.disliked ?? undefined

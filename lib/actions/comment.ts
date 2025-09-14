@@ -142,7 +142,7 @@ export const readStoryComments = async (isbn: string) => {
     }
 };
 
-export const likeAction = authActionClient
+export const likeCommentAction = authActionClient
     .inputSchema(reactionInsertSchema)
     .action(async ({ parsedInput }) => {
         const existingReaction = await db.query.reaction.findFirst({
@@ -204,7 +204,7 @@ export const likeAction = authActionClient
         return { liked: true };
     });
 
-export const dislikeAction = authActionClient
+export const dislikeCommentAction = authActionClient
     .inputSchema(reactionInsertSchema)
     .action(async ({ parsedInput }) => {
         const existingReaction = await db.query.reaction.findFirst({
