@@ -3,6 +3,7 @@ import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 import { timestamps } from "./base";
 import { rating } from "./rating";
+import { reaction } from "./reaction";
 import { story } from "./story";
 import { user } from "./user";
 
@@ -60,4 +61,5 @@ export const commentRelations = relations(comment, ({ one, many }) => ({
     childComments: many(comment, {
         relationName: "parentChild",
     }),
+    reactions: many(reaction),
 }));

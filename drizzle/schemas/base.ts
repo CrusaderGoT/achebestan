@@ -3,14 +3,9 @@ import * as t from "drizzle-orm/pg-core";
 
 export const timestamps = {
     created: t.timestamp().defaultNow().notNull(),
-    edited: t.timestamp().$onUpdate(() => /* @__PURE__ */ new Date()),
+    edited: t.timestamp(),
 };
 
 export const image = {
     image: t.varchar(),
-};
-
-export const reactions = {
-    likes: t.integer(),
-    dislikes: t.integer(),
 };

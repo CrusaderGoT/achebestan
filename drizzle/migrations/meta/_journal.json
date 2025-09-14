@@ -176,6 +176,20 @@
       "when": 1757001269838,
       "tag": "0024_conscious_archangel",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1757857465690,
+      "tag": "0025_lying_puppet_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1757866944477,
+      "tag": "0026_icy_junta",
+      "breakpoints": true
     }
   ]
 }

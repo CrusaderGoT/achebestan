@@ -54,7 +54,7 @@ export function AuthTabs({
 
             <Tabs.Panel value="default" pt="xs">
                 <Center>
-                    <Text>
+                    <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.
                     </Text>
                 </Center>

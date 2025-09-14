@@ -241,10 +241,6 @@ export async function searchStories(
         searchConditions.push(ilike(story.subtitle, `%${cleanSearchText}%`));
     }
 
-    if (fields.includes("isbn")) {
-        searchConditions.push(ilike(story.isbn, `%${cleanSearchText}%`));
-    }
-
     // Build order by clause
     const getOrderBy = () => {
         const direction = sortOrder === "asc" ? asc : desc;

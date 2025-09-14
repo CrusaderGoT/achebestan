@@ -82,7 +82,6 @@ export function SearchSpotlight() {
         setSearchState((prev) => ({ ...prev, loading: true }));
 
         try {
-            // Use the improved search function with options
             const searchResults = await searchStories(query, {
                 limit: 20,
                 sortBy: "created",
@@ -91,7 +90,7 @@ export function SearchSpotlight() {
             });
 
             setSearchState({
-                results: searchResults || [],
+                results: searchResults,
                 loading: false,
                 hasSearched: true,
             });
@@ -106,7 +105,7 @@ export function SearchSpotlight() {
     }, []);
 
     // Debounced search handler
-    const debouncedSearch = useDebouncedCallback(performSearch, 300);
+    const debouncedSearch = useDebouncedCallback(performSearch, 500);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.currentTarget.value;

@@ -38,8 +38,11 @@ import {
 } from "@/lib/hooks/comment/comment-hook";
 import { CommentSelectType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
+import { ReactionSelectType } from "@/zod-schemas/reaction";
+import { userSelectType } from "@/zod-schemas/user";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { LikeDislikeButton } from "../buttons/like-dislike-btns";
 import { UpdateCommentForm } from "../forms/comment/update-comment-form";
 
 dayjs.extend(relativeTime);
@@ -47,6 +50,8 @@ dayjs.extend(relativeTime);
 type CommentTreeProps = CommentSelectType & {
     childComments?: CommentSelectType[] | null;
     rating?: RatingSelectType | null;
+    user?: userSelectType | null;
+    reactions?: ReactionSelectType[] | null;
 };
 
 function buildCommentHierarchy(
@@ -60,7 +65,8 @@ function buildCommentHierarchy(
         commentMap.set(comment.id, {
             ...comment,
             childComments: [],
-            rating: comment.rating || null,
+            rating: comment.rating,
+            user: comment.user,
         });
     });
 
@@ -86,7 +92,7 @@ function buildCommentHierarchy(
 
 function commentsToTreeNodeData(
     comments: CommentTreeProps[]
-): (TreeNodeData & CommentSelectType & { rating?: RatingSelectType | null })[] {
+): (TreeNodeData & CommentTreeProps)[] {
     return comments.map((comment) => {
         const baseNode = {
             value: `${comment.id}`,
@@ -108,16 +114,14 @@ function commentsToTreeNodeData(
 
 // Move flattenComments outside the component to avoid dependency issues
 const flattenComments = (
-    comments: (TreeNodeData &
-        CommentSelectType & { rating?: RatingSelectType | null })[],
-    map: Map<string, CommentSelectType & { rating?: RatingSelectType | null }>
+    comments: (TreeNodeData & CommentTreeProps)[],
+    map: Map<string, CommentTreeProps>
 ) => {
     comments.forEach((comment) => {
         map.set(comment.value, comment);
         if (comment.children) {
             flattenComments(
-                comment.children as (TreeNodeData &
-                    CommentSelectType & { rating?: RatingSelectType | null })[],
+                comment.children as (TreeNodeData & CommentTreeProps)[],
                 map
             );
         }
@@ -133,10 +137,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
     // Memoize the commentMap to prevent infinite re-renders
     const commentMap = useMemo(() => {
-        const map = new Map<
-            string,
-            CommentSelectType & { rating?: RatingSelectType | null }
-        >();
+        const map = new Map<string, CommentTreeProps>();
         flattenComments(commentsNodeData, map);
         return map;
     }, [commentsNodeData]);
@@ -205,6 +206,16 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
                 const isEditOpen = activeEditId === comment.id;
 
+                const likes = comment.reactions?.filter((r) => r.liked).length;
+
+                const dislikes = comment.reactions?.filter(
+                    (r) => r.disliked
+                ).length;
+
+                const userReaction = comment.reactions
+                    ?.filter((r) => r.userId === session?.user.id)
+                    .pop();
+
                 return (
                     <Box
                         {...elementProps}
@@ -225,56 +236,81 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                     <IconUser />
                                 </Avatar>
 
-                                <Stack gap={4} flex={1}>
-                                    <Group gap="xs" align="center">
-                                        <Text size="xs" c="dimmed">
-                                            {comment.hasBeenDeleted
-                                                ? "[deleted]"
-                                                : comment.userId}
-                                        </Text>
+                                {!comment.hasBeenDeleted ? (
+                                    <Stack gap={4} flex={1}>
+                                        <Group gap="xs" align="center">
+                                            <Text size="xs" c="dimmed">
+                                                {comment.user?.name ||
+                                                    comment.userId}
+                                            </Text>
 
-                                        <Text size="xs" c="dimmed">
-                                            {comment.hasBeenDeleted
-                                                ? "deleted"
-                                                : comment.edited
-                                                ? `edited ${dayjs(
-                                                      comment.edited
-                                                  ).fromNow()}`
-                                                : comment.created
-                                                ? `${dayjs(
-                                                      comment.created
-                                                  ).fromNow()}`
-                                                : ""}
-                                        </Text>
-                                    </Group>
+                                            <Text size="xs" c="dimmed">
+                                                {comment.edited
+                                                    ? `edited ${dayjs(
+                                                          comment.edited
+                                                      ).fromNow()}`
+                                                    : comment.created
+                                                    ? `${dayjs(
+                                                          comment.created
+                                                      ).fromNow()}`
+                                                    : ""}
+                                            </Text>
+                                        </Group>
 
-                                    {comment.rating?.stars && (
-                                        <Rating
-                                            defaultValue={comment.rating.stars}
-                                            readOnly
-                                            fractions={2}
-                                            size={"xs"}
-                                        />
-                                    )}
-
-                                    <Text size="sm">
-                                        {comment.hasBeenDeleted ? (
-                                            "Deleted"
-                                        ) : isEditOpen ? (
-                                            <UpdateCommentForm
-                                                text={comment.text}
-                                                commentId={comment.id}
-                                                storyISBN={comment.storyISBN}
-                                                userId={comment.userId}
-                                                closeCommentForm={
-                                                    handleCloseEdit
+                                        {comment.rating?.stars && (
+                                            <Rating
+                                                defaultValue={
+                                                    comment.rating.stars
                                                 }
+                                                readOnly
+                                                fractions={2}
+                                                size={"xs"}
                                             />
-                                        ) : (
-                                            node.label
                                         )}
-                                    </Text>
-                                </Stack>
+
+                                        <Text size="sm">
+                                            {isEditOpen ? (
+                                                <UpdateCommentForm
+                                                    text={comment.text}
+                                                    commentId={comment.id}
+                                                    storyISBN={
+                                                        comment.storyISBN
+                                                    }
+                                                    userId={comment.userId}
+                                                    closeCommentForm={
+                                                        handleCloseEdit
+                                                    }
+                                                />
+                                            ) : (
+                                                node.label
+                                            )}
+                                        </Text>
+
+                                        {session?.user.id && (
+                                            <LikeDislikeButton
+                                                commentId={comment.id}
+                                                userId={session.user.id}
+                                                likes={likes}
+                                                dislikes={dislikes}
+                                                userReaction={userReaction}
+                                            />
+                                        )}
+                                    </Stack>
+                                ) : (
+                                    <Stack gap={4} flex={1}>
+                                        <Group gap="xs" align="center">
+                                            <Text size="xs" c="dimmed">
+                                                [deleted]
+                                            </Text>
+
+                                            <Text size="xs" c="dimmed">
+                                                deleted
+                                            </Text>
+                                        </Group>
+
+                                        <Text size="sm">Deleted</Text>
+                                    </Stack>
+                                )}
 
                                 {hasChildren && (
                                     <IconChevronDown

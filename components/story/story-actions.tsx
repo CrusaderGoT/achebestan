@@ -1,11 +1,14 @@
-import { ActionIcon, Group } from "@mantine/core";
+"use client";
+
+import { Group } from "@mantine/core";
+
 import {
     IconBubble,
     IconCurrencyDollar,
     IconHeart,
     IconShare2,
-    IconThumbUpFilled,
 } from "@tabler/icons-react";
+
 import { DeleteStory } from "./delete-story";
 
 type StoryActionsProps = {
@@ -21,29 +24,15 @@ export function StoryActions({
 }: StoryActionsProps) {
     return (
         <Group>
-            <LikeButton />
-
-            <IconHeart />
-            <IconBubble />
-            <IconCurrencyDollar />
-            <IconShare2 />
-
+            <IconHeart /> {/**favourite */}
+            <IconBubble /> {/**comment toggle */}
+            <IconCurrencyDollar /> {/**buy me coffee */}
+            <IconShare2 /> {/**social share */}
             <DeleteStory
                 isbn={isbn}
                 storyTitle={storyTitle}
                 authorId={authorId}
             />
         </Group>
-    );
-}
-
-function LikeButton() {
-    return (
-        <ActionIcon.Group>
-            <ActionIcon>
-                <IconThumbUpFilled />
-            </ActionIcon>
-            <ActionIcon.GroupSection>{33}</ActionIcon.GroupSection>
-        </ActionIcon.Group>
     );
 }

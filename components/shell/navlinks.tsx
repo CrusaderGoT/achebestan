@@ -2,6 +2,7 @@
 
 import { NavLink } from "@mantine/core";
 import {
+    IconBook,
     IconCoffee,
     IconMail,
     IconMoneybagPlus,
@@ -18,6 +19,12 @@ export const navlinkData = [
         href: "/story/new",
         description: "Write a new story",
         rightSection: <IconPlus size={16} stroke={1.5} />,
+    },
+    {
+        icon: IconBook,
+        label: "Books",
+        href: "/books",
+        description: "Collection of stories into books",
     },
     {
         icon: IconMail,

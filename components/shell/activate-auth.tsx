@@ -4,7 +4,7 @@ import { TextInput } from "@mantine/core";
 import { usePathname } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
-export function SecretLogin({
+export function ActivateAuth({
     secretValue,
     setSecretValue,
 }: {
