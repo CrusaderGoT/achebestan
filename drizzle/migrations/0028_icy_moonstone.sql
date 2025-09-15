@@ -1,0 +1,1 @@
+ALTER TABLE "stories" ALTER COLUMN "blurb" DROP NOT NULL;

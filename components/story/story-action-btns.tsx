@@ -9,38 +9,31 @@ import {
     IconShare2,
 } from "@tabler/icons-react";
 
+import { StorySelectType } from "@/zod-schemas/story";
 import { useMounted } from "@mantine/hooks";
 import { StoryTweetButton } from "../buttons/tweet-btn";
 import { DeleteStory } from "./delete-story";
 
 type StoryActionsProps = {
-    isbn: string;
-    storyTitle: string;
-    authorId: string;
+    story: Omit<StorySelectType, "content">;
 };
 
-export function StoryActions({
-    isbn,
-    storyTitle,
-    authorId,
-}: StoryActionsProps) {
+export function StoryActions({ story }: StoryActionsProps) {
     const mounted = useMounted();
 
     if (!mounted) return null;
 
     return (
-        <Group
-            justify="space-between"
-        >
+        <Group justify="space-between">
             <IconHeart /> {/**favourite */}
             <IconBubble /> {/**comment toggle */}
             <IconCurrencyDollar /> {/**buy me coffee */}
             <IconShare2 /> {/**social share modal */}
-            <StoryTweetButton storyTitle={storyTitle} isbn={isbn} />
+            <StoryTweetButton story={story} variant="subtle" />
             <DeleteStory
-                isbn={isbn}
-                storyTitle={storyTitle}
-                authorId={authorId}
+                isbn={story.isbn}
+                storyTitle={story.title}
+                authorId={story.authorId}
             />
         </Group>
     );

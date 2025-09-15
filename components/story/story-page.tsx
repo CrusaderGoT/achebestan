@@ -48,6 +48,7 @@ export function Story({
     isbn,
     id,
     bookId,
+    blurb,
 }: StoryProps) {
     const [story, setStory] = useState<StorySelectType>({
         image: image,
@@ -60,6 +61,7 @@ export function Story({
         id: id,
         bookId: bookId,
         authorId: author.id,
+        blurb: blurb,
     });
 
     const [

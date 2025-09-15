@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 
 import { authClient } from "@/lib/auth-client";
-import { calculateRatingsAverage } from "@/lib/utils/calculate-ratings-average";
+import { calculateRatingsAverage } from "@/lib/utils/helpers";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";

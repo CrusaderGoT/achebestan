@@ -3,7 +3,13 @@
 import { createFormContext } from "@mantine/form";
 
 import { StoryUpdateType } from "@/zod-schemas/story";
-import { Stack, TextInput, TextInputProps } from "@mantine/core";
+import {
+    Stack,
+    Textarea,
+    TextareaProps,
+    TextInput,
+    TextInputProps,
+} from "@mantine/core";
 import { StoryImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
@@ -30,6 +36,8 @@ export function UpdateStoryFormFields() {
             <UpdateStoryTitle />
 
             <UpdateStorySubtitle />
+
+            <UpdateStoryBlurb maxRows={8} />
 
             <UpdateStoryContent />
         </Stack>
@@ -61,6 +69,22 @@ export function UpdateStorySubtitle({ ...props }: UpdateStorySubtitleType) {
             label="Subtitle"
             key={form.key("subtitle")}
             {...form.getInputProps("subtitle")}
+            {...props}
+        />
+    );
+}
+
+type UpdateStoryBlurbType = Partial<TextareaProps>;
+
+export function UpdateStoryBlurb({ ...props }: UpdateStoryBlurbType) {
+    const form = useUpdateStoryFormContext();
+
+    return (
+        <Textarea
+            label="Blurb"
+            description="The description or intro of the story"
+            key={form.key("blurb")}
+            {...form.getInputProps("blurb")}
             {...props}
         />
     );

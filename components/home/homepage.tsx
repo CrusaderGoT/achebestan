@@ -48,6 +48,7 @@ export function HomePage({
                                     edited={story.edited}
                                     authorId={story.authorId}
                                     bookId={story.bookId}
+                                    blurb={story.blurb}
                                 />
                             </Grid.Col>
                         );

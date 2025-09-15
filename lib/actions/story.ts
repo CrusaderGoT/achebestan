@@ -273,6 +273,7 @@ export async function searchStories(
                 authorId: true,
                 bookId: true,
                 image: true,
+                blurb: true,
             },
         });
 

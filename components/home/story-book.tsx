@@ -29,7 +29,7 @@ export function StoryBook({
     authorName,
     isbn,
     navigate = true,
-    content,
+    blurb,
 }: StoryBookProps) {
     const { ref, width } = useElementSize();
 
@@ -78,21 +78,23 @@ export function StoryBook({
                 )}
             </Stack>
 
-            <Center
-                ref={ref}
-                className={cx(
-                    width < 120
-                        ? storybookStyles.hideParagraph
-                        : storybookStyles.showParagraph
-                )}
-            >
-                <Text
-                    lineClamp={7}
-                    className={storybookStyles.storybookParagraph}
+            {blurb && (
+                <Center
+                    ref={ref}
+                    className={cx(
+                        width < 120
+                            ? storybookStyles.hideParagraph
+                            : storybookStyles.showParagraph
+                    )}
                 >
-                    {content}
-                </Text>
-            </Center>
+                    <Text
+                        lineClamp={7}
+                        className={storybookStyles.storybookParagraph}
+                    >
+                        {blurb}
+                    </Text>
+                </Center>
+            )}
         </Flex>
     );
 }

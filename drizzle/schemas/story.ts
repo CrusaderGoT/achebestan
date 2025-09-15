@@ -24,6 +24,7 @@ export const story = table(
         bookId: t.integer(),
         ...timestamps,
         ...image,
+        blurb: t.text(),
     },
     (table) => [
         t.index("stories_title_idx").on(table.title),

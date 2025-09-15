@@ -1,9 +1,12 @@
 "use client";
 
+import { Stack, Textarea, TextInput } from "@mantine/core";
 import { createFormContext } from "@mantine/form";
 
+import storypageStyles from "@/styles/story-page.module.css";
+
 import { StoryInsertType } from "@/zod-schemas/story";
-import { Stack, TextInput } from "@mantine/core";
+
 import { StoryImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
@@ -34,11 +37,20 @@ export function StoryFormFields() {
                 {...form.getInputProps("subtitle")}
             />
 
+            <Textarea
+                label="Blurb"
+                description="A description or intro of the story"
+                key={form.key("blurb")}
+                {...form.getInputProps("blurb")}
+                maxRows={8}
+            />
+
             <StoryRichTextEditor
                 key={form.key("content")}
                 value={form.values.content}
                 error={form.getInputProps("content").error}
                 {...form.getInputProps("content")}
+                className={storypageStyles.storyContent}
             />
         </Stack>
     );

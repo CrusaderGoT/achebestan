@@ -162,9 +162,9 @@ export function SearchSpotlight() {
                     )}
 
                     {/* Show ISBN for identification */}
-                    {item.isbn && (
-                        <Text opacity={0.4} size="xs">
-                            ISBN: {item.isbn}
+                    {item.blurb && (
+                        <Text opacity={0.4} size="xs" lineClamp={4}>
+                            {item.blurb}
                         </Text>
                     )}
                 </Box>
