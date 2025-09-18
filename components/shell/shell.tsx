@@ -10,14 +10,7 @@ import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import {
-    AppShell,
-    Burger,
-    Group,
-    Image,
-    Title,
-    UnstyledButton,
-} from "@mantine/core";
+import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import Link from "next/link";
