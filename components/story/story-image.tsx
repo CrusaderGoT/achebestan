@@ -1,3 +1,5 @@
+"use client";
+
 import { userSelectType } from "@/zod-schemas/user";
 import { Avatar, Badge, Box, Code, Group, Image } from "@mantine/core";
 import { IconUserCircle } from "@tabler/icons-react";
@@ -6,6 +8,9 @@ import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 type StoryImageType = {
     image: string | null;

@@ -21,6 +21,9 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Graph } from "schema-dts";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 // Generate metadata for the story page
 export async function generateMetadata({

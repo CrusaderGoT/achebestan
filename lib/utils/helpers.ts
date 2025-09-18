@@ -65,9 +65,20 @@ export function truncateText(text: string, maxLength: number = 160): string {
 
 // Helper function to extract reading time estimate
 export function estimateReadingTime(content: string): number {
-    const wordsPerMinute = 200; // Average reading speed
+    const wordsPerMinute = 238; // average-reading-speed > https://scholarwithin.com/average-reading-speed
     const wordCount = content.split(/\s+/).length;
-    return Math.ceil(wordCount / wordsPerMinute);
+    return Number((wordCount / wordsPerMinute).toFixed(1));
+}
+
+export function formatEstimatedReadingTime(mins: number) {
+    if (mins <= 0) return "no read time";
+
+    if (mins < 1 && mins > 0) {
+        const timeInSeconds = mins * 60;
+        return `${timeInSeconds} seconds read`;
+    }
+
+    return mins === 1 ? `${mins} minute read` : `${mins} minutes read`;
 }
 
 // Helper function to create engaging tweet text

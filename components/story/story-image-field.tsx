@@ -1,13 +1,15 @@
+"use client";
+
 import { StoryUpdateType } from "@/zod-schemas/story";
 import { Box, Button } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useState } from "react";
 import { StoryImageDropzone } from "../ui/dropzone";
 
+import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
-import { authClient } from "@/lib/auth-client";
 
 type StoryImageFieldType = {
     openedImageField: boolean;

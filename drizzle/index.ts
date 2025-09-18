@@ -20,9 +20,43 @@ if (!connectionString) {
     throw new Error("Database connection string not found");
 }
 
-const client = postgres(connectionString);
+// Declare global variable for development singleton
+declare global {
+    var __drizzleClient: postgres.Sql | undefined;
+}
+
+// Configure postgres client with proper connection pooling
+const clientConfig = {
+    max: process.env.NODE_ENV === "production" ? 20 : 1, // Limit connections
+    idle_timeout: 20, // Close idle connections after 20 seconds
+    max_lifetime: 60 * 30, // Close connections after 30 minutes
+    connect_timeout: 10, // Connection timeout in seconds
+};
+
+let client: postgres.Sql;
+
+if (process.env.NODE_ENV === "production") {
+    // In production, create a new client
+    client = postgres(connectionString, clientConfig);
+} else {
+    // In development, use singleton pattern to prevent multiple connections
+    if (!global.__drizzleClient) {
+        global.__drizzleClient = postgres(connectionString, {
+            ...clientConfig,
+            max: 1, // Only 1 connection in development
+        });
+    }
+    client = global.__drizzleClient;
+}
 
 export const db = drizzle(client, {
     casing: "snake_case",
     schema: { ...story, ...user, ...book, ...rating, ...comment, ...reaction },
 });
+
+// Connection cleanup for graceful shutdown
+if (process.env.NODE_ENV === "production") {
+    process.on("beforeExit", async () => {
+        await client.end();
+    });
+}

@@ -39,20 +39,6 @@ export function BookmarkList({
 
     if (bookmarks.length === 0) return null;
 
-    const formatTimestamp = (timestamp: number) => {
-        const date = dayjs(timestamp);
-        const now = dayjs();
-        const diffMins = now.diff(date, "minute");
-        const diffHours = now.diff(date, "hour");
-        const diffDays = now.diff(date, "day");
-
-        if (diffMins < 1) return "Just now";
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        return date.format("L");
-    };
-
     return (
         <Box className={styles.bookmarkListBox}>
             {!opened && (
@@ -136,9 +122,9 @@ export function BookmarkList({
                                                     c="dimmed"
                                                     mt={4}
                                                 >
-                                                    {formatTimestamp(
+                                                    {dayjs(
                                                         bookmark.timestamp
-                                                    )}
+                                                    ).fromNow()}
                                                 </Text>
                                             </Box>
 

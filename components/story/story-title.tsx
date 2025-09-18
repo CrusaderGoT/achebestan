@@ -1,3 +1,5 @@
+"use client";
+
 import { UpdateStoryTitle } from "@/components/forms/story/update-story-form-context";
 import { StoryUpdateType } from "@/zod-schemas/story";
 import { ActionIcon, Box, Group, Title } from "@mantine/core";

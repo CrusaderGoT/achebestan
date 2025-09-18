@@ -89,7 +89,9 @@ export function DeleteStory({
                 onClick={openDeleteModal}
                 variant="subtle"
                 color="red"
-                className={cx(!session?.user.id && publicStyles.hide)}
+                className={cx(
+                    session?.user.id !== authorId && publicStyles.hide
+                )}
             >
                 <IconTrashX />
             </ActionIcon>

@@ -2,9 +2,16 @@
 
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
 import { StoryUpdateType } from "@/zod-schemas/story";
-import { ActionIcon, Box, Group, ScrollArea } from "@mantine/core";
+import {
+    ActionIcon,
+    Badge,
+    Box,
+    Group,
+    ScrollArea,
+    Stack,
+} from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { IconCheck, IconEdit } from "@tabler/icons-react";
+import { IconCheck, IconClock, IconEdit } from "@tabler/icons-react";
 
 import { authClient } from "@/lib/auth-client";
 import { useBookmarks } from "@/lib/hooks/bookmark/use-bookmarks";
@@ -14,6 +21,10 @@ import {
     renderBookmarkIndicators,
     shouldReRenderBookmarks,
 } from "@/lib/utils/bookmark-renderer";
+import {
+    estimateReadingTime,
+    formatEstimatedReadingTime,
+} from "@/lib/utils/helpers";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
@@ -190,8 +201,29 @@ export function StoryContent({
         }, 100);
     }, [hideContextMenu, bookmarks, renderBookmarks]);
 
+    const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
+
     return (
-        <Box className={publicStyles.relative}>
+        <Stack className={publicStyles.relative} gap={"xs"}>
+            {!openedContentField && (
+                <Group justify="space-between">
+                    <Badge
+                        size="xs"
+                        variant="subtle"
+                        leftSection={<IconClock size={14} />}
+                    >
+                        {timeToRead}
+                    </Badge>
+
+                    {/* Bookmark List Sidebar */}
+                    <BookmarkList
+                        bookmarks={bookmarks}
+                        onBookmarkClick={scrollToBookmark}
+                        onBookmarkRemove={handleBookmarkRemove}
+                    />
+                </Group>
+            )}
+
             <Group
                 justify="space-between"
                 mb={"xs"}
@@ -242,15 +274,6 @@ export function StoryContent({
                 menuRef={contextMenuRef}
             />
 
-            {/* Bookmark List Sidebar */}
-            {!openedContentField && (
-                <BookmarkList
-                    bookmarks={bookmarks}
-                    onBookmarkClick={scrollToBookmark}
-                    onBookmarkRemove={handleBookmarkRemove}
-                />
-            )}
-
             {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
             <ScrollArea
                 className={cx(
@@ -291,6 +314,6 @@ export function StoryContent({
                 onSave={handleSaveBookmark}
                 contextText={pendingBookmarkData?.contextText || ""}
             />
-        </Box>
+        </Stack>
     );
 }
