@@ -34,6 +34,7 @@ export default function RootLayout({
         <html {...mantineHtmlProps} lang="en">
             <head>
                 <ColorSchemeScript />
+                <meta name="apple-mobile-web-app-title" content="Achebestan" />
             </head>
             <body>
                 <MantineProvider>

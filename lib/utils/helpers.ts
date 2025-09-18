@@ -45,6 +45,18 @@ export function calculateRatingsAverage(
     return totalStars / uniqueRatingsArray.length;
 }
 
+export function highestRating(ratings: RatingSelectType[]) {
+    if (ratings.length < 1) return 0;
+
+    return Math.max(...ratings.map((r) => r.stars));
+}
+
+export function lowestRating(ratings: RatingSelectType[]) {
+    if (ratings.length < 1) return 0;
+
+    return Math.min(...ratings.map((r) => r.stars));
+}
+
 // Helper function to truncate text for descriptions
 export function truncateText(text: string, maxLength: number = 160): string {
     if (text.length <= maxLength) return text;
@@ -115,4 +127,3 @@ export function createExcerpt(text: string, maxLength: number): string {
 
     return excerpt + (excerpt.length < text.length ? "..." : "");
 }
-

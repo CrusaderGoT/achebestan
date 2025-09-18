@@ -10,12 +10,17 @@ import { auth } from "@/lib/auth";
 import {
     calculateRatingsAverage,
     estimateReadingTime,
+    highestRating,
+    lowestRating,
     truncateText,
 } from "@/lib/utils/helpers";
+import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { Divider, Stack } from "@mantine/core";
+import dayjs from "dayjs";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import type { Graph } from "schema-dts";
 
 // Generate metadata for the story page
 export async function generateMetadata({
@@ -73,7 +78,7 @@ export async function generateMetadata({
               story.blurb,
               140
           )} Read this original story on Achebestan.`
-        : `Discover "${story.title}" by ${story.author.name}. ${truncateText(
+        : `Discover ${story.title} by ${story.author.name}. ${truncateText(
               story.content,
               120
           )} Read on Achebestan.`;
@@ -90,7 +95,8 @@ export async function generateMetadata({
         "stories",
         "achebestan",
         isbn,
-        ...(story.subtitle ? [story.subtitle.toLowerCase()] : []),
+        story.subtitle && story.subtitle.toLowerCase(),
+        story.blurb && story.blurb.toLowerCase(),
     ];
 
     return {
@@ -100,7 +106,12 @@ export async function generateMetadata({
 
         // Enhanced meta tags
         keywords: dynamicKeywords.join(", "),
-        authors: [{ name: story.author.name, url: authorUrl }],
+        authors: [
+            {
+                name: story.author.name,
+                url: authorUrl,
+            },
+        ],
         creator: story.author.name,
         publisher: "Achebestan",
         category: "Literature",
@@ -140,7 +151,7 @@ export async function generateMetadata({
                     url: imageUrl,
                     width: 1200,
                     height: 630,
-                    alt: `"${fullTitle}" by ${story.author.name} - Original story on Achebestan`,
+                    alt: `${fullTitle} by ${story.author.name} - Original story on Achebestan`,
                     type: "image/jpeg",
                 },
                 // Square image for some platforms
@@ -148,20 +159,22 @@ export async function generateMetadata({
                     url: imageUrl,
                     width: 400,
                     height: 400,
-                    alt: `"${fullTitle}" by ${story.author.name}`,
+                    alt: `${fullTitle} by ${story.author.name}`,
                     type: "image/jpeg",
                 },
             ],
 
             // Article-specific metadata
-            publishedTime: story.created.toDateString(),
-            modifiedTime:
-                story.edited?.toDateString() || story.created.toDateString(),
+            publishedTime: dayjs(story.created).fromNow(true),
+            modifiedTime: story.edited
+                ? dayjs(story.edited).fromNow(true)
+                : dayjs(story.created).fromNow(true),
             authors: [story.author.name],
             section: "Original Stories",
             tags: [
                 story.title,
                 story.author.name,
+                story.blurb ? story.blurb.toLowerCase() : "",
                 "original story",
                 "literature",
                 "fiction",
@@ -173,13 +186,13 @@ export async function generateMetadata({
         twitter: {
             card: "summary_large_image",
             site: "@achebestan",
-            creator: "@achebestan", // You can link author Twitter if available
+            creator: "@achebestan",
             title: `${fullTitle} by ${story.author.name}`,
             description: socialDescription,
             images: [
                 {
                     url: imageUrl,
-                    alt: `"${fullTitle}" by ${story.author.name} - Read on Achebestan`,
+                    alt: `${fullTitle} by ${story.author.name} - Read on Achebestan`,
                 },
             ],
         },
@@ -188,9 +201,10 @@ export async function generateMetadata({
         other: {
             // Article metadata
             "article:author": story.author.name,
-            "article:published_time": story.created.toDateString(),
-            "article:modified_time":
-                story.edited?.toDateString() || story.created.toDateString(),
+            "article:published_time": dayjs(story.created).fromNow(true),
+            "article:modified_time": story.edited
+                ? dayjs(story.edited).fromNow(true)
+                : dayjs(story.created).fromNow(true),
             "article:section": "Original Stories",
             "article:tag": "original story, literature, fiction",
 
@@ -253,14 +267,16 @@ export default async function StoryPage({
     const readingTime = estimateReadingTime(story.content);
     const baseUrl = "https://achebestan.vercel.app";
     const wordCount = story.content.split(/\s+/).length;
+    const highestRate = highestRating(story.ratings);
+    const lowestRate = lowestRating(story.ratings);
 
     // Comprehensive JSON-LD structured data for rich snippets
-    const structuredData = {
+    const structuredData: Graph = {
         "@context": "https://schema.org",
         "@graph": [
             // Main Creative Work/Article schema
             {
-                "@type": ["CreativeWork", "Article"],
+                "@type": "Article",
                 "@id": `${baseUrl}/story/${isbn}#article`,
                 mainEntityOfPage: {
                     "@type": "WebPage",
@@ -272,13 +288,12 @@ export default async function StoryPage({
                 text: story.content,
                 wordCount: wordCount,
                 timeRequired: `PT${readingTime}M`,
-                readingTime: `PT${readingTime}M`,
                 image: story.image
                     ? {
                           "@type": "ImageObject",
                           url: story.image,
-                          width: 1200,
-                          height: 630,
+                          width: "1200",
+                          height: "630",
                       }
                     : undefined,
                 author: {
@@ -294,11 +309,13 @@ export default async function StoryPage({
                     url: baseUrl,
                     logo: {
                         "@type": "ImageObject",
-                        url: `${baseUrl}/logo-placeholder.png`,
+                        url: `${baseUrl}/web-app-manifest-512x512.png`,
                     },
                 },
-                datePublished: story.created,
-                dateModified: story.edited || story.created,
+                datePublished: dayjs(story.created).format(),
+                dateModified: story.edited
+                    ? dayjs(story.edited).format()
+                    : dayjs(story.created).format(),
                 inLanguage: "en-US",
                 genre: ["Fiction", "Literature", "Original Story"],
                 keywords: `${story.title}, ${story.author.name}, original story, literature, fiction, achebestan`,
@@ -326,19 +343,18 @@ export default async function StoryPage({
                 interactionStatistic: [
                     {
                         "@type": "InteractionCounter",
-                        interactionType: "https://schema.org/CommentAction",
+                        interactionType: {
+                            "@type": "CommentAction",
+                        },
                         userInteractionCount: comments?.length || 0,
                     },
-                    ...(totalRatings > 0
-                        ? [
-                              {
-                                  "@type": "InteractionCounter",
-                                  interactionType:
-                                      "https://schema.org/ReviewAction",
-                                  userInteractionCount: totalRatings,
-                              },
-                          ]
-                        : []),
+                    {
+                        "@type": "InteractionCounter",
+                        interactionType: {
+                            "@type": "ReviewAction",
+                        },
+                        userInteractionCount: totalRatings,
+                    },
                 ],
             },
 
@@ -364,7 +380,7 @@ export default async function StoryPage({
                     name: "Achebestan",
                     "@id": `${baseUrl}#organization`,
                 },
-                datePublished: story.created,
+                datePublished: dayjs(story.created).format(),
                 url: `${baseUrl}/story/${isbn}`,
                 sameAs: `${baseUrl}/story/${isbn}`,
                 ...(story.image && {
@@ -375,8 +391,8 @@ export default async function StoryPage({
                         "@type": "AggregateRating",
                         ratingValue: averageRating,
                         reviewCount: totalRatings,
-                        bestRating: 5,
-                        worstRating: 1,
+                        bestRating: highestRate,
+                        worstRating: lowestRate,
                     },
                 }),
             },
@@ -405,13 +421,13 @@ export default async function StoryPage({
                 url: baseUrl,
                 logo: {
                     "@type": "ImageObject",
-                    url: `${baseUrl}/logo-placeholder.png`,
-                    width: 200,
-                    height: 200,
+                    url: `${baseUrl}/web-app-manifest-512x512.png`,
+                    width: "200",
+                    height: "200",
                 },
                 description:
                     "Discover and share original stories. A platform for readers and writers to explore literature and fiction.",
-                foundingDate: "2024",
+                foundingDate: "2025",
                 areaServed: "Worldwide",
                 knowsAbout: [
                     "Literature",
@@ -444,7 +460,7 @@ export default async function StoryPage({
                         "@type": "EntryPoint",
                         urlTemplate: `${baseUrl}/search?q={search_term_string}`,
                     },
-                    "query-input": "required name=search_term_string",
+                    query: "required name=search_term_string",
                 },
                 inLanguage: "en-US",
             },
@@ -475,7 +491,9 @@ export default async function StoryPage({
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(structuredData, null, 2),
+                    __html: sanitizeHTML(
+                        JSON.stringify(structuredData, null, 2)
+                    ),
                 }}
             />
 
