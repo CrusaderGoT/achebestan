@@ -90,7 +90,7 @@ export function createTweetText(story: {
     const { title, subtitle, blurb } = story;
 
     // Start with the title
-    let text = `📚 "${title}"`;
+    let text = `${title}`;
 
     // Add subtitle if available and space allows
     if (subtitle && (text + ` - ${subtitle}`).length <= 200) {

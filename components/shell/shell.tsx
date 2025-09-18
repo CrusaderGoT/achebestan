@@ -10,7 +10,14 @@ import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
+import {
+    AppShell,
+    Burger,
+    Group,
+    Image,
+    Title,
+    UnstyledButton,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import Link from "next/link";
@@ -46,16 +53,30 @@ export function Shell({
         >
             <AppShell.Header zIndex={900}>
                 <Group className={shellStyles.headerGroup} flex={1} gap={"xl"}>
-                    <Title
-                        order={3}
+                    <Group
+                        align="center"
+                        wrap="nowrap"
+                        gap={5}
                         onClick={() => router.push("/")}
                         className={cx(
                             shellStyles.websiteName,
                             publicStyles.noTapHighlight
                         )}
                     >
-                        Achebestan
-                    </Title>
+                        <Title order={3}>Achebestan</Title>
+
+                        <svg
+                            height={24}
+                            width={24}
+                            style={{
+                                display: "inline",
+                                backgroundColor: "ButtonFace",
+                                color: "yellow",
+                            }}
+                        >
+                            <use xlinkHref="/achebestan_logo.svg"></use>
+                        </svg>
+                    </Group>
 
                     <Group justify="space-around" visibleFrom="lg" flex={1}>
                         {navlinkData.map((item, index) => (

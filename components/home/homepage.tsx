@@ -4,12 +4,7 @@ import { Container, Grid, Stack } from "@mantine/core";
 
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
-import { StorySelectType } from "@/zod-schemas/story";
-import { userSelectType } from "@/zod-schemas/user";
-
-interface StoryBookProp extends StorySelectType {
-    author: userSelectType;
-}
+import { StoryBookProp } from "@/lib/types/story";
 
 export function HomePage({
     stories,

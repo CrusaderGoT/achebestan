@@ -59,8 +59,8 @@ export function StoryTweetButton({
     return (
         <ActionIcon
             onClick={handleClick}
-            aria-label={`Share "${story.title}" on X (Twitter)`}
-            title={`Share "${story.title}" on X`}
+            aria-label={`Share ${story.title} on X (Twitter)`}
+            title={`Share ${story.title} on X`}
             {...props}
         >
             <IconBrandX stroke={1.5} />

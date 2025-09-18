@@ -11,7 +11,7 @@ import {
 
 import { StorySelectType } from "@/zod-schemas/story";
 import { useMounted } from "@mantine/hooks";
-import { StoryTweetButton } from "../buttons/tweet-btn";
+import { StoryTweetButton } from "../buttons/story-tweet-btn";
 import { DeleteStory } from "./delete-story";
 
 type StoryActionsProps = {
