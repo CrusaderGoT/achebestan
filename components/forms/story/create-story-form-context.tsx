@@ -40,15 +40,16 @@ export function StoryFormFields() {
             <Textarea
                 label="Blurb"
                 description="A description or intro of the story"
+                maxRows={8}
+                minRows={8}
+                autosize
                 key={form.key("blurb")}
                 {...form.getInputProps("blurb")}
-                maxRows={8}
             />
 
             <StoryRichTextEditor
                 key={form.key("content")}
                 value={form.values.content}
-                error={form.getInputProps("content").error}
                 {...form.getInputProps("content")}
                 className={storypageStyles.storyContent}
             />

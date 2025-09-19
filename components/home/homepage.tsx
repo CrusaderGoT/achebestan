@@ -4,12 +4,12 @@ import { Container, Grid, Stack } from "@mantine/core";
 
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
-import { StoryBookProp } from "@/lib/types/story";
+import { StoryBookProps } from "@/lib/types/story";
 
 export function HomePage({
     stories,
 }: {
-    stories: StoryBookProp[] | undefined;
+    stories: StoryBookProps[] | undefined;
 }) {
     return (
         <Stack>

@@ -1,13 +1,13 @@
 "use client";
 
+import { PickedStoryProps } from "@/lib/types/story";
 import { createTweetText } from "@/lib/utils/helpers";
-import { StorySelectType } from "@/zod-schemas/story";
-import { ActionIcon, ActionIconProps } from "@mantine/core";
+import { ActionIcon, ActionIconProps, Group, Text } from "@mantine/core";
 import { IconBrandX } from "@tabler/icons-react";
 import { useMemo } from "react";
 
 type StoryTweetButtonProps = {
-    story: Omit<StorySelectType, "content">;
+    story: PickedStoryProps;
     baseUrl?: string;
     hashtags?: string[];
     via?: string;
@@ -61,9 +61,14 @@ export function StoryTweetButton({
             onClick={handleClick}
             aria-label={`Share ${story.title} on X (Twitter)`}
             title={`Share ${story.title} on X`}
+            flex={"100px  0"}
+            mr={"auto"}
             {...props}
         >
-            <IconBrandX stroke={1.5} />
+            <Group wrap="nowrap" gap={5}>
+                <IconBrandX stroke={1.5} />
+                <Text visibleFrom="sm">Twitter</Text>
+            </Group>
         </ActionIcon>
     );
 }

@@ -8,6 +8,7 @@
 
 .websiteName {
   cursor: pointer;
+  max-width: max-content;
 }
 
 .mobileNavBar {
@@ -18,6 +19,7 @@
   font-weight: 500;
   transition: background-color 0.2s ease, filter 0.2s ease;
   cursor: pointer;
+  min-width: max-content;
 }
 
 /* Animated underline for non-active items */

@@ -84,6 +84,9 @@ export function UpdateStoryBlurb({ ...props }: UpdateStoryBlurbType) {
             label="Blurb"
             description="The description or intro of the story"
             key={form.key("blurb")}
+            maxRows={8}
+            minRows={8}
+            autosize
             {...form.getInputProps("blurb")}
             {...props}
         />
@@ -96,7 +99,6 @@ export function UpdateStoryContent() {
         <StoryRichTextEditor
             key={form.key("content")}
             value={form.values.content}
-            error={form.getInputProps("content").error}
             {...form.getInputProps("content")}
             className={storypageStyles.storyContent}
         />

@@ -47,6 +47,8 @@ export function StoryImageField({
                 field="image"
             />
 
+            {session.data?.user.role}
+
             {image && (
                 <Button
                     size="compact-sm"

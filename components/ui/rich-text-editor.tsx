@@ -79,6 +79,7 @@ export function StoryRichTextEditor({
 
                 <RichTextEditor.Content mih={"250"} />
             </RichTextEditor>
+            <Input.Error m={0} />
         </Input.Wrapper>
     );
 }

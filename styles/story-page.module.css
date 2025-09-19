@@ -53,11 +53,6 @@
 
 /* Book-style story content with Mantine integration */
 .storyContent {
-  /* Layout & Spacing */
-  max-width: min(70ch, 90vw);
-  margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
-
   /* Typography - Book-like font stack */
   font-family: "Crimson Text", "Crimson Pro", "Libertinus Serif", "Charter",
     "Georgia", "Times New Roman", serif;
@@ -65,6 +60,13 @@
   line-height: 1.75;
   font-feature-settings: "liga", "kern", "onum";
   text-rendering: optimizeLegibility;
+}
+
+.storyContent[data-story-content] {
+  /* Layout & Spacing */
+  max-width: min(70ch, 90vw);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
 
   /* Colors */
   color: light-dark(#2c2e33, #c1c2c5);
@@ -114,7 +116,7 @@
 }
 
 /* Book page margins - wider on binding side */
-.storyContent::before {
+.storyContent[data-story-content]::before {
   content: "";
   position: absolute;
   left: 0;
@@ -128,7 +130,7 @@
   pointer-events: none;
 }
 
-[data-mantine-color-scheme="dark"] .storyContent::before {
+[data-mantine-color-scheme="dark"] .storyContent[data-story-content]::before {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.03) 0%,
@@ -152,7 +154,6 @@
     sans-serif
   );
   font-weight: 600;
-  line-height: 1.2;
   margin-top: clamp(2rem, 5vw, 3rem);
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
   color: light-dark(#1a1b1e, #f8f9fa);
@@ -192,7 +193,7 @@
 .storyContent h2::before {
   content: "";
   position: absolute;
-  left: -1.5rem;
+  left: -1rem;
   top: 50%;
   transform: translateY(-50%);
   width: 4px;

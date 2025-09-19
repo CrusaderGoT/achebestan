@@ -1,5 +1,4 @@
 import { CommentTree } from "@/components/comment/comment-tree";
-import { CreateCommentForm } from "@/components/forms/comment/create-comment-form";
 import { StoryActions } from "@/components/story/story-action-btns";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
@@ -17,11 +16,11 @@ import {
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { Divider, Stack } from "@mantine/core";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Graph } from "schema-dts";
-import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
@@ -526,11 +525,7 @@ export default async function StoryPage({
                     userRating={userRating}
                 />
 
-                <StoryActions story={story} />
-
-                <Divider />
-
-                <CreateCommentForm storyISBN={story.isbn} text="" />
+                <StoryActions {...story} />
 
                 <Divider />
 

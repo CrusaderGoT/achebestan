@@ -1,40 +1,93 @@
 "use client";
 
-import { Group } from "@mantine/core";
+import {
+    ActionIcon,
+    Box,
+    Divider,
+    Group,
+    Stack,
+    Text,
+    Transition,
+} from "@mantine/core";
 
 import {
-    IconBubble,
     IconCurrencyDollar,
     IconHeart,
-    IconShare2,
+    IconMessage2,
+    IconMessage2Off,
 } from "@tabler/icons-react";
 
-import { StorySelectType } from "@/zod-schemas/story";
-import { useMounted } from "@mantine/hooks";
-import { StoryTweetButton } from "../buttons/story-tweet-btn";
+import { PickedStoryProps } from "@/lib/types/story";
+import { useDisclosure, useMounted } from "@mantine/hooks";
+import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { DeleteStory } from "./delete-story";
+import { ShareStoryDrawer } from "./share-story-drawer";
 
-type StoryActionsProps = {
-    story: Omit<StorySelectType, "content">;
-};
+export function StoryActions({ ...props }: PickedStoryProps) {
+    const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
+        useDisclosure(false);
 
-export function StoryActions({ story }: StoryActionsProps) {
+    const [
+        openedCommentForm,
+        { toggle: toggleCommentForm, close: closeCommentForm },
+    ] = useDisclosure(false);
+
     const mounted = useMounted();
 
     if (!mounted) return null;
 
     return (
-        <Group justify="space-between">
-            <IconHeart /> {/**favourite */}
-            <IconBubble /> {/**comment toggle */}
-            <IconCurrencyDollar /> {/**buy me coffee */}
-            <IconShare2 /> {/**social share modal */}
-            <StoryTweetButton story={story} variant="subtle" />
-            <DeleteStory
-                isbn={story.isbn}
-                storyTitle={story.title}
-                authorId={story.authorId}
-            />
-        </Group>
+        <Stack>
+            <Group justify="space-between" grow>
+                <IconHeart color="red" />
+                <ActionIcon
+                    onClick={toggleCommentForm}
+                    color="gray"
+                    variant="subtle"
+                    flex={"130px  0"}
+                >
+                    <Group gap={"xs"} wrap="nowrap">
+                        <Text visibleFrom="sm" fw={500}>
+                            {openedCommentForm ? "Close" : "Comment"}
+                        </Text>
+
+                        {openedCommentForm ? (
+                            <IconMessage2Off />
+                        ) : (
+                            <IconMessage2 />
+                        )}
+                    </Group>
+                </ActionIcon>
+                <IconCurrencyDollar color="green" />
+                <ShareStoryDrawer
+                    story={{ ...props }}
+                    openedStoryShare={openedStoryShare}
+                    openStoryShare={openStoryShare}
+                    closeStoryShare={closeStoryShare}
+                />
+                <DeleteStory {...props} />
+            </Group>
+
+            <Transition
+                mounted={openedCommentForm}
+                transition="scale-y"
+                duration={400}
+                timingFunction="ease-in-out"
+            >
+                {(styles) => (
+                    <>
+                        <Divider />
+
+                        <Box style={styles}>
+                            <CreateCommentForm
+                                storyISBN={props.isbn}
+                                text=""
+                                closeCommentForm={closeCommentForm}
+                            />
+                        </Box>
+                    </>
+                )}
+            </Transition>
+        </Stack>
     );
 }

@@ -67,18 +67,32 @@ export function truncateText(text: string, maxLength: number = 160): string {
 export function estimateReadingTime(content: string): number {
     const wordsPerMinute = 238; // average-reading-speed > https://scholarwithin.com/average-reading-speed
     const wordCount = content.split(/\s+/).length;
-    return Number((wordCount / wordsPerMinute).toFixed(1));
+
+    return Math.round(wordCount / wordsPerMinute);
 }
 
 export function formatEstimatedReadingTime(mins: number) {
-    if (mins <= 0) return "no read time";
+    if (mins <= 0) return "a quick read";
 
     if (mins < 1 && mins > 0) {
-        const timeInSeconds = mins * 60;
-        return `${timeInSeconds} seconds read`;
+        const timeInSeconds = Math.round(mins * 60);
+        return timeInSeconds === 1
+            ? `${timeInSeconds} second read`
+            : `${timeInSeconds} seconds read`;
     }
 
-    return mins === 1 ? `${mins} minute read` : `${mins} minutes read`;
+    if (mins >= 60) {
+        const timeInHours = Math.round(mins / 60);
+        return timeInHours === 1
+            ? `${timeInHours} hour read`
+            : `${timeInHours} hours read`;
+    }
+
+    const timeInMinutes = Math.round(mins);
+
+    return timeInMinutes === 1
+        ? `${timeInMinutes} minute read`
+        : `${timeInMinutes} minutes read`;
 }
 
 // Helper function to create engaging tweet text

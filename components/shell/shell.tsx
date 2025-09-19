@@ -10,7 +10,13 @@ import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
+import {
+    AppShell,
+    Burger,
+    Group,
+    Title,
+    UnstyledButton
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import Link from "next/link";
@@ -45,7 +51,11 @@ export function Shell({
             }}
         >
             <AppShell.Header zIndex={900}>
-                <Group className={shellStyles.headerGroup} flex={1} gap={"xl"}>
+                <Group
+                    className={shellStyles.headerGroup}
+                    flex={1}
+                    wrap="nowrap"
+                >
                     <Group
                         align="center"
                         wrap="nowrap"
@@ -71,7 +81,12 @@ export function Shell({
                         </svg>
                     </Group>
 
-                    <Group justify="space-around" visibleFrom="lg" flex={1}>
+                    <Group
+                        justify="space-around"
+                        flex={1}
+                        wrap="nowrap"
+                        visibleFrom="lg"
+                    >
                         {navlinkData.map((item, index) => (
                             <UnstyledButton
                                 key={index}
@@ -95,7 +110,7 @@ export function Shell({
                         )}
                     </Group>
 
-                    <Group gap={"xs"}>
+                    <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
                         {session?.user.id ? (
                             <LogoutButton />
                         ) : (

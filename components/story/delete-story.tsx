@@ -8,6 +8,7 @@ import {
     Mark,
     Modal,
     Stack,
+    Text,
 } from "@mantine/core";
 
 import { useDeleteStory } from "@/lib/hooks/story/delete-story-hook";
@@ -18,17 +19,10 @@ import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
 import { authClient } from "@/lib/auth-client";
+import { PickedStoryProps } from "@/lib/types/story";
 import { redirect } from "next/navigation";
 
-export function DeleteStory({
-    isbn,
-    storyTitle,
-    authorId,
-}: {
-    isbn: string;
-    storyTitle: string;
-    authorId: string;
-}) {
+export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
     const [opened, { open: openDeleteModal, close: closeDeleteModal }] =
         useDisclosure(false);
 
@@ -52,7 +46,7 @@ export function DeleteStory({
                         <Alert>
                             You Are About To Permanently Delete{" "}
                             <Mark className={publicStyles.highlightText}>
-                                {storyTitle.toUpperCase()}
+                                {title.toUpperCase()}
                             </Mark>
                             .
                         </Alert>
@@ -92,8 +86,14 @@ export function DeleteStory({
                 className={cx(
                     session?.user.id !== authorId && publicStyles.hide
                 )}
+                flex={"110px  0"}
             >
-                <IconTrashX />
+                <Group>
+                    <Text visibleFrom="sm" fw={500}>
+                        Delete
+                    </Text>
+                    <IconTrashX />
+                </Group>
             </ActionIcon>
         </>
     );

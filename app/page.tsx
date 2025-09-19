@@ -1,13 +1,13 @@
 import { HomePage } from "@/components/home/homepage";
 import { readLatestStories } from "@/lib/actions/story";
-import { StoryBookProp } from "@/lib/types/story";
+import { StoryBookProps } from "@/lib/types/story";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import type { Metadata } from "next";
 import { Graph } from "schema-dts";
 
 // Helper function to generate dynamic description based on latest stories
 function generateDynamicDescription(
-    stories: StoryBookProp[] | undefined
+    stories: StoryBookProps[] | undefined
 ): string {
     const baseDescription =
         "Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and stories. Explore adventure tales and world-building from the imagination of Nigerian author Enemchukwu Chukwuemeka.";
@@ -27,7 +27,7 @@ function generateDynamicDescription(
 }
 
 // Helper function to extract story themes for keywords
-function extractStoryThemes(stories: StoryBookProp[] | undefined): string[] {
+function extractStoryThemes(stories: StoryBookProps[] | undefined): string[] {
     const baseThemes = [
         "dark fiction",
         "poetry",
@@ -54,7 +54,7 @@ function extractStoryThemes(stories: StoryBookProp[] | undefined): string[] {
 
 // Generate structured data for homepage
 function generateHomepageStructuredData(
-    stories: StoryBookProp[] | undefined
+    stories: StoryBookProps[] | undefined
 ): Graph {
     const baseUrl = "https://achebestan.vercel.app";
 
