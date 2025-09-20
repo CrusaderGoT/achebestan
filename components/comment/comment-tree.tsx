@@ -27,7 +27,7 @@ import {
     IconUser,
 } from "@tabler/icons-react";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { useFocusTrap, useMounted } from "@mantine/hooks";
@@ -181,43 +181,19 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
     const mounted = useMounted();
 
-    // make new comments expand
-
-    const prevCommentsRef = useRef<CommentTreeProps[]>([]);
-
-    const commentsToExpand = useMemo(() => {
-        const prevCommentIds = new Set(
-            prevCommentsRef.current.map((c) => c.id)
-        );
-
-        // Find new comments (not in previous list)
-        const newComments = commentsNodeData.filter(
-            (c) => !prevCommentIds.has(c.id) && !c.parentCommentId
-        );
-
-        // Update ref for next render
-        prevCommentsRef.current = commentsNodeData;
-
-        // Return IDs of new top-level comments to expand
-        return newComments.map((c) => c.value);
-    }, [commentsNodeData]);
-
     const tree = useTree({
         multiple: false,
         initialExpandedState: getTreeExpandedState(
             commentsNodeData,
-            commentsToExpand
+            commentsNodeData
+                .slice(0, 10) // first 10
+                .filter((c) => {
+                    // Only top-level comments (level 0)
+                    return !c.parentCommentId;
+                })
+                .map((c) => c.value)
         ),
     });
-
-    // Expand new comments when they're added
-    useEffect(() => {
-        commentsToExpand.forEach((commentId) => {
-            if (!tree.expandedState[commentId]) {
-                tree.expand(commentId);
-            }
-        });
-    }, [commentsToExpand, tree]);
 
     return (
         <Tree
