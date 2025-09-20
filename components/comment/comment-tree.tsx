@@ -27,7 +27,7 @@ import {
     IconUser,
 } from "@tabler/icons-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { useFocusTrap, useMounted } from "@mantine/hooks";
@@ -181,19 +181,46 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
     const mounted = useMounted();
 
+    // make new comments expand
+
+    const prevCommentsRef = useRef<CommentTreeProps[]>([]);
+    const autoExpandedRef = useRef(new Set()); // Track auto-expanded comments
+
+    const commentsToExpand = useMemo(() => {
+        const prevCommentIds = new Set(
+            prevCommentsRef.current.map((c) => c.id)
+        );
+
+        const newComments = commentsNodeData.filter(
+            (c) => !prevCommentIds.has(c.id) && !c.parentCommentId
+        );
+
+        prevCommentsRef.current = commentsNodeData;
+
+        return newComments.map((c) => c.value);
+    }, [commentsNodeData]);
+
     const tree = useTree({
         multiple: false,
         initialExpandedState: getTreeExpandedState(
             commentsNodeData,
-            commentsNodeData
-                .slice(0, 10) // first 10
-                .filter((c) => {
-                    // Only top-level comments (level 0)
-                    return !c.parentCommentId;
-                })
-                .map((c) => c.value)
+            commentsToExpand
         ),
     });
+
+    // Only expand new comments once
+    useEffect(() => {
+        commentsToExpand.forEach((commentId) => {
+            // Only expand if we haven't auto-expanded it before AND it's not currently expanded
+            if (
+                !autoExpandedRef.current.has(commentId) &&
+                !tree.expandedState[commentId]
+            ) {
+                tree.expand(commentId);
+                autoExpandedRef.current.add(commentId); // Mark as auto-expanded
+            }
+        });
+    }, [commentsToExpand, tree]);
 
     return (
         <Tree
