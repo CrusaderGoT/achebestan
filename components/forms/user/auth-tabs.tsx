@@ -1,4 +1,3 @@
-// For file /tabs/[activeTab].tsx
 "use client";
 
 import { AnonymousSignin } from "@/components/buttons/user/anonymous-signin";
