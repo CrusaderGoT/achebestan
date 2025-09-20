@@ -6,7 +6,7 @@ import { LoginFormState } from "@/lib/types/login";
 import { useState } from "react";
 import { AuthTabs } from "./auth-tabs";
 
-export function LoginModal({
+export function AuthenticationModal({
     opened,
     close,
 }: {
@@ -18,6 +18,7 @@ export function LoginModal({
 
     const [signupFormState, setSignupFormState] =
         useState<LoginFormState>("idle");
+
     return (
         <Modal
             opened={opened}

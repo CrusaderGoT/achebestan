@@ -44,7 +44,7 @@ import { ReactionSelectType } from "@/zod-schemas/reaction";
 import { userSelectType } from "@/zod-schemas/user";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { LikeDislikeButton } from "../buttons/like-dislike-btns";
+import { LikeDislikeButton } from "../buttons/comment/like-dislike-btns";
 import { UpdateCommentForm } from "../forms/comment/update-comment-form";
 
 dayjs.extend(relativeTime);

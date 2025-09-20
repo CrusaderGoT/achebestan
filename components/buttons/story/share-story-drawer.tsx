@@ -11,7 +11,7 @@ import {
     Text,
 } from "@mantine/core";
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
-import { StoryTweetButton } from "../buttons/story-tweet-btn";
+import { StoryTweetButton } from "./story-tweet-btn";
 
 type ShareStoryDrawerProps = {
     story: PickedStoryProps;

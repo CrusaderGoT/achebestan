@@ -1,22 +1,16 @@
 "use client";
 
-import { LoginButton } from "@/components/buttons/login-btn";
-import { LogoutButton } from "@/components/buttons/logout-btn";
-import { ModeToggle } from "@/components/buttons/mode-toggle";
-import { LoginModal } from "@/components/forms/user/auth-modal";
+import { ModeToggle } from "@/components/buttons/shell/mode-toggle";
+import { LogoutButton } from "@/components/buttons/user/logout-btn";
+import { OpenAuthenticationModalButton } from "@/components/buttons/user/open-auth-modal-btn";
+import { AuthenticationModal } from "@/components/forms/user/auth-modal";
 import { ActivateAuth } from "@/components/shell/activate-auth";
 import { navlinkData, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import {
-    AppShell,
-    Burger,
-    Group,
-    Title,
-    UnstyledButton
-} from "@mantine/core";
+import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import Link from "next/link";
@@ -38,7 +32,7 @@ export function Shell({
 
     const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
 
-    const [openedLoginModal, { close: closeLoginModal, open: openLoginModal }] =
+    const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
 
     return (
@@ -77,7 +71,10 @@ export function Shell({
                                 color: "yellow",
                             }}
                         >
-                            <use xlinkHref="/achebestan_logo.svg"></use>
+                            <use
+                                xlinkHref="/achebestan_logo.svg"
+                                href="/achebestan_logo.svg"
+                            />
                         </svg>
                     </Group>
 
@@ -112,12 +109,19 @@ export function Shell({
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
                         {session?.user.id ? (
-                            <LogoutButton />
+                            session.user.isAnonymous ? (
+                                <OpenAuthenticationModalButton
+                                    openModal={openAuthModal}
+                                    disabled={openedAuthModal}
+                                />
+                            ) : (
+                                <LogoutButton />
+                            )
                         ) : (
                             secretValue.trim().toLowerCase() === "logmein" && (
-                                <LoginButton
-                                    openLoginModal={openLoginModal}
-                                    disabled={openedLoginModal}
+                                <OpenAuthenticationModalButton
+                                    openModal={openAuthModal}
+                                    disabled={openedAuthModal}
                                 />
                             )
                         )}
@@ -149,7 +153,10 @@ export function Shell({
 
             <AppShell.Main pos={"relative"}>
                 {children}
-                <LoginModal opened={openedLoginModal} close={closeLoginModal} />
+                <AuthenticationModal
+                    opened={openedAuthModal}
+                    close={closeAuthModal}
+                />
             </AppShell.Main>
 
             <AppShell.Footer></AppShell.Footer>

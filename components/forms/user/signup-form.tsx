@@ -34,8 +34,8 @@ export function SignupForm({
     });
 
     async function handleSubmit(data: SignupSchemaType) {
-        await authClient.admin.createUser(
-            { ...data, role: "user" },
+        await authClient.signUp.email(
+            { ...data },
             {
                 onRequest: () => setFormState("pending"),
                 onError(errCtx) {

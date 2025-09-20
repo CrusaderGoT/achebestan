@@ -5,8 +5,8 @@ import {
     ActionIcon,
     Group,
     Rating,
-    Text,
     TooltipFloating,
+    UnstyledButton,
 } from "@mantine/core";
 
 import { authClient } from "@/lib/auth-client";
@@ -16,6 +16,7 @@ import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
 import { RatingForm } from "../forms/rating/rating-form";
+import { AuthenticationModal } from "../forms/user/auth-modal";
 
 type StoryRatingProps = {
     ratings: RatingSelectType[];
@@ -35,6 +36,9 @@ export function StoryRating({
     const { data: session } = authClient.useSession();
 
     const mounted = useMounted();
+
+    const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
+        useDisclosure(false);
 
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
@@ -89,7 +93,16 @@ export function StoryRating({
                     />
                 </>
             ) : (
-                <Text>log in to rate</Text>
+                <Group>
+                    <UnstyledButton onClick={openAuthModal}>
+                        Rate and Comment
+                    </UnstyledButton>
+
+                    <AuthenticationModal
+                        opened={openedAuthModal}
+                        close={closeAuthModal}
+                    />
+                </Group>
             )}
 
             {ratings.length > 0 && (

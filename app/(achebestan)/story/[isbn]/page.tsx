@@ -1,5 +1,5 @@
 import { CommentTree } from "@/components/comment/comment-tree";
-import { StoryActions } from "@/components/story/story-action-btns";
+import { StoryActions } from "@/components/story/story-actions";
 import { Story } from "@/components/story/story-page";
 import { StoryRating } from "@/components/story/story-rating";
 import { readStoryComments } from "@/lib/actions/comment";

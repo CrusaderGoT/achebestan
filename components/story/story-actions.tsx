@@ -17,11 +17,12 @@ import {
     IconMessage2Off,
 } from "@tabler/icons-react";
 
+import { authClient } from "@/lib/auth-client";
 import { PickedStoryProps } from "@/lib/types/story";
 import { useDisclosure, useMounted } from "@mantine/hooks";
+import { DeleteStory } from "../buttons/story/delete-story";
+import { ShareStoryDrawer } from "../buttons/story/share-story-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
-import { DeleteStory } from "./delete-story";
-import { ShareStoryDrawer } from "./share-story-drawer";
 
 export function StoryActions({ ...props }: PickedStoryProps) {
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
@@ -34,30 +35,36 @@ export function StoryActions({ ...props }: PickedStoryProps) {
 
     const mounted = useMounted();
 
+    const { data: session } = authClient.useSession();
+
     if (!mounted) return null;
 
     return (
         <Stack>
             <Group justify="space-between" grow>
                 <IconHeart color="red" />
-                <ActionIcon
-                    onClick={toggleCommentForm}
-                    color="gray"
-                    variant="subtle"
-                    flex={"130px  0"}
-                >
-                    <Group gap={"xs"} wrap="nowrap">
-                        <Text visibleFrom="sm" fw={500}>
-                            {openedCommentForm ? "Close" : "Comment"}
-                        </Text>
 
-                        {openedCommentForm ? (
-                            <IconMessage2Off />
-                        ) : (
-                            <IconMessage2 />
-                        )}
-                    </Group>
-                </ActionIcon>
+                {session?.user.id && (
+                    <ActionIcon
+                        onClick={toggleCommentForm}
+                        color="gray"
+                        variant="subtle"
+                        flex={"130px  0"}
+                    >
+                        <Group gap={"xs"} wrap="nowrap">
+                            <Text visibleFrom="sm" fw={500}>
+                                {openedCommentForm ? "Close" : "Comment"}
+                            </Text>
+
+                            {openedCommentForm ? (
+                                <IconMessage2Off />
+                            ) : (
+                                <IconMessage2 />
+                            )}
+                        </Group>
+                    </ActionIcon>
+                )}
+
                 <IconCurrencyDollar color="green" />
                 <ShareStoryDrawer
                     story={{ ...props }}
@@ -69,7 +76,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
             </Group>
 
             <Transition
-                mounted={openedCommentForm}
+                mounted={openedCommentForm && !!session?.user.id}
                 transition="scale-y"
                 duration={400}
                 timingFunction="ease-in-out"

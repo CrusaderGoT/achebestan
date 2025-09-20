@@ -2,24 +2,27 @@
 
 import { ActionIcon, ActionIconProps } from "@mantine/core";
 
-import { IconLogin2 } from "@tabler/icons-react";
+import { IconLockAccess } from "@tabler/icons-react";
 
-type LoginButtonType = {
-    openLoginModal: () => void;
+type OpenAuthenticationModalButtonProps = {
+    openModal: () => void;
 } & ActionIconProps;
 
-export function LoginButton({ openLoginModal, ...props }: LoginButtonType) {
+export function OpenAuthenticationModalButton({
+    openModal,
+    ...props
+}: OpenAuthenticationModalButtonProps) {
     return (
         <ActionIcon
             onClick={() => {
-                openLoginModal();
+                openModal();
             }}
             color="teal"
             size={"lg"}
             variant="subtle"
             {...props}
         >
-            <IconLogin2 />
+            <IconLockAccess />
         </ActionIcon>
     );
 }
