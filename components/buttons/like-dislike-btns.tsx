@@ -1,5 +1,6 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import {
     useDislikeComment,
     useLikeComment,
@@ -13,23 +14,23 @@ import {
     IconThumbUp,
     IconThumbUpFilled,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type LikeDislikeButtonProps = {
     commentId: number;
     likes: number | undefined;
     dislikes: number | undefined;
     userReaction?: ReactionSelectType;
-    userId: string;
 };
 
 export function LikeDislikeButton({
     commentId,
-    userId,
     likes = 0,
     dislikes = 0,
     userReaction,
 }: LikeDislikeButtonProps) {
+    const { data: session } = authClient.useSession();
+
     const {
         executeAsync: executeAsyncLikeComment,
         isPending: isPendingLikeComment,
@@ -48,37 +49,50 @@ export function LikeDislikeButton({
         isPending: isPendingDislikeComment,
     } = useDislikeComment();
 
-    const [reaction, setReaction] = useState<boolean | undefined>(
-        userReaction?.liked ?? userReaction?.disliked ?? undefined
+    const [likeReaction, setLikeReaction] = useState<boolean | undefined>(
+        userReaction?.liked ?? undefined
     );
+
+    const [dislikeReaction, setDislikeReaction] = useState<boolean | undefined>(
+        userReaction?.disliked ?? undefined
+    );
+
+    useEffect(() => {
+        setDislikeReaction(userReaction?.disliked ?? undefined);
+        setLikeReaction(userReaction?.liked ?? undefined);
+    }, [userReaction, session?.user.id]);
 
     return (
         <ActionIcon.Group>
             <ActionIcon
                 variant="default"
                 onClick={async () => {
-                    const result = await executeAsyncLikeComment({
-                        commentId: commentId,
-                        userId: userId,
-                    });
+                    if (session?.user.id) {
+                        const result = await executeAsyncLikeComment({
+                            commentId: commentId,
+                            userId: session.user.id,
+                        });
 
-                    if (result.data?.deleted) {
-                        setReaction(undefined);
-                        decrementLike();
-                    } else if (result.data?.liked) {
-                        if (!reaction && reaction !== undefined) {
-                            decrementDislike();
+                        if (result.data?.deleted) {
+                            setLikeReaction(undefined);
+                            setDislikeReaction(undefined);
+                            decrementLike();
+                        } else if (result.data?.liked) {
+                            if (dislikeReaction) {
+                                setDislikeReaction(false);
+                                decrementDislike();
+                            }
+                            setLikeReaction(true);
+                            incrementLike();
                         }
-                        setReaction(true);
-                        incrementLike();
                     }
                 }}
-                disabled={isPendingDislikeComment}
+                disabled={isPendingDislikeComment || !session?.user.id}
                 loading={isPendingLikeComment}
                 size={"md"}
-                title={reaction ? "remove like" : "like"}
+                title={likeReaction ? "remove like" : "like"}
             >
-                {reaction ? (
+                {likeReaction ? (
                     <IconThumbUpFilled
                         color="var(--mantine-color-blue-text)"
                         size={16}
@@ -102,32 +116,32 @@ export function LikeDislikeButton({
             <ActionIcon
                 variant="default"
                 onClick={async () => {
-                    const result = await executeAsyncDislikeComment({
-                        commentId: commentId,
-                        userId: userId,
-                    });
+                    if (session?.user.id) {
+                        const result = await executeAsyncDislikeComment({
+                            commentId: commentId,
+                            userId: session.user.id,
+                        });
 
-                    if (result.data?.deleted) {
-                        setReaction(undefined);
-                        decrementDislike();
-                    } else if (result.data?.disliked) {
-                        if (reaction) {
-                            decrementLike();
+                        if (result.data?.deleted) {
+                            setDislikeReaction(undefined);
+                            setLikeReaction(undefined);
+                            decrementDislike();
+                        } else if (result.data?.disliked) {
+                            if (likeReaction) {
+                                setLikeReaction(false);
+                                decrementLike();
+                            }
+                            setDislikeReaction(true);
+                            incrementDislike();
                         }
-                        setReaction(false);
-                        incrementDislike();
                     }
                 }}
-                disabled={isPendingLikeComment}
+                disabled={isPendingLikeComment || !session?.user.id}
                 loading={isPendingDislikeComment}
                 size={"md"}
-                title={
-                    !reaction && reaction !== undefined
-                        ? "remove dislike"
-                        : "dislike"
-                }
+                title={dislikeReaction ? "remove dislike" : "dislike"}
             >
-                {!reaction && reaction !== undefined ? (
+                {dislikeReaction ? (
                     <IconThumbDownFilled
                         color="var(--mantine-color-red-text)"
                         size={16}

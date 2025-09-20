@@ -8,6 +8,8 @@ import {
     Avatar,
     Box,
     Button,
+    Collapse,
+    getTreeExpandedState,
     Group,
     Rating,
     Stack,
@@ -168,8 +170,6 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
     const focusTrapRef = useFocusTrap();
 
-    const tree = useTree({ multiple: false });
-
     const { data: session } = authClient.useSession();
 
     const {
@@ -180,6 +180,20 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     const { isPending: isPendingUpdateComment } = useUpdateComment();
 
     const mounted = useMounted();
+
+    const tree = useTree({
+        multiple: false,
+        initialExpandedState: getTreeExpandedState(
+            commentsNodeData,
+            commentsNodeData
+                .slice(0, 10) // first 10
+                .filter((c) => {
+                    // Only top-level comments (level 0)
+                    return !c.parentCommentId;
+                })
+                .map((c) => c.value)
+        ),
+    });
 
     return (
         <Tree
@@ -217,7 +231,9 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     .pop();
 
                 return (
-                    <Box
+                    <Stack
+                        gap={2}
+                        p="sm"
                         {...elementProps}
                         className={cx(
                             level > 1 && commentTreeStyles.childCommentLine
@@ -226,37 +242,72 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                             marginLeft: `${(level - 1) * 23}px`,
                         }}
                     >
-                        <Stack gap={2} p="sm">
-                            <Group
-                                align="flex-start"
-                                gap="xs"
-                                onClick={() => tree.toggleExpanded(node.value)}
-                            >
-                                <Avatar size="sm">
-                                    <IconUser />
-                                </Avatar>
+                        <Group
+                            align="flex-start"
+                            gap="xs"
+                            onClick={() => {
+                                tree.toggleExpanded(node.value);
+                                if (node.children) {
+                                    node.children.forEach((c) => {
+                                        tree.expand(c.value);
+                                    });
+                                }
+                            }}
+                        >
+                            <Avatar size="sm">
+                                <IconUser />
+                            </Avatar>
 
+                            {!comment.hasBeenDeleted ? (
+                                <>
+                                    <Text size="xs" c="dimmed">
+                                        {comment.user?.name || comment.userId}
+                                    </Text>
+
+                                    <Text size="xs" c="dimmed">
+                                        {comment.edited
+                                            ? `edited ${dayjs(
+                                                  comment.edited
+                                              ).fromNow()}`
+                                            : comment.created
+                                            ? `${dayjs(
+                                                  comment.created
+                                              ).fromNow()}`
+                                            : ""}
+                                    </Text>
+                                </>
+                            ) : (
+                                <>
+                                    <Text size="xs" c="dimmed">
+                                        [deleted]
+                                    </Text>
+
+                                    <Text size="xs" c="dimmed">
+                                        deleted
+                                    </Text>
+                                </>
+                            )}
+
+                            {hasChildren && (
+                                <IconChevronDown
+                                    size={18}
+                                    style={{
+                                        transform: expanded
+                                            ? "rotate(180deg)"
+                                            : "rotate(0deg)",
+                                        transition: "transform 0.2s ease",
+                                    }}
+                                />
+                            )}
+                        </Group>
+
+                        <Collapse
+                            in={tree.expandedState[node.value]}
+                            keepMounted
+                        >
+                            <Stack ml={28} gap={2}>
                                 {!comment.hasBeenDeleted ? (
                                     <Stack gap={4} flex={1}>
-                                        <Group gap="xs" align="center">
-                                            <Text size="xs" c="dimmed">
-                                                {comment.user?.name ||
-                                                    comment.userId}
-                                            </Text>
-
-                                            <Text size="xs" c="dimmed">
-                                                {comment.edited
-                                                    ? `edited ${dayjs(
-                                                          comment.edited
-                                                      ).fromNow()}`
-                                                    : comment.created
-                                                    ? `${dayjs(
-                                                          comment.created
-                                                      ).fromNow()}`
-                                                    : ""}
-                                            </Text>
-                                        </Group>
-
                                         {comment.rating?.stars && (
                                             <Rating
                                                 defaultValue={
@@ -286,127 +337,114 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                             )}
                                         </Text>
 
-                                        {session?.user.id && (
-                                            <LikeDislikeButton
-                                                commentId={comment.id}
-                                                userId={session.user.id}
-                                                likes={likes}
-                                                dislikes={dislikes}
-                                                userReaction={userReaction}
-                                            />
-                                        )}
+                                        <LikeDislikeButton
+                                            commentId={comment.id}
+                                            likes={likes}
+                                            dislikes={dislikes}
+                                            userReaction={userReaction}
+                                        />
                                     </Stack>
                                 ) : (
-                                    <Stack gap={4} flex={1}>
-                                        <Group gap="xs" align="center">
-                                            <Text size="xs" c="dimmed">
-                                                [deleted]
-                                            </Text>
-
-                                            <Text size="xs" c="dimmed">
-                                                deleted
-                                            </Text>
-                                        </Group>
-
-                                        <Text size="sm">Deleted</Text>
-                                    </Stack>
+                                    <Text size="sm">Deleted</Text>
                                 )}
 
-                                {hasChildren && (
-                                    <IconChevronDown
-                                        size={18}
-                                        style={{
-                                            transform: expanded
-                                                ? "rotate(180deg)"
-                                                : "rotate(0deg)",
-                                            transition: "transform 0.2s ease",
-                                        }}
-                                    />
-                                )}
-                            </Group>
-
-                            {!comment.hasBeenDeleted && session?.user.id && (
-                                <Group gap="xs" ml={28} mt={"xs"}>
-                                    <Button
-                                        variant="subtle"
-                                        size="xs"
-                                        onClick={() => {
-                                            handleCloseEdit();
-                                            handleReplyToggle(comment.id);
-                                        }}
-                                        leftSection={
-                                            <IconMessageReply size={15} />
-                                        }
-                                    >
-                                        {isReplyOpen ? "Cancel" : "Reply"}
-                                    </Button>
-
-                                    {session.user.id === comment.userId ? (
-                                        <>
+                                {!comment.hasBeenDeleted &&
+                                    session?.user.id && (
+                                        <Group gap="xs">
                                             <Button
                                                 variant="subtle"
-                                                color="yellow"
                                                 size="xs"
-                                                leftSection={
-                                                    <IconEdit size={15} />
-                                                }
                                                 onClick={() => {
-                                                    handleCloseReply();
-                                                    handleEditToggle(
+                                                    handleCloseEdit();
+                                                    handleReplyToggle(
                                                         comment.id
                                                     );
                                                 }}
-                                                disabled={
-                                                    isPendingUpdateComment
-                                                }
-                                                title="Edit Comment"
-                                            >
-                                                {isEditOpen ? "Cancel" : "Edit"}
-                                            </Button>
-
-                                            <Button
-                                                variant="subtle"
-                                                size="xs"
-                                                color="red"
                                                 leftSection={
-                                                    <IconTrashX size={15} />
+                                                    <IconMessageReply
+                                                        size={15}
+                                                    />
                                                 }
-                                                onClick={async () =>
-                                                    await executeAsyncDeleteComment(
-                                                        {
-                                                            commentId:
-                                                                comment.id,
-                                                            userId: comment.userId,
-                                                            storyISBN:
-                                                                comment.storyISBN,
-                                                        }
-                                                    )
-                                                }
-                                                disabled={
-                                                    isPendingDeleteComment
-                                                }
-                                                title="Delete Comment"
                                             >
-                                                Delete
+                                                {isReplyOpen
+                                                    ? "Cancel"
+                                                    : "Reply"}
                                             </Button>
-                                        </>
-                                    ) : null}
-                                </Group>
-                            )}
 
-                            {isReplyOpen && !comment.hasBeenDeleted && (
-                                <Box ml={28} mt="xs" ref={focusTrapRef}>
-                                    <CreateCommentForm
-                                        storyISBN={comment.storyISBN}
-                                        text=""
-                                        parentCommentId={comment.id}
-                                        placeholder={`Reply to ${comment.userId}`}
-                                        closeCommentForm={handleCloseReply}
-                                    />
-                                </Box>
-                            )}
-                        </Stack>
-                    </Box>
+                                            {session.user.id ===
+                                            comment.userId ? (
+                                                <>
+                                                    <Button
+                                                        variant="subtle"
+                                                        color="yellow"
+                                                        size="xs"
+                                                        leftSection={
+                                                            <IconEdit
+                                                                size={15}
+                                                            />
+                                                        }
+                                                        onClick={() => {
+                                                            handleCloseReply();
+                                                            handleEditToggle(
+                                                                comment.id
+                                                            );
+                                                        }}
+                                                        disabled={
+                                                            isPendingUpdateComment
+                                                        }
+                                                        title="Edit Comment"
+                                                    >
+                                                        {isEditOpen
+                                                            ? "Cancel"
+                                                            : "Edit"}
+                                                    </Button>
+
+                                                    <Button
+                                                        variant="subtle"
+                                                        size="xs"
+                                                        color="red"
+                                                        leftSection={
+                                                            <IconTrashX
+                                                                size={15}
+                                                            />
+                                                        }
+                                                        onClick={async () =>
+                                                            await executeAsyncDeleteComment(
+                                                                {
+                                                                    commentId:
+                                                                        comment.id,
+                                                                    userId: comment.userId,
+                                                                    storyISBN:
+                                                                        comment.storyISBN,
+                                                                }
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isPendingDeleteComment
+                                                        }
+                                                        title="Delete Comment"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </>
+                                            ) : null}
+                                        </Group>
+                                    )}
+
+                                {isReplyOpen && !comment.hasBeenDeleted && (
+                                    <Box ml={28} mt="xs" ref={focusTrapRef}>
+                                        <CreateCommentForm
+                                            storyISBN={comment.storyISBN}
+                                            text=""
+                                            parentCommentId={comment.id}
+                                            placeholder={`Reply to ${comment.userId}`}
+                                            closeCommentForm={handleCloseReply}
+                                        />
+                                    </Box>
+                                )}
+                            </Stack>
+                        </Collapse>
+                    </Stack>
                 );
             }}
         />
