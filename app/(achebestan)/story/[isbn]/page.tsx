@@ -14,7 +14,7 @@ import {
     truncateText,
 } from "@/lib/utils/helpers";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
-import { Divider, Stack } from "@mantine/core";
+import { Center, Divider, Stack, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { Metadata } from "next";
@@ -527,9 +527,17 @@ export default async function StoryPage({
 
                 <StoryActions {...story} />
 
-                <Divider />
+                <Divider
+                    label={comments && comments.length > 0 ? "comments" : ""}
+                />
 
-                {comments && <CommentTree comments={comments} />}
+                {comments && comments.length > 0 ? (
+                    <CommentTree comments={comments} />
+                ) : (
+                    <Center>
+                        <Text c={"dimmed"}>No Comments Yet...</Text>
+                    </Center>
+                )}
             </Stack>
         </>
     );

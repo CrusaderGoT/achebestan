@@ -13,12 +13,14 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 type CommentFormProps = CommentInsertType &
     TextareaProps & {
         closeCommentForm?: () => void;
+        onNewCommentAdded?: (newCommentId: string) => void;
     };
 
 export function CreateCommentForm({
     storyISBN,
     parentCommentId,
     closeCommentForm,
+    onNewCommentAdded,
     ...props
 }: CommentFormProps) {
     const form = useCreateCommentForm({
@@ -43,6 +45,10 @@ export function CreateCommentForm({
 
             if (closeCommentForm) {
                 closeCommentForm();
+            }
+
+            if (onNewCommentAdded) {
+                onNewCommentAdded(`${newComment.id}`);
             }
         }
     }

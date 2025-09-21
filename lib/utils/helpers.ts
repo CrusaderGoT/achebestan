@@ -1,4 +1,7 @@
 import { RatingSelectType } from "@/zod-schemas/rating";
+import { CommentsToTreeNodeDataType, CommentTreeProps } from "../types/comment";
+
+// STORY HELPERS
 
 export function calculateRatingsAverage(
     ratings: RatingSelectType[],
@@ -123,7 +126,6 @@ export function createTweetText(story: {
 }
 
 // Helper function to create a smart excerpt from the blurb
-
 export function createExcerpt(text: string, maxLength: number): string {
     if (!text || text.length <= maxLength) return text;
 
@@ -151,4 +153,76 @@ export function createExcerpt(text: string, maxLength: number): string {
     }
 
     return excerpt + (excerpt.length < text.length ? "..." : "");
+}
+
+// COMMENT HELPERS
+
+export const flattenComments = (
+    comments: CommentsToTreeNodeDataType,
+    map: Map<string, CommentTreeProps>
+) => {
+    comments.forEach((comment) => {
+        map.set(comment.value, comment);
+        if (comment.children) {
+            flattenComments(comment.children as CommentsToTreeNodeDataType, map);
+        }
+    });
+};
+
+export function commentsToTreeNodeData(
+    comments: CommentTreeProps[]
+): CommentsToTreeNodeDataType {
+    return comments.map((comment) => {
+        const baseNode = {
+            value: `${comment.id}`,
+            label: comment.text,
+            ...comment,
+            rating: comment.rating,
+        };
+
+        if (comment.childComments?.length) {
+            return {
+                ...baseNode,
+                children: commentsToTreeNodeData(comment.childComments),
+            };
+        }
+
+        return baseNode;
+    });
+}
+
+export function buildCommentHierarchy(
+    comments: CommentTreeProps[]
+): CommentTreeProps[] {
+    const commentMap = new Map<number, CommentTreeProps>();
+    const topLevel: CommentTreeProps[] = [];
+
+    // First pass: create all comment objects
+    comments.forEach((comment) => {
+        commentMap.set(comment.id, {
+            ...comment,
+            childComments: [],
+            rating: comment.rating,
+            user: comment.user,
+        });
+    });
+
+    // Second pass: build hierarchy
+    comments.forEach((comment) => {
+        const commentWithChildren = commentMap.get(comment.id)!;
+
+        if (comment.parentCommentId) {
+            // This is a child comment
+            const parent = commentMap.get(comment.parentCommentId);
+            if (parent) {
+                parent.childComments = parent.childComments || [];
+                parent.childComments.push(commentWithChildren);
+            }
+        } else {
+            // This is a top-level comment
+            topLevel.push(commentWithChildren);
+        }
+    });
+
+    return topLevel;
 }
