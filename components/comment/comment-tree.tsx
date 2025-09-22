@@ -180,9 +180,8 @@ function useCommentInteractions(): CommentInteractionHandlers {
 function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
     const [drawerOpened, setDrawerOpened] = useState(false);
 
-    const [activeDrawerCommentId, activeDrawerHandlers] = useStateHistory<
-        string | null
-    >(null);
+    const [activeDrawerCommentId, activeDrawerHandlers, drawerHistory] =
+        useStateHistory<string | null>(null);
 
     const drawerTree = useTree({
         multiple: false,
@@ -254,6 +253,7 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
         closeDrawer,
         drawerTitle,
         activeDrawerHandlers,
+        drawerHistory,
     };
 }
 // Component for comment content
@@ -657,11 +657,17 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 onClose={drawer.closeDrawer}
                 title={
                     <Group>
-                        <ActionIcon
-                            onClick={() => drawer.activeDrawerHandlers.back()}
-                        >
-                            <IconArrowBack size={14} />
-                        </ActionIcon>
+                        {drawer.drawerHistory.current > 0 && (
+                            <ActionIcon
+                                onClick={() =>
+                                    drawer.activeDrawerHandlers.back()
+                                }
+                                variant="subtle"
+                                color="gray"
+                            >
+                                <IconArrowBack size={14} />
+                            </ActionIcon>
+                        )}
 
                         <Text truncate="end" maw={200}>
                             {drawer.drawerTitle}
