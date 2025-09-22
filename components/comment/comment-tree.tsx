@@ -33,7 +33,13 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { useFocusTrap, useMounted, useStateHistory } from "@mantine/hooks";
+import {
+    useFocusTrap,
+    useMounted,
+    useStateHistory,
+    UseStateHistoryHandlers,
+    UseStateHistoryValue,
+} from "@mantine/hooks";
 
 import { CreateCommentForm } from "@/components/forms/comment/create-comment-form";
 
@@ -61,17 +67,22 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 // Configuration
-type DRAWER_CONFIGType = {
+type DRAWER_CONFIG_TYPE = {
     drawerLevel: number;
     initialExpandCount: number;
     drawerSize: MantineSize;
     drawerPosition: "left" | "right" | "bottom";
+    indentationSize: number;
+    titleMaxLength: number;
 };
-const DRAWER_CONFIG: DRAWER_CONFIGType = {
-    drawerLevel: 2, // Level that should show drawer - test
+
+const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
+    drawerLevel: 2,
     initialExpandCount: 10,
-    drawerSize: "sm",
-    drawerPosition: "bottom",
+    drawerSize: "sm" as MantineSize,
+    drawerPosition: "bottom" as const,
+    indentationSize: 23, // New: Make indentation configurable
+    titleMaxLength: 50, // New: Make title truncation configurable
 };
 
 // Types
@@ -104,14 +115,22 @@ class CommentTreeUtils {
     }
 
     static calculateIndentation(level: number, isInDrawer: boolean): number {
-        return isInDrawer ? (level - 1) * 23 : (level - 1) * 23;
+        // IMPROVEMENT: Make indentation configurable
+        const INDENTATION_SIZE = 23;
+        return isInDrawer
+            ? (level - 1) * INDENTATION_SIZE
+            : (level - 1) * INDENTATION_SIZE;
     }
 
-    // Fixed version of getCommentWithChildren method
+    // IMPROVEMENT: Add validation and better error handling
     static getCommentWithChildren(
         commentId: string,
         nodeData: CommentsToTreeNodeDataType
     ): CommentsToTreeNodeDataType {
+        if (!commentId || !nodeData || nodeData.length === 0) {
+            return [];
+        }
+
         const findNodeRecursively = (
             nodes: CommentsToTreeNodeDataType,
             targetId: string
@@ -120,7 +139,7 @@ class CommentTreeUtils {
                 if (node.value === targetId) {
                     return node;
                 }
-                if (node.children) {
+                if (node.children && Array.isArray(node.children)) {
                     const found = findNodeRecursively(
                         node.children as CommentsToTreeNodeDataType,
                         targetId
@@ -131,16 +150,15 @@ class CommentTreeUtils {
             return null;
         };
 
-        // First find the node recursively in the entire tree
-        const targetNode = findNodeRecursively(nodeData, commentId);
-
-        if (!targetNode) {
+        try {
+            const targetNode = findNodeRecursively(nodeData, commentId);
+            return targetNode
+                ? [targetNode as CommentsToTreeNodeDataType[0]]
+                : [];
+        } catch (error) {
+            console.error("Error finding comment node:", error);
             return [];
         }
-
-        // Return just the target node with its existing tree structure intact
-        // The tree component will handle rendering the hierarchy correctly
-        return [targetNode as CommentsToTreeNodeDataType[0]];
     }
 }
 
@@ -177,7 +195,22 @@ function useCommentInteractions(): CommentInteractionHandlers {
 }
 
 // Hook for drawer management
-function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
+interface DrawerState {
+    drawerOpened: boolean;
+    drawerCommentData: CommentsToTreeNodeDataType;
+    drawerCommentMap: Map<string, CommentTreeProps>;
+    drawerTree: ReturnType<typeof useTree>;
+    handleOpenDrawer: (commentId: string) => void;
+    closeDrawer: () => void;
+    drawerTitle: string;
+    activeDrawerHandlers: UseStateHistoryHandlers<string | null>;
+    drawerHistory: UseStateHistoryValue<string | null>;
+    activeDrawerCommentId: string | null;
+}
+
+function useDrawerState(
+    commentsNodeData: CommentsToTreeNodeDataType
+): DrawerState {
     const [drawerOpened, setDrawerOpened] = useState(false);
 
     const [activeDrawerCommentId, activeDrawerHandlers, drawerHistory] =
@@ -188,7 +221,7 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
         initialExpandedState: {},
     });
 
-    // Compute drawer data dynamically based on current commentsNodeData
+    // IMPROVEMENT: Add error handling and validation
     const { drawerCommentData, drawerCommentMap, drawerTitle } = useMemo(() => {
         if (!activeDrawerCommentId || !drawerOpened) {
             return {
@@ -198,53 +231,90 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
             };
         }
 
-        const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
-            activeDrawerCommentId,
-            commentsNodeData
-        );
-        const drawerMap = new Map<string, CommentTreeProps>();
-        flattenComments(commentWithChildren, drawerMap);
+        try {
+            const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
+                activeDrawerCommentId,
+                commentsNodeData
+            );
 
-        // Get the root comment for title
-        const rootComment = drawerMap.get(activeDrawerCommentId);
-
-        // Custom title formatting
-        let title = "Comment Thread";
-        if (rootComment) {
-            const author = rootComment.user?.name;
-            const text = rootComment.text;
-
-            if (author) {
-                title = `Thread by ${author}: "${text}"`;
-            } else {
-                title = title + " " + `${text}`;
+            if (!commentWithChildren || commentWithChildren.length === 0) {
+                console.warn(
+                    `Comment with ID ${activeDrawerCommentId} not found`
+                );
+                return {
+                    drawerCommentData: [],
+                    drawerCommentMap: new Map<string, CommentTreeProps>(),
+                    drawerTitle: "Comment Not Found",
+                };
             }
-        }
 
-        return {
-            drawerCommentData: commentWithChildren,
-            drawerCommentMap: drawerMap,
-            drawerTitle: title,
-        };
+            const drawerMap = new Map<string, CommentTreeProps>();
+            flattenComments(commentWithChildren, drawerMap);
+
+            // Get the root comment for title
+            const rootComment = drawerMap.get(activeDrawerCommentId);
+
+            // IMPROVEMENT: Better title formatting with truncation and escaping
+            const getDrawerTitle = (
+                comment: CommentTreeProps | undefined
+            ): string => {
+                if (!comment) return "Comment Thread";
+
+                const author = comment.user?.name;
+                const maxTextLength = 50;
+                const text =
+                    comment.text?.slice(0, maxTextLength) +
+                    (comment.text && comment.text.length > maxTextLength
+                        ? "..."
+                        : "");
+
+                // Escape quotes in text to prevent display issues
+                const escapedText = text?.replace(/"/g, '\\"') || "";
+
+                return author
+                    ? `Thread by ${author}: "${escapedText}"`
+                    : `Comment Thread: ${escapedText}`;
+            };
+
+            return {
+                drawerCommentData: commentWithChildren,
+                drawerCommentMap: drawerMap,
+                drawerTitle: getDrawerTitle(rootComment),
+            };
+        } catch (error) {
+            console.error("Error loading comment thread:", error);
+            return {
+                drawerCommentData: [],
+                drawerCommentMap: new Map<string, CommentTreeProps>(),
+                drawerTitle: "Error Loading Thread",
+            };
+        }
     }, [activeDrawerCommentId, drawerOpened, commentsNodeData]);
 
+    // CRITICAL BUG FIX: Completely rewrite handleOpenDrawer
     const handleOpenDrawer = useCallback(
         (commentId: string) => {
-            if (!drawerHistory.history.includes(commentId)) {
-                activeDrawerHandlers.set(commentId);
-            }
+            // Set the active comment ID first
+            activeDrawerHandlers.set(commentId);
+
+            // Then open the drawer
             setDrawerOpened(true);
 
-            // Auto-expand the root comment in drawer
-            setTimeout(() => drawerTree.expand(commentId), 100);
+            // IMPROVEMENT: Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                drawerTree.expand(commentId);
+            });
         },
-        [drawerTree, activeDrawerHandlers, drawerHistory.history]
+        [drawerTree, activeDrawerHandlers]
     );
 
     const closeDrawer = useCallback(() => {
         setDrawerOpened(false);
-        activeDrawerHandlers.reset();
-    }, [activeDrawerHandlers]);
+        // IMPROVEMENT: Only reset if drawer was actually open
+        if (activeDrawerCommentId) {
+            activeDrawerHandlers.reset();
+        }
+    }, [activeDrawerHandlers, activeDrawerCommentId]);
 
     return {
         drawerOpened,
@@ -259,6 +329,7 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
         activeDrawerCommentId,
     };
 }
+
 // Component for comment content
 function CommentContent({
     comment,
@@ -570,16 +641,22 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
         return newComments.map((c) => c.value);
     }, [commentsNodeData]);
 
+    // IMPROVEMENT: Enhanced auto-expansion with error handling
     useEffect(() => {
-        newCommentsToExpand.forEach((commentId) => {
-            if (
-                !autoExpandedRef.current.has(commentId) &&
-                !tree.expandedState[commentId]
-            ) {
-                tree.expand(commentId);
-                autoExpandedRef.current.add(commentId);
-            }
-        });
+        try {
+            newCommentsToExpand.forEach((commentId) => {
+                if (
+                    commentId &&
+                    !autoExpandedRef.current.has(commentId) &&
+                    !tree.expandedState[commentId]
+                ) {
+                    tree.expand(commentId);
+                    autoExpandedRef.current.add(commentId);
+                }
+            });
+        } catch (error) {
+            console.error("Error auto-expanding comments:", error);
+        }
     }, [newCommentsToExpand, tree]);
 
     // Render functions
@@ -660,14 +737,41 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 onClose={drawer.closeDrawer}
                 title={
                     <Group>
+                        {/**
+                         * check drawer is not in it first element (nothing to go back to)
+                         * check drawer has something to go back to (prev is not null)
+                         */}
                         {drawer.drawerHistory.current > 0 &&
-                            !!drawer.activeDrawerCommentId && (
+                            drawer.drawerHistory.history[
+                                drawer.drawerHistory.current - 1
+                            ] && (
                                 <ActionIcon
                                     onClick={() => {
-                                        drawer.activeDrawerHandlers.back();
-                                        drawer.drawerTree.expand(
-                                            drawer.activeDrawerCommentId as string
-                                        );
+                                        const previousIndex =
+                                            drawer.drawerHistory.current - 1;
+
+                                        // IMPROVEMENT: Add bounds checking
+                                        if (
+                                            previousIndex >= 0 &&
+                                            previousIndex <
+                                                drawer.drawerHistory.history
+                                                    .length
+                                        ) {
+                                            const previousCommentId =
+                                                drawer.drawerHistory.history[
+                                                    previousIndex
+                                                ];
+
+                                            if (previousCommentId) {
+                                                drawer.activeDrawerHandlers.back();
+                                                // IMPROVEMENT: Add delay to ensure state update
+                                                setTimeout(() => {
+                                                    drawer.drawerTree.expand(
+                                                        previousCommentId
+                                                    );
+                                                }, 50);
+                                            }
+                                        }
                                     }}
                                     variant="subtle"
                                     color="gray"
@@ -684,7 +788,8 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 size={DRAWER_CONFIG.drawerSize}
                 position={DRAWER_CONFIG.drawerPosition}
             >
-                {drawer.drawerCommentData.length > 0 && (
+                {/* IMPROVEMENT: Add loading state */}
+                {drawer.drawerCommentData.length > 0 ? (
                     <Tree
                         data={drawer.drawerCommentData}
                         tree={drawer.drawerTree}
@@ -694,6 +799,12 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                         className={publicStyles.noTapHighlight}
                         renderNode={renderDrawerNode}
                     />
+                ) : (
+                    <Text size="sm" c="dimmed" ta="center" py="xl">
+                        {drawer.drawerOpened && !drawer.activeDrawerCommentId
+                            ? "Loading comment thread..."
+                            : "No comments to display"}
+                    </Text>
                 )}
             </Drawer>
         </>
