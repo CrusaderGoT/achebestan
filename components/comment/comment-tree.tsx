@@ -658,17 +658,13 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 onClose={drawer.closeDrawer}
                 title={
                     <Group>
-                        {drawer.drawerHistory.current > 0 &&
+                        {drawer.drawerHistory.current > 1 &&
                             !!drawer.activeDrawerCommentId && (
                                 <ActionIcon
                                     onClick={() => {
-                                        const prevExists =
-                                            drawer.activeDrawerCommentId;
-
-                                        if (prevExists) {
-                                            drawer.activeDrawerHandlers.back();
-                                            drawer.handleOpenDrawer(prevExists);
-                                        }
+                                              drawer.activeDrawerHandlers.back();
+                                                               setTimeout(() => drawer.drawerTree.expand(drawer.activeDrawerCommentId), 100);    
+                                        
                                     }}
                                     variant="subtle"
                                     color="gray"
