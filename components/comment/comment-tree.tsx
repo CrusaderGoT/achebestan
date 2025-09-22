@@ -663,7 +663,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                 <ActionIcon
                                     onClick={() => {
                                               drawer.activeDrawerHandlers.back();
-                                                               setTimeout(() => drawer.drawerTree.expand(drawer.activeDrawerCommentId), 100);    
+                                                               setTimeout(() => drawer.drawerTree.expand(drawer.activeDrawerCommentId as string), 100);    
                                         
                                     }}
                                     variant="subtle"
