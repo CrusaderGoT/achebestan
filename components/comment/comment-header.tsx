@@ -1,14 +1,20 @@
 "use client";
 
 import { CommentTreeProps } from "@/lib/types/comment";
-import { Text } from "@mantine/core";
+import { Avatar, Button, Group, Text } from "@mantine/core";
+import {
+    IconChevronDown,
+    IconExternalLink,
+    IconUser,
+} from "@tabler/icons-react";
 import dayjs from "dayjs";
 
+import { CommentTreeUtils } from "@/lib/utils/helpers";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-export function CommentHeader({ ...props }: CommentTreeProps) {
+function CommentHeader({ ...props }: CommentTreeProps) {
     return (
         <>
             <Text size="xs" c="dimmed">
@@ -23,5 +29,85 @@ export function CommentHeader({ ...props }: CommentTreeProps) {
                     : ""}
             </Text>
         </>
+    );
+}
+
+// Component for comment header
+export function CommentNodeHeader({
+    comment,
+    hasChildren,
+    expanded,
+    level,
+    onToggleExpand,
+    onOpenDrawer,
+}: {
+    comment: CommentTreeProps;
+    hasChildren: boolean;
+    expanded: boolean;
+    level: number;
+    isInDrawer: boolean;
+    onToggleExpand: () => void;
+    onOpenDrawer: () => void;
+}) {
+    const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
+        level,
+        hasChildren
+    );
+
+    return (
+        <Group
+            align="flex-start"
+            gap="xs"
+            onClick={(e) => {
+                if (!showDrawerButton) {
+                    onToggleExpand();
+                } else {
+                    e.stopPropagation();
+                    onOpenDrawer();
+                }
+            }}
+        >
+            <Avatar size="sm">
+                <IconUser />
+            </Avatar>
+
+            {!comment.hasBeenDeleted ? (
+                <CommentHeader {...comment} />
+            ) : (
+                <>
+                    <Text size="xs" c="dimmed">
+                        [deleted]
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                        deleted
+                    </Text>
+                </>
+            )}
+
+            {hasChildren && !showDrawerButton && (
+                <IconChevronDown
+                    size={18}
+                    style={{
+                        cursor: "pointer",
+                        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
+                    }}
+                />
+            )}
+
+            {showDrawerButton && (
+                <Button
+                    variant="subtle"
+                    size="compact-xs"
+                    leftSection={<IconExternalLink size={14} />}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenDrawer();
+                    }}
+                >
+                    View thread
+                </Button>
+            )}
+        </Group>
     );
 }

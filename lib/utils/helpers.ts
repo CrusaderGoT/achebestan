@@ -1,4 +1,6 @@
+import { DRAWER_CONFIG } from "@/components/comment/comment-tree";
 import { RatingSelectType } from "@/zod-schemas/rating";
+import { TreeNodeData } from "@mantine/core";
 import { CommentsToTreeNodeDataType, CommentTreeProps } from "../types/comment";
 
 // STORY HELPERS
@@ -228,4 +230,60 @@ export function buildCommentHierarchy(
     });
 
     return topLevel;
+}
+
+export class CommentTreeUtils {
+    static shouldShowDrawerButton(
+        level: number,
+        hasChildren: boolean
+    ): boolean {
+        return DRAWER_CONFIG.drawerLevel === level && hasChildren;
+    }
+
+    static calculateIndentation(level: number, isInDrawer: boolean): number {
+        // IMPROVEMENT: Make indentation configurable
+        const INDENTATION_SIZE = 23;
+        return isInDrawer
+            ? (level - 1) * INDENTATION_SIZE
+            : (level - 1) * INDENTATION_SIZE;
+    }
+
+    // IMPROVEMENT: Add validation and better error handling
+    static getCommentWithChildren(
+        commentId: string,
+        nodeData: CommentsToTreeNodeDataType
+    ): CommentsToTreeNodeDataType {
+        if (!commentId || !nodeData || nodeData.length === 0) {
+            return [];
+        }
+
+        const findNodeRecursively = (
+            nodes: CommentsToTreeNodeDataType,
+            targetId: string
+        ): TreeNodeData | null => {
+            for (const node of nodes) {
+                if (node.value === targetId) {
+                    return node;
+                }
+                if (node.children && Array.isArray(node.children)) {
+                    const found = findNodeRecursively(
+                        node.children as CommentsToTreeNodeDataType,
+                        targetId
+                    );
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+
+        try {
+            const targetNode = findNodeRecursively(nodeData, commentId);
+            return targetNode
+                ? [targetNode as CommentsToTreeNodeDataType[0]]
+                : [];
+        } catch (error) {
+            console.error("Error finding comment node:", error);
+            return [];
+        }
+    }
 }

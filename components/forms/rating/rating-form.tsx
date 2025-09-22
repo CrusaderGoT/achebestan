@@ -9,7 +9,7 @@ import {
     useCreateComment,
     useDeleteComment,
     useUpdateComment,
-} from "@/lib/hooks/comment/comment-hook";
+} from "@/lib/hooks/comment/comment-action-hooks";
 import { useDeleteRating } from "@/lib/hooks/rating/delete-rating-hook";
 import { useRateStory } from "@/lib/hooks/rating/rate-story-hook";
 import publicStyles from "@/styles/public.module.css";
