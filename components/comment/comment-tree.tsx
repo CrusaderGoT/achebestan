@@ -230,18 +230,20 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
 
     const handleOpenDrawer = useCallback(
         (commentId: string) => {
-            activeDrawerHandlers.set(commentId);
+            if (!drawerHistory.history.includes(commentId)) {
+                activeDrawerHandlers.set(commentId);
+            }
             setDrawerOpened(true);
 
             // Auto-expand the root comment in drawer
             setTimeout(() => drawerTree.expand(commentId), 100);
         },
-        [drawerTree, activeDrawerHandlers]
+        [drawerTree, activeDrawerHandlers, drawerHistory.history]
     );
 
     const closeDrawer = useCallback(() => {
         setDrawerOpened(false);
-        activeDrawerHandlers.set(null);
+        activeDrawerHandlers.reset();
     }, [activeDrawerHandlers]);
 
     return {
@@ -658,14 +660,14 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 onClose={drawer.closeDrawer}
                 title={
                     <Group>
-                        {drawer.drawerHistory.current > 1 &&
-                            !!drawer.activeDrawerCommentId && 
-drawer.activeDrawerCommentId !== drawer.drawerHistory.history[0] && (
+                        {drawer.drawerHistory.current > 0 &&
+                            !!drawer.activeDrawerCommentId && (
                                 <ActionIcon
                                     onClick={() => {
-                                              drawer.activeDrawerHandlers.back();
-                                                               setTimeout(() => drawer.drawerTree.expand(drawer.activeDrawerCommentId as string), 100);    
-                                        
+                                        drawer.activeDrawerHandlers.back();
+                                        drawer.drawerTree.expand(
+                                            drawer.activeDrawerCommentId as string
+                                        );
                                     }}
                                     variant="subtle"
                                     color="gray"
