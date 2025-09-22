@@ -164,7 +164,10 @@ export const flattenComments = (
     comments.forEach((comment) => {
         map.set(comment.value, comment);
         if (comment.children) {
-            flattenComments(comment.children as CommentsToTreeNodeDataType, map);
+            flattenComments(
+                comment.children as CommentsToTreeNodeDataType,
+                map
+            );
         }
     });
 };

@@ -7,19 +7,28 @@ import cx from "clsx";
 import {
     Avatar,
     Box,
+    Button,
     Collapse,
+    Drawer,
     getTreeExpandedState,
     Group,
+    MantineSize,
     Rating,
+    RenderTreeNodePayload,
     Stack,
     Text,
     Tree,
+    TreeNodeData,
     useTree,
 } from "@mantine/core";
 
-import { IconChevronDown, IconUser } from "@tabler/icons-react";
+import {
+    IconChevronDown,
+    IconExternalLink,
+    IconUser,
+} from "@tabler/icons-react";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { useFocusTrap, useMounted } from "@mantine/hooks";
@@ -49,57 +58,452 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
+// Configuration
+type DRAWER_CONFIGType = {
+    drawerLevel: number;
+    initialExpandCount: number;
+    drawerSize: MantineSize;
+    drawerPosition: "left" | "right" | "bottom";
+};
+const DRAWER_CONFIG: DRAWER_CONFIGType = {
+    drawerLevel: 4, // Level that should show drawer - test
+    initialExpandCount: 10,
+    drawerSize: "sm",
+    drawerPosition: "bottom",
+};
+
+// Types
+type CommentNodeProps = RenderTreeNodePayload;
+
+interface CommentRenderContext {
+    isInDrawer: boolean;
+    tree: ReturnType<typeof useTree>;
+    commentMap: Map<string, CommentTreeProps>;
+    onOpenDrawer: (commentId: string) => void;
+}
+
+interface CommentInteractionHandlers {
+    activeReplyId: number | null;
+    activeEditId: number | null;
+    handleReplyToggle: (commentId: number) => void;
+    handleEditToggle: (commentId: number) => void;
+    handleCloseReply: () => void;
+    handleCloseEdit: () => void;
+    focusTrapRef: React.RefCallback<HTMLElement | null>;
+}
+
+// Utility functions
+class CommentTreeUtils {
+    static shouldShowDrawerButton(
+        level: number,
+        hasChildren: boolean
+    ): boolean {
+        return DRAWER_CONFIG.drawerLevel === level && hasChildren;
+    }
+
+    static calculateIndentation(level: number, isInDrawer: boolean): number {
+        return isInDrawer ? (level - 1) * 23 : (level - 1) * 23;
+    }
+
+    // Fixed version of getCommentWithChildren method
+    static getCommentWithChildren(
+        commentId: string,
+        nodeData: CommentsToTreeNodeDataType
+    ): CommentsToTreeNodeDataType {
+        const findNodeRecursively = (
+            nodes: CommentsToTreeNodeDataType,
+            targetId: string
+        ): TreeNodeData | null => {
+            for (const node of nodes) {
+                if (node.value === targetId) {
+                    return node;
+                }
+                if (node.children) {
+                    const found = findNodeRecursively(
+                        node.children as CommentsToTreeNodeDataType,
+                        targetId
+                    );
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+
+        // First find the node recursively in the entire tree
+        const targetNode = findNodeRecursively(nodeData, commentId);
+
+        if (!targetNode) {
+            return [];
+        }
+
+        // Return just the target node with its existing tree structure intact
+        // The tree component will handle rendering the hierarchy correctly
+        return [targetNode as CommentsToTreeNodeDataType[0]];
+    }
+}
+
+// Hook for comment interactions
+function useCommentInteractions(): CommentInteractionHandlers {
+    const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+    const [activeEditId, setActiveEditId] = useState<number | null>(null);
+    const focusTrapRef = useFocusTrap();
+
+    const handleReplyToggle = useCallback((commentId: number) => {
+        setActiveReplyId((current) =>
+            current === commentId ? null : commentId
+        );
+    }, []);
+
+    const handleEditToggle = useCallback((commentId: number) => {
+        setActiveEditId((current) =>
+            current === commentId ? null : commentId
+        );
+    }, []);
+
+    const handleCloseReply = useCallback(() => setActiveReplyId(null), []);
+    const handleCloseEdit = useCallback(() => setActiveEditId(null), []);
+
+    return {
+        activeReplyId,
+        activeEditId,
+        handleReplyToggle,
+        handleEditToggle,
+        handleCloseReply,
+        handleCloseEdit,
+        focusTrapRef,
+    };
+}
+
+// Hook for drawer management
+function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
+    const [drawerOpened, setDrawerOpened] = useState(false);
+    const [drawerCommentData, setDrawerCommentData] =
+        useState<CommentsToTreeNodeDataType>([]);
+    const [drawerCommentMap, setDrawerCommentMap] = useState<
+        Map<string, CommentTreeProps>
+    >(new Map());
+
+    const drawerTree = useTree({
+        multiple: false,
+        initialExpandedState: {},
+    });
+
+    const handleOpenDrawer = useCallback(
+        (commentId: string) => {
+            const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
+                commentId,
+                commentsNodeData
+            );
+            const drawerMap = new Map<string, CommentTreeProps>();
+
+            flattenComments(commentWithChildren, drawerMap);
+
+            setDrawerCommentData(commentWithChildren);
+            setDrawerCommentMap(drawerMap);
+            setDrawerOpened(true);
+
+            // Auto-expand the root comment in drawer
+            setTimeout(() => drawerTree.expand(commentId), 100);
+        },
+        [commentsNodeData, drawerTree]
+    );
+
+    const closeDrawer = useCallback(() => setDrawerOpened(false), []);
+
+    return {
+        drawerOpened,
+        drawerCommentData,
+        drawerCommentMap,
+        drawerTree,
+        handleOpenDrawer,
+        closeDrawer,
+    };
+}
+
+// Component for comment content
+function CommentContent({
+    comment,
+    node,
+    isEditOpen,
+    handleCloseEdit,
+}: {
+    comment: CommentTreeProps;
+    node: TreeNodeData;
+    isEditOpen: boolean;
+    handleCloseEdit: () => void;
+}) {
+    if (comment.hasBeenDeleted) {
+        return <Text size="sm">Deleted</Text>;
+    }
+
+    return (
+        <Stack gap={4} flex={1}>
+            {comment.rating?.stars && (
+                <Rating
+                    defaultValue={comment.rating.stars}
+                    readOnly
+                    fractions={2}
+                    size="xs"
+                />
+            )}
+
+            <Text size="sm">
+                {isEditOpen ? (
+                    <UpdateCommentForm
+                        text={comment.text}
+                        commentId={comment.id}
+                        storyISBN={comment.storyISBN}
+                        userId={comment.userId}
+                        closeCommentForm={handleCloseEdit}
+                    />
+                ) : (
+                    node.label
+                )}
+            </Text>
+        </Stack>
+    );
+}
+
+// Component for comment header
+function CommentNodeHeader({
+    comment,
+    hasChildren,
+    expanded,
+    level,
+    isInDrawer,
+    onToggleExpand,
+    onOpenDrawer,
+}: {
+    comment: CommentTreeProps;
+    hasChildren: boolean;
+    expanded: boolean;
+    level: number;
+    isInDrawer: boolean;
+    onToggleExpand: () => void;
+    onOpenDrawer: () => void;
+}) {
+    const showDrawerButton =
+        !isInDrawer &&
+        CommentTreeUtils.shouldShowDrawerButton(level, hasChildren);
+
+    return (
+        <Group
+            align="flex-start"
+            gap="xs"
+            onClick={(e) => {
+                if (!showDrawerButton) {
+                    onToggleExpand();
+                } else {
+                    e.stopPropagation();
+                    onOpenDrawer();
+                }
+            }}
+        >
+            <Avatar size="sm">
+                <IconUser />
+            </Avatar>
+
+            {!comment.hasBeenDeleted ? (
+                <CommentHeader {...comment} />
+            ) : (
+                <>
+                    <Text size="xs" c="dimmed">
+                        [deleted]
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                        deleted
+                    </Text>
+                </>
+            )}
+
+            {hasChildren && !showDrawerButton && (
+                <IconChevronDown
+                    size={18}
+                    style={{
+                        cursor: "pointer",
+                        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
+                    }}
+                />
+            )}
+
+            {showDrawerButton && (
+                <Button
+                    variant="subtle"
+                    size="compact-xs"
+                    leftSection={<IconExternalLink size={14} />}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenDrawer();
+                    }}
+                >
+                    View thread
+                </Button>
+            )}
+        </Group>
+    );
+}
+
+// Main comment node renderer
+function CommentNode({
+    nodeProps,
+    context,
+    interactions,
+    session,
+}: {
+    nodeProps: CommentNodeProps;
+    context: CommentRenderContext;
+    interactions: CommentInteractionHandlers;
+    session: ReturnType<typeof authClient.useSession>["data"];
+}) {
+    const { node, expanded, hasChildren, elementProps, level } = nodeProps;
+    const { isInDrawer, tree, commentMap, onOpenDrawer } = context;
+    const {
+        activeReplyId,
+        activeEditId,
+        handleReplyToggle,
+        handleEditToggle,
+        handleCloseEdit,
+        handleCloseReply,
+        focusTrapRef,
+    } = interactions;
+
+    const comment = commentMap.get(node.value);
+    const { isPending: isPendingUpdateComment } = useUpdateComment();
+
+    useEffect(() => {
+        if (expanded && showDrawerButton) {
+            console.error(showDrawerButton);
+            tree.collapse(node.value);
+        }
+    });
+
+    if (!comment) return null;
+
+    const isReplyOpen = activeReplyId === Number(node.value);
+    const isEditOpen = activeEditId === comment.id;
+    const showDrawerButton =
+        !isInDrawer &&
+        CommentTreeUtils.shouldShowDrawerButton(level, hasChildren);
+
+    const likes = comment.reactions?.filter((r) => r.liked).length;
+    const dislikes = comment.reactions?.filter((r) => r.disliked).length;
+    const userReaction = comment.reactions
+        ?.filter((r) => r.userId === session?.user.id)
+        .pop();
+
+    const handleToggleExpand = () => {
+        tree.toggleExpanded(node.value);
+        if (node.children && !showDrawerButton) {
+            node.children.forEach((c) => tree.expand(c.value));
+        }
+    };
+
+    return (
+        <Stack
+            gap={2}
+            p="sm"
+            {...elementProps}
+            className={cx(level > 1 && commentTreeStyles.childCommentLine)}
+            style={{
+                marginLeft: `${CommentTreeUtils.calculateIndentation(
+                    level,
+                    isInDrawer
+                )}px`,
+            }}
+        >
+            <CommentNodeHeader
+                comment={comment}
+                hasChildren={hasChildren}
+                expanded={expanded}
+                level={level}
+                isInDrawer={isInDrawer}
+                onToggleExpand={handleToggleExpand}
+                onOpenDrawer={() => onOpenDrawer(node.value)}
+            />
+
+            {!showDrawerButton && (
+                <Collapse in={tree.expandedState[node.value]} keepMounted>
+                    <Stack ml={28} gap={2}>
+                        <CommentContent
+                            comment={comment}
+                            node={node}
+                            isEditOpen={isEditOpen}
+                            handleCloseEdit={handleCloseEdit}
+                        />
+
+                        {!comment.hasBeenDeleted && (
+                            <LikeDislikeButton
+                                commentId={comment.id}
+                                likes={likes}
+                                dislikes={dislikes}
+                                userReaction={userReaction}
+                            />
+                        )}
+
+                        {!comment.hasBeenDeleted && session?.user.id && (
+                            <CommentActions
+                                commentId={comment.id}
+                                commentUserId={comment.userId}
+                                userId={session.user.id}
+                                isReplyOpen={isReplyOpen}
+                                isPendingUpdateComment={isPendingUpdateComment}
+                                isEditOpen={isEditOpen}
+                                handleEditToggle={handleEditToggle}
+                                handleReplyToggle={handleReplyToggle}
+                                handleCloseEdit={handleCloseEdit}
+                                handleCloseReply={handleCloseReply}
+                                storyISBN={comment.storyISBN}
+                            />
+                        )}
+
+                        {isReplyOpen && !comment.hasBeenDeleted && (
+                            <Box ml={28} mt="xs" ref={focusTrapRef}>
+                                <CreateCommentForm
+                                    storyISBN={comment.storyISBN}
+                                    text=""
+                                    parentCommentId={comment.id}
+                                    placeholder={`Reply to ${
+                                        comment.user?.name || ""
+                                    }`}
+                                    closeCommentForm={handleCloseReply}
+                                    onNewCommentAdded={tree.expand}
+                                />
+                            </Box>
+                        )}
+                    </Stack>
+                </Collapse>
+            )}
+        </Stack>
+    );
+}
+
+// Main CommentTree component
 export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
-    // Memoize the hierarchical comments and tree data
+    const mounted = useMounted();
+    const { data: session } = authClient.useSession();
+    const interactions = useCommentInteractions();
+
+    // Memoize comment data
     const commentsNodeData = useMemo<CommentsToTreeNodeDataType>(() => {
         const hierarchicalComments = buildCommentHierarchy(comments);
         return commentsToTreeNodeData(hierarchicalComments);
     }, [comments]);
 
-    // Memoize the commentMap to prevent infinite re-renders
     const commentMap = useMemo<Map<string, CommentTreeProps>>(() => {
         const map = new Map<string, CommentTreeProps>();
         flattenComments(commentsNodeData, map);
         return map;
     }, [commentsNodeData]);
 
-    // reply state handler
+    // Initialize drawer state
+    const drawer = useDrawerState(commentsNodeData);
 
-    const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
-
-    const handleReplyToggle = (commentId: number) => {
-        setActiveReplyId(activeReplyId === commentId ? null : commentId);
-    };
-
-    const handleCloseReply = () => {
-        setActiveReplyId(null);
-    };
-
-    // edit comment state handler
-
-    const [activeEditId, setActiveEditId] = useState<number | null>(null);
-
-    const handleEditToggle = (commentId: number) => {
-        setActiveEditId(activeEditId === commentId ? null : commentId);
-    };
-
-    const handleCloseEdit = () => {
-        setActiveEditId(null);
-    };
-
-    const focusTrapRef = useFocusTrap(); // for focusing on the reply comment text area
-
-    const { data: session } = authClient.useSession();
-
-    const { isPending: isPendingUpdateComment } = useUpdateComment();
-
-    const mounted = useMounted();
-
-    // For initial expansion - only top-level comments
+    // Initialize main tree
     const initialCommentsToExpand = useMemo<string[]>(() => {
         return commentsNodeData
-            .slice(0, 10) // first 10
-            .filter((c) => !c.parentCommentId) // Only top-level comments
+            .slice(0, DRAWER_CONFIG.initialExpandCount)
+            .filter((c) => !c.parentCommentId)
             .map((c) => c.value);
     }, [commentsNodeData]);
 
@@ -107,222 +511,129 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
         multiple: false,
         initialExpandedState: getTreeExpandedState(
             commentsNodeData,
-            initialCommentsToExpand // Only top-level for initial expansion
+            initialCommentsToExpand
         ),
     });
 
-    // make new top-level comments auto expand, since tree is not available to that form @StoryActions
-
+    // Auto-expansion logic
     const prevCommentsRef = useRef<CommentsToTreeNodeDataType>([]);
-    const autoExpandedRef = useRef(new Set()); // Track auto-expanded comments, to prevent re-renders
+    const autoExpandedRef = useRef(new Set());
 
-    // For auto-expansion of top-level
     const newCommentsToExpand = useMemo(() => {
         const prevCommentIds = new Set(
             prevCommentsRef.current.map((c) => c.id)
         );
-
-        // Find ALL new top-level comments
         const newComments = commentsNodeData.filter(
             (c) => !prevCommentIds.has(c.id) && !c.parentCommentId
         );
-
         prevCommentsRef.current = commentsNodeData;
-
         return newComments.map((c) => c.value);
     }, [commentsNodeData]);
 
-    // Auto-expand ALL new comments (top-level and children)
     useEffect(() => {
         newCommentsToExpand.forEach((commentId) => {
-            // Only expand if we haven't auto-expanded it before AND it's not currently expanded
             if (
                 !autoExpandedRef.current.has(commentId) &&
                 !tree.expandedState[commentId]
             ) {
                 tree.expand(commentId);
-                autoExpandedRef.current.add(commentId); // Mark as auto-expanded
+                autoExpandedRef.current.add(commentId);
             }
         });
     }, [newCommentsToExpand, tree]);
 
+    // Render functions
+    const renderMainNode = useCallback(
+        (props: CommentNodeProps) => {
+            if (!mounted) return null;
+
+            const context: CommentRenderContext = {
+                isInDrawer: false,
+                tree,
+                commentMap,
+                onOpenDrawer: drawer.handleOpenDrawer,
+            };
+
+            return (
+                <CommentNode
+                    nodeProps={props}
+                    context={context}
+                    interactions={interactions}
+                    session={session}
+                />
+            );
+        },
+        [
+            mounted,
+            tree,
+            commentMap,
+            drawer.handleOpenDrawer,
+            interactions,
+            session,
+        ]
+    );
+
+    const renderDrawerNode = useCallback(
+        (props: CommentNodeProps) => {
+            if (!mounted) return null;
+
+            const context: CommentRenderContext = {
+                isInDrawer: true,
+                tree: drawer.drawerTree,
+                commentMap: drawer.drawerCommentMap,
+                onOpenDrawer: drawer.handleOpenDrawer,
+            };
+
+            return (
+                <CommentNode
+                    nodeProps={props}
+                    context={context}
+                    interactions={interactions}
+                    session={session}
+                />
+            );
+        },
+        [
+            mounted,
+            drawer.drawerTree,
+            drawer.drawerCommentMap,
+            drawer.handleOpenDrawer,
+            interactions,
+            session,
+        ]
+    );
+
     return (
-        <Tree
-            data={commentsNodeData}
-            tree={tree}
-            levelOffset={0}
-            expandOnClick={false}
-            expandOnSpace={false}
-            className={publicStyles.noTapHighlight}
-            renderNode={({
-                node,
-                expanded,
-                hasChildren,
-                elementProps,
-                level,
-            }) => {
-                const comment = commentMap.get(node.value);
+        <>
+            <Tree
+                data={commentsNodeData}
+                tree={tree}
+                levelOffset={0}
+                expandOnClick={false}
+                expandOnSpace={false}
+                className={publicStyles.noTapHighlight}
+                renderNode={renderMainNode}
+            />
 
-                if (!comment || !mounted) {
-                    return null; // Safety check
-                }
-
-                const isReplyOpen = activeReplyId === Number(node.value);
-
-                const isEditOpen = activeEditId === comment.id;
-
-                const likes = comment.reactions?.filter((r) => r.liked).length;
-
-                const dislikes = comment.reactions?.filter(
-                    (r) => r.disliked
-                ).length;
-
-                const userReaction = comment.reactions
-                    ?.filter((r) => r.userId === session?.user.id)
-                    .pop();
-
-                return (
-                    <Stack
-                        gap={2}
-                        p="sm"
-                        {...elementProps}
-                        className={cx(
-                            level > 1 && commentTreeStyles.childCommentLine
-                        )}
-                        style={{
-                            marginLeft: `${(level - 1) * 23}px`,
-                        }}
-                    >
-                        <Group
-                            align="flex-start"
-                            gap="xs"
-                            onClick={() => {
-                                tree.toggleExpanded(node.value);
-                                if (node.children) {
-                                    node.children.forEach((c) => {
-                                        tree.expand(c.value);
-                                    });
-                                }
-                            }}
-                        >
-                            <Avatar size="sm">
-                                <IconUser />
-                            </Avatar>
-
-                            {!comment.hasBeenDeleted ? (
-                                <CommentHeader {...comment} />
-                            ) : (
-                                <>
-                                    <Text size="xs" c="dimmed">
-                                        [deleted]
-                                    </Text>
-
-                                    <Text size="xs" c="dimmed">
-                                        deleted
-                                    </Text>
-                                </>
-                            )}
-
-                            {hasChildren && (
-                                <IconChevronDown
-                                    size={18}
-                                    style={{
-                                        transform: expanded
-                                            ? "rotate(180deg)"
-                                            : "rotate(0deg)",
-                                        transition: "transform 0.2s ease",
-                                    }}
-                                />
-                            )}
-                        </Group>
-
-                        <Collapse
-                            in={tree.expandedState[node.value]}
-                            keepMounted
-                        >
-                            <Stack ml={28} gap={2}>
-                                {!comment.hasBeenDeleted ? (
-                                    <Stack gap={4} flex={1}>
-                                        {comment.rating?.stars && (
-                                            <Rating
-                                                defaultValue={
-                                                    comment.rating.stars
-                                                }
-                                                readOnly
-                                                fractions={2}
-                                                size={"xs"}
-                                            />
-                                        )}
-
-                                        <Text size="sm">
-                                            {isEditOpen ? (
-                                                <UpdateCommentForm
-                                                    text={comment.text}
-                                                    commentId={comment.id}
-                                                    storyISBN={
-                                                        comment.storyISBN
-                                                    }
-                                                    userId={comment.userId}
-                                                    closeCommentForm={
-                                                        handleCloseEdit
-                                                    }
-                                                />
-                                            ) : (
-                                                node.label
-                                            )}
-                                        </Text>
-
-                                        <LikeDislikeButton
-                                            commentId={comment.id}
-                                            likes={likes}
-                                            dislikes={dislikes}
-                                            userReaction={userReaction}
-                                        />
-                                    </Stack>
-                                ) : (
-                                    <Text size="sm">Deleted</Text>
-                                )}
-
-                                {!comment.hasBeenDeleted &&
-                                    session?.user.id && (
-                                        <CommentActions
-                                            commentId={comment.id}
-                                            commentUserId={comment.userId}
-                                            userId={session.user.id}
-                                            isReplyOpen={isReplyOpen}
-                                            isPendingUpdateComment={
-                                                isPendingUpdateComment
-                                            }
-                                            isEditOpen={isEditOpen}
-                                            handleEditToggle={handleEditToggle}
-                                            handleReplyToggle={
-                                                handleReplyToggle
-                                            }
-                                            handleCloseEdit={handleCloseEdit}
-                                            handleCloseReply={handleCloseReply}
-                                            storyISBN={comment.storyISBN}
-                                        />
-                                    )}
-
-                                {isReplyOpen && !comment.hasBeenDeleted && (
-                                    <Box ml={28} mt="xs" ref={focusTrapRef}>
-                                        <CreateCommentForm
-                                            storyISBN={comment.storyISBN}
-                                            text=""
-                                            parentCommentId={comment.id}
-                                            placeholder={`Reply to ${
-                                                comment.user?.name || ""
-                                            }`}
-                                            closeCommentForm={handleCloseReply}
-                                            onNewCommentAdded={tree.expand}
-                                        />
-                                    </Box>
-                                )}
-                            </Stack>
-                        </Collapse>
-                    </Stack>
-                );
-            }}
-        />
+            <Drawer
+                opened={drawer.drawerOpened}
+                onClose={drawer.closeDrawer}
+                title="Comment Thread"
+                size={DRAWER_CONFIG.drawerSize}
+                position={DRAWER_CONFIG.drawerPosition}
+            >
+                {drawer.drawerCommentData.length > 0 && (
+                    <Tree
+                        data={drawer.drawerCommentData}
+                        tree={drawer.drawerTree}
+                        levelOffset={0}
+                        expandOnClick={false}
+                        expandOnSpace={false}
+                        className={publicStyles.noTapHighlight}
+                        renderNode={renderDrawerNode}
+                    />
+                )}
+            </Drawer>
+        </>
     );
 }

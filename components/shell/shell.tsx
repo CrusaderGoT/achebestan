@@ -5,16 +5,15 @@ import { LogoutButton } from "@/components/buttons/user/logout-btn";
 import { OpenAuthenticationModalButton } from "@/components/buttons/user/open-auth-modal-btn";
 import { AuthenticationModal } from "@/components/forms/user/auth-modal";
 import { ActivateAuth } from "@/components/shell/activate-auth";
-import { navlinkData, NavLinks } from "@/components/shell/navlinks";
+import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Title, UnstyledButton } from "@mantine/core";
+import { AppShell, Burger, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function Shell({
@@ -23,8 +22,6 @@ export function Shell({
     children: React.ReactNode;
 }>) {
     const router = useRouter();
-
-    const pathname = usePathname();
 
     const [secretValue, setSecretValue] = useState<string>("");
 
@@ -84,20 +81,7 @@ export function Shell({
                         wrap="nowrap"
                         visibleFrom="lg"
                     >
-                        {navlinkData.map((item, index) => (
-                            <UnstyledButton
-                                key={index}
-                                component={Link}
-                                href={item.href}
-                                className={cx(
-                                    shellStyles.mobileNavBar,
-                                    pathname === item.href &&
-                                        shellStyles.mobileNavBarActive
-                                )}
-                            >
-                                {item.label}
-                            </UnstyledButton>
-                        ))}
+                        <AltNavLinks session={session} />
 
                         {!session?.user.id && (
                             <ActivateAuth
@@ -141,7 +125,7 @@ export function Shell({
             </AppShell.Header>
 
             <AppShell.Navbar py="md" px={4}>
-                <NavLinks />
+                <NavLinks session={session} />
 
                 {!session?.user.id && (
                     <ActivateAuth
