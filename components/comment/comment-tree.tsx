@@ -66,7 +66,7 @@ type DRAWER_CONFIGType = {
     drawerPosition: "left" | "right" | "bottom";
 };
 const DRAWER_CONFIG: DRAWER_CONFIGType = {
-    drawerLevel: 4, // Level that should show drawer - test
+    drawerLevel: 2, // Level that should show drawer - test
     initialExpandCount: 10,
     drawerSize: "sm",
     drawerPosition: "bottom",
@@ -270,7 +270,6 @@ function CommentNodeHeader({
     hasChildren,
     expanded,
     level,
-    isInDrawer,
     onToggleExpand,
     onOpenDrawer,
 }: {
@@ -282,9 +281,10 @@ function CommentNodeHeader({
     onToggleExpand: () => void;
     onOpenDrawer: () => void;
 }) {
-    const showDrawerButton =
-        !isInDrawer &&
-        CommentTreeUtils.shouldShowDrawerButton(level, hasChildren);
+    const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
+        level,
+        hasChildren
+    );
 
     return (
         <Group
@@ -371,20 +371,21 @@ function CommentNode({
     const comment = commentMap.get(node.value);
     const { isPending: isPendingUpdateComment } = useUpdateComment();
 
+    const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
+        level,
+        hasChildren
+    );
+
     useEffect(() => {
         if (expanded && showDrawerButton) {
-            console.error(showDrawerButton);
             tree.collapse(node.value);
         }
-    });
+    }, [expanded, showDrawerButton, tree, node.value]);
 
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
     const isEditOpen = activeEditId === comment.id;
-    const showDrawerButton =
-        !isInDrawer &&
-        CommentTreeUtils.shouldShowDrawerButton(level, hasChildren);
 
     const likes = comment.reactions?.filter((r) => r.liked).length;
     const dislikes = comment.reactions?.filter((r) => r.disliked).length;
