@@ -5,6 +5,7 @@ import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
 import {
+    ActionIcon,
     Avatar,
     Box,
     Button,
@@ -23,6 +24,7 @@ import {
 } from "@mantine/core";
 
 import {
+    IconArrowBack,
     IconChevronDown,
     IconExternalLink,
     IconUser,
@@ -31,7 +33,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { useFocusTrap, useMounted } from "@mantine/hooks";
+import { useFocusTrap, useMounted, useStateHistory } from "@mantine/hooks";
 
 import { CreateCommentForm } from "@/components/forms/comment/create-comment-form";
 
@@ -177,38 +179,71 @@ function useCommentInteractions(): CommentInteractionHandlers {
 // Hook for drawer management
 function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
     const [drawerOpened, setDrawerOpened] = useState(false);
-    const [drawerCommentData, setDrawerCommentData] =
-        useState<CommentsToTreeNodeDataType>([]);
-    const [drawerCommentMap, setDrawerCommentMap] = useState<
-        Map<string, CommentTreeProps>
-    >(new Map());
+
+    const [activeDrawerCommentId, activeDrawerHandlers] = useStateHistory<
+        string | null
+    >(null);
 
     const drawerTree = useTree({
         multiple: false,
         initialExpandedState: {},
     });
 
+    // Compute drawer data dynamically based on current commentsNodeData
+    const { drawerCommentData, drawerCommentMap, drawerTitle } = useMemo(() => {
+        if (!activeDrawerCommentId || !drawerOpened) {
+            return {
+                drawerCommentData: [],
+                drawerCommentMap: new Map<string, CommentTreeProps>(),
+                drawerTitle: "Comment Thread",
+            };
+        }
+
+        const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
+            activeDrawerCommentId,
+            commentsNodeData
+        );
+        const drawerMap = new Map<string, CommentTreeProps>();
+        flattenComments(commentWithChildren, drawerMap);
+
+        // Get the root comment for title
+        const rootComment = drawerMap.get(activeDrawerCommentId);
+
+        // Custom title formatting
+        let title = "Comment Thread";
+        if (rootComment) {
+            const author = rootComment.user?.name;
+            const text = rootComment.text;
+
+            if (author) {
+                title = `Thread by ${author}: "${text}"`;
+            } else {
+                title = title + " " + `${text}`;
+            }
+        }
+
+        return {
+            drawerCommentData: commentWithChildren,
+            drawerCommentMap: drawerMap,
+            drawerTitle: title,
+        };
+    }, [activeDrawerCommentId, drawerOpened, commentsNodeData]);
+
     const handleOpenDrawer = useCallback(
         (commentId: string) => {
-            const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
-                commentId,
-                commentsNodeData
-            );
-            const drawerMap = new Map<string, CommentTreeProps>();
-
-            flattenComments(commentWithChildren, drawerMap);
-
-            setDrawerCommentData(commentWithChildren);
-            setDrawerCommentMap(drawerMap);
+            activeDrawerHandlers.set(commentId);
             setDrawerOpened(true);
 
             // Auto-expand the root comment in drawer
             setTimeout(() => drawerTree.expand(commentId), 100);
         },
-        [commentsNodeData, drawerTree]
+        [drawerTree, activeDrawerHandlers]
     );
 
-    const closeDrawer = useCallback(() => setDrawerOpened(false), []);
+    const closeDrawer = useCallback(() => {
+        setDrawerOpened(false);
+        activeDrawerHandlers.set(null);
+    }, [activeDrawerHandlers]);
 
     return {
         drawerOpened,
@@ -217,9 +252,10 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
         drawerTree,
         handleOpenDrawer,
         closeDrawer,
+        drawerTitle,
+        activeDrawerHandlers,
     };
 }
-
 // Component for comment content
 function CommentContent({
     comment,
@@ -619,7 +655,19 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             <Drawer
                 opened={drawer.drawerOpened}
                 onClose={drawer.closeDrawer}
-                title="Comment Thread"
+                title={
+                    <Group>
+                        <ActionIcon
+                            onClick={() => drawer.activeDrawerHandlers.back()}
+                        >
+                            <IconArrowBack size={14} />
+                        </ActionIcon>
+
+                        <Text truncate="end" maw={200}>
+                            {drawer.drawerTitle}
+                        </Text>
+                    </Group>
+                }
                 size={DRAWER_CONFIG.drawerSize}
                 position={DRAWER_CONFIG.drawerPosition}
             >
