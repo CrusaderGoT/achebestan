@@ -659,7 +659,8 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 title={
                     <Group>
                         {drawer.drawerHistory.current > 1 &&
-                            !!drawer.activeDrawerCommentId && (
+                            !!drawer.activeDrawerCommentId && 
+drawer.activeDrawerCommentId !== drawer.drawerHistory.history[0] && (
                                 <ActionIcon
                                     onClick={() => {
                                               drawer.activeDrawerHandlers.back();
