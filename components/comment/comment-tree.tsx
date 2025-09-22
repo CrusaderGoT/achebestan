@@ -254,6 +254,7 @@ function useDrawerState(commentsNodeData: CommentsToTreeNodeDataType) {
         drawerTitle,
         activeDrawerHandlers,
         drawerHistory,
+        activeDrawerCommentId,
     };
 }
 // Component for comment content
@@ -657,17 +658,24 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 onClose={drawer.closeDrawer}
                 title={
                     <Group>
-                        {drawer.drawerHistory.current > 0 && (
-                            <ActionIcon
-                                onClick={() =>
-                                    drawer.activeDrawerHandlers.back()
-                                }
-                                variant="subtle"
-                                color="gray"
-                            >
-                                <IconArrowBack size={14} />
-                            </ActionIcon>
-                        )}
+                        {drawer.drawerHistory.current > 0 &&
+                            !!drawer.activeDrawerCommentId && (
+                                <ActionIcon
+                                    onClick={() => {
+                                        const prevExists =
+                                            drawer.activeDrawerCommentId;
+
+                                        if (prevExists) {
+                                            drawer.activeDrawerHandlers.back();
+                                            drawer.handleOpenDrawer(prevExists);
+                                        }
+                                    }}
+                                    variant="subtle"
+                                    color="gray"
+                                >
+                                    <IconArrowBack size={14} />
+                                </ActionIcon>
+                            )}
 
                         <Text truncate="end" maw={200}>
                             {drawer.drawerTitle}
