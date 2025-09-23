@@ -27,7 +27,7 @@
   position: relative;
 }
 
-.comment:not([data-level="1"])::before {
+.comment::before {
   position: absolute;
   content: "";
   left: calc(calc(var(--level-offset) - 24px) * -1);
@@ -36,4 +36,10 @@
   width: 20px;
   height: 10px; /* for curve side*/
   top: 15px;
+}
+
+/* Hide ::before for top-level comments (data-level="0") */
+.comment[data-level="0"]::before {
+  content: none;
+  display: none;
 }
