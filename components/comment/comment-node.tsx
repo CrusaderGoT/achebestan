@@ -18,6 +18,7 @@ import { CommentContent } from "./comment-content";
 import { CommentNodeHeader } from "./comment-header";
 
 import { CommentTreeUtils } from "@/lib/utils/helpers";
+import { useElementSize } from "@mantine/hooks";
 
 // Main comment node renderer
 export function CommentNode({
@@ -57,6 +58,8 @@ export function CommentNode({
         }
     }, [expanded, showDrawerButton, tree, node.value]);
 
+    const { ref, height } = useElementSize();
+
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
@@ -77,15 +80,24 @@ export function CommentNode({
 
     return (
         <Stack
+            ref={ref}
             gap={2}
             p="sm"
             {...elementProps}
-            className={cx(level > 1 && commentTreeStyles.childCommentLine)}
+            className={cx(
+                level > 1 && commentTreeStyles.childCommentLine,
+                hasChildren && expanded && commentTreeStyles.parentCommentLine
+            )}
             style={{
                 marginLeft: `${CommentTreeUtils.calculateIndentation(
                     level,
                     isInDrawer
                 )}px`,
+                ["--line-height"]: `${height - 40}px`, // trunk height
+                ["--hook-height"]:
+                    expanded && level > 1
+                        ? `${height - 13}px`
+                        : `${height + 70}px`, // how far child hook goes up
             }}
         >
             <CommentNodeHeader

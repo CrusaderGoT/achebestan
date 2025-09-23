@@ -20,8 +20,6 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useMounted } from "@mantine/hooks";
 
-import dayjs from "dayjs";
-
 import {
     CommentNodeProps,
     CommentRenderContext,
@@ -40,13 +38,10 @@ import {
     useCommentInteractions,
     useDrawerState,
 } from "@/lib/hooks/comment/comment-tree-hooks";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { CommentNode } from "./comment-node";
 
-dayjs.extend(relativeTime);
-
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
-    drawerLevel: 2,
+    drawerLevel: 4,
     initialExpandCount: 10,
     drawerSize: "sm" as MantineSize,
     drawerPosition: "bottom" as const,
@@ -77,10 +72,21 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
     // Initialize main tree
     const initialCommentsToExpand = useMemo<string[]>(() => {
-        return commentsNodeData
+        const values: string[] = [];
+
+        commentsNodeData
             .slice(0, DRAWER_CONFIG.initialExpandCount)
             .filter((c) => !c.parentCommentId)
-            .map((c) => c.value);
+            .forEach((c) => {
+                values.push(c.value);
+                if (c.children?.length && c.children.length > 0) {
+                    c.children
+                        .slice(0, DRAWER_CONFIG.initialExpandCount)
+                        .forEach((ch) => values.push(ch.value));
+                }
+            });
+
+        return values;
     }, [commentsNodeData]);
 
     const tree = useTree({
@@ -106,7 +112,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
         return newComments.map((c) => c.value);
     }, [commentsNodeData]);
 
-    // IMPROVEMENT: Enhanced auto-expansion with error handling
+    // Enhanced auto-expansion with error handling
     useEffect(() => {
         try {
             newCommentsToExpand.forEach((commentId) => {

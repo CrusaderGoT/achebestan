@@ -1,3 +1,33 @@
+/**
+.parentCommentLine {
+  position: relative;
+  z-index: 99;
+}
+
+.parentCommentLine::before {
+  content: "";
+  border-left: 2px solid greenyellow;
+  height: var(--line-height);
+  position: absolute;
+  left: 24px;
+  top: 40px;
+}
+**/
+
+
 .childCommentLine {
-  border-left: 0.5px solid var(--mantine-color-gray-filled);
+  position: relative;
+}
+
+.childCommentLine::after {
+  content: "";
+  height: var(--hook-height);
+  width: 11px;
+  border-left: 2px solid rgb(50, 47, 255);
+  border-bottom: 1px solid rgb(50, 47, 255);
+  border-radius: 0 0 0 9px;
+  position: absolute;
+  left: 1px;
+
+  transform: translateY(-90%);
 }
