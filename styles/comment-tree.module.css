@@ -34,8 +34,6 @@
   height: var(--hook-height);
 
   border-left: 2px solid transparent;
-  border-bottom: 2px solid transparent;
-  border-radius: 0 0 0 9px;
 
   background: linear-gradient(
     to bottom right,
@@ -46,4 +44,24 @@
   mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   mask-composite: exclude;
+
+  /* Animation setup */
+  opacity: 0;
+  transform: translateY(-90%) scaleY(0);
+  transform-origin: top left;
+  animation: drawHook 2s ease-out forwards;
+}
+
+@keyframes drawHook {
+  0% {
+    opacity: 0;
+    transform: translateY(-90%) scaleY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(-90%) scaleY(1);
+    border-bottom: 2px solid transparent;
+    border-radius: 0 0 0 9px;
+  }
 }

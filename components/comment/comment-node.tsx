@@ -10,7 +10,7 @@ import {
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 import { Box, Collapse, Stack } from "@mantine/core";
 import cx from "clsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LikeDislikeButton } from "../buttons/comment/like-dislike-btns";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
@@ -60,6 +60,14 @@ export function CommentNode({
 
     const { ref, height } = useElementSize();
 
+    const [heightState, setHeightState] = useState<number>(height);
+
+    useEffect(() => {
+        if (expanded) {
+            setHeightState(height);
+        }
+    }, [expanded, height, heightState]);
+
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
@@ -93,9 +101,7 @@ export function CommentNode({
                     level,
                     isInDrawer
                 )}px`,
-                ["--hook-height"]: expanded
-                    ? `${height - 13}px`
-                    : `${height + 70}px`,
+                ["--hook-height"]: `${heightState - 14}px`,
             }}
         >
             <CommentNodeHeader
