@@ -41,7 +41,7 @@ import {
 import { CommentNode } from "./comment-node";
 
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
-    drawerLevel: 4,
+    drawerLevel: 3,
     initialExpandCount: 10,
     drawerSize: "sm" as MantineSize,
     drawerPosition: "bottom" as const,

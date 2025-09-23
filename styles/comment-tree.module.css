@@ -1,19 +1,25 @@
-/**
+/*
 .parentCommentLine {
-  position: relative;
-  z-index: 99;
-}
+    position: relative;
+    z-index: 0;
+  }
 
-.parentCommentLine::before {
-  content: "";
-  border-left: 2px solid greenyellow;
-  height: var(--line-height);
-  position: absolute;
-  left: 24px;
-  top: 40px;
-}
-**/
-
+  .parentCommentLine::before {
+    content: "";
+    position: absolute;
+    top: 40px;
+    bottom: 0; 
+    left: 24px;
+    width: 0; 
+    border-left: 2px solid;
+    border-image: linear-gradient(
+        to bottom,
+        rgba(173, 255, 47, 0.2),
+        rgba(173, 255, 47, 1) 
+      )
+      1;
+  }
+*/
 
 .childCommentLine {
   position: relative;
@@ -21,13 +27,23 @@
 
 .childCommentLine::after {
   content: "";
-  height: var(--hook-height);
-  width: 11px;
-  border-left: 2px solid rgb(50, 47, 255);
-  border-bottom: 1px solid rgb(50, 47, 255);
-  border-radius: 0 0 0 9px;
   position: absolute;
   left: 1px;
-
   transform: translateY(-90%);
+  width: 11px;
+  height: var(--hook-height);
+
+  border-left: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 0 0 0 9px;
+
+  background: linear-gradient(
+    to bottom right,
+    rgba(50, 47, 255, 1),
+    rgba(50, 47, 255, 0.2)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
 }

@@ -85,19 +85,17 @@ export function CommentNode({
             p="sm"
             {...elementProps}
             className={cx(
-                level > 1 && commentTreeStyles.childCommentLine,
-                hasChildren && expanded && commentTreeStyles.parentCommentLine
+                level > 1 && commentTreeStyles.childCommentLine
+                // hasChildren && expanded && commentTreeStyles.parentCommentLine
             )}
             style={{
                 marginLeft: `${CommentTreeUtils.calculateIndentation(
                     level,
                     isInDrawer
                 )}px`,
-                ["--line-height"]: `${height - 40}px`, // trunk height
-                ["--hook-height"]:
-                    expanded && level > 1
-                        ? `${height - 13}px`
-                        : `${height + 70}px`, // how far child hook goes up
+                ["--hook-height"]: expanded
+                    ? `${height - 13}px`
+                    : `${height + 70}px`,
             }}
         >
             <CommentNodeHeader
