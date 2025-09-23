@@ -206,6 +206,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     root: publicStyles.noTapHighlight,
                     node: commentTreeStyles.parentComment,
                     subtree: commentTreeStyles.childComment,
+                    label: commentTreeStyles.comment,
                 }}
             />
 
@@ -275,6 +276,12 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                         expandOnSpace={false}
                         className={publicStyles.noTapHighlight}
                         renderNode={renderDrawerNode}
+                        classNames={{
+                            root: publicStyles.noTapHighlight,
+                            node: commentTreeStyles.parentComment,
+                            subtree: commentTreeStyles.childComment,
+                            label: commentTreeStyles.comment,
+                        }}
                     />
                 ) : (
                     <Text size="sm" c="dimmed" ta="center" py="xl">

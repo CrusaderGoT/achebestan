@@ -20,11 +20,14 @@
 }
 
 .childComment {
-  position: relative;
   margin-left: var(--level-offset);
 }
 
-.childComment::before {
+.comment {
+  position: relative;
+}
+
+.comment::before {
   position: absolute;
   content: "";
   left: calc(calc(var(--level-offset) - 24px) * -1);
