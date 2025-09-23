@@ -27,7 +27,7 @@
   position: relative;
 }
 
-.comment::before {
+.comment:not([data-level="1"])::before {
   position: absolute;
   content: "";
   left: calc(calc(var(--level-offset) - 24px) * -1);
