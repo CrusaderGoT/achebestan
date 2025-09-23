@@ -271,7 +271,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     <Tree
                         data={drawer.drawerCommentData}
                         tree={drawer.drawerTree}
-                        levelOffset={0}
+                        levelOffset={"xl"}
                         expandOnClick={false}
                         expandOnSpace={false}
                         renderNode={renderDrawerNode}
