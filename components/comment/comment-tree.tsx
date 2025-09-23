@@ -201,9 +201,9 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                 levelOffset={"xl"}
                 expandOnClick={false}
                 expandOnSpace={false}
-                className={publicStyles.noTapHighlight}
                 renderNode={renderMainNode}
                 classNames={{
+                    root: publicStyles.noTapHighlight,
                     node: commentTreeStyles.parentComment,
                     subtree: commentTreeStyles.childComment,
                 }}
