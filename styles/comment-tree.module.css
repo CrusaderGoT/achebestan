@@ -1,67 +1,36 @@
-/*
-.parentCommentLine {
-    position: relative;
-    z-index: 0;
-  }
-
-  .parentCommentLine::before {
-    content: "";
-    position: absolute;
-    top: 40px;
-    bottom: 0; 
-    left: 24px;
-    width: 0; 
-    border-left: 2px solid;
-    border-image: linear-gradient(
-        to bottom,
-        rgba(173, 255, 47, 0.2),
-        rgba(173, 255, 47, 1) 
-      )
-      1;
-  }
-*/
-
-.childCommentLine {
+.parentComment {
   position: relative;
+  margin-bottom: 20px;
 }
 
-.childCommentLine::after {
+.parentComment::before {
   content: "";
   position: absolute;
-  left: 1px;
-  transform: translateY(-90%);
-  width: 11px;
-  height: var(--hook-height);
-
-  border-left: 2px solid transparent;
-
-  background: linear-gradient(
-    to bottom right,
-    rgba(50, 47, 255, 1),
-    rgba(50, 47, 255, 0.2)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
-
-  /* Animation setup */
-  opacity: 0;
-  transform: translateY(-90%) scaleY(0);
-  transform-origin: top left;
-  animation: drawHook 2s ease-out forwards;
+  top: 40px;
+  bottom: 0;
+  left: 24px;
+  width: 0;
+  border-left: 2px solid;
+  border-image: linear-gradient(
+      to bottom,
+      rgba(173, 255, 47, 1),
+      rgba(173, 255, 47, 0.2)
+    )
+    1;
 }
 
-@keyframes drawHook {
-  0% {
-    opacity: 0;
-    transform: translateY(-90%) scaleY(0);
-  }
+.childComment {
+  position: relative;
+  margin-left: var(--level-offset);
+}
 
-  100% {
-    opacity: 1;
-    transform: translateY(-90%) scaleY(1);
-    border-bottom: 2px solid transparent;
-    border-radius: 0 0 0 9px;
-  }
+.childComment::before {
+  position: absolute;
+  content: "";
+  left: calc(calc(var(--level-offset) - 24px) * -1);
+  border-bottom: 1px solid rgba(173, 255, 47, 0.5);
+  border-radius: 0 0 0 9px;
+  width: 20px;
+  height: 10px; /* for curve side*/
+  top: 15px;
 }

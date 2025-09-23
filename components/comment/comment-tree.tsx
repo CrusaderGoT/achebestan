@@ -40,6 +40,8 @@ import {
 } from "@/lib/hooks/comment/comment-tree-hooks";
 import { CommentNode } from "./comment-node";
 
+import commentTreeStyles from "@/styles/comment-tree.module.css";
+
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
     drawerLevel: 3,
     initialExpandCount: 10,
@@ -196,11 +198,15 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             <Tree
                 data={commentsNodeData}
                 tree={tree}
-                levelOffset={0}
+                levelOffset={"xl"}
                 expandOnClick={false}
                 expandOnSpace={false}
                 className={publicStyles.noTapHighlight}
                 renderNode={renderMainNode}
+                classNames={{
+                    node: commentTreeStyles.parentComment,
+                    subtree: commentTreeStyles.childComment,
+                }}
             />
 
             <Drawer

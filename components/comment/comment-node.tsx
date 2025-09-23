@@ -7,9 +7,7 @@ import {
     CommentNodeProps,
     CommentRenderContext,
 } from "@/lib/types/comment";
-import commentTreeStyles from "@/styles/comment-tree.module.css";
 import { Box, Collapse, Stack } from "@mantine/core";
-import cx from "clsx";
 import { useEffect, useState } from "react";
 import { LikeDislikeButton } from "../buttons/comment/like-dislike-btns";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
@@ -87,23 +85,7 @@ export function CommentNode({
     };
 
     return (
-        <Stack
-            ref={ref}
-            gap={2}
-            p="sm"
-            {...elementProps}
-            className={cx(
-                level > 1 && commentTreeStyles.childCommentLine
-                // hasChildren && expanded && commentTreeStyles.parentCommentLine
-            )}
-            style={{
-                marginLeft: `${CommentTreeUtils.calculateIndentation(
-                    level,
-                    isInDrawer
-                )}px`,
-                ["--hook-height"]: `${heightState - 14}px`,
-            }}
-        >
+        <Stack ref={ref} gap={2} p="sm" {...elementProps}>
             <CommentNodeHeader
                 comment={comment}
                 hasChildren={hasChildren}
