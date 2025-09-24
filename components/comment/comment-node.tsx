@@ -8,15 +8,14 @@ import {
     CommentRenderContext,
 } from "@/lib/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { LikeDislikeButton } from "../buttons/comment/like-dislike-btns";
+import { useEffect } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentNodeHeader } from "./comment-header";
+import { LikeDislikeButton } from "./like-dislike-btns";
 
 import { CommentTreeUtils } from "@/lib/utils/helpers";
-import { useElementSize } from "@mantine/hooks";
 
 // Main comment node renderer
 export function CommentNode({
@@ -56,16 +55,6 @@ export function CommentNode({
         }
     }, [expanded, showDrawerButton, tree, node.value]);
 
-    const { ref, height } = useElementSize();
-
-    const [heightState, setHeightState] = useState<number>(height);
-
-    useEffect(() => {
-        if (expanded) {
-            setHeightState(height);
-        }
-    }, [expanded, height, heightState]);
-
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
@@ -79,13 +68,16 @@ export function CommentNode({
 
     const handleToggleExpand = () => {
         tree.toggleExpanded(node.value);
-        if (node.children && !showDrawerButton) {
-            node.children.forEach((c) => tree.expand(c.value));
+        if (comment.childComments && !showDrawerButton) {
+            comment.childComments
+                .slice(1, 10)
+                .filter((c) => !c.hasBeenDeleted)
+                .forEach((c) => tree.expand(c.id.toString()));
         }
     };
 
     return (
-        <Stack ref={ref} gap={2} p="sm" {...elementProps}>
+        <Stack gap={2} p="sm" {...elementProps}>
             <CommentNodeHeader
                 comment={comment}
                 hasChildren={hasChildren}
@@ -93,7 +85,7 @@ export function CommentNode({
                 level={level}
                 isInDrawer={isInDrawer}
                 onToggleExpand={handleToggleExpand}
-                onOpenDrawer={() => onOpenDrawer(node.value)}
+                onOpenDrawer={() => onOpenDrawer(comment)}
             />
 
             {!showDrawerButton && (

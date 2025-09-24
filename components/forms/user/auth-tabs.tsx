@@ -1,7 +1,7 @@
 // For file /tabs/[activeTab].tsx
 "use client";
 
-import { AnonymousSignin } from "@/components/buttons/user/anonymous-signin";
+import { AnonymousSignin } from "@/components/user/anonymous-signin";
 import { authClient } from "@/lib/auth-client";
 import { LoginFormState } from "@/lib/types/login";
 import { Center, Divider, Stack, Tabs, Text } from "@mantine/core";

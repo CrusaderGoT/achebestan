@@ -31,6 +31,7 @@ import {
 import {
     buildCommentHierarchy,
     commentsToTreeNodeData,
+    CommentTreeUtils,
     flattenComments,
 } from "@/lib/utils/helpers";
 
@@ -44,7 +45,6 @@ import commentTreeStyles from "@/styles/comment-tree.module.css";
 
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
     drawerLevel: 3,
-    initialExpandCount: 10,
     drawerSize: "sm" as MantineSize,
     drawerPosition: "bottom" as const,
     indentationSize: 23, // New: Make indentation configurable
@@ -77,13 +77,13 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
         const values: string[] = [];
 
         commentsNodeData
-            .slice(0, DRAWER_CONFIG.initialExpandCount)
-            .filter((c) => !c.parentCommentId)
+            .slice(0, CommentTreeUtils.initialExpandCount)
+            .filter((c) => !c.parentCommentId && !c.hasBeenDeleted)
             .forEach((c) => {
                 values.push(c.value);
                 if (c.children?.length && c.children.length > 0) {
                     c.children
-                        .slice(0, DRAWER_CONFIG.initialExpandCount)
+                        .slice(0, CommentTreeUtils.initialExpandCount)
                         .forEach((ch) => values.push(ch.value));
                 }
             });
@@ -123,7 +123,9 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     !autoExpandedRef.current.has(commentId) &&
                     !tree.expandedState[commentId]
                 ) {
-                    tree.expand(commentId);
+                    requestAnimationFrame(() => {
+                        tree.expand(commentId);
+                    });
                     autoExpandedRef.current.add(commentId);
                 }
             });

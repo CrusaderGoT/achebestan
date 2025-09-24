@@ -1,16 +1,16 @@
 "use client";
 
-import { ModeToggle } from "@/components/buttons/shell/mode-toggle";
-import { LogoutButton } from "@/components/buttons/user/logout-btn";
-import { OpenAuthenticationModalButton } from "@/components/buttons/user/open-auth-modal-btn";
 import { AuthenticationModal } from "@/components/forms/user/auth-modal";
 import { ActivateAuth } from "@/components/shell/activate-auth";
+import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
+import { LogoutButton } from "@/components/user/logout-btn";
+import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal-btn";
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Title } from "@mantine/core";
+import { AppShell, Burger, Group, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,8 @@ export function Shell({
 
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
+
+    const [checkedModeToggle, setCheckedModeToggle] = useState(false);
 
     return (
         <AppShell
@@ -112,7 +114,12 @@ export function Shell({
 
                         <SearchSpotlight />
 
-                        <ModeToggle />
+                        <ModeToggle
+                            size="md"
+                            checked={checkedModeToggle}
+                            setChecked={setCheckedModeToggle}
+                            visibleFrom="lg"
+                        />
 
                         <Burger
                             opened={openedNavBar}
@@ -126,6 +133,17 @@ export function Shell({
 
             <AppShell.Navbar py="md" px={4}>
                 <NavLinks session={session} />
+
+                <Group ml={"auto"} mt={"xs"} mr={"sm"}>
+                    <Text size="sm" c={"dimmed"}>
+                        mode toggle
+                    </Text>
+                    <ModeToggle
+                        size={"sm"}
+                        checked={checkedModeToggle}
+                        setChecked={setCheckedModeToggle}
+                    />
+                </Group>
 
                 {!session?.user.id && (
                     <ActivateAuth

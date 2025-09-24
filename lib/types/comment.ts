@@ -24,7 +24,7 @@ export interface DrawerState {
     drawerCommentData: CommentsToTreeNodeDataType;
     drawerCommentMap: Map<string, CommentTreeProps>;
     drawerTree: ReturnType<typeof useTree>;
-    handleOpenDrawer: (commentId: string) => void;
+    handleOpenDrawer: (comment: CommentTreeProps) => void;
     closeDrawer: () => void;
     drawerTitle: string;
     activeDrawerHandlers: UseStateHistoryHandlers<string | null>;
@@ -35,7 +35,6 @@ export interface DrawerState {
 // Configuration
 export type DRAWER_CONFIG_TYPE = {
     drawerLevel: number;
-    initialExpandCount: number;
     drawerSize: MantineSize;
     drawerPosition: "left" | "right" | "bottom";
     indentationSize: number;
@@ -48,7 +47,7 @@ export interface CommentRenderContext {
     isInDrawer: boolean;
     tree: ReturnType<typeof useTree>;
     commentMap: Map<string, CommentTreeProps>;
-    onOpenDrawer: (commentId: string) => void;
+    onOpenDrawer: (comment: CommentTreeProps) => void;
 }
 
 export interface CommentInteractionHandlers {

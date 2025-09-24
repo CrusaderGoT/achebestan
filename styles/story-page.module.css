@@ -49,6 +49,7 @@
 .storyContentScrollArea {
   height: 50dvh;
   max-height: 100dvh;
+  position: relative;
 }
 
 /* Book-style story content with Mantine integration */
@@ -623,4 +624,10 @@
   .storyContent * {
     transition: none !important;
   }
+}
+
+.storyEditContentBtn {
+  position: absolute;
+  z-index: 20;
+  right: 10px;
 }

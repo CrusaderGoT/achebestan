@@ -38,8 +38,7 @@
   top: 15px;
 }
 
-/* Hide ::before for top-level comments (data-level="1") */
-.comment[data-level="0"]::before {
-  content: none;
-  display: none;
+.parentComment:has([data-level="1"]) > .comment::before {
+  content: none !important;
+  display: none !important;
 }

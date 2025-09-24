@@ -72,7 +72,7 @@ export function StoryBook({
                             component="a"
                             href={`/story/${isbn}`}
                         >
-                            Goto
+                            Read
                         </Button>
                     </Center>
                 )}

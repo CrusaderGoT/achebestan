@@ -20,8 +20,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { PickedStoryProps } from "@/lib/types/story";
 import { useDisclosure, useMounted } from "@mantine/hooks";
-import { DeleteStory } from "../buttons/story/delete-story";
-import { ShareStoryDrawer } from "../buttons/story/share-story-drawer";
+import { DeleteStory } from "./buttons/delete-story";
+import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 
 export function StoryActions({ ...props }: PickedStoryProps) {

@@ -286,4 +286,6 @@ export class CommentTreeUtils {
             return [];
         }
     }
+
+    static initialExpandCount = 10;
 }

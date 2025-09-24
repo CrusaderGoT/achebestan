@@ -51,7 +51,6 @@ export function useDrawerState(
 
     const drawerTree = useTree({
         multiple: false,
-        initialExpandedState: {},
     });
 
     // IMPROVEMENT: Add error handling and validation
@@ -126,17 +125,26 @@ export function useDrawerState(
 
     // CRITICAL BUG FIX: Completely rewrite handleOpenDrawer
     const handleOpenDrawer = useCallback(
-        (commentId: string) => {
+        (comment: CommentTreeProps) => {
             // Set the active comment ID first
-            activeDrawerHandlers.set(commentId);
+            activeDrawerHandlers.set(comment.id.toString());
 
             // Then open the drawer
             setDrawerOpened(true);
 
             // IMPROVEMENT: Use requestAnimationFrame for better performance
             requestAnimationFrame(() => {
-                drawerTree.expand(commentId);
+                drawerTree.expand(comment.id.toString());
             });
+
+            if (comment.childComments && comment.childComments.length > 0) {
+                comment.childComments
+                    .slice(0, CommentTreeUtils.initialExpandCount)
+                    .filter((c) => !c.hasBeenDeleted)
+                    .forEach((c) => {
+                        drawerTree.expand(c.id.toString());
+                    });
+            }
         },
         [drawerTree, activeDrawerHandlers]
     );

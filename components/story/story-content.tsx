@@ -2,16 +2,9 @@
 
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
 import { StoryUpdateType } from "@/zod-schemas/story";
-import {
-    ActionIcon,
-    Badge,
-    Box,
-    Group,
-    ScrollArea,
-    Stack,
-} from "@mantine/core";
+import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { IconCheck, IconClock, IconEdit } from "@tabler/icons-react";
+import { IconClock } from "@tabler/icons-react";
 
 import { authClient } from "@/lib/auth-client";
 import { useBookmarks } from "@/lib/hooks/bookmark/use-bookmarks";
@@ -34,6 +27,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
+import { StoryEditButtons } from "./buttons/story-edit-btns";
 
 type StoryContentType = {
     toggleContentField: () => void;
@@ -81,6 +75,37 @@ export function StoryContent({
         contextText: string;
     } | null>(null);
 
+    const handleAddBookmark = () => {
+        const bookmarkData = getBookmarkData();
+        if (!bookmarkData) return;
+
+        setPendingBookmarkData(bookmarkData);
+        openModal();
+        hideContextMenu();
+    };
+
+    const handleSaveBookmark = (note: string) => {
+        if (!pendingBookmarkData) return;
+
+        addBookmark({
+            containerSelector: pendingBookmarkData.containerSelector,
+            position: pendingBookmarkData.position,
+            contextText: pendingBookmarkData.contextText,
+            userNote: note || undefined,
+        });
+
+        setPendingBookmarkData(null);
+    };
+
+    const handleBookmarkRemove = (id: string) => {
+        removeBookmark(id);
+        // Force immediate re-render after removal
+        const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
+        setTimeout(() => {
+            forceRenderBookmarkIndicators(remainingBookmarks);
+        }, 50);
+    };
+
     // Robust bookmark rendering with retry logic
     const renderBookmarks = useCallback(
         (force = false) => {
@@ -101,6 +126,18 @@ export function StoryContent({
         },
         [bookmarks]
     );
+
+    const handleContextMenuClose = useCallback(() => {
+        hideContextMenu();
+        // Small delay to ensure DOM is stable before re-rendering
+        setTimeout(() => {
+            if (bookmarks.length > 0 && shouldReRenderBookmarks(bookmarks)) {
+                renderBookmarks(true);
+            }
+        }, 100);
+    }, [hideContextMenu, bookmarks, renderBookmarks]);
+
+    const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
 
     // Main effect for rendering bookmarks
     useEffect(() => {
@@ -160,51 +197,22 @@ export function StoryContent({
         return () => window.removeEventListener("focus", handleFocus);
     }, [bookmarks, renderBookmarks]);
 
-    const handleAddBookmark = () => {
-        const bookmarkData = getBookmarkData();
-        if (!bookmarkData) return;
-
-        setPendingBookmarkData(bookmarkData);
-        openModal();
-        hideContextMenu();
-    };
-
-    const handleSaveBookmark = (note: string) => {
-        if (!pendingBookmarkData) return;
-
-        addBookmark({
-            containerSelector: pendingBookmarkData.containerSelector,
-            position: pendingBookmarkData.position,
-            contextText: pendingBookmarkData.contextText,
-            userNote: note || undefined,
-        });
-
-        setPendingBookmarkData(null);
-    };
-
-    const handleBookmarkRemove = (id: string) => {
-        removeBookmark(id);
-        // Force immediate re-render after removal
-        const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
-        setTimeout(() => {
-            forceRenderBookmarkIndicators(remainingBookmarks);
-        }, 50);
-    };
-
-    const handleContextMenuClose = useCallback(() => {
-        hideContextMenu();
-        // Small delay to ensure DOM is stable before re-rendering
-        setTimeout(() => {
-            if (bookmarks.length > 0 && shouldReRenderBookmarks(bookmarks)) {
-                renderBookmarks(true);
-            }
-        }, 100);
-    }, [hideContextMenu, bookmarks, renderBookmarks]);
-
-    const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
-
     return (
         <Stack className={publicStyles.relative} gap={"xs"}>
+            {/* Context Menu for Bookmarks */}
+            <BookmarkContextMenu
+                visible={showContextMenu}
+                position={menuPosition}
+                onAddBookmark={handleAddBookmark}
+                onClose={handleContextMenuClose}
+                contextText={
+                    pendingBookmarkData?.contextText ||
+                    getBookmarkData()?.contextText ||
+                    ""
+                }
+                menuRef={contextMenuRef}
+            />
+
             {!openedContentField && (
                 <Group justify="space-between">
                     <Badge
@@ -224,56 +232,6 @@ export function StoryContent({
                 </Group>
             )}
 
-            <Group
-                justify="space-between"
-                mb={"xs"}
-                className={cx(
-                    storyAuthorId !== session.data?.user.id && publicStyles.hide
-                )}
-            >
-                <ActionIcon
-                    loading={form.submitting}
-                    title="Submit Update"
-                    variant="light"
-                    size={"xs"}
-                    type="submit"
-                    color="green"
-                    className={cx(
-                        (!openedContentField || !dirty) && publicStyles.hide
-                    )}
-                >
-                    <IconCheck />
-                </ActionIcon>
-
-                <ActionIcon
-                    onClick={() => {
-                        toggleContentField();
-                    }}
-                    title="Update Story Content"
-                    variant="subtle"
-                    color="yellow"
-                    size={"xs"}
-                    ml={"auto"}
-                    disabled={form.submitting}
-                >
-                    <IconEdit />
-                </ActionIcon>
-            </Group>
-
-            {/* Context Menu for Bookmarks */}
-            <BookmarkContextMenu
-                visible={showContextMenu}
-                position={menuPosition}
-                onAddBookmark={handleAddBookmark}
-                onClose={handleContextMenuClose}
-                contextText={
-                    pendingBookmarkData?.contextText ||
-                    getBookmarkData()?.contextText ||
-                    ""
-                }
-                menuRef={contextMenuRef}
-            />
-
             {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
             <ScrollArea
                 className={cx(
@@ -282,6 +240,15 @@ export function StoryContent({
                 )}
                 offsetScrollbars="present"
             >
+                <StoryEditButtons
+                    storyAuthorId={storyAuthorId}
+                    sessionUserId={session.data?.user.id}
+                    isFormSubmiting={form.submitting}
+                    openedContentField={openedContentField}
+                    dirty={dirty}
+                    toggleContentField={toggleContentField}
+                />
+
                 <Box
                     dangerouslySetInnerHTML={{
                         __html: sanitizeHTML(content),
@@ -299,11 +266,20 @@ export function StoryContent({
 
             <Box
                 className={cx(
+                    publicStyles.relative,
                     (!openedContentField ||
                         storyAuthorId !== session.data?.user.id) &&
                         publicStyles.hide
                 )}
             >
+                <StoryEditButtons
+                    storyAuthorId={storyAuthorId}
+                    sessionUserId={session.data?.user.id}
+                    isFormSubmiting={form.submitting}
+                    openedContentField={openedContentField}
+                    dirty={dirty}
+                    toggleContentField={toggleContentField}
+                />
                 <UpdateStoryContent />
             </Box>
 
