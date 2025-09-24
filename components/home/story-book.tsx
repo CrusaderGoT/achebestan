@@ -14,6 +14,7 @@ import {
     Text,
 } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
+import { NavigationLink } from "../ui/route-navigation-progress";
 
 interface StoryBookProps extends StorySelectType {
     alt?: string;
@@ -69,8 +70,8 @@ export function StoryBook({
                         <Button
                             variant="outline"
                             className={storybookStyles.navigate}
-                            component="a"
                             href={`/story/${isbn}`}
+                            component={NavigationLink}
                         >
                             Read
                         </Button>

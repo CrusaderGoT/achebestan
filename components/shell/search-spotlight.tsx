@@ -15,10 +15,11 @@ import {
     TextInput,
 } from "@mantine/core";
 import { useDebouncedCallback, useIsFirstRender } from "@mantine/hooks";
+import { nprogress } from "@mantine/nprogress";
 import { Spotlight, spotlight } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 // Define search options interface to match the improved function
@@ -30,6 +31,8 @@ interface SearchState {
 
 export function SearchSpotlight() {
     const router = useRouter();
+
+    const pathname = usePathname();
 
     const [search, setSearch] = useState("");
 
@@ -127,6 +130,21 @@ export function SearchSpotlight() {
                           .includes(search.toLowerCase().trim()))
           );
 
+    const [activeLink, setActiveLink] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        if (!activeLink) return;
+
+        if (pathname === activeLink) {
+            // Complete progress when we reach the target or if already there
+            const timer = setTimeout(() => {
+                nprogress.complete();
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [pathname, activeLink]);
+
     // Render spotlight actions
     const items = filteredResults.map((item) => (
         <Spotlight.Action
@@ -134,7 +152,20 @@ export function SearchSpotlight() {
             onClick={() => {
                 console.log("Selected story:", item);
                 spotlight.close(); // Close spotlight after selection
-                router.push(`/story/${item.isbn}`);
+
+                const targetPath = `/story/${item.isbn}`;
+
+                // Check if we're already on this path
+                if (pathname === targetPath) {
+                    // Already on this page - complete progress immediately
+                    setTimeout(() => {
+                        nprogress.complete();
+                    }, 100); // Small delay to show the progress
+                } else {
+                    // Different path - normal navigation
+                    setActiveLink(targetPath);
+                    router.push(targetPath);
+                }
             }}
         >
             <Group wrap="nowrap" w="100%">

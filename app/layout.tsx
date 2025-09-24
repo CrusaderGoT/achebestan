@@ -4,6 +4,7 @@ import "@mantine/core/styles.layer.css";
 
 import "@mantine/dropzone/styles.css";
 import "@mantine/notifications/styles.css";
+import "@mantine/nprogress/styles.css";
 import "@mantine/spotlight/styles.css";
 import "@mantine/tiptap/styles.css";
 
@@ -18,6 +19,7 @@ import {
 import { Notifications } from "@mantine/notifications";
 
 import { Shell } from "@/components/shell/shell";
+import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -38,6 +40,7 @@ export default function RootLayout({
             </head>
             <body>
                 <MantineProvider>
+                    <RouteNavigationProgress />
                     <Notifications />
                     <Shell>{children}</Shell>
                 </MantineProvider>

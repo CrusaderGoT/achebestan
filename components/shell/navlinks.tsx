@@ -10,11 +10,11 @@ import {
     IconPlus,
     IconWriting,
 } from "@tabler/icons-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import shellStyles from "@/styles/shell.module.css";
 import cx from "clsx";
+import { NavigationLink } from "../ui/route-navigation-progress";
 
 export const navlinkData = [
     {
@@ -66,7 +66,7 @@ export function NavLinks({
                 description={item.description}
                 rightSection={item.rightSection}
                 leftSection={<item.icon size={16} stroke={1.5} />}
-                component={Link}
+                component={NavigationLink}
             />
         );
     });
@@ -87,12 +87,12 @@ export function AltNavLinks({
         return (
             <UnstyledButton
                 key={index}
-                component={Link}
                 href={item.href}
                 className={cx(
                     shellStyles.mobileNavBar,
                     pathname === item.href && shellStyles.mobileNavBarActive
                 )}
+                component={NavigationLink}
             >
                 {item.label}
             </UnstyledButton>
