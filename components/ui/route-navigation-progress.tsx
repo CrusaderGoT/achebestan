@@ -2,13 +2,14 @@
 "use client";
 
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ComponentPropsWithRef, useEffect, useRef } from "react";
 
 import Link from "next/link";
 
 export function RouteNavigationProgress() {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const isInitialLoad = useRef(true);
 
     // Handle route changes
@@ -25,7 +26,7 @@ export function RouteNavigationProgress() {
         }, 200);
 
         return () => clearTimeout(timer);
-    }, [pathname]);
+    }, [pathname, searchParams]);
 
     // Handle link clicks globally
     useEffect(() => {
@@ -52,7 +53,7 @@ export function RouteNavigationProgress() {
         return () => document.removeEventListener("click", handleLinkClick);
     }, []);
 
-    return <NavigationProgress />;
+    return <NavigationProgress color="cyan" />;
 }
 
 // NavigationLink.tsx - Custom Link component with progress

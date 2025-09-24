@@ -21,6 +21,8 @@ import { Notifications } from "@mantine/notifications";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { NavigationProgress } from "@mantine/nprogress";
 
 export const metadata: Metadata = {
     title: "Achebestan",
@@ -40,7 +42,11 @@ export default function RootLayout({
             </head>
             <body>
                 <MantineProvider>
-                    <RouteNavigationProgress />
+                    {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
+                    <Suspense fallback={<NavigationProgress />}>
+                        <RouteNavigationProgress />
+                    </Suspense>
+
                     <Notifications />
                     <Shell>{children}</Shell>
                 </MantineProvider>
