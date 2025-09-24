@@ -44,7 +44,7 @@ import { CommentNode } from "./comment-node";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
-    drawerLevel: 3,
+    drawerLevel: 4,
     drawerSize: "sm" as MantineSize,
     drawerPosition: "bottom" as const,
     indentationSize: 23, // New: Make indentation configurable
@@ -208,7 +208,6 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     root: publicStyles.noTapHighlight,
                     node: commentTreeStyles.parentComment,
                     subtree: commentTreeStyles.childComment,
-                    label: commentTreeStyles.comment,
                 }}
             />
 
@@ -281,7 +280,6 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                             root: publicStyles.noTapHighlight,
                             node: commentTreeStyles.parentComment,
                             subtree: commentTreeStyles.childComment,
-                            label: commentTreeStyles.comment,
                         }}
                     />
                 ) : (

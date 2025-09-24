@@ -22,7 +22,7 @@ import { StoryTitle } from "@/components/story/story-title";
 import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
@@ -164,6 +164,10 @@ export function Story({
     }
 
     const session = authClient.useSession();
+
+    const mounted = useMounted();
+
+    if (!mounted) return null;
 
     return (
         <UpdateStoryFormProvider form={form}>

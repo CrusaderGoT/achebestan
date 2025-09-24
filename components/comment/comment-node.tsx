@@ -17,6 +17,10 @@ import { LikeDislikeButton } from "./like-dislike-btns";
 
 import { CommentTreeUtils } from "@/lib/utils/helpers";
 
+import commentTreeStyles from "@/styles/comment-tree.module.css";
+import cx from "clsx";
+import { DRAWER_CONFIG } from "./comment-tree";
+
 // Main comment node renderer
 export function CommentNode({
     nodeProps,
@@ -77,7 +81,17 @@ export function CommentNode({
     };
 
     return (
-        <Stack gap={2} p="sm" {...elementProps}>
+        <Stack
+            gap={2}
+            p="sm"
+            {...elementProps}
+            className={cx(
+                commentTreeStyles.comment,
+                level === 1 && commentTreeStyles.topLevel,
+                level === DRAWER_CONFIG.drawerLevel &&
+                    commentTreeStyles.drawerLevel
+            )}
+        >
             <CommentNodeHeader
                 comment={comment}
                 hasChildren={hasChildren}

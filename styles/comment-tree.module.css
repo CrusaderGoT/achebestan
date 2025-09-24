@@ -3,7 +3,7 @@
   margin-bottom: 20px;
 }
 
-.parentComment::before {
+.parentComment:not(.drawerLevel):before {
   content: "";
   position: absolute;
   top: 40px;
@@ -27,7 +27,7 @@
   position: relative;
 }
 
-.comment::before {
+.comment:not(.topLevel):before {
   position: absolute;
   content: "";
   left: calc(calc(var(--level-offset) - 24px) * -1);
@@ -36,9 +36,4 @@
   width: 20px;
   height: 10px; /* for curve side*/
   top: 15px;
-}
-
-.parentComment:has([data-level="1"]) > .comment::before {
-  content: none !important;
-  display: none !important;
 }
