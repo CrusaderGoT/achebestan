@@ -2,14 +2,13 @@
 "use client";
 
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ComponentPropsWithRef, useEffect, useRef } from "react";
 
 import Link from "next/link";
 
 export function RouteNavigationProgress() {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
     const isInitialLoad = useRef(true);
 
     // Handle route changes
@@ -26,7 +25,7 @@ export function RouteNavigationProgress() {
         }, 200);
 
         return () => clearTimeout(timer);
-    }, [pathname, searchParams]);
+    }, [pathname]);
 
     // Handle link clicks globally
     useEffect(() => {
