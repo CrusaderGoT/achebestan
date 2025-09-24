@@ -153,6 +153,8 @@ export function SearchSpotlight() {
                 console.log("Selected story:", item);
                 spotlight.close(); // Close spotlight after selection
 
+                nprogress.start();
+
                 const targetPath = `/story/${item.isbn}`;
 
                 // Check if we're already on this path
