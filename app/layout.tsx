@@ -20,9 +20,9 @@ import { Notifications } from "@mantine/notifications";
 
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
+import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { NavigationProgress } from "@mantine/nprogress";
 
 export const metadata: Metadata = {
     title: "Achebestan",
