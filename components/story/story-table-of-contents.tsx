@@ -125,7 +125,7 @@ export function StoryTableOfContents({
 
     const [opened, { toggle, close }] = useDisclosure();
 
-    if (!isReady || !viewport || hasHeadingOrList(viewport)) {
+    if (!isReady || !viewport || !hasHeadingOrList(viewport)) {
         return null;
     }
 
