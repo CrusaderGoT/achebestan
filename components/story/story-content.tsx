@@ -221,10 +221,16 @@ export function StoryContent({
 
             {!openedContentField && (
                 <Group justify="space-between">
+                    <StoryTableOfContents
+                        dependency={sanitizeHTML(content)}
+                        scrollAreaRef={scrollAreaRef}
+                    />
+
                     <Badge
                         size="xs"
                         variant="subtle"
                         leftSection={<IconClock size={14} />}
+                        mr="auto"
                     >
                         {timeToRead}
                     </Badge>
@@ -237,12 +243,6 @@ export function StoryContent({
                     />
                 </Group>
             )}
-
-            {/* Pass the scrollAreaRef to the TableOfContents */}
-            <StoryTableOfContents
-                dependency={sanitizeHTML(content)}
-                scrollAreaRef={scrollAreaRef}
-            />
 
             <Box flex={1} ref={ref} className={cx(publicStyles.relative)}>
                 <StoryContentButtons
