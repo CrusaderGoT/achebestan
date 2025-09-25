@@ -10,7 +10,14 @@ import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Text, Title } from "@mantine/core";
+import {
+    AppShell,
+    Burger,
+    Group,
+    Text,
+    Title,
+    useMantineColorScheme,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
@@ -32,7 +39,11 @@ export function Shell({
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
 
-    const [checkedModeToggle, setCheckedModeToggle] = useState(false);
+    const { colorScheme } = useMantineColorScheme();
+
+    const [checkedModeToggle, setCheckedModeToggle] = useState(
+        colorScheme === "light" ? true : false
+    );
 
     return (
         <AppShell
