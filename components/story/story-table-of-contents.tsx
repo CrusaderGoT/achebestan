@@ -121,44 +121,18 @@ export function StoryTableOfContents({
             color="blue"
             size="sm"
             radius="sm"
+            depthOffset={20}
             scrollSpyOptions={{
                 selector:
                     '[data-story-content="true"] :is(h1, h2, h3, h4, h5, h6)',
                 scrollHost: viewport,
             }}
             getControlProps={({ active, data }) => ({
-                onClick: () => {
-                    const element = data.getNode();
-
-                    if (viewport && element) {
-                        try {
-                            const containerRect =
-                                viewport.getBoundingClientRect();
-                            const elementRect = element.getBoundingClientRect();
-                            const scrollTop = viewport.scrollTop;
-                            const elementOffsetTop =
-                                elementRect.top - containerRect.top + scrollTop;
-
-                            viewport.scrollTo({
-                                top: elementOffsetTop - 20,
-                                behavior: "smooth",
-                            });
-                        } catch {
-                            try {
-                                const offsetTop = element.offsetTop;
-                                viewport.scrollTo({
-                                    top: offsetTop - 20,
-                                    behavior: "smooth",
-                                });
-                            } catch {
-                                element.scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "start",
-                                });
-                            }
-                        }
-                    }
-                },
+                onClick: () =>
+                    data.getNode().scrollIntoView({
+                        behavior: "instant",
+                        block: "start",
+                    }),
                 children: data.value,
                 style: {
                     color: active
