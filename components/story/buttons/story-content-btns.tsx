@@ -4,7 +4,8 @@ import { ActionIcon, Group } from "@mantine/core";
 import {
     IconCheck,
     IconEdit,
-    IconLayoutNavbarExpand,
+    IconMaximize,
+    IconMinimize,
 } from "@tabler/icons-react";
 
 import publicStyles from "@/styles/public.module.css";
@@ -19,6 +20,7 @@ type StoryContentButtonsProps = {
     dirty: boolean;
     toggleContentField: () => void;
     toggleFullscreen: () => Promise<void>;
+    fullscreen: boolean;
 };
 
 export function StoryContentButtons({
@@ -29,6 +31,7 @@ export function StoryContentButtons({
     dirty,
     toggleContentField,
     toggleFullscreen,
+    fullscreen,
 }: StoryContentButtonsProps) {
     return (
         <Group
@@ -74,8 +77,9 @@ export function StoryContentButtons({
                 ml={"auto"}
                 variant="light"
                 size={"xs"}
+                color={fullscreen ? "red" : ""}
             >
-                <IconLayoutNavbarExpand />
+                {fullscreen ? <IconMinimize /> : <IconMaximize />}
             </ActionIcon>
         </Group>
     );

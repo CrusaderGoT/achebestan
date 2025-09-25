@@ -244,12 +244,13 @@ export function StoryContent({
                     dirty={dirty}
                     toggleContentField={toggleContentField}
                     toggleFullscreen={toggleFullscreen}
+                    fullscreen={fullscreen}
                 />
 
                 {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
                 <ScrollArea
                     className={cx(storypageStyles.storyContentScrollArea)}
-                    offsetScrollbars="present"
+                    offsetScrollbars={!fullscreen ? "present" : false}
                     style={{
                         ...(fullscreen ? { height: "100%" } : {}),
                     }}
