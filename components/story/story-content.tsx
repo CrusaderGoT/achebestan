@@ -28,6 +28,7 @@ import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
 import { StoryContentButtons } from "./buttons/story-content-btns";
+import { StoryTableOfContents } from "./story-table-of-contents";
 
 type StoryContentType = {
     toggleContentField: () => void;
@@ -200,6 +201,8 @@ export function StoryContent({
     // for content full screen functionality
     const { ref, toggle: toggleFullscreen, fullscreen } = useFullscreen();
 
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
     return (
         <Stack className={publicStyles.relative} gap={"xs"}>
             {/* Context Menu for Bookmarks */}
@@ -235,6 +238,12 @@ export function StoryContent({
                 </Group>
             )}
 
+            {/* Pass the scrollAreaRef to the TableOfContents */}
+            <StoryTableOfContents
+                dependency={sanitizeHTML(content)}
+                scrollAreaRef={scrollAreaRef}
+            />
+
             <Box flex={1} ref={ref} className={cx(publicStyles.relative)}>
                 <StoryContentButtons
                     storyAuthorId={storyAuthorId}
@@ -249,6 +258,7 @@ export function StoryContent({
 
                 {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
                 <ScrollArea
+                    ref={scrollAreaRef}
                     className={cx(storypageStyles.storyContentScrollArea)}
                     offsetScrollbars={!fullscreen ? "present" : false}
                     style={{
