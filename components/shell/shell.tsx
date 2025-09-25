@@ -16,7 +16,7 @@ import {
     Group,
     Text,
     Title,
-    useMantineColorScheme,
+    useComputedColorScheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
@@ -39,10 +39,12 @@ export function Shell({
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
 
-    const { colorScheme } = useMantineColorScheme();
+       const computedColorScheme = useComputedColorScheme("light", {
+        getInitialValueInEffect: true,
+    });
 
     const [checkedModeToggle, setCheckedModeToggle] = useState(
-        colorScheme === "light" ? true : false
+        computedColorScheme === "light" ? true : false
     );
 
     return (
