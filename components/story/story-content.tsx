@@ -21,13 +21,13 @@ import {
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useFullscreen } from "@mantine/hooks";
 import cx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
-import { StoryEditButtons } from "./buttons/story-edit-btns";
+import { StoryContentButtons } from "./buttons/story-content-btns";
 
 type StoryContentType = {
     toggleContentField: () => void;
@@ -197,6 +197,9 @@ export function StoryContent({
         return () => window.removeEventListener("focus", handleFocus);
     }, [bookmarks, renderBookmarks]);
 
+    // for content full screen functionality
+    const { ref, toggle: toggleFullscreen, fullscreen } = useFullscreen();
+
     return (
         <Stack className={publicStyles.relative} gap={"xs"}>
             {/* Context Menu for Bookmarks */}
@@ -232,55 +235,51 @@ export function StoryContent({
                 </Group>
             )}
 
-            {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
-            <ScrollArea
-                className={cx(
-                    storypageStyles.storyContentScrollArea,
-                    openedContentField && publicStyles.hide
-                )}
-                offsetScrollbars="present"
-            >
-                <StoryEditButtons
+            <Box flex={1} ref={ref} className={cx(publicStyles.relative)}>
+                <StoryContentButtons
                     storyAuthorId={storyAuthorId}
                     sessionUserId={session.data?.user.id}
                     isFormSubmiting={form.submitting}
                     openedContentField={openedContentField}
                     dirty={dirty}
                     toggleContentField={toggleContentField}
+                    toggleFullscreen={toggleFullscreen}
                 />
 
-                <Box
-                    dangerouslySetInnerHTML={{
-                        __html: sanitizeHTML(content),
-                    }}
-                    className={cx(storypageStyles.storyContent)}
-                    data-story-content="true"
+                {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
+                <ScrollArea
+                    className={cx(storypageStyles.storyContentScrollArea)}
+                    offsetScrollbars="present"
                     style={{
-                        userSelect: "text",
-                        WebkitUserSelect: "text",
-                        MozUserSelect: "text",
-                        msUserSelect: "text",
+                        ...(fullscreen ? { height: "100%" } : {}),
                     }}
-                />
-            </ScrollArea>
+                >
+                    <Box
+                        dangerouslySetInnerHTML={{
+                            __html: sanitizeHTML(content),
+                        }}
+                        className={cx(
+                            storypageStyles.storyContent,
+                            openedContentField && publicStyles.hide
+                        )}
+                        data-story-content="true"
+                        style={{
+                            userSelect: "text",
+                            WebkitUserSelect: "text",
+                            MozUserSelect: "text",
+                            msUserSelect: "text",
+                        }}
+                    />
 
-            <Box
-                className={cx(
-                    publicStyles.relative,
-                    (!openedContentField ||
-                        storyAuthorId !== session.data?.user.id) &&
-                        publicStyles.hide
-                )}
-            >
-                <StoryEditButtons
-                    storyAuthorId={storyAuthorId}
-                    sessionUserId={session.data?.user.id}
-                    isFormSubmiting={form.submitting}
-                    openedContentField={openedContentField}
-                    dirty={dirty}
-                    toggleContentField={toggleContentField}
-                />
-                <UpdateStoryContent />
+                    <UpdateStoryContent
+                        className={cx(
+                            storypageStyles.storyContent,
+                            (!openedContentField ||
+                                storyAuthorId !== session.data?.user.id) &&
+                                publicStyles.hide
+                        )}
+                    />
+                </ScrollArea>
             </Box>
 
             {/* Bookmark Modal */}

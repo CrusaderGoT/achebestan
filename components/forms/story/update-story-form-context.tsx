@@ -11,9 +11,10 @@ import {
     TextInputProps,
 } from "@mantine/core";
 import { StoryImageDropzone } from "../../ui/dropzone";
-import { StoryRichTextEditor } from "../../ui/rich-text-editor";
-
-import storypageStyles from "@/styles/story-page.module.css";
+import {
+    StoryRichTextEditor,
+    StoryRichTextEditorProps,
+} from "../../ui/rich-text-editor";
 
 export const [
     UpdateStoryFormProvider,
@@ -93,14 +94,17 @@ export function UpdateStoryBlurb({ ...props }: UpdateStoryBlurbType) {
     );
 }
 
-export function UpdateStoryContent() {
+export function UpdateStoryContent({
+    ...props
+}: Omit<StoryRichTextEditorProps, "value" | "onChange">) {
     const form = useUpdateStoryFormContext();
+
     return (
         <StoryRichTextEditor
             key={form.key("content")}
             value={form.values.content}
             {...form.getInputProps("content")}
-            className={storypageStyles.storyContent}
+            {...props}
         />
     );
 }

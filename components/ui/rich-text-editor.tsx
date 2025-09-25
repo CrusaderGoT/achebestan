@@ -6,7 +6,8 @@ import { Link, RichTextEditor } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
-interface StoryRichTextEditorProps extends Omit<InputWrapperProps, "onChange"> {
+export interface StoryRichTextEditorProps
+    extends Omit<InputWrapperProps, "onChange"> {
     value: string;
     onChange?(value: string): void;
 }
@@ -17,6 +18,7 @@ export function StoryRichTextEditor({
     ...props
 }: StoryRichTextEditorProps) {
     const editor = useEditor({
+        shouldRerenderOnTransaction: true,
         extensions: [StarterKit, Link],
         content: value,
         immediatelyRender: false,
@@ -37,15 +39,16 @@ export function StoryRichTextEditor({
         <Input.Wrapper {...props}>
             <RichTextEditor
                 editor={editor}
-                mah={500}
-                h={300}
                 style={
                     props.error
                         ? { borderColor: "red", color: "red" }
                         : { overflowY: "auto" }
                 }
             >
-                <RichTextEditor.Toolbar sticky>
+                <RichTextEditor.Toolbar
+                    sticky
+                    stickyOffset="var(--docs-header-height)"
+                >
                     <RichTextEditor.ControlsGroup>
                         <RichTextEditor.BulletList />
                         <RichTextEditor.OrderedList />
@@ -77,7 +80,7 @@ export function StoryRichTextEditor({
                     </RichTextEditor.ControlsGroup>
                 </RichTextEditor.Toolbar>
 
-                <RichTextEditor.Content mih={"250"} />
+                <RichTextEditor.Content />
             </RichTextEditor>
             <Input.Error m={0} />
         </Input.Wrapper>

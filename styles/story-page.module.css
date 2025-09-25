@@ -629,5 +629,5 @@
 .storyEditContentBtn {
   position: absolute;
   z-index: 20;
-  right: 10px;
+  width: 100%;
 }
