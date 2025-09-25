@@ -5,6 +5,7 @@ import { Input, InputWrapperProps } from "@mantine/core";
 import { Link, RichTextEditor } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { usePathname } from "next/navigation";
 
 export interface StoryRichTextEditorProps
     extends Omit<InputWrapperProps, "onChange"> {
@@ -18,7 +19,6 @@ export function StoryRichTextEditor({
     ...props
 }: StoryRichTextEditorProps) {
     const editor = useEditor({
-        shouldRerenderOnTransaction: true,
         extensions: [StarterKit, Link],
         content: value,
         immediatelyRender: false,
@@ -35,19 +35,21 @@ export function StoryRichTextEditor({
         },
     });
 
+    const pathname = usePathname();
+
     return (
         <Input.Wrapper {...props}>
             <RichTextEditor
                 editor={editor}
-                style={
-                    props.error
-                        ? { borderColor: "red", color: "red" }
-                        : { overflowY: "auto" }
-                }
+                style={props.error ? { borderColor: "red", color: "red" } : {}}
             >
                 <RichTextEditor.Toolbar
                     sticky
-                    stickyOffset="var(--docs-header-height)"
+                    stickyOffset={
+                        pathname.endsWith("new")
+                            ? 60
+                            : "var(--docs-header-height)"
+                    }
                 >
                     <RichTextEditor.ControlsGroup>
                         <RichTextEditor.BulletList />
