@@ -21,7 +21,12 @@ import {
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
-import { useDisclosure, useFullscreen } from "@mantine/hooks";
+import {
+    useDisclosure,
+    useElementSize,
+    useFullscreen,
+    useMergedRef,
+} from "@mantine/hooks";
 import cx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
@@ -199,9 +204,23 @@ export function StoryContent({
     }, [bookmarks, renderBookmarks]);
 
     // for content full screen functionality
-    const { ref, toggle: toggleFullscreen, fullscreen } = useFullscreen();
+    const {
+        ref: fullscreenRef,
+        toggle: toggleFullscreen,
+        fullscreen,
+    } = useFullscreen();
 
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    // for observing change in scroll area height or width
+    const { ref: scrollAreaSizeRef, width, height } = useElementSize();
+
+    // the Element Ref
+    const scrollAreaTocRef = useRef<HTMLDivElement>(null);
+
+    // merge them
+    const scrollAreaMergeRef = useMergedRef(
+        scrollAreaSizeRef,
+        scrollAreaTocRef
+    );
 
     return (
         <Stack className={publicStyles.relative} gap={"xs"}>
@@ -222,8 +241,10 @@ export function StoryContent({
             {!openedContentField && (
                 <Group justify="space-between">
                     <StoryTableOfContents
-                        dependency={sanitizeHTML(content)}
-                        scrollAreaRef={scrollAreaRef}
+                        scrollAreaTocRef={scrollAreaTocRef}
+                        content={sanitizeHTML(content)}
+                        height={height}
+                        width={width}
                     />
 
                     <Badge
@@ -244,7 +265,11 @@ export function StoryContent({
                 </Group>
             )}
 
-            <Box flex={1} ref={ref} className={cx(publicStyles.relative)}>
+            <Box
+                flex={1}
+                ref={fullscreenRef}
+                className={cx(publicStyles.relative)}
+            >
                 <StoryContentButtons
                     storyAuthorId={storyAuthorId}
                     sessionUserId={session.data?.user.id}
@@ -258,7 +283,7 @@ export function StoryContent({
 
                 {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
                 <ScrollArea
-                    ref={scrollAreaRef}
+                    ref={scrollAreaMergeRef}
                     className={cx(storypageStyles.storyContentScrollArea)}
                     offsetScrollbars={!fullscreen ? "present" : false}
                     style={{

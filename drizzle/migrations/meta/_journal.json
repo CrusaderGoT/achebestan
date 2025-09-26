@@ -211,6 +211,13 @@
       "when": 1758383772732,
       "tag": "0029_windy_stature",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1758904946359,
+      "tag": "0030_aspiring_devos",
+      "breakpoints": true
     }
   ]
 }
