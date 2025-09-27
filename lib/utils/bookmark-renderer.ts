@@ -110,9 +110,193 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
     return result;
 }
 
+// Enhanced bookmark validation strategies
+
+// Strategy 1: Simple character-based similarity
+function isContentSimilarEnough(
+    original: string,
+    current: string,
+    threshold: number
+): boolean {
+    if (original === current) return true;
+
+    // If current context contains most of the original, it's probably still valid
+    const commonChars = countCommonCharacters(
+        original.toLowerCase(),
+        current.toLowerCase()
+    );
+    const similarity = commonChars / Math.max(original.length, current.length);
+
+    return similarity >= threshold;
+}
+
+function countCommonCharacters(str1: string, str2: string): number {
+    const chars1 = str1.split("");
+    const chars2 = str2.split("");
+    let common = 0;
+
+    for (let i = 0; i < chars1.length; i++) {
+        const index = chars2.indexOf(chars1[i]);
+        if (index !== -1) {
+            chars2.splice(index, 1);
+            common++;
+        }
+    }
+
+    return common;
+}
+
+// Strategy 2: Levenshtein distance for fuzzy matching
+function isFuzzyMatch(
+    original: string,
+    current: string,
+    maxDifferenceRatio: number
+): boolean {
+    if (original === current) return true;
+
+    const distance = levenshteinDistance(original, current);
+    const maxLength = Math.max(original.length, current.length);
+    const differenceRatio = distance / maxLength;
+
+    return differenceRatio <= maxDifferenceRatio;
+}
+
+function levenshteinDistance(str1: string, str2: string): number {
+    const matrix = Array(str2.length + 1)
+        .fill(null)
+        .map(() => Array(str1.length + 1).fill(null));
+
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= str2.length; j++) {
+        for (let i = 1; i <= str1.length; i++) {
+            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            matrix[j][i] = Math.min(
+                matrix[j][i - 1] + 1, // deletion
+                matrix[j - 1][i] + 1, // insertion
+                matrix[j - 1][i - 1] + indicator // substitution
+            );
+        }
+    }
+
+    return matrix[str2.length][str1.length];
+}
+
+// Strategy 3: Word-based comparison (more forgiving of small text changes)
+function hasSignificantWordOverlap(
+    original: string,
+    current: string,
+    threshold: number
+): boolean {
+    const originalWords = extractSignificantWords(original);
+    const currentWords = extractSignificantWords(current);
+
+    if (originalWords.length === 0) return false;
+
+    const commonWords = originalWords.filter((word) =>
+        currentWords.some(
+            (currentWord) =>
+                currentWord.includes(word) || word.includes(currentWord)
+        )
+    );
+
+    const overlap = commonWords.length / originalWords.length;
+    return overlap >= threshold;
+}
+
+function extractSignificantWords(text: string): string[] {
+    // Remove common stop words and extract meaningful words
+    const stopWords = new Set([
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+    ]);
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 2 && !stopWords.has(word));
+}
+
+// Strategy 4: Key phrase preservation (looks for important phrases)
+function preservesKeyPhrases(original: string, current: string): boolean {
+    const keyPhrases = extractKeyPhrases(original);
+
+    if (keyPhrases.length === 0) {
+        // Fallback to simple substring check for very short contexts
+        return (
+            current.toLowerCase().includes(original.toLowerCase()) ||
+            original.toLowerCase().includes(current.toLowerCase())
+        );
+    }
+
+    // Check if most key phrases are still present
+    const preservedPhrases = keyPhrases.filter((phrase) =>
+        current.toLowerCase().includes(phrase.toLowerCase())
+    );
+
+    return preservedPhrases.length >= Math.ceil(keyPhrases.length * 0.6); // 60% of key phrases preserved
+}
+
+function extractKeyPhrases(text: string, minLength = 3): string[] {
+    // Extract phrases of 2-4 words that might be important
+    const words = text
+        .replace(/[^\w\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 0);
+    const phrases: string[] = [];
+
+    // Extract 2-word phrases
+    for (let i = 0; i < words.length - 1; i++) {
+        const phrase = `${words[i]} ${words[i + 1]}`;
+        if (phrase.length >= minLength) {
+            phrases.push(phrase);
+        }
+    }
+
+    // Extract 3-word phrases for longer contexts
+    if (words.length >= 6) {
+        for (let i = 0; i < words.length - 2; i++) {
+            const phrase = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+            phrases.push(phrase);
+        }
+    }
+
+    return phrases;
+}
+
+// Enhanced version that combines multiple strategies
 function isBookmarkStillValid(container: Element, bookmark: Bookmark): boolean {
     try {
-        // Get current context at the bookmark position using same logic as when saving
         const currentContext = getContextAtPosition(
             container,
             bookmark.position
@@ -122,8 +306,30 @@ function isBookmarkStillValid(container: Element, bookmark: Bookmark): boolean {
             return false;
         }
 
-        // Simple substring check - if saved context exists in current context, it's valid
-        return currentContext.includes(bookmark.contextText.trim());
+        const savedContext = bookmark.contextText.trim();
+
+        // If exact match, definitely valid
+        if (savedContext === currentContext) {
+            return true;
+        }
+
+        // If one contains the other, probably valid
+        if (
+            currentContext.includes(savedContext) ||
+            savedContext.includes(currentContext)
+        ) {
+            return true;
+        }
+
+        // Try multiple strategies and require at least one to pass
+        const strategies = [
+            () => hasSignificantWordOverlap(savedContext, currentContext, 0.5),
+            () => isFuzzyMatch(savedContext, currentContext, 0.4),
+            () => preservesKeyPhrases(savedContext, currentContext),
+            () => isContentSimilarEnough(savedContext, currentContext, 0.8),
+        ];
+
+        return strategies.some((strategy) => strategy());
     } catch (error) {
         console.error(`Error validating bookmark ${bookmark.id}:`, error);
         return false;
