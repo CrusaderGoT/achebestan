@@ -1,6 +1,6 @@
 "use client";
 
-import { PickedStoryProps } from "@/lib/types/story";
+import { PickedStoryProps } from "@/types/story";
 import {
     ActionIcon,
     CopyButton,
@@ -48,12 +48,7 @@ export function ShareStoryDrawer({
                 </Stack>
             </Drawer>
 
-            <ActionIcon
-                onClick={openStoryShare}
-                variant="subtle"
-                flex={"100px  0"}
-                color="cyan"
-            >
+            <ActionIcon onClick={openStoryShare} variant="subtle" color="cyan">
                 <Group>
                     <Text visibleFrom="sm" fw={500}>
                         Share

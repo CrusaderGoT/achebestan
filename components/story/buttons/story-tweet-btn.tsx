@@ -1,6 +1,6 @@
 "use client";
 
-import { PickedStoryProps } from "@/lib/types/story";
+import { PickedStoryProps } from "@/types/story";
 import { createTweetText } from "@/lib/utils/helpers";
 import { ActionIcon, ActionIconProps, Group, Text } from "@mantine/core";
 import { IconBrandX } from "@tabler/icons-react";

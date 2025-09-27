@@ -6,7 +6,8 @@ import {
     useStoryForm,
 } from "@/components/forms/story/create-story-form-context";
 
-import { storyInsertSchema, StoryInsertType } from "@/zod-schemas/story";
+import { storyInsertSchema } from "@/zod-schemas/story";
+import { StoryInsertType } from "@/types/story";
 
 import { Button, Paper } from "@mantine/core";
 import { notifications } from "@mantine/notifications";

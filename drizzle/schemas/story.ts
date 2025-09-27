@@ -7,6 +7,7 @@ import { relations } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 import { comment } from "./comment";
+import { favouriteUserStories } from "./favourite";
 import { rating } from "./rating";
 
 export const story = table(
@@ -55,32 +56,3 @@ export const storyRelations = relations(story, ({ one, many }) => ({
     comments: many(comment),
     favourites: many(favouriteUserStories),
 }));
-
-export const favouriteUserStories = table(
-    "favourite_user_stories",
-    {
-        userId: t
-            .text()
-            .references(() => user.id, { onDelete: "cascade" })
-            .notNull(),
-        storyId: t
-            .integer()
-            .references(() => story.id, { onDelete: "cascade" })
-            .notNull(),
-    },
-    (table) => [t.primaryKey({ columns: [table.userId, table.storyId] })]
-);
-
-export const favouriteUserStoriesRelations = relations(
-    favouriteUserStories,
-    ({ one }) => ({
-        user: one(user, {
-            fields: [favouriteUserStories.userId],
-            references: [user.id],
-        }),
-        story: one(story, {
-            fields: [favouriteUserStories.storyId],
-            references: [story.id],
-        }),
-    })
-);

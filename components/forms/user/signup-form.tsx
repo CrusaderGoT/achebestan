@@ -12,7 +12,7 @@ import {
     useSignupForm,
 } from "./signup-form-context";
 
-import { LoginFormState } from "@/lib/types/login";
+import { LoginFormState } from "@/types/user";
 import { notifications } from "@mantine/notifications";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 

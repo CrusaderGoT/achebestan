@@ -7,10 +7,10 @@ import {
 } from "@/components/forms/story/update-story-form-context";
 
 import {
-    StorySelectType,
     storyUpdateSchema,
-    StoryUpdateType,
 } from "@/zod-schemas/story";
+import { StorySelectType } from "@/types/story";
+import { StoryUpdateType } from "@/types/story";
 
 import { Button, Paper } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";

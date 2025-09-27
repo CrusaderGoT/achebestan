@@ -26,7 +26,7 @@ import {
     CommentsToTreeNodeDataType,
     CommentTreeProps,
     DRAWER_CONFIG_TYPE,
-} from "@/lib/types/comment";
+} from "@/types/comment";
 
 import {
     buildCommentHierarchy,

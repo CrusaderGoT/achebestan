@@ -3,7 +3,7 @@
 import storybookStyles from "@/styles/story-book.module.css";
 import cx from "clsx";
 
-import { StorySelectType } from "@/zod-schemas/story";
+import { StorySelectType } from "@/types/story";
 import {
     Box,
     Button,

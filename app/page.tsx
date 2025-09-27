@@ -1,6 +1,6 @@
 import { HomePage } from "@/components/home/homepage";
 import { readLatestStories } from "@/lib/actions/story";
-import { StoryBookProps } from "@/lib/types/story";
+import { StoryBookProps } from "@/types/story";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import type { Metadata } from "next";
 import { Graph } from "schema-dts";

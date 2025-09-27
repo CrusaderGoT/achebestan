@@ -1,6 +1,6 @@
 // utils/bookmarkRenderer.ts
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
-import { Bookmark } from "../types/bookmark";
+import { Bookmark } from "../../types/bookmark";
 
 let renderTimeout: NodeJS.Timeout | null = null;
 

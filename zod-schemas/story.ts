@@ -1,4 +1,5 @@
 import { story } from "@/drizzle/schemas/story";
+import { favouriteUserStories } from "@/drizzle/schemas/favourite";
 import {
     createInsertSchema,
     createSelectSchema,
@@ -33,8 +34,4 @@ export const storyInsertSchema = createInsertSchema(story, {
     isbn: true,
 });
 
-export type StoryInsertType = z.infer<typeof storyInsertSchema>;
-
-export type StoryUpdateType = z.infer<typeof storyUpdateSchema>;
-
-export type StorySelectType = z.infer<typeof storySelectSchema>;
+export const favouriteInserSchema = createInsertSchema(favouriteUserStories);

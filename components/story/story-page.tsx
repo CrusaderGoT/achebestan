@@ -1,10 +1,10 @@
 "use client";
 
 import {
-    StorySelectType,
     storyUpdateSchema,
-    StoryUpdateType,
 } from "@/zod-schemas/story";
+import { StorySelectType } from "@/types/story";
+import { StoryUpdateType } from "@/types/story";
 import { userSelectType } from "@/zod-schemas/user";
 
 import { ActionIcon, Box, Card, Stack } from "@mantine/core";

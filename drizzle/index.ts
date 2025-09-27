@@ -3,6 +3,7 @@ import "dotenv/config";
 
 import * as book from "@/drizzle/schemas/book";
 import * as comment from "@/drizzle/schemas/comment";
+import * as favourite from "@/drizzle/schemas/favourite";
 import * as rating from "@/drizzle/schemas/rating";
 import * as reaction from "@/drizzle/schemas/reaction";
 import * as story from "@/drizzle/schemas/story";
@@ -51,7 +52,15 @@ if (process.env.NODE_ENV === "production") {
 
 export const db = drizzle(client, {
     casing: "snake_case",
-    schema: { ...story, ...user, ...book, ...rating, ...comment, ...reaction },
+    schema: {
+        ...story,
+        ...user,
+        ...book,
+        ...rating,
+        ...comment,
+        ...reaction,
+        ...favourite,
+    },
 });
 
 // Connection cleanup for graceful shutdown

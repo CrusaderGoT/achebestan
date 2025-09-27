@@ -20,7 +20,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import stylesPublic from "@/styles/public.module.css";
 import styles from "@/styles/story-page.module.css";
 
-import { StoryInsertType, StoryUpdateType } from "@/zod-schemas/story";
+import { StoryUpdateType } from "@/types/story";
+import { StoryInsertType } from "@/types/story";
 import { UseFormReturnType } from "@mantine/form";
 import cx from "clsx";
 

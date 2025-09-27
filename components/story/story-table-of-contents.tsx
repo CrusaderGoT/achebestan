@@ -3,22 +3,20 @@
 import {
     ActionIcon,
     Affix,
+    Box,
     CloseButton,
-    Collapse,
     Group,
     TableOfContents,
     Text,
+    Transition,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { IconListTree } from "@tabler/icons-react";
 import {
-    RefObject,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from "react";
+    useClickOutside,
+    useDisclosure,
+    useIsomorphicEffect,
+} from "@mantine/hooks";
+import { IconListTree } from "@tabler/icons-react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 export function StoryTableOfContents({
     content,
@@ -117,7 +115,7 @@ export function StoryTableOfContents({
         setTimeout(tryFindViewport, 50);
     }, [updateViewport]);
 
-    useLayoutEffect(() => {
+    useIsomorphicEffect(() => {
         if (isReady) {
             setTimeout(() => {
                 reinitializeRef.current();
@@ -131,6 +129,8 @@ export function StoryTableOfContents({
 
     const [opened, { toggle, close }] = useDisclosure();
 
+    const ref = useClickOutside(() => close());
+
     if (!isReady || !viewport || !hasHeadingOrList(viewport)) {
         return null;
     }
@@ -143,21 +143,33 @@ export function StoryTableOfContents({
                 </ActionIcon>
             )}
 
-            {opened && (
-                <Affix position={{ top: 70, bottom: 50, right: 30, left: 30 }}>
-                    <Collapse
-                        in={opened}
-                        style={{
-                            backdropFilter: "blur(99px)",
-                        }}
-                        p={"sm"}
-                    >
-                        <>
-                            <Group justify="space-between" mb={"xs"}>
-                                <Text>Table of Contents</Text>
+            <Affix
+                position={{
+                    top: 70,
+                    left: 30,
+                }}
+            >
+                <Transition
+                    mounted={opened}
+                    duration={400}
+                    transition="slide-right"
+                    timingFunction="ease-in-out"
+                >
+                    {(styles) => (
+                        <Box
+                            ref={ref}
+                            style={{
+                                ...styles,
+                                backdropFilter: "blur(99px)",
+                            }}
+                            p={"md"}
+                        >
+                            <Group justify="space-between" mb={"xs"} gap={"xl"}>
+                                <Text fw={700}>Table of Contents</Text>
 
-                                <CloseButton onClick={close} />
+                                <CloseButton size={"sm"} onClick={close} />
                             </Group>
+
                             <TableOfContents
                                 autoContrast
                                 reinitializeRef={reinitializeRef}
@@ -221,10 +233,10 @@ export function StoryTableOfContents({
                                     },
                                 })}
                             />
-                        </>
-                    </Collapse>
-                </Affix>
-            )}
+                        </Box>
+                    )}
+                </Transition>
+            </Affix>
         </>
     );
 }

@@ -1,7 +1,7 @@
 import { DRAWER_CONFIG } from "@/components/comment/comment-tree";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { TreeNodeData } from "@mantine/core";
-import { CommentsToTreeNodeDataType, CommentTreeProps } from "../types/comment";
+import { CommentsToTreeNodeDataType, CommentTreeProps } from "../../types/comment";
 
 // STORY HELPERS
 

@@ -6,5 +6,4 @@ export interface Bookmark {
     contextText: string;
     timestamp: number;
     userNote?: string;
-  }
-  
+}

@@ -3,7 +3,7 @@ import {
     CommentsToTreeNodeDataType,
     CommentTreeProps,
     DrawerState,
-} from "@/lib/types/comment";
+} from "@/types/comment";
 import { CommentTreeUtils, flattenComments } from "@/lib/utils/helpers";
 import { useTree } from "@mantine/core";
 import { useFocusTrap, useStateHistory } from "@mantine/hooks";

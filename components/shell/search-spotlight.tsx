@@ -1,7 +1,7 @@
 "use client";
 
 import { readLatestStories, searchStories } from "@/lib/actions/story";
-import { StorySelectType } from "@/zod-schemas/story";
+import { StorySelectType } from "@/types/story";
 import {
     ActionIcon,
     Badge,

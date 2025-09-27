@@ -1,7 +1,7 @@
 "use client";
 
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
-import { StoryUpdateType } from "@/zod-schemas/story";
+import { StoryUpdateType } from "@/types/story";
 import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { IconClock } from "@tabler/icons-react";

@@ -6,7 +6,7 @@ import {
     CommentInteractionHandlers,
     CommentNodeProps,
     CommentRenderContext,
-} from "@/lib/types/comment";
+} from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
 import { useEffect } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";

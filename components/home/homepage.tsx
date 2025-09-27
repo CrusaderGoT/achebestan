@@ -4,7 +4,7 @@ import { Container, Grid, Stack } from "@mantine/core";
 
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
-import { StoryBookProps } from "@/lib/types/story";
+import { StoryBookProps } from "@/types/story";
 
 export function HomePage({
     stories,

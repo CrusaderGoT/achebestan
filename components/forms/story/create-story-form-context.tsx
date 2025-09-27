@@ -5,7 +5,7 @@ import { createFormContext } from "@mantine/form";
 
 import storypageStyles from "@/styles/story-page.module.css";
 
-import { StoryInsertType } from "@/zod-schemas/story";
+import { StoryInsertType } from "@/types/story";
 
 import { StoryImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";

@@ -19,7 +19,7 @@ import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
 import { authClient } from "@/lib/auth-client";
-import { PickedStoryProps } from "@/lib/types/story";
+import { PickedStoryProps } from "@/types/story";
 import { redirect } from "next/navigation";
 
 export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
@@ -86,7 +86,6 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
                 className={cx(
                     session?.user.id !== authorId && publicStyles.hide
                 )}
-                flex={"110px  0"}
             >
                 <Group>
                     <Text visibleFrom="sm" fw={500}>

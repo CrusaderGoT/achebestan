@@ -10,6 +10,7 @@ import { handleFileUpload } from "../utils/image-upload";
 
 import z from "zod/v4";
 
+import { SearchOptions } from "@/types/story";
 import { revalidatePath } from "next/cache";
 import { redirect, unauthorized } from "next/navigation";
 import { sanitizeHTML } from "../utils/sanitize-html";
@@ -197,14 +198,6 @@ export const deleteStoryAction = authActionClient
             return deletedStory;
         }
     );
-
-export interface SearchOptions {
-    limit?: number;
-    offset?: number;
-    sortBy?: "created" | "edited" | "title";
-    sortOrder?: "asc" | "desc";
-    fields?: Array<"title" | "subtitle">;
-}
 
 export async function searchStories(
     searchText: string,

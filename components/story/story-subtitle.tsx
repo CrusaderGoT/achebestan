@@ -1,7 +1,7 @@
 "use client";
 
 import { UpdateStorySubtitle } from "@/components/forms/story/update-story-form-context";
-import { StoryUpdateType } from "@/zod-schemas/story";
+import { StoryUpdateType } from "@/types/story";
 import { ActionIcon, Box, Group, Text } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import {

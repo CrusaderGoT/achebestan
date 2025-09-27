@@ -2,7 +2,7 @@
 
 import { Modal } from "@mantine/core";
 
-import { LoginFormState } from "@/lib/types/login";
+import { LoginFormState } from "@/types/user";
 import { useState } from "react";
 import { AuthTabs } from "./auth-tabs";
 

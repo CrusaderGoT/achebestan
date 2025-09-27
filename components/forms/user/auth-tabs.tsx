@@ -3,7 +3,7 @@
 
 import { AnonymousSignin } from "@/components/user/anonymous-signin";
 import { authClient } from "@/lib/auth-client";
-import { LoginFormState } from "@/lib/types/login";
+import { LoginFormState } from "@/types/user";
 import { Center, Divider, Stack, Tabs, Text } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
 import { LoginForm } from "./login-form";

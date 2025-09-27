@@ -12,17 +12,17 @@ import {
 
 import {
     IconCurrencyDollar,
-    IconHeart,
     IconMessage2,
     IconMessage2Off,
 } from "@tabler/icons-react";
 
 import { authClient } from "@/lib/auth-client";
-import { PickedStoryProps } from "@/lib/types/story";
+import { PickedStoryProps } from "@/types/story";
 import { useDisclosure, useMounted } from "@mantine/hooks";
-import { DeleteStory } from "./buttons/delete-story";
-import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
+import { DeleteStory } from "./buttons/delete-story";
+import { FavouriteStory } from "./buttons/favourite-story";
+import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 
 export function StoryActions({ ...props }: PickedStoryProps) {
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
@@ -42,36 +42,35 @@ export function StoryActions({ ...props }: PickedStoryProps) {
     return (
         <Stack>
             <Group justify="space-between" grow>
-                <IconHeart color="red" />
+                <FavouriteStory userId={session?.user.id} storyId={props.id} />
 
-                {session?.user.id && (
-                    <ActionIcon
-                        onClick={toggleCommentForm}
-                        color="gray"
-                        variant="subtle"
-                        flex={"130px  0"}
-                    >
-                        <Group gap={"xs"} wrap="nowrap">
-                            <Text visibleFrom="sm" fw={500}>
-                                {openedCommentForm ? "Close" : "Comment"}
-                            </Text>
+                <ActionIcon
+                    onClick={toggleCommentForm}
+                    color="gray"
+                    variant="subtle"
+                >
+                    <Group gap={"xs"} wrap="nowrap">
+                        <Text visibleFrom="sm" fw={500}>
+                            {openedCommentForm ? "Close" : "Comment"}
+                        </Text>
 
-                            {openedCommentForm ? (
-                                <IconMessage2Off />
-                            ) : (
-                                <IconMessage2 />
-                            )}
-                        </Group>
-                    </ActionIcon>
-                )}
+                        {openedCommentForm ? (
+                            <IconMessage2Off />
+                        ) : (
+                            <IconMessage2 />
+                        )}
+                    </Group>
+                </ActionIcon>
 
                 <IconCurrencyDollar color="green" />
+
                 <ShareStoryDrawer
                     story={{ ...props }}
                     openedStoryShare={openedStoryShare}
                     openStoryShare={openStoryShare}
                     closeStoryShare={closeStoryShare}
                 />
+
                 <DeleteStory {...props} />
             </Group>
 

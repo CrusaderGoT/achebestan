@@ -2,7 +2,7 @@
 
 import { createFormContext } from "@mantine/form";
 
-import { StoryUpdateType } from "@/zod-schemas/story";
+import { StoryUpdateType } from "@/types/story";
 import {
     Stack,
     Textarea,

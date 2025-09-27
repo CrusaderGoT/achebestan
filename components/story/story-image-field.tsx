@@ -1,6 +1,6 @@
 "use client";
 
-import { StoryUpdateType } from "@/zod-schemas/story";
+import { StoryUpdateType } from "@/types/story";
 import { Box, Button } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useState } from "react";

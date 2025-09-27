@@ -1,6 +1,6 @@
 "use client";
 
-import { CommentTreeProps } from "@/lib/types/comment";
+import { CommentTreeProps } from "@/types/comment";
 import { Rating, Stack, Text, TreeNodeData } from "@mantine/core";
 import { UpdateCommentForm } from "../forms/comment/update-comment-form";
 

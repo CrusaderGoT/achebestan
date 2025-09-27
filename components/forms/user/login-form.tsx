@@ -11,7 +11,7 @@ import {
     useLoginForm,
 } from "./login-form-context";
 
-import { LoginFormState } from "@/lib/types/login";
+import { LoginFormState } from "@/types/user";
 import { notifications } from "@mantine/notifications";
 import { Dispatch, SetStateAction } from "react";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
