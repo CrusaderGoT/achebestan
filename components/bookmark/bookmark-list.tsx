@@ -47,7 +47,7 @@ export function BookmarkList({
                 </ActionIcon>
             )}
 
-            <Affix position={{ top: 70, right: 30 }}>
+            <Affix position={{ top: 70, right: 30 }} withinPortal={false}>
                 <Transition
                     mounted={opened}
                     duration={400}

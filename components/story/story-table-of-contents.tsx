@@ -148,6 +148,7 @@ export function StoryTableOfContents({
                     top: 70,
                     left: 30,
                 }}
+                withinPortal={false}
             >
                 <Transition
                     mounted={opened}

@@ -626,8 +626,8 @@
   }
 }
 
-.storyEditContentBtn {
+.storyContentBtns {
   position: absolute;
-  z-index: 20;
+  z-index: 200;
   width: 100%;
 }

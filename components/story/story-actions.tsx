@@ -31,7 +31,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
     const [
         openedCommentForm,
         { toggle: toggleCommentForm, close: closeCommentForm },
-    ] = useDisclosure(false);
+    ] = useDisclosure(true);
 
     const mounted = useMounted();
 

@@ -270,16 +270,39 @@ export function StoryContent({
                 ref={fullscreenRef}
                 className={cx(publicStyles.relative)}
             >
-                <StoryContentButtons
-                    storyAuthorId={storyAuthorId}
-                    sessionUserId={session.data?.user.id}
-                    isFormSubmiting={form.submitting}
-                    openedContentField={openedContentField}
-                    dirty={dirty}
-                    toggleContentField={toggleContentField}
-                    toggleFullscreen={toggleFullscreen}
-                    fullscreen={fullscreen}
-                />
+                <Stack
+                    gap={"xs"}
+                    justify="space-around"
+                    className={cx(storypageStyles.storyContentBtns)}
+                >
+                    <StoryContentButtons
+                        storyAuthorId={storyAuthorId}
+                        sessionUserId={session.data?.user.id}
+                        isFormSubmiting={form.submitting}
+                        openedContentField={openedContentField}
+                        dirty={dirty}
+                        toggleContentField={toggleContentField}
+                        toggleFullscreen={toggleFullscreen}
+                        fullscreen={fullscreen}
+                    />
+
+                    {fullscreen && !openedContentField && (
+                        <Group gap={"xl"}>
+                            <StoryTableOfContents
+                                scrollAreaTocRef={scrollAreaTocRef}
+                                content={sanitizeHTML(content)}
+                                height={height}
+                                width={width}
+                            />
+
+                            <BookmarkList
+                                bookmarks={bookmarks}
+                                onBookmarkClick={scrollToBookmark}
+                                onBookmarkRemove={handleBookmarkRemove}
+                            />
+                        </Group>
+                    )}
+                </Stack>
 
                 {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
                 <ScrollArea

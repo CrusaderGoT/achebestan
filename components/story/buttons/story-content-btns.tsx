@@ -4,12 +4,13 @@ import { ActionIcon, Group } from "@mantine/core";
 import {
     IconCheck,
     IconEdit,
+    IconEditOff,
     IconMaximize,
     IconMinimize,
 } from "@tabler/icons-react";
 
 import publicStyles from "@/styles/public.module.css";
-import storypageStyles from "@/styles/story-page.module.css";
+import { useMounted } from "@mantine/hooks";
 import cx from "clsx";
 
 type StoryContentButtonsProps = {
@@ -33,14 +34,12 @@ export function StoryContentButtons({
     toggleFullscreen,
     fullscreen,
 }: StoryContentButtonsProps) {
+    const mounted = useMounted();
+
+    if (!mounted) return null;
+
     return (
-        <Group
-            justify="flex-end"
-            gap={"xl"}
-            px={"md"}
-            py={"xs"}
-            className={cx(storypageStyles.storyEditContentBtn)}
-        >
+        <Group gap={"xl"}>
             {storyAuthorId === sessionUserId && (
                 <>
                     <ActionIcon
@@ -50,24 +49,28 @@ export function StoryContentButtons({
                         title="Update Story Content"
                         variant="light"
                         color="yellow"
-                        size={"xs"}
+                        size="sm"
                         disabled={isFormSubmiting}
                     >
-                        <IconEdit />
+                        {!openedContentField ? (
+                            <IconEdit size={16} />
+                        ) : (
+                            <IconEditOff size={16} />
+                        )}
                     </ActionIcon>
 
                     <ActionIcon
                         loading={isFormSubmiting}
                         title="Submit Update"
                         variant="light"
-                        size={"xs"}
+                        size={"sm"}
                         type="submit"
                         color="green"
                         className={cx(
                             (!openedContentField || !dirty) && publicStyles.hide
                         )}
                     >
-                        <IconCheck />
+                        <IconCheck size={16} />
                     </ActionIcon>
                 </>
             )}
@@ -76,10 +79,14 @@ export function StoryContentButtons({
                 onClick={toggleFullscreen}
                 ml={"auto"}
                 variant="light"
-                size={"xs"}
+                size={"sm"}
                 color={fullscreen ? "red" : ""}
             >
-                {fullscreen ? <IconMinimize /> : <IconMaximize />}
+                {fullscreen ? (
+                    <IconMinimize size={16} />
+                ) : (
+                    <IconMaximize size={16} />
+                )}
             </ActionIcon>
         </Group>
     );
