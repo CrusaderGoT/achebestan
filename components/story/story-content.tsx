@@ -69,7 +69,6 @@ export function StoryContent({
 
     const [modalOpened, { open: openModal, close: closeModal }] =
         useDisclosure(false);
-        
     const [pendingBookmarkData, setPendingBookmarkData] = useState<{
         containerSelector: string;
         position: number;
@@ -100,7 +99,6 @@ export function StoryContent({
 
     const handleBookmarkRemove = (id: string) => {
         removeBookmark(id);
-        // Force immediate re-render after removal
         const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
         setTimeout(() => {
             forceRenderBookmarkIndicators(
@@ -110,19 +108,12 @@ export function StoryContent({
         }, 50);
     };
 
-    // Robust bookmark rendering with retry logic and cleanup
     const renderBookmarks = useCallback(
         async (force = false) => {
-            // Don't render bookmarks when content field is open (editor mode)
-            if (openedContentField) {
-                console.log(
-                    "Skipping bookmark rendering: content field is open"
-                );
-                return;
-            }
+            // Don't render when in edit mode
+            if (openedContentField) return;
 
             if (bookmarks.length === 0) {
-                // Clear any existing indicators if no bookmarks
                 document
                     .querySelectorAll("[data-bookmark-id]")
                     .forEach((el) => el.remove());
@@ -131,7 +122,6 @@ export function StoryContent({
 
             try {
                 let result: RenderResult;
-
                 if (force) {
                     renderAttempts.current = 0;
                     result = forceRenderBookmarkIndicators(
@@ -145,16 +135,13 @@ export function StoryContent({
                     );
                 }
 
-                // If some bookmarks failed and we haven't exceeded max attempts, retry
+                // Retry failed bookmarks
                 if (
                     result.failed.length > 0 &&
                     renderAttempts.current < maxRenderAttempts
                 ) {
                     renderAttempts.current++;
                     setTimeout(() => {
-                        console.log(
-                            `Retrying failed bookmarks (attempt ${renderAttempts.current})`
-                        );
                         forceRenderBookmarkIndicators(
                             result.failed,
                             handleFailedBookmarks
@@ -170,49 +157,48 @@ export function StoryContent({
 
     const handleContextMenuClose = useCallback(() => {
         hideContextMenu();
-        // Small delay to ensure DOM is stable before re-rendering
-        // Only re-render if content field is not open
-        if (!openedContentField) {
-            setTimeout(() => {
-                if (
-                    bookmarks.length > 0 &&
-                    shouldReRenderBookmarks(bookmarks)
-                ) {
-                    renderBookmarks(true);
-                }
-            }, 100);
+        if (
+            !openedContentField &&
+            bookmarks.length > 0 &&
+            shouldReRenderBookmarks(bookmarks)
+        ) {
+            setTimeout(() => renderBookmarks(true), 100);
         }
     }, [hideContextMenu, bookmarks, renderBookmarks, openedContentField]);
 
     const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
 
-    // Main effect for rendering bookmarks
+    // Main bookmark rendering effect
     useEffect(() => {
-        // Don't render bookmarks when in edit mode
-        if (openedContentField) {
-            return;
-        }
+        if (openedContentField) return;
 
-        const timer = setTimeout(() => {
-            renderBookmarks();
-        }, 100);
-
+        const timer = setTimeout(() => renderBookmarks(), 100);
         return () => clearTimeout(timer);
     }, [bookmarks, renderBookmarks, openedContentField]);
 
-    // Additional effect to check and re-render if needed (fallback)
+    // Handle edit mode transitions
     useEffect(() => {
-        // Don't run fallback check when in edit mode
-        if (openedContentField) {
-            return;
+        if (!openedContentField && bookmarks.length > 0) {
+            // Re-render when exiting edit mode
+            const timer = setTimeout(() => renderBookmarks(true), 200);
+            return () => clearTimeout(timer);
+        } else if (openedContentField) {
+            // Clear indicators when entering edit mode
+            document
+                .querySelectorAll("[data-bookmark-id]")
+                .forEach((el) => el.remove());
         }
+    }, [openedContentField, bookmarks.length, renderBookmarks]);
+
+    // Fallback re-render check
+    useEffect(() => {
+        if (openedContentField) return;
 
         const checkTimer = setTimeout(() => {
             if (
                 shouldReRenderBookmarks(bookmarks) &&
                 renderAttempts.current < maxRenderAttempts
             ) {
-                console.log("Re-rendering bookmarks (fallback check)");
                 renderAttempts.current++;
                 renderBookmarks(true);
             }
@@ -221,36 +207,16 @@ export function StoryContent({
         return () => clearTimeout(checkTimer);
     }, [bookmarks, renderBookmarks, openedContentField]);
 
-    // Re-render bookmarks when context menu is hidden
-    useEffect(() => {
-        if (!showContextMenu && bookmarks.length > 0 && !openedContentField) {
-            const timer = setTimeout(() => {
-                if (shouldReRenderBookmarks(bookmarks)) {
-                    console.log(
-                        "Re-rendering bookmarks after context menu closed"
-                    );
-                    renderBookmarks(true);
-                }
-            }, 200);
-
-            return () => clearTimeout(timer);
-        }
-    }, [showContextMenu, bookmarks, renderBookmarks, openedContentField]);
-
-    // Force re-render on window focus (in case of any issues)
+    // Window focus re-render
     useEffect(() => {
         const handleFocus = () => {
             if (
                 document.hasFocus() &&
                 bookmarks.length > 0 &&
-                !openedContentField
+                !openedContentField &&
+                shouldReRenderBookmarks(bookmarks)
             ) {
-                setTimeout(() => {
-                    if (shouldReRenderBookmarks(bookmarks)) {
-                        console.log("Re-rendering bookmarks on window focus");
-                        renderBookmarks(true);
-                    }
-                }, 300);
+                setTimeout(() => renderBookmarks(true), 300);
             }
         };
 
@@ -258,39 +224,14 @@ export function StoryContent({
         return () => window.removeEventListener("focus", handleFocus);
     }, [bookmarks, renderBookmarks, openedContentField]);
 
-    // Effect to handle transitions between read and edit modes
-    useEffect(() => {
-        if (!openedContentField && bookmarks.length > 0) {
-            // When switching back to read mode, re-render bookmarks after a delay
-            // to ensure DOM is fully rendered
-            const timer = setTimeout(() => {
-                console.log("Re-rendering bookmarks after exiting edit mode");
-                renderBookmarks(true);
-            }, 200);
-
-            return () => clearTimeout(timer);
-        } else if (openedContentField) {
-            // When entering edit mode, clear existing bookmark indicators
-            // to prevent confusion and DOM conflicts
-            document
-                .querySelectorAll("[data-bookmark-id]")
-                .forEach((el) => el.remove());
-        }
-    }, [openedContentField, bookmarks.length, renderBookmarks]);
-
     const {
         ref: fullscreenRef,
         toggle: toggleFullscreen,
         fullscreen,
     } = useFullscreen();
 
-    // for observing change in scroll area height or width
     const { ref: scrollAreaSizeRef, width, height } = useElementSize();
-
-    // the Element Ref
     const scrollAreaTocRef = useRef<HTMLDivElement>(null);
-
-    // merge them
     const scrollAreaMergeRef = useMergedRef(
         scrollAreaSizeRef,
         scrollAreaTocRef
@@ -298,7 +239,6 @@ export function StoryContent({
 
     return (
         <Stack className={publicStyles.relative} gap={"xs"}>
-            {/* Context Menu for Bookmarks */}
             <BookmarkContextMenu
                 visible={showContextMenu}
                 position={menuPosition}
@@ -330,7 +270,6 @@ export function StoryContent({
                         {timeToRead}
                     </Badge>
 
-                    {/* Bookmark List Sidebar */}
                     <BookmarkList
                         bookmarks={bookmarks}
                         onBookmarkClick={scrollToBookmark}
@@ -378,7 +317,6 @@ export function StoryContent({
                     )}
                 </Stack>
 
-                {/**Do not use ScrollAreaAutosize; it causes both content and content field to appear at the same time*/}
                 <ScrollArea
                     ref={scrollAreaMergeRef}
                     className={cx(storypageStyles.storyContentScrollArea)}
@@ -415,7 +353,6 @@ export function StoryContent({
                 </ScrollArea>
             </Box>
 
-            {/* Bookmark Modal */}
             <BookmarkModal
                 opened={modalOpened}
                 onClose={closeModal}

@@ -45,11 +45,10 @@ export function useBookmarks(postId?: string) {
 
             const failedIds = failedBookmarks.map((b) => b.id);
 
-            // Show notification to user
             const message =
                 failedBookmarks.length === 1
-                    ? `1 bookmark could not be displayed because the content has changed.`
-                    : `${failedBookmarks.length} bookmarks could not be displayed because the content has changed.`;
+                    ? `1 bookmark was removed because the content has changed.`
+                    : `${failedBookmarks.length} bookmarks were removed because the content has changed.`;
 
             notifications.show({
                 title: "Bookmarks Removed",
@@ -59,17 +58,7 @@ export function useBookmarks(postId?: string) {
                 withCloseButton: true,
             });
 
-            // Remove the failed bookmarks from storage
             removeBulkBookmarks(failedIds);
-
-            console.log(
-                "Removed failed bookmarks:",
-                failedBookmarks.map((b) => ({
-                    id: b.id,
-                    contextText: b.contextText,
-                    userNote: b.userNote,
-                }))
-            );
         },
         [removeBulkBookmarks]
     );
@@ -95,7 +84,6 @@ export function useBookmarks(postId?: string) {
                     ?.classList.contains("hide") || false;
 
             if (!isInEditMode) {
-                // Only show error if not in edit mode
                 notifications.show({
                     title: "Bookmark Not Found",
                     message:
@@ -111,7 +99,6 @@ export function useBookmarks(postId?: string) {
         bookmarks,
         addBookmark,
         removeBookmark,
-        removeBulkBookmarks,
         scrollToBookmark,
         handleFailedBookmarks,
     };
