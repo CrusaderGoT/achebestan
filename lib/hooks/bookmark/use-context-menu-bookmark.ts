@@ -54,15 +54,15 @@ export function useContextMenuBookmark() {
 
     const getTextPositionFromPoint = useCallback(
         (element: Element, clientX: number, clientY: number) => {
-            const range = document.caretRangeFromPoint(clientX, clientY);
-            if (!range || !element.contains(range.startContainer)) {
+            const range = document.caretPositionFromPoint(clientX, clientY);
+            if (!range || !element.contains(range.offsetNode)) {
                 return { position: 0, contextText: "" };
             }
 
             // Calculate position within the element's text content
             const beforeRange = document.createRange();
             beforeRange.setStart(element, 0);
-            beforeRange.setEnd(range.startContainer, range.startOffset);
+            beforeRange.setEnd(range.offsetNode, range.offset);
             const position = beforeRange.toString().length;
 
             // Get context text (40 chars before and after)

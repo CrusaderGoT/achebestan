@@ -1,3 +1,4 @@
+import { authClient } from "@/lib/auth-client";
 import {
     favouriteInserSchema,
     storyInsertSchema,
@@ -5,7 +6,9 @@ import {
     storyUpdateSchema,
 } from "@/zod-schemas/story";
 import { userSelectType } from "@/zod-schemas/user";
+import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod/v4";
+import { StoryUpdateType } from "./story";
 
 export interface StoryBookProps extends StorySelectType {
     author: userSelectType;
@@ -30,4 +33,13 @@ export interface SearchOptions {
     sortBy?: "created" | "edited" | "title";
     sortOrder?: "asc" | "desc";
     fields?: Array<"title" | "subtitle">;
-}
+}export type StoryContentType = {
+    toggleContentField: () => void;
+    openedContentField: boolean;
+    content: string;
+    form: UseFormReturnType<StoryUpdateType>;
+    session: ReturnType<typeof authClient.useSession>;
+    storyAuthorId: string;
+    storyISBN: string;
+};
+
