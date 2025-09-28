@@ -236,57 +236,6 @@ export function useBookmarkRenderer({
         [updateBookmark]
     );
 
-    // Extracted missing indicator handling
-    const handleMissingIndicator = useCallback((bookmark: Bookmark) => {
-        // Check if we're in edit mode before attempting recovery
-        const storyContent = document.querySelector(
-            '[data-story-content="true"]'
-        );
-        const isInEditMode = storyContent?.classList.contains("hide") || false;
-
-        if (isInEditMode) {
-            // Don't try to render in edit mode, just show a gentle message
-            notifications.show({
-                title: "Bookmark Temporarily Hidden",
-                message: "This bookmark will appear when you exit edit mode.",
-                color: "gray",
-                autoClose: 2000,
-            });
-            return;
-        }
-
-        // Try to re-render the specific bookmark
-        try {
-            const result = forceRenderBookmarkIndicators([bookmark]);
-
-            if (result.successful.length > 0) {
-                // Successfully re-rendered, try scrolling again
-                setTimeout(() => scrollToBookmark(bookmark), 100);
-            } else if (result.failed.length > 0) {
-                // Bookmark is truly invalid, remove it
-                removeBulkBookmarks([bookmark.id]);
-
-                notifications.show({
-                    title: "Bookmark Not Found",
-                    message:
-                        "This bookmark could not be located and has been removed.",
-                    color: "red",
-                    autoClose: 4000,
-                    withCloseButton: true,
-                });
-            }
-        } catch (error) {
-            console.error("Error handling missing bookmark indicator:", error);
-            notifications.show({
-                title: "Bookmark Error",
-                message: "There was an error locating this bookmark.",
-                color: "red",
-                autoClose: 3000,
-            });
-        }
-    }, []);
-
-    // Improved scrollToBookmark function
     const scrollToBookmark = useCallback(
         (bookmark: Bookmark) => {
             const indicator = document.querySelector(
@@ -310,10 +259,77 @@ export function useBookmarkRenderer({
                 return;
             }
 
-            // Indicator not found - try to handle gracefully
-            handleMissingIndicator(bookmark);
+            // Indicator not found - handle inline instead of separate function
+            // Check if we're in edit mode before attempting recovery
+            const storyContent = document.querySelector(
+                '[data-story-content="true"]'
+            );
+            const isInEditMode =
+                storyContent?.classList.contains("hide") || false;
+
+            if (isInEditMode) {
+                // Don't try to render in edit mode, just show a gentle message
+                notifications.show({
+                    title: "Bookmark Temporarily Hidden",
+                    message:
+                        "This bookmark will appear when you exit edit mode.",
+                    color: "gray",
+                    autoClose: 2000,
+                });
+                return;
+            }
+
+            // Try to re-render the specific bookmark
+            try {
+                const result = forceRenderBookmarkIndicators([bookmark]);
+
+                if (result.successful.length > 0) {
+                    // Successfully re-rendered, try scrolling again (but only once more)
+                    setTimeout(() => {
+                        const retryIndicator = document.querySelector(
+                            `[data-bookmark-id="${bookmark.id}"]`
+                        );
+                        if (retryIndicator) {
+                            retryIndicator.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                            });
+                            retryIndicator.classList.add(`${styles.pulse}`);
+                            setTimeout(() => {
+                                retryIndicator.classList.remove(
+                                    `${styles.pulse}`
+                                );
+                            }, 1500);
+                            tryUpdateBookmarkContext(bookmark);
+                        }
+                    }, 100);
+                } else if (result.failed.length > 0) {
+                    // Bookmark is truly invalid, remove it
+                    removeBulkBookmarks([bookmark.id]);
+
+                    notifications.show({
+                        title: "Bookmark Not Found",
+                        message:
+                            "This bookmark could not be located and has been removed.",
+                        color: "red",
+                        autoClose: 4000,
+                        withCloseButton: true,
+                    });
+                }
+            } catch (error) {
+                console.error(
+                    "Error handling missing bookmark indicator:",
+                    error
+                );
+                notifications.show({
+                    title: "Bookmark Error",
+                    message: "There was an error locating this bookmark.",
+                    color: "red",
+                    autoClose: 3000,
+                });
+            }
         },
-        [tryUpdateBookmarkContext, handleMissingIndicator]
+        [tryUpdateBookmarkContext, removeBulkBookmarks]
     );
 
     // Main bookmark rendering effect with post-submission stability
@@ -442,6 +458,6 @@ export function useBookmarkRenderer({
         addBookmark,
         removeBookmark,
         bookmarks,
-        handleFailedBookmarks
+        handleFailedBookmarks,
     };
 }

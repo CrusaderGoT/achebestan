@@ -150,21 +150,6 @@ export function getContextAtPosition(
     }
 }
 
-export function extractTextFromHtml(htmlString: string): string {
-    if (!htmlString) return "";
-
-    try {
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = htmlString;
-        return (tempDiv.textContent || "").replace(/\s+/g, " ").trim();
-    } catch {
-        return htmlString
-            .replace(/<[^>]*>/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-    }
-}
-
 // Text comparison utilities
 export function shouldUpdateBookmarkContext(
     currentContext: string,
@@ -173,15 +158,11 @@ export function shouldUpdateBookmarkContext(
     if (!currentContext || !savedContext) return false;
     if (currentContext === savedContext) return false;
 
-    // Extract clean text from both contexts (in case they contain HTML)
-    const cleanCurrent = extractTextFromHtml(currentContext);
-    const cleanSaved = extractTextFromHtml(savedContext);
-
-    if (cleanCurrent === cleanSaved) return false;
+    if (currentContext === savedContext) return false;
 
     // Only update if the content has meaningfully changed
     // Use similar logic to bookmark validation but more lenient
-    const similarity = calculateTextSimilarity(cleanCurrent, cleanSaved);
+    const similarity = calculateTextSimilarity(currentContext, savedContext);
 
     // Update if similarity is between 30-90% (significant but not complete change)
     return similarity >= 0.3 && similarity <= 0.9;
@@ -257,48 +238,35 @@ function isBookmarkStillValidEnhanced(
 
         const savedContext = bookmark.contextText.trim();
 
-        // Extract text content from both contexts
-        const savedTextContent = extractTextFromHtml(savedContext);
-        const currentTextContent = extractTextFromHtml(currentContext);
-
         // If either extraction failed, fall back to direct comparison
-        if (!savedTextContent || !currentTextContent) {
+        if (!savedContext || !currentContext) {
             return savedContext === currentContext;
         }
 
         // If exact text match, definitely valid
-        if (savedTextContent === currentTextContent) {
+        if (savedContext === currentContext) {
             return true;
         }
 
         // If one text contains the other, probably valid (handles expansions/contractions)
         if (
-            currentTextContent.includes(savedTextContent) ||
-            savedTextContent.includes(currentTextContent)
+            currentContext.includes(savedContext) ||
+            savedContext.includes(currentContext)
         ) {
             return true;
         }
 
         // For very short contexts, be more strict but allow minor changes
-        if (savedTextContent.length < 15) {
-            const distance = levenshteinDistance(
-                savedTextContent,
-                currentTextContent
-            );
-            return distance <= Math.max(2, savedTextContent.length * 0.3); // Allow 30% changes for short text
+        if (savedContext.length < 15) {
+            const distance = levenshteinDistance(savedContext, currentContext);
+            return distance <= Math.max(2, savedContext.length * 0.3); // Allow 30% changes for short text
         }
 
         // For longer contexts, try multiple strategies - require at least one to pass
         const strategies = [
-            () =>
-                hasSignificantWordOverlap(
-                    savedTextContent,
-                    currentTextContent,
-                    0.6
-                ), // 60% word overlap
-            () => isFuzzyMatch(savedTextContent, currentTextContent, 0.35), // Allow 35% character differences
-            () =>
-                preservesKeyPhrases(savedTextContent, currentTextContent, 0.5), // 50% key phrases preserved
+            () => hasSignificantWordOverlap(savedContext, currentContext, 0.6), // 60% word overlap
+            () => isFuzzyMatch(savedContext, currentContext, 0.35), // Allow 35% character differences
+            () => preservesKeyPhrases(savedContext, currentContext, 0.5), // 50% key phrases preserved
         ];
 
         // At least one strategy must pass for longer content
@@ -541,4 +509,3 @@ function insertIndicatorAtPosition(
         return false;
     }
 }
-

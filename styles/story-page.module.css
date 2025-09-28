@@ -628,6 +628,6 @@
 
 .storyContentBtns {
   position: absolute;
-  z-index: 200;
+  z-index: 20;
   width: 100%;
 }
