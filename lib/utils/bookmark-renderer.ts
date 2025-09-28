@@ -71,8 +71,8 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
                     return;
                 }
 
-                // Validate bookmark using same logic as when saving
-                if (!isBookmarkStillValid(container, bookmark)) {
+                // Validate bookmark using enhanced HTML-aware logic
+                if (!isBookmarkStillValidEnhanced(container, bookmark)) {
                     result.failed.push(bookmark);
                     return;
                 }
@@ -110,80 +110,102 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
     return result;
 }
 
-// Enhanced bookmark validation strategies
-
-// Strategy 1: Simple character-based similarity
-function isContentSimilarEnough(
-    original: string,
-    current: string,
-    threshold: number
+// Enhanced HTML-aware bookmark validation
+function isBookmarkStillValidEnhanced(
+    container: Element,
+    bookmark: Bookmark
 ): boolean {
-    if (original === current) return true;
+    try {
+        const currentContext = getContextAtPosition(
+            container,
+            bookmark.position
+        );
 
-    // If current context contains most of the original, it's probably still valid
-    const commonChars = countCommonCharacters(
-        original.toLowerCase(),
-        current.toLowerCase()
-    );
-    const similarity = commonChars / Math.max(original.length, current.length);
-
-    return similarity >= threshold;
-}
-
-function countCommonCharacters(str1: string, str2: string): number {
-    const chars1 = str1.split("");
-    const chars2 = str2.split("");
-    let common = 0;
-
-    for (let i = 0; i < chars1.length; i++) {
-        const index = chars2.indexOf(chars1[i]);
-        if (index !== -1) {
-            chars2.splice(index, 1);
-            common++;
+        if (!currentContext) {
+            return false;
         }
-    }
 
-    return common;
-}
+        const savedContext = bookmark.contextText.trim();
 
-// Strategy 2: Levenshtein distance for fuzzy matching
-function isFuzzyMatch(
-    original: string,
-    current: string,
-    maxDifferenceRatio: number
-): boolean {
-    if (original === current) return true;
+        // Extract text content from both contexts
+        const savedTextContent = extractTextFromHtml(savedContext);
+        const currentTextContent = extractTextFromHtml(currentContext);
 
-    const distance = levenshteinDistance(original, current);
-    const maxLength = Math.max(original.length, current.length);
-    const differenceRatio = distance / maxLength;
+        // If either extraction failed, fall back to direct comparison
+        if (!savedTextContent || !currentTextContent) {
+            return savedContext === currentContext;
+        }
 
-    return differenceRatio <= maxDifferenceRatio;
-}
+        // If exact text match, definitely valid
+        if (savedTextContent === currentTextContent) {
+            return true;
+        }
 
-function levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1)
-        .fill(null)
-        .map(() => Array(str1.length + 1).fill(null));
+        // If one text contains the other, probably valid (handles expansions/contractions)
+        if (
+            currentTextContent.includes(savedTextContent) ||
+            savedTextContent.includes(currentTextContent)
+        ) {
+            return true;
+        }
 
-    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
-    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
-
-    for (let j = 1; j <= str2.length; j++) {
-        for (let i = 1; i <= str1.length; i++) {
-            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-            matrix[j][i] = Math.min(
-                matrix[j][i - 1] + 1, // deletion
-                matrix[j - 1][i] + 1, // insertion
-                matrix[j - 1][i - 1] + indicator // substitution
+        // For very short contexts, be more strict but allow minor changes
+        if (savedTextContent.length < 15) {
+            const distance = levenshteinDistance(
+                savedTextContent,
+                currentTextContent
             );
+            return distance <= Math.max(2, savedTextContent.length * 0.3); // Allow 30% changes for short text
         }
-    }
 
-    return matrix[str2.length][str1.length];
+        // For longer contexts, try multiple strategies - require at least one to pass
+        const strategies = [
+            () =>
+                hasSignificantWordOverlap(
+                    savedTextContent,
+                    currentTextContent,
+                    0.6
+                ), // 60% word overlap
+            () => isFuzzyMatch(savedTextContent, currentTextContent, 0.35), // Allow 35% character differences
+            () =>
+                preservesKeyPhrases(savedTextContent, currentTextContent, 0.5), // 50% key phrases preserved
+        ];
+
+        // At least one strategy must pass for longer content
+        return strategies.some((strategy) => strategy());
+    } catch (error) {
+        console.error(`Error validating bookmark ${bookmark.id}:`, error);
+        return false;
+    }
 }
 
-// Strategy 3: Word-based comparison (more forgiving of small text changes)
+// Helper function to extract text content from HTML strings
+function extractTextFromHtml(htmlString: string): string {
+    if (!htmlString) return "";
+
+    try {
+        // Create a temporary DOM element to parse HTML
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlString;
+
+        // Get text content and clean it up
+        const textContent = tempDiv.textContent || tempDiv.innerText || "";
+
+        // Clean up whitespace and normalize
+        return textContent
+            .replace(/\s+/g, " ") // Replace multiple whitespace with single space
+            .trim();
+    } catch {
+        // If HTML parsing fails, try simple regex approach
+        return htmlString
+            .replace(/<[^>]*>/g, " ") // Remove HTML tags
+            .replace(/&[^;]+;/g, " ") // Remove HTML entities (basic)
+            .replace(/\s+/g, " ") // Normalize whitespace
+            .trim();
+    }
+}
+
+// Word-based comparison (forgiving of small text changes)
 function hasSignificantWordOverlap(
     original: string,
     current: string,
@@ -197,7 +219,12 @@ function hasSignificantWordOverlap(
     const commonWords = originalWords.filter((word) =>
         currentWords.some(
             (currentWord) =>
-                currentWord.includes(word) || word.includes(currentWord)
+                // Allow partial word matches and stemming-like comparison
+                currentWord.includes(word) ||
+                word.includes(currentWord) ||
+                (word.length > 4 &&
+                    currentWord.length > 4 &&
+                    levenshteinDistance(word, currentWord) <= 2)
         )
     );
 
@@ -238,6 +265,17 @@ function extractSignificantWords(text: string): string[] {
         "would",
         "could",
         "should",
+        "this",
+        "that",
+        "these",
+        "those",
+        "i",
+        "you",
+        "he",
+        "she",
+        "it",
+        "we",
+        "they",
     ]);
 
     return text
@@ -247,8 +285,49 @@ function extractSignificantWords(text: string): string[] {
         .filter((word) => word.length > 2 && !stopWords.has(word));
 }
 
-// Strategy 4: Key phrase preservation (looks for important phrases)
-function preservesKeyPhrases(original: string, current: string): boolean {
+// Levenshtein distance for fuzzy matching
+function isFuzzyMatch(
+    original: string,
+    current: string,
+    maxDifferenceRatio: number
+): boolean {
+    if (original === current) return true;
+
+    const distance = levenshteinDistance(original, current);
+    const maxLength = Math.max(original.length, current.length);
+    const differenceRatio = distance / maxLength;
+
+    return differenceRatio <= maxDifferenceRatio;
+}
+
+function levenshteinDistance(str1: string, str2: string): number {
+    const matrix = Array(str2.length + 1)
+        .fill(null)
+        .map(() => Array(str1.length + 1).fill(null));
+
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= str2.length; j++) {
+        for (let i = 1; i <= str1.length; i++) {
+            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            matrix[j][i] = Math.min(
+                matrix[j][i - 1] + 1, // deletion
+                matrix[j - 1][i] + 1, // insertion
+                matrix[j - 1][i - 1] + indicator // substitution
+            );
+        }
+    }
+
+    return matrix[str2.length][str1.length];
+}
+
+// Key phrase preservation (looks for important phrases)
+function preservesKeyPhrases(
+    original: string,
+    current: string,
+    threshold: number = 0.6
+): boolean {
     const keyPhrases = extractKeyPhrases(original);
 
     if (keyPhrases.length === 0) {
@@ -259,12 +338,21 @@ function preservesKeyPhrases(original: string, current: string): boolean {
         );
     }
 
-    // Check if most key phrases are still present
-    const preservedPhrases = keyPhrases.filter((phrase) =>
-        current.toLowerCase().includes(phrase.toLowerCase())
+    // Check if most key phrases are still present (with fuzzy matching)
+    const preservedPhrases = keyPhrases.filter(
+        (phrase) =>
+            current.toLowerCase().includes(phrase.toLowerCase()) ||
+            // Allow slight variations in phrases
+            keyPhrases.some(
+                (currentPhrase) =>
+                    levenshteinDistance(
+                        phrase.toLowerCase(),
+                        currentPhrase.toLowerCase()
+                    ) <= 2
+            )
     );
 
-    return preservedPhrases.length >= Math.ceil(keyPhrases.length * 0.6); // 60% of key phrases preserved
+    return preservedPhrases.length >= Math.ceil(keyPhrases.length * threshold);
 }
 
 function extractKeyPhrases(text: string, minLength = 3): string[] {
@@ -274,6 +362,9 @@ function extractKeyPhrases(text: string, minLength = 3): string[] {
         .split(/\s+/)
         .filter((w) => w.length > 0);
     const phrases: string[] = [];
+
+    // Don't extract phrases from very short text
+    if (words.length < 3) return [];
 
     // Extract 2-word phrases
     for (let i = 0; i < words.length - 1; i++) {
@@ -292,48 +383,6 @@ function extractKeyPhrases(text: string, minLength = 3): string[] {
     }
 
     return phrases;
-}
-
-// Enhanced version that combines multiple strategies
-function isBookmarkStillValid(container: Element, bookmark: Bookmark): boolean {
-    try {
-        const currentContext = getContextAtPosition(
-            container,
-            bookmark.position
-        );
-
-        if (!currentContext) {
-            return false;
-        }
-
-        const savedContext = bookmark.contextText.trim();
-
-        // If exact match, definitely valid
-        if (savedContext === currentContext) {
-            return true;
-        }
-
-        // If one contains the other, probably valid
-        if (
-            currentContext.includes(savedContext) ||
-            savedContext.includes(currentContext)
-        ) {
-            return true;
-        }
-
-        // Try multiple strategies and require at least one to pass
-        const strategies = [
-            () => hasSignificantWordOverlap(savedContext, currentContext, 0.5),
-            () => isFuzzyMatch(savedContext, currentContext, 0.4),
-            () => preservesKeyPhrases(savedContext, currentContext),
-            () => isContentSimilarEnough(savedContext, currentContext, 0.8),
-        ];
-
-        return strategies.some((strategy) => strategy());
-    } catch (error) {
-        console.error(`Error validating bookmark ${bookmark.id}:`, error);
-        return false;
-    }
 }
 
 function getContextAtPosition(element: Element, position: number): string {

@@ -168,46 +168,33 @@ export function StoryContent({
 
     const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
 
-    // Main bookmark rendering effect
-    useEffect(() => {
-        if (openedContentField) return;
+    // Optimized bookmark rendering effects
 
-        const timer = setTimeout(() => renderBookmarks(), 100);
-        return () => clearTimeout(timer);
-    }, [bookmarks, renderBookmarks, openedContentField]);
-
-    // Handle edit mode transitions
+    // Main bookmark rendering effect - handles most scenarios
     useEffect(() => {
-        if (!openedContentField && bookmarks.length > 0) {
-            // Re-render when exiting edit mode
-            const timer = setTimeout(() => renderBookmarks(true), 200);
-            return () => clearTimeout(timer);
-        } else if (openedContentField) {
+        if (openedContentField) {
             // Clear indicators when entering edit mode
             document
                 .querySelectorAll("[data-bookmark-id]")
                 .forEach((el) => el.remove());
+            return;
         }
-    }, [openedContentField, bookmarks.length, renderBookmarks]);
 
-    // Fallback re-render check
-    useEffect(() => {
-        if (openedContentField) return;
-
-        const checkTimer = setTimeout(() => {
+        // When not in edit mode, render bookmarks with intelligent checking
+        const timer = setTimeout(() => {
             if (
-                shouldReRenderBookmarks(bookmarks) &&
+                shouldReRenderBookmarks(bookmarks) ||
                 renderAttempts.current < maxRenderAttempts
             ) {
-                renderAttempts.current++;
                 renderBookmarks(true);
+                renderAttempts.current++;
             }
-        }, 500);
+        }, 150); // Single optimized delay
 
-        return () => clearTimeout(checkTimer);
+        return () => clearTimeout(timer);
     }, [bookmarks, renderBookmarks, openedContentField]);
 
-    // Window focus re-render
+    // Window focus re-render - only when necessary
     useEffect(() => {
         const handleFocus = () => {
             if (
@@ -216,7 +203,7 @@ export function StoryContent({
                 !openedContentField &&
                 shouldReRenderBookmarks(bookmarks)
             ) {
-                setTimeout(() => renderBookmarks(true), 300);
+                setTimeout(() => renderBookmarks(true), 100);
             }
         };
 
