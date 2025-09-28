@@ -1,4 +1,7 @@
-// utils/bookmarkRenderer.ts
+// ==============================================================================
+// utils/bookmarkRenderer.ts - Pure utility functions and DOM manipulation
+// ==============================================================================
+
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "../../types/bookmark";
 
@@ -9,6 +12,7 @@ export interface RenderResult {
     failed: Bookmark[];
 }
 
+// Main rendering functions
 export function renderBookmarkIndicators(
     bookmarks: Bookmark[],
     onFailedBookmarksDetected?: (failedBookmarks: Bookmark[]) => void
@@ -110,6 +114,132 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
     return result;
 }
 
+// Text extraction and context utilities
+export function getContextAtPosition(
+    element: Element,
+    position: number,
+    before: number = 40,
+    after: number = 40
+): string {
+    try {
+        // Create a clone of the element to work with clean text
+        const cleanElement = element.cloneNode(true) as Element;
+
+        // Remove all bookmark indicators from the clone
+        cleanElement
+            .querySelectorAll("[data-bookmark-id]")
+            .forEach((indicator) => {
+                indicator.remove();
+            });
+
+        const fullText = cleanElement.textContent || "";
+
+        if (position > fullText.length) {
+            return "";
+        }
+
+        // Get context text (N chars before and after)
+        const contextStart = Math.max(0, position - before);
+        const contextEnd = Math.min(fullText.length, position + after);
+        const contextText = fullText.substring(contextStart, contextEnd);
+
+        return contextText.trim();
+    } catch (error) {
+        console.error("Error extracting context at position:", error);
+        return "";
+    }
+}
+
+export function extractTextFromHtml(htmlString: string): string {
+    if (!htmlString) return "";
+
+    try {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlString;
+        return (tempDiv.textContent || "").replace(/\s+/g, " ").trim();
+    } catch {
+        return htmlString
+            .replace(/<[^>]*>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+}
+
+// Text comparison utilities
+export function shouldUpdateBookmarkContext(
+    currentContext: string,
+    savedContext: string
+): boolean {
+    if (!currentContext || !savedContext) return false;
+    if (currentContext === savedContext) return false;
+
+    // Extract clean text from both contexts (in case they contain HTML)
+    const cleanCurrent = extractTextFromHtml(currentContext);
+    const cleanSaved = extractTextFromHtml(savedContext);
+
+    if (cleanCurrent === cleanSaved) return false;
+
+    // Only update if the content has meaningfully changed
+    // Use similar logic to bookmark validation but more lenient
+    const similarity = calculateTextSimilarity(cleanCurrent, cleanSaved);
+
+    // Update if similarity is between 30-90% (significant but not complete change)
+    return similarity >= 0.3 && similarity <= 0.9;
+}
+
+export function calculateTextSimilarity(text1: string, text2: string): number {
+    if (!text1 || !text2) return 0;
+    if (text1 === text2) return 1;
+
+    const longer = text1.length > text2.length ? text1 : text2;
+    const shorter = text1.length > text2.length ? text2 : text1;
+
+    if (longer.length === 0) return 1;
+
+    const editDistance = levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+}
+
+export function levenshteinDistance(str1: string, str2: string): number {
+    const matrix = Array(str2.length + 1)
+        .fill(null)
+        .map(() => Array(str1.length + 1).fill(null));
+
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= str2.length; j++) {
+        for (let i = 1; i <= str1.length; i++) {
+            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            matrix[j][i] = Math.min(
+                matrix[j][i - 1] + 1,
+                matrix[j - 1][i] + 1,
+                matrix[j - 1][i - 1] + indicator
+            );
+        }
+    }
+
+    return matrix[str2.length][str1.length];
+}
+
+export function shouldReRenderBookmarks(bookmarks: Bookmark[]): boolean {
+    const existingIndicators = document.querySelectorAll(
+        `.${styles.indicator}`
+    );
+
+    if (existingIndicators.length !== bookmarks.length) {
+        return true;
+    }
+
+    const existingIds = Array.from(existingIndicators)
+        .map((el) => el.getAttribute("data-bookmark-id"))
+        .filter((id) => id !== null);
+
+    const bookmarkIds = bookmarks.map((b) => b.id);
+
+    return !bookmarkIds.every((id) => existingIds.includes(id));
+}
+
 // Enhanced HTML-aware bookmark validation
 function isBookmarkStillValidEnhanced(
     container: Element,
@@ -127,12 +257,9 @@ function isBookmarkStillValidEnhanced(
 
         const savedContext = bookmark.contextText.trim();
 
-        const savedTextContent = savedContext;
-        const currentTextContent = currentContext;
-
         // Extract text content from both contexts
-        //const savedTextContent = extractTextFromHtml(savedContext);
-        //const currentTextContent = extractTextFromHtml(currentContext);
+        const savedTextContent = extractTextFromHtml(savedContext);
+        const currentTextContent = extractTextFromHtml(currentContext);
 
         // If either extraction failed, fall back to direct comparison
         if (!savedTextContent || !currentTextContent) {
@@ -182,38 +309,7 @@ function isBookmarkStillValidEnhanced(
     }
 }
 
-export function calculateTextSimilarity(text1: string, text2: string): number {
-    if (!text1 || !text2) return 0;
-    if (text1 === text2) return 1;
-
-    const longer = text1.length > text2.length ? text1 : text2;
-    const shorter = text1.length > text2.length ? text2 : text1;
-
-    if (longer.length === 0) return 1;
-
-    const editDistance = levenshteinDistance(longer, shorter);
-    return (longer.length - editDistance) / longer.length;
-}
-
-// Enhanced context comparison for better updating logic
-export function shouldUpdateBookmarkContext(
-    currentContext: string,
-    savedContext: string
-): boolean {
-    if (!currentContext || !savedContext) return false;
-    if (currentContext === savedContext) return false;
-
-    if (currentContext === savedContext) return false;
-
-    // Only update if the content has meaningfully changed
-    // Use similar logic to bookmark validation but more lenient
-    const similarity = calculateTextSimilarity(currentContext, savedContext);
-
-    // Update if similarity is between 30-90% (significant but not complete change)
-    return similarity >= 0.3 && similarity <= 0.9;
-}
-
-// Word-based comparison (forgiving of small text changes)
+// Supporting validation functions
 function hasSignificantWordOverlap(
     original: string,
     current: string,
@@ -293,7 +389,6 @@ function extractSignificantWords(text: string): string[] {
         .filter((word) => word.length > 2 && !stopWords.has(word));
 }
 
-// Levenshtein distance for fuzzy matching
 function isFuzzyMatch(
     original: string,
     current: string,
@@ -308,29 +403,6 @@ function isFuzzyMatch(
     return differenceRatio <= maxDifferenceRatio;
 }
 
-function levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1)
-        .fill(null)
-        .map(() => Array(str1.length + 1).fill(null));
-
-    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
-    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
-
-    for (let j = 1; j <= str2.length; j++) {
-        for (let i = 1; i <= str1.length; i++) {
-            const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-            matrix[j][i] = Math.min(
-                matrix[j][i - 1] + 1, // deletion
-                matrix[j - 1][i] + 1, // insertion
-                matrix[j - 1][i - 1] + indicator // substitution
-            );
-        }
-    }
-
-    return matrix[str2.length][str1.length];
-}
-
-// Key phrase preservation (looks for important phrases)
 function preservesKeyPhrases(
     original: string,
     current: string,
@@ -391,42 +463,6 @@ function extractKeyPhrases(text: string, minLength = 3): string[] {
     }
 
     return phrases;
-}
-
-// Improved getContextAtPosition that handles indicator elements
-export function getContextAtPosition(
-    element: Element,
-    position: number,
-    before: number = 40,
-    after: number = 40
-): string {
-    try {
-        // Create a clone of the element to work with clean text
-        const cleanElement = element.cloneNode(true) as Element;
-
-        // Remove all bookmark indicators from the clone
-        cleanElement
-            .querySelectorAll("[data-bookmark-id]")
-            .forEach((indicator) => {
-                indicator.remove();
-            });
-
-        const fullText = cleanElement.textContent || "";
-
-        if (position > fullText.length) {
-            return "";
-        }
-
-        // Get context text (N chars before and after)
-        const contextStart = Math.max(0, position - before);
-        const contextEnd = Math.min(fullText.length, position + after);
-        const contextText = fullText.substring(contextStart, contextEnd);
-
-        return contextText.trim();
-    } catch (error) {
-        console.error("Error extracting context at position:", error);
-        return "";
-    }
 }
 
 function createBookmarkIndicator(bookmark: Bookmark): HTMLElement {
@@ -506,20 +542,3 @@ function insertIndicatorAtPosition(
     }
 }
 
-export function shouldReRenderBookmarks(bookmarks: Bookmark[]): boolean {
-    const existingIndicators = document.querySelectorAll(
-        `.${styles.indicator}`
-    );
-
-    if (existingIndicators.length !== bookmarks.length) {
-        return true;
-    }
-
-    const existingIds = Array.from(existingIndicators)
-        .map((el) => el.getAttribute("data-bookmark-id"))
-        .filter((id) => id !== null);
-
-    const bookmarkIds = bookmarks.map((b) => b.id);
-
-    return !bookmarkIds.every((id) => existingIds.includes(id));
-}

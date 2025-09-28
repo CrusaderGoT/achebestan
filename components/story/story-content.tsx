@@ -5,12 +5,10 @@ import { StoryContentType } from "@/types/story";
 import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import { IconClock } from "@tabler/icons-react";
 
-import { useBookmarks } from "@/lib/hooks/bookmark/use-bookmarks";
+import { useBookmarkRenderer } from "@/lib/hooks/bookmark/use-bookmark-renderer";
 import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bookmark";
 import {
     forceRenderBookmarkIndicators,
-    renderBookmarkIndicators,
-    RenderResult,
     shouldReRenderBookmarks,
 } from "@/lib/utils/bookmark-renderer";
 import {
@@ -27,7 +25,7 @@ import {
     useMergedRef,
 } from "@mantine/hooks";
 import cx from "clsx";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
@@ -44,20 +42,10 @@ export function StoryContent({
     storyISBN,
 }: StoryContentType) {
     const [dirty, setDirty] = useState(false);
-    const renderAttempts = useRef(0);
-    const maxRenderAttempts = 3;
 
     form.watch("content", ({ dirty }) => {
         setDirty(dirty);
     });
-
-    const {
-        bookmarks,
-        addBookmark,
-        removeBookmark,
-        scrollToBookmark,
-        handleFailedBookmarks,
-    } = useBookmarks(storyISBN);
 
     const {
         showContextMenu,
@@ -67,8 +55,21 @@ export function StoryContent({
         getBookmarkData,
     } = useContextMenuBookmark();
 
+    const {
+        renderBookmarks,
+        scrollToBookmark,
+        bookmarks,
+        addBookmark,
+        removeBookmark,
+        handleFailedBookmarks,
+    } = useBookmarkRenderer({
+        postId: storyISBN,
+        openedContentField,
+    });
+
     const [modalOpened, { open: openModal, close: closeModal }] =
         useDisclosure(false);
+
     const [pendingBookmarkData, setPendingBookmarkData] = useState<{
         containerSelector: string;
         position: number;
@@ -108,53 +109,6 @@ export function StoryContent({
         }, 50);
     };
 
-    const renderBookmarks = useCallback(
-        async (force = false) => {
-            // Don't render when in edit mode
-            if (openedContentField) return;
-
-            if (bookmarks.length === 0) {
-                document
-                    .querySelectorAll("[data-bookmark-id]")
-                    .forEach((el) => el.remove());
-                return;
-            }
-
-            try {
-                let result: RenderResult;
-                if (force) {
-                    renderAttempts.current = 0;
-                    result = forceRenderBookmarkIndicators(
-                        bookmarks,
-                        handleFailedBookmarks
-                    );
-                } else {
-                    result = await renderBookmarkIndicators(
-                        bookmarks,
-                        handleFailedBookmarks
-                    );
-                }
-
-                // Retry failed bookmarks
-                if (
-                    result.failed.length > 0 &&
-                    renderAttempts.current < maxRenderAttempts
-                ) {
-                    renderAttempts.current++;
-                    setTimeout(() => {
-                        forceRenderBookmarkIndicators(
-                            result.failed,
-                            handleFailedBookmarks
-                        );
-                    }, 1000);
-                }
-            } catch (error) {
-                console.error("Error in renderBookmarks:", error);
-            }
-        },
-        [bookmarks, handleFailedBookmarks, openedContentField]
-    );
-
     const handleContextMenuClose = useCallback(() => {
         hideContextMenu();
         if (
@@ -167,119 +121,6 @@ export function StoryContent({
     }, [hideContextMenu, bookmarks, renderBookmarks, openedContentField]);
 
     const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
-
-    // Optimized bookmark rendering effects with post-submission stability
-
-    // Track when we're potentially in a post-submission state
-    const lastEditCloseTime = useRef<number>(0);
-    const isPostSubmission = () =>
-        Date.now() - lastEditCloseTime.current < 2000; // 2 second window
-
-    // Main bookmark rendering effect - handles most scenarios
-    useEffect(() => {
-        if (openedContentField) {
-            // Clear indicators when entering edit mode
-            document
-                .querySelectorAll("[data-bookmark-id]")
-                .forEach((el) => el.remove());
-            return;
-        }
-
-        // Track when edit mode closes (potential form submission)
-        if (!openedContentField) {
-            lastEditCloseTime.current = Date.now();
-        }
-
-        // When not in edit mode, render bookmarks with intelligent checking
-        const baseDelay = isPostSubmission() ? 300 : 150; // Longer delay after potential submission
-
-        const timer = setTimeout(() => {
-            if (
-                shouldReRenderBookmarks(bookmarks) ||
-                renderAttempts.current === 0
-            ) {
-                renderBookmarks(true);
-                renderAttempts.current++;
-
-                // If this is potentially post-submission, do a follow-up check
-                if (isPostSubmission()) {
-                    setTimeout(() => {
-                        if (
-                            shouldReRenderBookmarks(bookmarks) &&
-                            renderAttempts.current < maxRenderAttempts
-                        ) {
-                            renderAttempts.current++;
-                            renderBookmarks(true);
-                        }
-                    }, 500); // Additional check after content settles
-                }
-            }
-        }, baseDelay);
-
-        return () => clearTimeout(timer);
-    }, [bookmarks, renderBookmarks, openedContentField]);
-
-    // Window focus re-render - only when necessary
-    useEffect(() => {
-        const handleFocus = () => {
-            if (
-                document.hasFocus() &&
-                bookmarks.length > 0 &&
-                !openedContentField &&
-                shouldReRenderBookmarks(bookmarks) &&
-                !isPostSubmission() // Avoid interfering with post-submission renders
-            ) {
-                setTimeout(() => renderBookmarks(true), 100);
-            }
-        };
-
-        window.addEventListener("focus", handleFocus);
-        return () => window.removeEventListener("focus", handleFocus);
-    }, [bookmarks, renderBookmarks, openedContentField]);
-
-    // Additional effect to handle revalidation-induced re-renders
-    useEffect(() => {
-        if (openedContentField) return;
-
-        // Listen for potential DOM changes that might affect bookmarks
-        const observer = new MutationObserver((mutations) => {
-            const hasContentChanges = mutations.some(
-                (mutation) =>
-                    mutation.type === "childList" ||
-                    (mutation.type === "characterData" &&
-                        mutation.target.parentElement?.getAttribute(
-                            "data-story-content"
-                        ) === "true")
-            );
-
-            if (hasContentChanges && isPostSubmission()) {
-                // Debounce re-renders during post-submission period
-                setTimeout(() => {
-                    if (
-                        shouldReRenderBookmarks(bookmarks) &&
-                        renderAttempts.current < 5
-                    ) {
-                        renderAttempts.current++;
-                        renderBookmarks(true);
-                    }
-                }, 200);
-            }
-        });
-
-        // Only observe the story content area if it exists
-        const storyContent = document.querySelector(
-            '[data-story-content="true"]'
-        );
-        if (storyContent) {
-            observer.observe(storyContent, {
-                childList: true,
-                subtree: true,
-                characterData: true,
-            });
-        }
-
-        return () => observer.disconnect();
-    }, [bookmarks, renderBookmarks, openedContentField]);
 
     const {
         ref: fullscreenRef,
