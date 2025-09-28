@@ -129,9 +129,16 @@ export function useContextMenuBookmark() {
             const target = event.target as Element;
             if (!target) return;
 
-            // NEW: Check if we're within the story content area first
+            // Check if we're within the story content area first
             if (!isWithinStoryContent(target)) {
                 return; // Don't show context menu if not within story content
+            }
+
+            // Clear existing indicators if present to allow fresh context menu
+            const existingIndicators =
+                document.querySelectorAll("[data-bookmark-id]");
+            if (existingIndicators.length > 0) {
+                existingIndicators.forEach((el) => el.remove());
             }
 
             // Check if we're within a bookmarkable container
@@ -192,9 +199,16 @@ export function useContextMenuBookmark() {
             const target = event.target as Element;
             if (!target) return;
 
-            // NEW: Check if we're within the story content area first
+            // Check if we're within the story content area first
             if (!isWithinStoryContent(target)) {
                 return; // Don't handle touch if not within story content
+            }
+
+            // Clear existing indicators if present to allow fresh context menu
+            const existingIndicators =
+                document.querySelectorAll("[data-bookmark-id]");
+            if (existingIndicators.length > 0) {
+                existingIndicators.forEach((el) => el.remove());
             }
 
             const container = findBookmarkableContainer(target);

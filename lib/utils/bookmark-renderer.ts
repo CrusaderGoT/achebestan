@@ -125,12 +125,10 @@ export function getContextAtPosition(
         // Create a clone of the element to work with clean text
         const cleanElement = element.cloneNode(true) as Element;
 
-        // Remove all bookmark indicators from the clone
-        cleanElement
-            .querySelectorAll("[data-bookmark-id]")
-            .forEach((indicator) => {
-                indicator.remove();
-            });
+        // Remove all bookmark indicators
+        document.querySelectorAll("[data-bookmark-id]").forEach((indicator) => {
+            indicator.remove();
+        });
 
         const fullText = cleanElement.textContent || "";
 

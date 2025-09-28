@@ -12,7 +12,7 @@ import {
 } from "@/lib/utils/bookmark-renderer";
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "@/types/bookmark";
-import { randomId, useLocalStorage } from "@mantine/hooks";
+import { useLocalStorage } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -96,10 +96,25 @@ export function useBookmarkRenderer({
         [setBookmarks]
     );
 
-    // Enhanced handleFailedBookmarks with deduplication
     const handleFailedBookmarks = useCallback(
         (failedBookmarks: Bookmark[]) => {
             if (failedBookmarks.length === 0) return;
+
+            // Create a unique notification ID based on the failed bookmark IDs
+            const failedIds = failedBookmarks
+                .map((b) => b.id)
+                .sort()
+                .join("-");
+            const notificationId = `bookmarks-removed-${failedIds}`;
+
+            // Check if we've already shown this exact notification
+            if (
+                document.querySelector(
+                    `[data-notification-id="${notificationId}"]`
+                )
+            ) {
+                return;
+            }
 
             // Filter out bookmarks we've already notified about
             const newFailedBookmarks = failedBookmarks.filter(
@@ -113,8 +128,8 @@ export function useBookmarkRenderer({
                 notifiedFailedBookmarks.current.add(bookmark.id);
             });
 
-            const failedIds = newFailedBookmarks.map((b) => b.id);
-            removeBulkBookmarks(failedIds);
+            const newFailedIds = newFailedBookmarks.map((b) => b.id);
+            removeBulkBookmarks(newFailedIds);
 
             const message =
                 newFailedBookmarks.length === 1
@@ -122,7 +137,7 @@ export function useBookmarkRenderer({
                     : `${newFailedBookmarks.length} bookmarks were removed because the content has changed.`;
 
             notifications.show({
-                id: randomId(),
+                id: notificationId,
                 title: "Bookmarks Removed",
                 message,
                 color: "yellow",
