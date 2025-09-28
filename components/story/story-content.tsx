@@ -168,7 +168,12 @@ export function StoryContent({
 
     const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
 
-    // Optimized bookmark rendering effects
+    // Optimized bookmark rendering effects with post-submission stability
+
+    // Track when we're potentially in a post-submission state
+    const lastEditCloseTime = useRef<number>(0);
+    const isPostSubmission = () =>
+        Date.now() - lastEditCloseTime.current < 2000; // 2 second window
 
     // Main bookmark rendering effect - handles most scenarios
     useEffect(() => {
@@ -180,16 +185,36 @@ export function StoryContent({
             return;
         }
 
+        // Track when edit mode closes (potential form submission)
+        if (!openedContentField) {
+            lastEditCloseTime.current = Date.now();
+        }
+
         // When not in edit mode, render bookmarks with intelligent checking
+        const baseDelay = isPostSubmission() ? 300 : 150; // Longer delay after potential submission
+
         const timer = setTimeout(() => {
             if (
                 shouldReRenderBookmarks(bookmarks) ||
-                renderAttempts.current < maxRenderAttempts
+                renderAttempts.current === 0
             ) {
                 renderBookmarks(true);
                 renderAttempts.current++;
+
+                // If this is potentially post-submission, do a follow-up check
+                if (isPostSubmission()) {
+                    setTimeout(() => {
+                        if (
+                            shouldReRenderBookmarks(bookmarks) &&
+                            renderAttempts.current < maxRenderAttempts
+                        ) {
+                            renderAttempts.current++;
+                            renderBookmarks(true);
+                        }
+                    }, 500); // Additional check after content settles
+                }
             }
-        }, 150); // Single optimized delay
+        }, baseDelay);
 
         return () => clearTimeout(timer);
     }, [bookmarks, renderBookmarks, openedContentField]);
@@ -201,7 +226,8 @@ export function StoryContent({
                 document.hasFocus() &&
                 bookmarks.length > 0 &&
                 !openedContentField &&
-                shouldReRenderBookmarks(bookmarks)
+                shouldReRenderBookmarks(bookmarks) &&
+                !isPostSubmission() // Avoid interfering with post-submission renders
             ) {
                 setTimeout(() => renderBookmarks(true), 100);
             }
@@ -209,6 +235,50 @@ export function StoryContent({
 
         window.addEventListener("focus", handleFocus);
         return () => window.removeEventListener("focus", handleFocus);
+    }, [bookmarks, renderBookmarks, openedContentField]);
+
+    // Additional effect to handle revalidation-induced re-renders
+    useEffect(() => {
+        if (openedContentField) return;
+
+        // Listen for potential DOM changes that might affect bookmarks
+        const observer = new MutationObserver((mutations) => {
+            const hasContentChanges = mutations.some(
+                (mutation) =>
+                    mutation.type === "childList" ||
+                    (mutation.type === "characterData" &&
+                        mutation.target.parentElement?.getAttribute(
+                            "data-story-content"
+                        ) === "true")
+            );
+
+            if (hasContentChanges && isPostSubmission()) {
+                // Debounce re-renders during post-submission period
+                setTimeout(() => {
+                    if (
+                        shouldReRenderBookmarks(bookmarks) &&
+                        renderAttempts.current < 5
+                    ) {
+                        renderAttempts.current++;
+                        renderBookmarks(true);
+                    }
+                }, 200);
+            }
+        });
+
+        // Only observe the story content area if it exists
+        const storyContent = document.querySelector(
+            '[data-story-content="true"]'
+        );
+        if (storyContent) {
+            observer.observe(storyContent, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+            });
+        }
+
+        return () => observer.disconnect();
     }, [bookmarks, renderBookmarks, openedContentField]);
 
     const {
