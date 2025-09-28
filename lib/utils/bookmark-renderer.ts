@@ -127,9 +127,12 @@ function isBookmarkStillValidEnhanced(
 
         const savedContext = bookmark.contextText.trim();
 
+        const savedTextContent = savedContext;
+        const currentTextContent = currentContext;
+
         // Extract text content from both contexts
-        const savedTextContent = extractTextFromHtml(savedContext);
-        const currentTextContent = extractTextFromHtml(currentContext);
+        //const savedTextContent = extractTextFromHtml(savedContext);
+        //const currentTextContent = extractTextFromHtml(currentContext);
 
         // If either extraction failed, fall back to direct comparison
         if (!savedTextContent || !currentTextContent) {
@@ -179,30 +182,35 @@ function isBookmarkStillValidEnhanced(
     }
 }
 
-// Helper function to extract text content from HTML strings
-function extractTextFromHtml(htmlString: string): string {
-    if (!htmlString) return "";
+export function calculateTextSimilarity(text1: string, text2: string): number {
+    if (!text1 || !text2) return 0;
+    if (text1 === text2) return 1;
 
-    try {
-        // Create a temporary DOM element to parse HTML
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = htmlString;
+    const longer = text1.length > text2.length ? text1 : text2;
+    const shorter = text1.length > text2.length ? text2 : text1;
 
-        // Get text content and clean it up
-        const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    if (longer.length === 0) return 1;
 
-        // Clean up whitespace and normalize
-        return textContent
-            .replace(/\s+/g, " ") // Replace multiple whitespace with single space
-            .trim();
-    } catch {
-        // If HTML parsing fails, try simple regex approach
-        return htmlString
-            .replace(/<[^>]*>/g, " ") // Remove HTML tags
-            .replace(/&[^;]+;/g, " ") // Remove HTML entities (basic)
-            .replace(/\s+/g, " ") // Normalize whitespace
-            .trim();
-    }
+    const editDistance = levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+}
+
+// Enhanced context comparison for better updating logic
+export function shouldUpdateBookmarkContext(
+    currentContext: string,
+    savedContext: string
+): boolean {
+    if (!currentContext || !savedContext) return false;
+    if (currentContext === savedContext) return false;
+
+    if (currentContext === savedContext) return false;
+
+    // Only update if the content has meaningfully changed
+    // Use similar logic to bookmark validation but more lenient
+    const similarity = calculateTextSimilarity(currentContext, savedContext);
+
+    // Update if similarity is between 30-90% (significant but not complete change)
+    return similarity >= 0.3 && similarity <= 0.9;
 }
 
 // Word-based comparison (forgiving of small text changes)
@@ -385,17 +393,33 @@ function extractKeyPhrases(text: string, minLength = 3): string[] {
     return phrases;
 }
 
-function getContextAtPosition(element: Element, position: number): string {
+// Improved getContextAtPosition that handles indicator elements
+export function getContextAtPosition(
+    element: Element,
+    position: number,
+    before: number = 40,
+    after: number = 40
+): string {
     try {
-        const fullText = element.textContent || "";
+        // Create a clone of the element to work with clean text
+        const cleanElement = element.cloneNode(true) as Element;
+
+        // Remove all bookmark indicators from the clone
+        cleanElement
+            .querySelectorAll("[data-bookmark-id]")
+            .forEach((indicator) => {
+                indicator.remove();
+            });
+
+        const fullText = cleanElement.textContent || "";
 
         if (position > fullText.length) {
             return "";
         }
 
-        // Get context text (40 chars before and after) - same as in bookmark creation
-        const contextStart = Math.max(0, position - 40);
-        const contextEnd = Math.min(fullText.length, position + 40);
+        // Get context text (N chars before and after)
+        const contextStart = Math.max(0, position - before);
+        const contextEnd = Math.min(fullText.length, position + after);
         const contextText = fullText.substring(contextStart, contextEnd);
 
         return contextText.trim();

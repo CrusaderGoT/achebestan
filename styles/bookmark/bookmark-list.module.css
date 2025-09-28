@@ -18,8 +18,11 @@
 
 .contextText {
   font-family: var(--mantine-font-family-monospace);
-  background-color: var(--mantine-color-gray-0);
-  padding: 8px;
+  background-color: light-dark(
+    var(--mantine-color-gray-9),
+    var(--mantine-color-gray-0)
+  );
   border-radius: var(--mantine-radius-sm);
   border: 1px solid var(--mantine-color-gray-2);
+  padding: 5px;
 }

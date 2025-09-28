@@ -1,4 +1,5 @@
 // hooks/useContextMenuBookmark.ts
+import { getContextAtPosition } from "@/lib/utils/bookmark-renderer";
 import { useViewportSize, useWindowEvent } from "@mantine/hooks";
 import { useCallback, useRef, useState } from "react";
 
@@ -65,13 +66,10 @@ export function useContextMenuBookmark() {
             beforeRange.setEnd(range.offsetNode, range.offset);
             const position = beforeRange.toString().length;
 
-            // Get context text (40 chars before and after)
-            const fullText = element.textContent || "";
-            const contextStart = Math.max(0, position - 40);
-            const contextEnd = Math.min(fullText.length, position + 40);
-            const contextText = fullText.substring(contextStart, contextEnd);
+            // Get context text
+            const contextText = getContextAtPosition(element, position);
 
-            return { position, contextText: contextText.trim() };
+            return { position, contextText: contextText };
         },
         []
     );

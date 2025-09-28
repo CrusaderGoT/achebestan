@@ -101,7 +101,7 @@ export function BookmarkList({
                                                 align="flex-start"
                                                 gap="xs"
                                             >
-                                                <Box flex={1}>
+                                                <Stack flex={1} gap={2}>
                                                     <Group gap="xs" mb={5}>
                                                         <Badge
                                                             size="xs"
@@ -123,18 +123,21 @@ export function BookmarkList({
                                                         )}
                                                     </Group>
 
-                                                    <Text
-                                                        size="xs"
-                                                        c="dimmed"
-                                                        lineClamp={2}
+                                                    <Box
                                                         className={
                                                             styles.contextText
                                                         }
                                                     >
-                                                        ...
-                                                        {bookmark.contextText}
-                                                        ...
-                                                    </Text>
+                                                        <Text
+                                                            size="xs"
+                                                            c="dimmed"
+                                                            lineClamp={2}
+                                                        >
+                                                            {
+                                                                bookmark.contextText
+                                                            }
+                                                        </Text>
+                                                    </Box>
 
                                                     <Text
                                                         size="xs"
@@ -145,7 +148,7 @@ export function BookmarkList({
                                                             bookmark.timestamp
                                                         ).fromNow()}
                                                     </Text>
-                                                </Box>
+                                                </Stack>
 
                                                 <Group gap={2}>
                                                     <Tooltip label="Go to bookmark">
