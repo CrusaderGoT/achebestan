@@ -368,7 +368,7 @@ export function useBookmarkRenderer({
         const timer = setTimeout(() => {
             if (
                 shouldReRenderBookmarks(bookmarks) ||
-                renderAttempts.current === 0
+                renderAttempts.current < maxRenderAttempts
             ) {
                 renderBookmarks(true);
                 renderAttempts.current++;
@@ -378,7 +378,7 @@ export function useBookmarkRenderer({
                     setTimeout(() => {
                         if (
                             shouldReRenderBookmarks(bookmarks) &&
-                            renderAttempts.current < 3
+                            renderAttempts.current < maxRenderAttempts
                         ) {
                             renderAttempts.current++;
                             renderBookmarks(true);
@@ -429,7 +429,7 @@ export function useBookmarkRenderer({
                 setTimeout(() => {
                     if (
                         shouldReRenderBookmarks(bookmarks) &&
-                        renderAttempts.current < 5
+                        renderAttempts.current < maxRenderAttempts
                     ) {
                         renderAttempts.current++;
                         renderBookmarks(true);
