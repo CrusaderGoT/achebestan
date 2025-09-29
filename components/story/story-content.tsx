@@ -5,7 +5,7 @@ import { StoryContentType } from "@/types/story";
 import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import { IconClock } from "@tabler/icons-react";
 
-import { useBookmarkRenderer } from "@/lib/hooks/bookmark/use-bookmark-renderer";
+import { useBookmark } from "@/lib/hooks/bookmark/use-bookmark";
 import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bookmark";
 import {
     forceRenderBookmarkIndicators,
@@ -62,7 +62,7 @@ export function StoryContent({
         addBookmark,
         removeBookmark,
         handleFailedBookmarks,
-    } = useBookmarkRenderer({
+    } = useBookmark({
         postId: storyISBN,
         openedContentField,
     });

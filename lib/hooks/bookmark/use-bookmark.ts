@@ -1,5 +1,5 @@
 // ==============================================================================
-// hooks/useBookmarkRenderer.ts - React hook with state management and effects
+// hooks/useBookmark.ts - React hook with state management and effects
 // ==============================================================================
 
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/lib/utils/bookmark-renderer";
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "@/types/bookmark";
-import { useLocalStorage } from "@mantine/hooks";
+import { useCounter, useLocalStorage } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -21,25 +21,24 @@ interface UseBookmarkRendererProps {
     openedContentField: boolean;
 }
 
-export function useBookmarkRenderer({
+export function useBookmark({
     postId,
     openedContentField,
 }: UseBookmarkRendererProps) {
-    const renderAttempts = useRef(0);
-    const maxRenderAttempts = 3;
     const notifiedFailedBookmarks = useRef<Set<string>>(new Set());
     const lastEditCloseTime = useRef<number>(0);
 
     const isPostSubmission = () =>
         Date.now() - lastEditCloseTime.current < 2000;
 
-    const resetrenderAttempts = useCallback(() => {
-        renderAttempts.current = 0;
-    }, []);
-
-    const incrementrenderAttempts = useCallback(() => {
-        renderAttempts.current++;
-    }, []);
+    const maxRenderAttempts = 3;
+    const [
+        renderAttempts,
+        { increment: incrementrenderAttempts, reset: resetrenderAttempts },
+    ] = useCounter(0, {
+        max: 3,
+        min: 0,
+    });
 
     const storageKey = postId ? `bookmarks-${postId}` : "bookmarks";
     const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>({
@@ -121,7 +120,7 @@ export function useBookmarkRenderer({
                 (bookmark) => !notifiedFailedBookmarks.current.has(bookmark.id)
             );
 
-            if (newFailedBookmarks.length === 0) return;
+            if (newFailedBookmarks.length < 1) return;
 
             // Track these bookmarks as notified
             newFailedBookmarks.forEach((bookmark) => {
@@ -153,7 +152,7 @@ export function useBookmarkRenderer({
             // Don't render when in edit mode
             if (openedContentField) return;
 
-            if (bookmarks.length === 0) {
+            if (bookmarks.length < 1) {
                 // Clear both indicators and notification tracking when no bookmarks
                 document
                     .querySelectorAll("[data-bookmark-id]")
@@ -180,7 +179,7 @@ export function useBookmarkRenderer({
                 // and ONLY if we haven't already notified about these bookmarks
                 if (
                     result.failed.length > 0 &&
-                    renderAttempts.current < maxRenderAttempts
+                    renderAttempts < maxRenderAttempts
                 ) {
                     const unnotifiedFailed = result.failed.filter(
                         (bookmark) =>
@@ -204,6 +203,7 @@ export function useBookmarkRenderer({
             resetrenderAttempts,
             incrementrenderAttempts,
             handleFailedBookmarks,
+            renderAttempts,
         ]
     );
 
@@ -368,19 +368,19 @@ export function useBookmarkRenderer({
         const timer = setTimeout(() => {
             if (
                 shouldReRenderBookmarks(bookmarks) ||
-                renderAttempts.current < maxRenderAttempts
+                renderAttempts < maxRenderAttempts
             ) {
                 renderBookmarks(true);
-                renderAttempts.current++;
+                incrementrenderAttempts();
 
                 // If this is potentially post-submission, do a follow-up check
                 if (isPostSubmission()) {
                     setTimeout(() => {
                         if (
                             shouldReRenderBookmarks(bookmarks) &&
-                            renderAttempts.current < maxRenderAttempts
+                            renderAttempts < maxRenderAttempts
                         ) {
-                            renderAttempts.current++;
+                            incrementrenderAttempts();
                             renderBookmarks(true);
                         }
                     }, 500); // Additional check after content settles
@@ -389,7 +389,13 @@ export function useBookmarkRenderer({
         }, baseDelay);
 
         return () => clearTimeout(timer);
-    }, [bookmarks, renderBookmarks, openedContentField]);
+    }, [
+        bookmarks,
+        renderBookmarks,
+        openedContentField,
+        renderAttempts,
+        incrementrenderAttempts,
+    ]);
 
     // Window focus re-render - only when necessary
     useEffect(() => {
@@ -429,9 +435,9 @@ export function useBookmarkRenderer({
                 setTimeout(() => {
                     if (
                         shouldReRenderBookmarks(bookmarks) &&
-                        renderAttempts.current < maxRenderAttempts
+                        renderAttempts < maxRenderAttempts
                     ) {
-                        renderAttempts.current++;
+                        incrementrenderAttempts();
                         renderBookmarks(true);
                     }
                 }, 200);
@@ -451,7 +457,13 @@ export function useBookmarkRenderer({
         }
 
         return () => observer.disconnect();
-    }, [bookmarks, renderBookmarks, openedContentField]);
+    }, [
+        bookmarks,
+        renderBookmarks,
+        openedContentField,
+        renderAttempts,
+        incrementrenderAttempts,
+    ]);
 
     // Clean up notification tracking when bookmarks change significantly
     useEffect(() => {
