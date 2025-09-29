@@ -62,7 +62,6 @@ export function FavouriteStory({
             onClick={handleToggleFavourite}
             variant="subtle"
             color="red"
-            style={{ minWidth: "110px" }}
             loading={isPending}
             disabled={isInitializing}
         >
