@@ -204,13 +204,6 @@ export function useContextMenuBookmark() {
                 return; // Don't handle touch if not within story content
             }
 
-            // Clear existing indicators if present to allow fresh context menu
-            const existingIndicators =
-                document.querySelectorAll("[data-bookmark-id]");
-            if (existingIndicators.length > 0) {
-                existingIndicators.forEach((el) => el.remove());
-            }
-
             const container = findBookmarkableContainer(target);
             if (!container) return;
 
