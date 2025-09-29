@@ -222,7 +222,7 @@ export function StoryContent({
                         fullscreen={fullscreen}
                     />
                     {fullscreen && !openedContentField && (
-                        <Group gap="xl">
+                        <Stack gap="xl">
                             <StoryTableOfContents
                                 scrollAreaTocRef={scrollAreaTocRef}
                                 content={sanitizedContent}
@@ -234,7 +234,7 @@ export function StoryContent({
                                 onBookmarkClick={scrollToBookmark}
                                 onBookmarkRemove={handleBookmarkRemove}
                             />
-                        </Group>
+                        </Stack>
                     )}
                 </Stack>
 
