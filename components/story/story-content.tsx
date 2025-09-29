@@ -1,10 +1,5 @@
 "use client";
-
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
-import { StoryContentType } from "@/types/story";
-import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
-import { IconClock } from "@tabler/icons-react";
-
 import { useBookmark } from "@/lib/hooks/bookmark/use-bookmark";
 import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bookmark";
 import {
@@ -18,14 +13,17 @@ import {
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
+import { StoryContentType } from "@/types/story";
+import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import {
     useDisclosure,
     useElementSize,
     useFullscreen,
     useMergedRef,
 } from "@mantine/hooks";
+import { IconClock } from "@tabler/icons-react";
 import cx from "clsx";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
@@ -69,58 +67,77 @@ export function StoryContent({
 
     const [modalOpened, { open: openModal, close: closeModal }] =
         useDisclosure(false);
-
     const [pendingBookmarkData, setPendingBookmarkData] = useState<{
         containerSelector: string;
         position: number;
         contextText: string;
     } | null>(null);
 
-    const handleAddBookmark = () => {
+    const handleAddBookmark = useCallback(() => {
         const bookmarkData = getBookmarkData();
         if (!bookmarkData) return;
 
         setPendingBookmarkData(bookmarkData);
         openModal();
         hideContextMenu();
-    };
+    }, [getBookmarkData, openModal, hideContextMenu]);
 
-    const handleSaveBookmark = (note: string) => {
-        if (!pendingBookmarkData) return;
+    const handleSaveBookmark = useCallback(
+        (note: string) => {
+            if (!pendingBookmarkData) return;
 
-        addBookmark({
-            containerSelector: pendingBookmarkData.containerSelector,
-            position: pendingBookmarkData.position,
-            contextText: pendingBookmarkData.contextText,
-            userNote: note || undefined,
-        });
+            addBookmark({
+                containerSelector: pendingBookmarkData.containerSelector,
+                position: pendingBookmarkData.position,
+                contextText: pendingBookmarkData.contextText,
+                userNote: note || undefined,
+            });
 
-        setPendingBookmarkData(null);
-    };
+            setPendingBookmarkData(null);
+        },
+        [pendingBookmarkData, addBookmark]
+    );
 
-    const handleBookmarkRemove = (id: string) => {
-        removeBookmark(id);
-        const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
-        setTimeout(() => {
-            forceRenderBookmarkIndicators(
-                remainingBookmarks,
-                handleFailedBookmarks
-            );
-        }, 50);
-    };
+    const handleBookmarkRemove = useCallback(
+        (id: string) => {
+            removeBookmark(id);
+
+            const remainingBookmarks = bookmarks.filter((b) => b.id !== id);
+
+            // Use requestAnimationFrame for smoother DOM updates
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    forceRenderBookmarkIndicators(
+                        remainingBookmarks,
+                        handleFailedBookmarks
+                    );
+                }, 50);
+            });
+        },
+        [bookmarks, removeBookmark, handleFailedBookmarks]
+    );
 
     const handleContextMenuClose = useCallback(() => {
         hideContextMenu();
+
         if (
             !openedContentField &&
             bookmarks.length > 0 &&
             shouldReRenderBookmarks(bookmarks)
         ) {
-            setTimeout(() => renderBookmarks(true), 100);
+            requestAnimationFrame(() => {
+                setTimeout(() => renderBookmarks(true), 100);
+            });
         }
     }, [hideContextMenu, bookmarks, renderBookmarks, openedContentField]);
 
-    const timeToRead = formatEstimatedReadingTime(estimateReadingTime(content));
+    // Memoize expensive calculations
+    const timeToRead = useMemo(
+        () => formatEstimatedReadingTime(estimateReadingTime(content)),
+        [content]
+    );
+
+    const sanitizedContent = useMemo(() => sanitizeHTML(content), [content]);
 
     const {
         ref: fullscreenRef,
@@ -135,8 +152,18 @@ export function StoryContent({
         scrollAreaTocRef
     );
 
+    const isAuthor = useMemo(
+        () => storyAuthorId === session.data?.user.id,
+        [storyAuthorId, session.data?.user.id]
+    );
+
+    const shouldShowEditContent = useMemo(
+        () => openedContentField && isAuthor,
+        [openedContentField, isAuthor]
+    );
+
     return (
-        <Stack className={publicStyles.relative} gap={"xs"}>
+        <Stack className={publicStyles.relative} gap="xs">
             <BookmarkContextMenu
                 visible={showContextMenu}
                 position={menuPosition}
@@ -154,11 +181,10 @@ export function StoryContent({
                 <Group justify="space-between">
                     <StoryTableOfContents
                         scrollAreaTocRef={scrollAreaTocRef}
-                        content={sanitizeHTML(content)}
+                        content={sanitizedContent}
                         height={height}
                         width={width}
                     />
-
                     <Badge
                         size="xs"
                         variant="subtle"
@@ -167,7 +193,6 @@ export function StoryContent({
                     >
                         {timeToRead}
                     </Badge>
-
                     <BookmarkList
                         bookmarks={bookmarks}
                         onBookmarkClick={scrollToBookmark}
@@ -182,7 +207,7 @@ export function StoryContent({
                 className={cx(publicStyles.relative)}
             >
                 <Stack
-                    gap={"xs"}
+                    gap="xs"
                     justify="space-around"
                     className={cx(storypageStyles.storyContentBtns)}
                 >
@@ -196,16 +221,14 @@ export function StoryContent({
                         toggleFullscreen={toggleFullscreen}
                         fullscreen={fullscreen}
                     />
-
                     {fullscreen && !openedContentField && (
-                        <Group gap={"xl"}>
+                        <Group gap="xl">
                             <StoryTableOfContents
                                 scrollAreaTocRef={scrollAreaTocRef}
-                                content={sanitizeHTML(content)}
+                                content={sanitizedContent}
                                 height={height}
                                 width={width}
                             />
-
                             <BookmarkList
                                 bookmarks={bookmarks}
                                 onBookmarkClick={scrollToBookmark}
@@ -225,7 +248,7 @@ export function StoryContent({
                 >
                     <Box
                         dangerouslySetInnerHTML={{
-                            __html: sanitizeHTML(content),
+                            __html: sanitizedContent,
                         }}
                         className={cx(
                             storypageStyles.storyContent,
@@ -239,13 +262,10 @@ export function StoryContent({
                             msUserSelect: "text",
                         }}
                     />
-
                     <UpdateStoryContent
                         className={cx(
                             storypageStyles.storyContent,
-                            (!openedContentField ||
-                                storyAuthorId !== session.data?.user.id) &&
-                                publicStyles.hide
+                            !shouldShowEditContent && publicStyles.hide
                         )}
                     />
                 </ScrollArea>

@@ -1,7 +1,12 @@
-// hooks/useContextMenuBookmark.ts
+// hooks/useContextMenuBookmark.ts - Improved with better event handling
 import { getContextAtPosition } from "@/lib/utils/bookmark-renderer";
-import { useViewportSize, useWindowEvent } from "@mantine/hooks";
-import { useCallback, useRef, useState } from "react";
+import { useViewportSize } from "@mantine/hooks";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const LONG_PRESS_DURATION = 500;
+const TOUCH_MOVE_THRESHOLD = 10;
+const MENU_WIDTH = 200;
+const MENU_HEIGHT = 120;
 
 export function useContextMenuBookmark() {
     const [showContextMenu, setShowContextMenu] = useState(false);
@@ -18,13 +23,14 @@ export function useContextMenuBookmark() {
 
     const { width: viewportWidth, height: viewportHeight } = useViewportSize();
     const contextMenuRef = useRef<HTMLDivElement>(null);
-    const longPressTimerRef = useRef<NodeJS.Timeout>(null);
+    const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
     const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
     const isLongPressRef = useRef(false);
 
     const generateSelector = useCallback((element: Element): string => {
         const tagName = element.tagName.toLowerCase();
         const id = element.id;
+
         if (id) return `#${id}`;
 
         const classes = Array.from(element.classList);
@@ -32,11 +38,11 @@ export function useContextMenuBookmark() {
             return `${tagName}.${classes.join(".")}`;
         }
 
-        // Use data attributes
         const dataAttrs = Array.from(element.attributes)
             .filter((attr) => attr.name.startsWith("data-"))
             .map((attr) => `[${attr.name}="${attr.value}"]`)
             .join("");
+
         if (dataAttrs) return `${tagName}${dataAttrs}`;
 
         // nth-of-type fallback
@@ -50,67 +56,59 @@ export function useContextMenuBookmark() {
                 parent
             )} > ${tagName}:nth-of-type(${index})`;
         }
+
         return tagName;
     }, []);
 
     const getTextPositionFromPoint = useCallback(
         (element: Element, clientX: number, clientY: number) => {
             const range = document.caretPositionFromPoint(clientX, clientY);
+
             if (!range || !element.contains(range.offsetNode)) {
                 return { position: 0, contextText: "" };
             }
 
-            // Calculate position within the element's text content
             const beforeRange = document.createRange();
             beforeRange.setStart(element, 0);
             beforeRange.setEnd(range.offsetNode, range.offset);
             const position = beforeRange.toString().length;
 
-            // Get context text
             const contextText = getContextAtPosition(element, position);
 
-            return { position, contextText: contextText };
+            return { position, contextText };
         },
         []
     );
 
-    // NEW: Check if the target is within the story content area
     const isWithinStoryContent = useCallback((target: Element): boolean => {
         let current: Element | null = target;
-
         while (current) {
-            // Check by data attribute
             if (current.getAttribute("data-story-content") === "true") {
                 return true;
             }
-
             current = current.parentElement;
         }
-
         return false;
     }, []);
 
     const findBookmarkableContainer = useCallback(
         (target: Element): Element | null => {
-            let current: Element | null = target;
+            const validTags = new Set([
+                "P",
+                "H1",
+                "H2",
+                "H3",
+                "H4",
+                "H5",
+                "H6",
+                "DIV",
+                "ARTICLE",
+                "SECTION",
+            ]);
 
+            let current: Element | null = target;
             while (current) {
-                const tagName = current.tagName;
-                if (
-                    [
-                        "P",
-                        "H1",
-                        "H2",
-                        "H3",
-                        "H4",
-                        "H5",
-                        "H6",
-                        "DIV",
-                        "ARTICLE",
-                        "SECTION",
-                    ].includes(tagName)
-                ) {
-                    // Check if this element has meaningful text content
+                if (validTags.has(current.tagName)) {
                     const textContent = current.textContent?.trim();
                     if (textContent && textContent.length > 10) {
                         return current;
@@ -118,58 +116,40 @@ export function useContextMenuBookmark() {
                 }
                 current = current.parentElement;
             }
-
             return null;
         },
         []
     );
 
-    const handleContextMenu = useCallback(
-        (event: MouseEvent) => {
-            const target = event.target as Element;
-            if (!target) return;
+    const calculateMenuPosition = useCallback(
+        (clientX: number, clientY: number) => {
+            let x = clientX;
+            let y = clientY;
 
-            // Check if we're within the story content area first
-            if (!isWithinStoryContent(target)) {
-                return; // Don't show context menu if not within story content
+            if (x + MENU_WIDTH > viewportWidth) {
+                x = viewportWidth - MENU_WIDTH - 10;
             }
 
-            // Clear existing indicators if present to allow fresh context menu
-            const existingIndicators =
-                document.querySelectorAll("[data-bookmark-id]");
-            if (existingIndicators.length > 0) {
-                existingIndicators.forEach((el) => el.remove());
+            if (y + MENU_HEIGHT > viewportHeight) {
+                y = Math.max(10, y - MENU_HEIGHT);
             }
 
-            // Check if we're within a bookmarkable container
-            const container = findBookmarkableContainer(target);
-            if (!container) return;
+            return { x, y };
+        },
+        [viewportWidth, viewportHeight]
+    );
 
-            event.preventDefault();
-            event.stopPropagation();
-
+    const showMenu = useCallback(
+        (container: Element, clientX: number, clientY: number) => {
             const { position, contextText } = getTextPositionFromPoint(
                 container,
-                event.clientX,
-                event.clientY
+                clientX,
+                clientY
             );
 
             if (!contextText) return;
 
-            // Calculate menu position
-            let x = event.clientX;
-            let y = event.clientY;
-
-            // Keep menu within viewport
-            const menuWidth = 200; // Approximate menu width
-            const menuHeight = 120; // Approximate menu height
-
-            if (x + menuWidth > viewportWidth) {
-                x = viewportWidth - menuWidth - 10;
-            }
-            if (y + menuHeight > viewportHeight) {
-                y = y - menuHeight;
-            }
+            const menuPos = calculateMenuPosition(clientX, clientY);
 
             setTargetInfo({
                 element: container,
@@ -177,31 +157,45 @@ export function useContextMenuBookmark() {
                 contextText,
                 containerSelector: generateSelector(container),
             });
-            setMenuPosition({ x, y });
+            setMenuPosition(menuPos);
             setShowContextMenu(true);
         },
-        [
-            isWithinStoryContent,
-            findBookmarkableContainer,
-            getTextPositionFromPoint,
-            generateSelector,
-            viewportWidth,
-            viewportHeight,
-        ]
+        [getTextPositionFromPoint, calculateMenuPosition, generateSelector]
     );
 
-    // Touch handlers for long press
+    const handleContextMenu = useCallback(
+        (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target || !isWithinStoryContent(target)) {
+                return;
+            }
+
+            const container = findBookmarkableContainer(target);
+            if (!container) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            showMenu(container, event.clientX, event.clientY);
+        },
+        [isWithinStoryContent, findBookmarkableContainer, showMenu]
+    );
+
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
     const handleTouchStart = useCallback(
         (event: TouchEvent) => {
             const touch = event.touches[0];
             if (!touch) return;
 
             const target = event.target as Element;
-            if (!target) return;
-
-            // Check if we're within the story content area first
-            if (!isWithinStoryContent(target)) {
-                return; // Don't handle touch if not within story content
+            if (!target || !isWithinStoryContent(target)) {
+                return;
             }
 
             const container = findBookmarkableContainer(target);
@@ -210,96 +204,68 @@ export function useContextMenuBookmark() {
             touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
             isLongPressRef.current = false;
 
-            // Clear any existing timer
-            if (longPressTimerRef.current) {
-                clearTimeout(longPressTimerRef.current);
-            }
+            clearLongPressTimer();
 
-            // Set long press timer
             longPressTimerRef.current = setTimeout(() => {
                 if (!touchStartPosRef.current) return;
 
                 isLongPressRef.current = true;
 
-                // Trigger haptic feedback if available
+                // Haptic feedback
                 if ("vibrate" in navigator) {
                     navigator.vibrate(50);
                 }
 
-                const { position, contextText } = getTextPositionFromPoint(
+                showMenu(
                     container,
                     touchStartPosRef.current.x,
                     touchStartPosRef.current.y
                 );
-
-                if (!contextText) return;
-
-                // Calculate menu position for touch
-                let x = touchStartPosRef.current.x;
-                let y = touchStartPosRef.current.y;
-
-                const menuWidth = 200;
-                const menuHeight = 120;
-
-                if (x + menuWidth > viewportWidth) {
-                    x = viewportWidth - menuWidth - 10;
-                }
-                if (y + menuHeight > viewportHeight) {
-                    y = y - menuHeight;
-                }
-
-                setTargetInfo({
-                    element: container,
-                    textPosition: position,
-                    contextText,
-                    containerSelector: generateSelector(container),
-                });
-                setMenuPosition({ x, y });
-                setShowContextMenu(true);
-            }, 500); // 500ms long press duration
+            }, LONG_PRESS_DURATION);
         },
         [
             isWithinStoryContent,
             findBookmarkableContainer,
-            getTextPositionFromPoint,
-            generateSelector,
-            viewportWidth,
-            viewportHeight,
+            clearLongPressTimer,
+            showMenu,
         ]
     );
 
-    const handleTouchMove = useCallback((event: TouchEvent) => {
-        if (!touchStartPosRef.current) return;
+    const handleTouchMove = useCallback(
+        (event: TouchEvent) => {
+            if (!touchStartPosRef.current) return;
 
-        const touch = event.touches[0];
-        if (!touch) return;
+            const touch = event.touches[0];
+            if (!touch) return;
 
-        // Check if finger moved too much (cancel long press)
-        const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x);
-        const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y);
+            const deltaX = Math.abs(touch.clientX - touchStartPosRef.current.x);
+            const deltaY = Math.abs(touch.clientY - touchStartPosRef.current.y);
 
-        if (deltaX > 10 || deltaY > 10) {
-            if (longPressTimerRef.current) {
-                clearTimeout(longPressTimerRef.current);
+            if (
+                deltaX > TOUCH_MOVE_THRESHOLD ||
+                deltaY > TOUCH_MOVE_THRESHOLD
+            ) {
+                clearLongPressTimer();
+                touchStartPosRef.current = null;
             }
+        },
+        [clearLongPressTimer]
+    );
+
+    const handleTouchEnd = useCallback(
+        (event: TouchEvent) => {
+            clearLongPressTimer();
+
+            if (isLongPressRef.current) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
             touchStartPosRef.current = null;
-        }
-    }, []);
-
-    const handleTouchEnd = useCallback((event: TouchEvent) => {
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-        }
-
-        // Prevent default click if it was a long press
-        if (isLongPressRef.current) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        touchStartPosRef.current = null;
-        isLongPressRef.current = false;
-    }, []);
+            isLongPressRef.current = false;
+        },
+        [clearLongPressTimer]
+    );
 
     const hideContextMenu = useCallback(() => {
         setShowContextMenu(false);
@@ -307,7 +273,6 @@ export function useContextMenuBookmark() {
         setTargetInfo(null);
     }, []);
 
-    // Close menu when clicking outside
     const handleClickOutside = useCallback(
         (event: MouseEvent) => {
             if (
@@ -321,7 +286,6 @@ export function useContextMenuBookmark() {
         [showContextMenu, hideContextMenu]
     );
 
-    // Handle escape key
     const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
             if (event.key === "Escape" && showContextMenu) {
@@ -332,12 +296,38 @@ export function useContextMenuBookmark() {
     );
 
     // Set up event listeners
-    useWindowEvent("contextmenu", handleContextMenu);
-    useWindowEvent("touchstart", handleTouchStart, { passive: false });
-    useWindowEvent("touchmove", handleTouchMove, { passive: false });
-    useWindowEvent("touchend", handleTouchEnd, { passive: false });
-    useWindowEvent("click", handleClickOutside);
-    useWindowEvent("keydown", handleKeyDown);
+    useEffect(() => {
+        document.addEventListener("contextmenu", handleContextMenu);
+        document.addEventListener("touchstart", handleTouchStart, {
+            passive: false,
+        });
+        document.addEventListener("touchmove", handleTouchMove, {
+            passive: false,
+        });
+        document.addEventListener("touchend", handleTouchEnd, {
+            passive: false,
+        });
+        document.addEventListener("click", handleClickOutside);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("contextmenu", handleContextMenu);
+            document.removeEventListener("touchstart", handleTouchStart);
+            document.removeEventListener("touchmove", handleTouchMove);
+            document.removeEventListener("touchend", handleTouchEnd);
+            document.removeEventListener("click", handleClickOutside);
+            document.removeEventListener("keydown", handleKeyDown);
+            clearLongPressTimer();
+        };
+    }, [
+        handleContextMenu,
+        handleTouchStart,
+        handleTouchMove,
+        handleTouchEnd,
+        handleClickOutside,
+        handleKeyDown,
+        clearLongPressTimer,
+    ]);
 
     const getBookmarkData = useCallback(() => {
         if (!targetInfo) return null;

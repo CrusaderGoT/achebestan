@@ -1,7 +1,6 @@
 // ==============================================================================
-// utils/bookmarkRenderer.ts - Pure utility functions and DOM manipulation
+// utils/bookmark-renderer.ts - Fixed logic bugs and improved performance
 // ==============================================================================
-
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "../../types/bookmark";
 
@@ -12,6 +11,10 @@ export interface RenderResult {
     failed: Bookmark[];
 }
 
+const DEBOUNCE_DELAY = 50;
+const CONTEXT_BEFORE = 40;
+const CONTEXT_AFTER = 40;
+
 // Main rendering functions
 export function renderBookmarkIndicators(
     bookmarks: Bookmark[],
@@ -19,16 +22,20 @@ export function renderBookmarkIndicators(
 ): Promise<RenderResult> {
     if (renderTimeout) {
         clearTimeout(renderTimeout);
+        renderTimeout = null;
     }
 
     return new Promise((resolve) => {
         renderTimeout = setTimeout(() => {
+            renderTimeout = null;
             const result = _renderBookmarkIndicators(bookmarks);
+
             if (result.failed.length > 0 && onFailedBookmarksDetected) {
                 onFailedBookmarksDetected(result.failed);
             }
+
             resolve(result);
-        }, 50);
+        }, DEBOUNCE_DELAY);
     });
 }
 
@@ -38,11 +45,15 @@ export function forceRenderBookmarkIndicators(
 ): RenderResult {
     if (renderTimeout) {
         clearTimeout(renderTimeout);
+        renderTimeout = null;
     }
+
     const result = _renderBookmarkIndicators(bookmarks);
+
     if (result.failed.length > 0 && onFailedBookmarksDetected) {
         onFailedBookmarksDetected(result.failed);
     }
+
     return result;
 }
 
@@ -70,12 +81,12 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
                 const container = document.querySelector(
                     bookmark.containerSelector
                 );
+
                 if (!container) {
                     result.failed.push(bookmark);
                     return;
                 }
 
-                // Validate bookmark using enhanced HTML-aware logic
                 if (!isBookmarkStillValidEnhanced(container, bookmark)) {
                     result.failed.push(bookmark);
                     return;
@@ -108,7 +119,6 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
     } catch (error) {
         console.error("Error in renderBookmarkIndicators:", error);
         result.failed = [...bookmarks];
-        result.successful = [];
     }
 
     return result;
@@ -118,17 +128,18 @@ function _renderBookmarkIndicators(bookmarks: Bookmark[]): RenderResult {
 export function getContextAtPosition(
     element: Element,
     position: number,
-    before: number = 40,
-    after: number = 40
+    before: number = CONTEXT_BEFORE,
+    after: number = CONTEXT_AFTER
 ): string {
     try {
-        // Create a clone of the element to work with clean text
         const cleanElement = element.cloneNode(true) as Element;
 
-        // Remove all bookmark indicators
-        document.querySelectorAll("[data-bookmark-id]").forEach((indicator) => {
-            indicator.remove();
-        });
+        // Remove bookmark indicators from the clone
+        cleanElement
+            .querySelectorAll("[data-bookmark-id]")
+            .forEach((indicator) => {
+                indicator.remove();
+            });
 
         const fullText = cleanElement.textContent || "";
 
@@ -136,7 +147,6 @@ export function getContextAtPosition(
             return "";
         }
 
-        // Get context text (N chars before and after)
         const contextStart = Math.max(0, position - before);
         const contextEnd = Math.min(fullText.length, position + after);
         const contextText = fullText.substring(contextStart, contextEnd);
@@ -148,7 +158,7 @@ export function getContextAtPosition(
     }
 }
 
-// Text comparison utilities
+// Text comparison utilities - FIXED: removed duplicate comparison
 export function shouldUpdateBookmarkContext(
     currentContext: string,
     savedContext: string
@@ -156,10 +166,6 @@ export function shouldUpdateBookmarkContext(
     if (!currentContext || !savedContext) return false;
     if (currentContext === savedContext) return false;
 
-    if (currentContext === savedContext) return false;
-
-    // Only update if the content has meaningfully changed
-    // Use similar logic to bookmark validation but more lenient
     const similarity = calculateTextSimilarity(currentContext, savedContext);
 
     // Update if similarity is between 30-90% (significant but not complete change)
@@ -182,7 +188,7 @@ export function calculateTextSimilarity(text1: string, text2: string): number {
 export function levenshteinDistance(str1: string, str2: string): number {
     const matrix = Array(str2.length + 1)
         .fill(null)
-        .map(() => Array(str1.length + 1).fill(null));
+        .map(() => Array(str1.length + 1).fill(0));
 
     for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
@@ -210,13 +216,13 @@ export function shouldReRenderBookmarks(bookmarks: Bookmark[]): boolean {
         return true;
     }
 
-    const existingIds = Array.from(existingIndicators)
-        .map((el) => el.getAttribute("data-bookmark-id"))
-        .filter((id) => id !== null);
+    const existingIds = new Set(
+        Array.from(existingIndicators)
+            .map((el) => el.getAttribute("data-bookmark-id"))
+            .filter((id): id is string => id !== null)
+    );
 
-    const bookmarkIds = bookmarks.map((b) => b.id);
-
-    return !bookmarkIds.every((id) => existingIds.includes(id));
+    return !bookmarks.every((b) => existingIds.has(b.id));
 }
 
 // Enhanced HTML-aware bookmark validation
@@ -236,17 +242,14 @@ function isBookmarkStillValidEnhanced(
 
         const savedContext = bookmark.contextText.trim();
 
-        // If either extraction failed, fall back to direct comparison
         if (!savedContext || !currentContext) {
             return savedContext === currentContext;
         }
 
-        // If exact text match, definitely valid
         if (savedContext === currentContext) {
             return true;
         }
 
-        // If one text contains the other, probably valid (handles expansions/contractions)
         if (
             currentContext.includes(savedContext) ||
             savedContext.includes(currentContext)
@@ -254,20 +257,21 @@ function isBookmarkStillValidEnhanced(
             return true;
         }
 
-        // For very short contexts, be more strict but allow minor changes
+        // For very short contexts, be more strict
         if (savedContext.length < 15) {
             const distance = levenshteinDistance(savedContext, currentContext);
-            return distance <= Math.max(2, savedContext.length * 0.3); // Allow 30% changes for short text
+            return (
+                distance <= Math.max(2, Math.floor(savedContext.length * 0.3))
+            );
         }
 
-        // For longer contexts, try multiple strategies - require at least one to pass
+        // For longer contexts, use multiple validation strategies
         const strategies = [
-            () => hasSignificantWordOverlap(savedContext, currentContext, 0.6), // 60% word overlap
-            () => isFuzzyMatch(savedContext, currentContext, 0.35), // Allow 35% character differences
-            () => preservesKeyPhrases(savedContext, currentContext, 0.5), // 50% key phrases preserved
+            () => hasSignificantWordOverlap(savedContext, currentContext, 0.6),
+            () => isFuzzyMatch(savedContext, currentContext, 0.35),
+            () => preservesKeyPhrases(savedContext, currentContext, 0.5),
         ];
 
-        // At least one strategy must pass for longer content
         return strategies.some((strategy) => strategy());
     } catch (error) {
         console.error(`Error validating bookmark ${bookmark.id}:`, error);
@@ -289,7 +293,6 @@ function hasSignificantWordOverlap(
     const commonWords = originalWords.filter((word) =>
         currentWords.some(
             (currentWord) =>
-                // Allow partial word matches and stemming-like comparison
                 currentWord.includes(word) ||
                 word.includes(currentWord) ||
                 (word.length > 4 &&
@@ -303,7 +306,6 @@ function hasSignificantWordOverlap(
 }
 
 function extractSignificantWords(text: string): string[] {
-    // Remove common stop words and extract meaningful words
     const stopWords = new Set([
         "the",
         "a",
@@ -369,6 +371,7 @@ function isFuzzyMatch(
     return differenceRatio <= maxDifferenceRatio;
 }
 
+// FIXED: Corrected logic to compare against current text, not original phrases
 function preservesKeyPhrases(
     original: string,
     current: string,
@@ -377,40 +380,40 @@ function preservesKeyPhrases(
     const keyPhrases = extractKeyPhrases(original);
 
     if (keyPhrases.length === 0) {
-        // Fallback to simple substring check for very short contexts
         return (
             current.toLowerCase().includes(original.toLowerCase()) ||
             original.toLowerCase().includes(current.toLowerCase())
         );
     }
 
-    // Check if most key phrases are still present (with fuzzy matching)
-    const preservedPhrases = keyPhrases.filter(
-        (phrase) =>
-            current.toLowerCase().includes(phrase.toLowerCase()) ||
-            // Allow slight variations in phrases
-            keyPhrases.some(
-                (currentPhrase) =>
-                    levenshteinDistance(
-                        phrase.toLowerCase(),
-                        currentPhrase.toLowerCase()
-                    ) <= 2
-            )
-    );
+    const currentLower = current.toLowerCase();
+    const preservedPhrases = keyPhrases.filter((phrase) => {
+        const phraseLower = phrase.toLowerCase();
+
+        // Check if phrase exists in current text
+        if (currentLower.includes(phraseLower)) {
+            return true;
+        }
+
+        // Check for fuzzy match in current text
+        const currentWords = current.split(/\s+/);
+        return currentWords.some(
+            (word) => levenshteinDistance(phraseLower, word.toLowerCase()) <= 2
+        );
+    });
 
     return preservedPhrases.length >= Math.ceil(keyPhrases.length * threshold);
 }
 
 function extractKeyPhrases(text: string, minLength = 3): string[] {
-    // Extract phrases of 2-4 words that might be important
     const words = text
         .replace(/[^\w\s]/g, " ")
         .split(/\s+/)
         .filter((w) => w.length > 0);
-    const phrases: string[] = [];
 
-    // Don't extract phrases from very short text
     if (words.length < 3) return [];
+
+    const phrases: string[] = [];
 
     // Extract 2-word phrases
     for (let i = 0; i < words.length - 1; i++) {
@@ -435,9 +438,12 @@ function createBookmarkIndicator(bookmark: Bookmark): HTMLElement {
     const indicator = document.createElement("span");
     indicator.className = styles.indicator;
     indicator.setAttribute("data-bookmark-id", bookmark.id);
-    indicator.title = `Bookmark: ${bookmark.contextText}${
-        bookmark.userNote ? ` - ${bookmark.userNote}` : ""
-    }`;
+
+    const titleText = bookmark.userNote
+        ? `Bookmark: ${bookmark.contextText} - ${bookmark.userNote}`
+        : `Bookmark: ${bookmark.contextText}`;
+
+    indicator.title = titleText;
     indicator.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>

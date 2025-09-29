@@ -1,7 +1,6 @@
 // ==============================================================================
-// hooks/useBookmark.ts - React hook with state management and effects
+// hooks/useBookmark.ts - Improved with race condition fixes and optimizations
 // ==============================================================================
-
 import {
     forceRenderBookmarkIndicators,
     getContextAtPosition,
@@ -12,7 +11,7 @@ import {
 } from "@/lib/utils/bookmark-renderer";
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "@/types/bookmark";
-import { useCounter, useLocalStorage } from "@mantine/hooks";
+import { useLocalStorage } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -21,30 +20,36 @@ interface UseBookmarkRendererProps {
     openedContentField: boolean;
 }
 
+const MAX_RENDER_ATTEMPTS = 3;
+const POST_SUBMISSION_WINDOW = 2000;
+const MAX_NOTIFIED_BOOKMARKS = 100; // Prevent unbounded growth
+
 export function useBookmark({
     postId,
     openedContentField,
 }: UseBookmarkRendererProps) {
+    // Refs for tracking state without causing re-renders
     const notifiedFailedBookmarks = useRef<Set<string>>(new Set());
     const lastEditCloseTime = useRef<number>(0);
-
-    const isPostSubmission = () =>
-        Date.now() - lastEditCloseTime.current < 2000;
-
-    const maxRenderAttempts = 3;
-    const [
-        renderAttempts,
-        { increment: incrementrenderAttempts, reset: resetrenderAttempts },
-    ] = useCounter(0, {
-        max: 3,
-        min: 0,
-    });
+    const renderAttempts = useRef<number>(0);
+    const isRenderingRef = useRef<boolean>(false);
+    const cleanupFunctionsRef = useRef<Array<() => void>>([]);
 
     const storageKey = postId ? `bookmarks-${postId}` : "bookmarks";
     const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>({
         key: storageKey,
         defaultValue: [],
     });
+
+    const isPostSubmission = useCallback(() => {
+        return Date.now() - lastEditCloseTime.current < POST_SUBMISSION_WINDOW;
+    }, []);
+
+    // Centralized cleanup function
+    const cleanup = useCallback(() => {
+        cleanupFunctionsRef.current.forEach((fn) => fn());
+        cleanupFunctionsRef.current = [];
+    }, []);
 
     const addBookmark = useCallback(
         (bookmark: Omit<Bookmark, "id" | "timestamp">) => {
@@ -62,6 +67,7 @@ export function useBookmark({
     const removeBookmark = useCallback(
         (id: string) => {
             setBookmarks((prev) => prev.filter((b) => b.id !== id));
+            notifiedFailedBookmarks.current.delete(id);
         },
         [setBookmarks]
     );
@@ -69,11 +75,11 @@ export function useBookmark({
     const removeBulkBookmarks = useCallback(
         (ids: string[]) => {
             setBookmarks((prev) => prev.filter((b) => !ids.includes(b.id)));
+            ids.forEach((id) => notifiedFailedBookmarks.current.delete(id));
         },
         [setBookmarks]
     );
 
-    // Enhanced updateBookmark with better state management
     const updateBookmark = useCallback(
         (updatedBookmark: Bookmark) => {
             setBookmarks((prevBookmarks) => {
@@ -82,11 +88,9 @@ export function useBookmark({
                 );
 
                 if (existingIndex === -1) {
-                    // Bookmark doesn't exist, add it
                     return [...prevBookmarks, updatedBookmark];
                 }
 
-                // Update existing bookmark while preserving array order
                 const newBookmarks = [...prevBookmarks];
                 newBookmarks[existingIndex] = updatedBookmark;
                 return newBookmarks;
@@ -99,28 +103,26 @@ export function useBookmark({
         (failedBookmarks: Bookmark[]) => {
             if (failedBookmarks.length === 0) return;
 
-            // Create a unique notification ID based on the failed bookmark IDs
-            const failedIds = failedBookmarks
-                .map((b) => b.id)
-                .sort()
-                .join("-");
-            const notificationId = `bookmarks-removed-${failedIds}`;
-
-            // Check if we've already shown this exact notification
-            if (
-                document.querySelector(
-                    `[data-notification-id="${notificationId}"]`
-                )
-            ) {
-                return;
-            }
-
             // Filter out bookmarks we've already notified about
             const newFailedBookmarks = failedBookmarks.filter(
                 (bookmark) => !notifiedFailedBookmarks.current.has(bookmark.id)
             );
 
-            if (newFailedBookmarks.length < 1) return;
+            if (newFailedBookmarks.length === 0) return;
+
+            // Bound the size of notified set to prevent memory leak
+            if (notifiedFailedBookmarks.current.size > MAX_NOTIFIED_BOOKMARKS) {
+                const toRemove = Array.from(
+                    notifiedFailedBookmarks.current
+                ).slice(
+                    0,
+                    notifiedFailedBookmarks.current.size -
+                        MAX_NOTIFIED_BOOKMARKS
+                );
+                toRemove.forEach((id) =>
+                    notifiedFailedBookmarks.current.delete(id)
+                );
+            }
 
             // Track these bookmarks as notified
             newFailedBookmarks.forEach((bookmark) => {
@@ -130,9 +132,15 @@ export function useBookmark({
             const newFailedIds = newFailedBookmarks.map((b) => b.id);
             removeBulkBookmarks(newFailedIds);
 
+            const failedIds = newFailedBookmarks
+                .map((b) => b.id)
+                .sort()
+                .join("-");
+            const notificationId = `bookmarks-removed-${failedIds}`;
+
             const message =
                 newFailedBookmarks.length === 1
-                    ? `1 bookmark was removed because the content has changed.`
+                    ? "1 bookmark was removed because the content has changed."
                     : `${newFailedBookmarks.length} bookmarks were removed because the content has changed.`;
 
             notifications.show({
@@ -149,11 +157,14 @@ export function useBookmark({
 
     const renderBookmarks = useCallback(
         async (force = false) => {
-            // Don't render when in edit mode
+            // Prevent concurrent renders
+            if (isRenderingRef.current) {
+                return;
+            }
+
             if (openedContentField) return;
 
-            if (bookmarks.length < 1) {
-                // Clear both indicators and notification tracking when no bookmarks
+            if (bookmarks.length === 0) {
                 document
                     .querySelectorAll("[data-bookmark-id]")
                     .forEach((el) => el.remove());
@@ -162,24 +173,24 @@ export function useBookmark({
             }
 
             try {
+                isRenderingRef.current = true;
                 let result: RenderResult;
+
                 if (force) {
-                    resetrenderAttempts();
+                    renderAttempts.current = 0;
                     result = forceRenderBookmarkIndicators(bookmarks);
                 } else {
                     result = await renderBookmarkIndicators(bookmarks);
                 }
 
-                // Handle failed bookmarks (this will deduplicate notifications)
                 if (result.failed.length > 0) {
                     handleFailedBookmarks(result.failed);
                 }
 
-                // Retry failed bookmarks ONLY if we haven't reached max attempts
-                // and ONLY if we haven't already notified about these bookmarks
+                // Retry logic with attempt limiting
                 if (
                     result.failed.length > 0 &&
-                    renderAttempts < maxRenderAttempts
+                    renderAttempts.current < MAX_RENDER_ATTEMPTS
                 ) {
                     const unnotifiedFailed = result.failed.filter(
                         (bookmark) =>
@@ -187,27 +198,25 @@ export function useBookmark({
                     );
 
                     if (unnotifiedFailed.length > 0) {
-                        incrementrenderAttempts();
-                        setTimeout(() => {
+                        renderAttempts.current++;
+                        const timeoutId = setTimeout(() => {
                             forceRenderBookmarkIndicators(unnotifiedFailed);
                         }, 1000);
+
+                        cleanupFunctionsRef.current.push(() =>
+                            clearTimeout(timeoutId)
+                        );
                     }
                 }
             } catch (error) {
                 console.error("Error in renderBookmarks:", error);
+            } finally {
+                isRenderingRef.current = false;
             }
         },
-        [
-            bookmarks,
-            openedContentField,
-            resetrenderAttempts,
-            incrementrenderAttempts,
-            handleFailedBookmarks,
-            renderAttempts,
-        ]
+        [bookmarks, openedContentField, handleFailedBookmarks]
     );
 
-    // Extracted context updating logic
     const tryUpdateBookmarkContext = useCallback(
         (bookmark: Bookmark) => {
             try {
@@ -231,11 +240,10 @@ export function useBookmark({
                         ...bookmark,
                         contextText: currentContext,
                     };
-
                     updateBookmark(updatedBookmark);
 
                     notifications.show({
-                        id: `context-update-${bookmark.id}`, // Prevent duplicate notifications
+                        id: `context-update-${bookmark.id}`,
                         title: "Bookmark Context Updated",
                         message:
                             "Bookmark context was updated due to content changes.",
@@ -258,24 +266,22 @@ export function useBookmark({
             );
 
             if (indicator) {
-                // Successfully found indicator - scroll and animate
                 indicator.scrollIntoView({
                     behavior: "smooth",
                     block: "center",
                 });
+                indicator.classList.add(styles.pulse);
 
-                indicator.classList.add(`${styles.pulse}`);
-                setTimeout(() => {
-                    indicator.classList.remove(`${styles.pulse}`);
+                const timeoutId = setTimeout(() => {
+                    indicator.classList.remove(styles.pulse);
                 }, 1500);
 
-                // Try to update bookmark context if needed
+                cleanupFunctionsRef.current.push(() => clearTimeout(timeoutId));
                 tryUpdateBookmarkContext(bookmark);
                 return;
             }
 
-            // Indicator not found - handle inline instead of separate function
-            // Check if we're in edit mode before attempting recovery
+            // Check if in edit mode
             const storyContent = document.querySelector(
                 '[data-story-content="true"]'
             );
@@ -283,7 +289,6 @@ export function useBookmark({
                 storyContent?.classList.contains("hide") || false;
 
             if (isInEditMode) {
-                // Don't try to render in edit mode, just show a gentle message
                 notifications.show({
                     title: "Bookmark Temporarily Hidden",
                     message:
@@ -294,13 +299,12 @@ export function useBookmark({
                 return;
             }
 
-            // Try to re-render the specific bookmark
+            // Attempt recovery
             try {
                 const result = forceRenderBookmarkIndicators([bookmark]);
 
                 if (result.successful.length > 0) {
-                    // Successfully re-rendered, try scrolling again (but only once more)
-                    setTimeout(() => {
+                    const timeoutId = setTimeout(() => {
                         const retryIndicator = document.querySelector(
                             `[data-bookmark-id="${bookmark.id}"]`
                         );
@@ -309,19 +313,25 @@ export function useBookmark({
                                 behavior: "smooth",
                                 block: "center",
                             });
-                            retryIndicator.classList.add(`${styles.pulse}`);
-                            setTimeout(() => {
-                                retryIndicator.classList.remove(
-                                    `${styles.pulse}`
-                                );
+                            retryIndicator.classList.add(styles.pulse);
+
+                            const pulseTimeoutId = setTimeout(() => {
+                                retryIndicator.classList.remove(styles.pulse);
                             }, 1500);
+
+                            cleanupFunctionsRef.current.push(() => {
+                                clearTimeout(pulseTimeoutId);
+                            });
+
                             tryUpdateBookmarkContext(bookmark);
                         }
                     }, 100);
-                } else if (result.failed.length > 0) {
-                    // Bookmark is truly invalid, remove it
-                    removeBulkBookmarks([bookmark.id]);
 
+                    cleanupFunctionsRef.current.push(() =>
+                        clearTimeout(timeoutId)
+                    );
+                } else if (result.failed.length > 0) {
+                    removeBulkBookmarks([bookmark.id]);
                     notifications.show({
                         title: "Bookmark Not Found",
                         message:
@@ -347,57 +357,57 @@ export function useBookmark({
         [tryUpdateBookmarkContext, removeBulkBookmarks]
     );
 
-    // Main bookmark rendering effect with post-submission stability
+    // Main rendering effect
     useEffect(() => {
         if (openedContentField) {
-            // Clear indicators when entering edit mode
             document
                 .querySelectorAll("[data-bookmark-id]")
                 .forEach((el) => el.remove());
             return;
         }
 
-        // Track when edit mode closes (potential form submission)
-        if (!openedContentField) {
-            lastEditCloseTime.current = Date.now();
-        }
+        lastEditCloseTime.current = Date.now();
 
-        // When not in edit mode, render bookmarks with intelligent checking
-        const baseDelay = isPostSubmission() ? 300 : 150; // Longer delay after potential submission
-
+        const baseDelay = isPostSubmission() ? 300 : 150;
         const timer = setTimeout(() => {
             if (
                 shouldReRenderBookmarks(bookmarks) ||
-                renderAttempts < maxRenderAttempts
+                renderAttempts.current < MAX_RENDER_ATTEMPTS
             ) {
                 renderBookmarks(true);
-                incrementrenderAttempts();
+                renderAttempts.current++;
 
-                // If this is potentially post-submission, do a follow-up check
                 if (isPostSubmission()) {
-                    setTimeout(() => {
+                    const followUpTimer = setTimeout(() => {
                         if (
                             shouldReRenderBookmarks(bookmarks) &&
-                            renderAttempts < maxRenderAttempts
+                            renderAttempts.current < MAX_RENDER_ATTEMPTS
                         ) {
-                            incrementrenderAttempts();
+                            renderAttempts.current++;
                             renderBookmarks(true);
                         }
-                    }, 500); // Additional check after content settles
+                    }, 500);
+
+                    cleanupFunctionsRef.current.push(() =>
+                        clearTimeout(followUpTimer)
+                    );
                 }
             }
         }, baseDelay);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            cleanup();
+        };
     }, [
         bookmarks,
         renderBookmarks,
         openedContentField,
-        renderAttempts,
-        incrementrenderAttempts,
+        isPostSubmission,
+        cleanup,
     ]);
 
-    // Window focus re-render - only when necessary
+    // Window focus handler
     useEffect(() => {
         const handleFocus = () => {
             if (
@@ -405,21 +415,23 @@ export function useBookmark({
                 bookmarks.length > 0 &&
                 !openedContentField &&
                 shouldReRenderBookmarks(bookmarks) &&
-                !isPostSubmission() // Avoid interfering with post-submission renders
+                !isPostSubmission()
             ) {
-                setTimeout(() => renderBookmarks(true), 100);
+                const timeoutId = setTimeout(() => renderBookmarks(true), 100);
+                cleanupFunctionsRef.current.push(() => clearTimeout(timeoutId));
             }
         };
 
         window.addEventListener("focus", handleFocus);
         return () => window.removeEventListener("focus", handleFocus);
-    }, [bookmarks, renderBookmarks, openedContentField]);
+    }, [bookmarks, renderBookmarks, openedContentField, isPostSubmission]);
 
-    // Additional effect to handle revalidation-induced re-renders
+    // Mutation observer for DOM changes
     useEffect(() => {
         if (openedContentField) return;
 
-        // Listen for potential DOM changes that might affect bookmarks
+        let debounceTimer: NodeJS.Timeout;
+
         const observer = new MutationObserver((mutations) => {
             const hasContentChanges = mutations.some(
                 (mutation) =>
@@ -431,20 +443,19 @@ export function useBookmark({
             );
 
             if (hasContentChanges && isPostSubmission()) {
-                // Debounce re-renders during post-submission period
-                setTimeout(() => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
                     if (
                         shouldReRenderBookmarks(bookmarks) &&
-                        renderAttempts < maxRenderAttempts
+                        renderAttempts.current < MAX_RENDER_ATTEMPTS
                     ) {
-                        incrementrenderAttempts();
+                        renderAttempts.current++;
                         renderBookmarks(true);
                     }
                 }, 200);
             }
         });
 
-        // Only observe the story content area if it exists
         const storyContent = document.querySelector(
             '[data-story-content="true"]'
         );
@@ -456,27 +467,28 @@ export function useBookmark({
             });
         }
 
-        return () => observer.disconnect();
-    }, [
-        bookmarks,
-        renderBookmarks,
-        openedContentField,
-        renderAttempts,
-        incrementrenderAttempts,
-    ]);
+        return () => {
+            observer.disconnect();
+            clearTimeout(debounceTimer);
+        };
+    }, [bookmarks, renderBookmarks, openedContentField, isPostSubmission]);
 
-    // Clean up notification tracking when bookmarks change significantly
+    // Cleanup notification tracking
     useEffect(() => {
         const currentBookmarkIds = new Set(bookmarks.map((b) => b.id));
         const notifiedIds = Array.from(notifiedFailedBookmarks.current);
 
-        // Remove tracking for bookmarks that no longer exist in our bookmarks array
         notifiedIds.forEach((id) => {
             if (!currentBookmarkIds.has(id)) {
                 notifiedFailedBookmarks.current.delete(id);
             }
         });
     }, [bookmarks]);
+
+    // Global cleanup on unmount
+    useEffect(() => {
+        return () => cleanup();
+    }, [cleanup]);
 
     return {
         renderBookmarks,
