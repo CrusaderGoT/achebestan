@@ -1,3 +1,4 @@
+"use client"
 // Push Notificstion ofor PWA
 
 import { sendNotification, subscribeUser, unsubscribeUser } from "@/lib/actions/pwa";
