@@ -86,7 +86,7 @@ export function PushNotificationManager() {
     }
 
     return (
-        <Box>
+        <Box hidden>
             <Title>Push Notification</Title>
 
             {subscription ? (
