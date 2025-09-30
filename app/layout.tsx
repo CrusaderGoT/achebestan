@@ -23,6 +23,8 @@ import { RouteNavigationProgress } from "@/components/ui/route-navigation-progre
 import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
 
 export const metadata: Metadata = {
     title: "Achebestan",
@@ -48,6 +50,11 @@ export default function RootLayout({
                     </Suspense>
 
                     <Notifications limit={1} />
+
+                    {/** PWAs Components */}
+                    <PushNotificationManager />
+                    <InstallPrompt />
+
                     <Shell>{children}</Shell>
                 </MantineProvider>
             </body>
