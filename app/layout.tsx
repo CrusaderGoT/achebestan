@@ -21,14 +21,57 @@ import { Notifications } from "@mantine/notifications";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { NavigationProgress } from "@mantine/nprogress";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { InstallPrompt } from "@/components/pwa/install-prompt";
-import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
+
+const APP_NAME = "Achebestan";
+const APP_DEFAULT_TITLE = "Imagination Suppliments Reality";
+const APP_TITLE_TEMPLATE = "%s - Achebestan";
+const APP_DESCRIPTION = "A World Of Stories...";
 
 export const metadata: Metadata = {
-    title: "Achebestan",
-    description: "A hub for my stories...",
+    applicationName: APP_NAME,
+    title: {
+        default: APP_DEFAULT_TITLE,
+        template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: APP_DEFAULT_TITLE,
+        // startUpImage: [],
+    },
+    formatDetection: {
+        telephone: false,
+    },
+    openGraph: {
+        type: "website",
+        siteName: APP_NAME,
+        title: {
+            default: APP_DEFAULT_TITLE,
+            template: APP_TITLE_TEMPLATE,
+        },
+        description: APP_DESCRIPTION,
+    },
+    twitter: {
+        card: "summary",
+        title: {
+            default: APP_DEFAULT_TITLE,
+            template: APP_TITLE_TEMPLATE,
+        },
+        description: APP_DESCRIPTION,
+    },
+};
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    themeColor: [
+        { media: "(prefers-color-scheme: dark)", color: "#000000" },
+        { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    ],
+    colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -37,10 +80,22 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html {...mantineHtmlProps} lang="en">
+        <html {...mantineHtmlProps} lang="en" dir="ltr">
             <head>
                 <ColorSchemeScript />
+
                 <meta name="apple-mobile-web-app-title" content="Achebestan" />
+
+                {/* Preload critical resources */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="dns-prefetch" href="https://achebestan.vercel.app" />
+
+                {/* PWA manifest */}
+                <link rel="manifest" href="/manifest.json" />
+
+                {/* Favicon and icons with dark theme */}
+                <link rel="icon" href="/favicon.ico" />
+                <link rel="apple-touch-icon" href="/apple-icon.png" />
             </head>
             <body>
                 <MantineProvider>
@@ -50,10 +105,6 @@ export default function RootLayout({
                     </Suspense>
 
                     <Notifications limit={1} />
-
-                    {/** PWAs Components */}
-                    <PushNotificationManager />
-                    <InstallPrompt />
 
                     <Shell>{children}</Shell>
                 </MantineProvider>

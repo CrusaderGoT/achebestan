@@ -1,7 +1,7 @@
 import { HomePage } from "@/components/home/homepage";
 import { readLatestStories } from "@/lib/actions/story";
-import { StoryBookProps } from "@/types/story";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
+import { StoryBookProps } from "@/types/story";
 import type { Metadata } from "next";
 import { Graph } from "schema-dts";
 
@@ -490,26 +490,8 @@ export default async function Home() {
                 }}
             />
 
-            {/* Preload critical resources */}
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="dns-prefetch" href="https://achebestan.vercel.app" />
-
             {/* Preload hero image for better performance */}
             <link rel="preload" href="/images/demo.jpg" as="image" />
-
-            {/* PWA manifest */}
-            <link rel="manifest" href="/manifest.json" />
-
-            {/* Favicon and icons with dark theme */}
-            <link rel="icon" href="/favicon.ico" />
-            <link rel="apple-touch-icon" href="/apple-icon.png" />
-
-            {/* Additional meta for personal brand */}
-            <meta name="author" content="Enemchukwu Chukwuemeka" />
-            <meta
-                name="copyright"
-                content={`© ${new Date().getFullYear()} Enemchukwu Chukwuemeka (Achebestan)`}
-            />
 
             <HomePage stories={stories} />
         </>
