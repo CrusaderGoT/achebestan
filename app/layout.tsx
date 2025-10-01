@@ -18,13 +18,13 @@ import {
 
 import { Notifications } from "@mantine/notifications";
 
+import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 
 const APP_NAME = "Achebestan";
 const APP_DEFAULT_TITLE = "Imagination Suppliments Reality";

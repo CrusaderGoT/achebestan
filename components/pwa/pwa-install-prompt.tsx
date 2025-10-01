@@ -43,7 +43,13 @@ export function PWAInstallPrompt() {
     if (!showPrompt) return null;
 
     return (
-        <Modal opened={showPrompt} onClose={() => setShowPrompt(false)}>
+        <Modal
+            opened={showPrompt}
+            onClose={() => {
+                setShowPrompt(false);
+                setDeferredPrompt(null);
+            }}
+        >
             <Card
                 shadow="lg"
                 padding="md"
@@ -73,7 +79,6 @@ export function PWAInstallPrompt() {
                     fullWidth
                     leftSection={<IconDownload size={16} />}
                     onClick={handleInstall}
-                    id="installPwaBtn"
                 >
                     Install Now
                 </Button>
