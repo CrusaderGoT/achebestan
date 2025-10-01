@@ -10,13 +10,13 @@ import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Text, Title } from "@mantine/core";
+import { AppShell, Burger, Group, Space, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {PushNotificationToggle} from "@/components/pwa/push-notification-toggle";
+import { PushNotificationToggle } from "@/components/pwa/push-notification-toggle";
 
 export function Shell({
     children,
@@ -70,13 +70,10 @@ export function Shell({
                                 display: "inline",
                                 backgroundColor: "ButtonFace",
                                 color: "yellow",
-                                backgroundImage: "url(/icon0.svg"
+                                backgroundImage: "url(/icon0.svg",
                             }}
                         >
-                            <use
-                                xlinkHref="/icon0.svg"
-                                href="/icon0.svg"
-                            />
+                            <use xlinkHref="/icon0.svg" href="/icon0.svg" />
                         </svg>
                     </Group>
 
@@ -154,7 +151,10 @@ export function Shell({
                         setSecretValue={setSecretValue}
                     />
                 )}
-<PushNotificationToggle />
+
+                <Space />
+
+                <PushNotificationToggle />
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>

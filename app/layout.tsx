@@ -24,6 +24,7 @@ import { RouteNavigationProgress } from "@/components/ui/route-navigation-progre
 import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 
 const APP_NAME = "Achebestan";
 const APP_DEFAULT_TITLE = "Imagination Suppliments Reality";
@@ -109,6 +110,8 @@ export default function RootLayout({
                     <Notifications limit={1} />
 
                     <ServiceWorkerRegister />
+
+                    <PWAInstallPrompt />
 
                     <Shell>{children}</Shell>
                 </MantineProvider>

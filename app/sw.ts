@@ -25,11 +25,11 @@ const serwist = new Serwist({
     runtimeCaching: [
         {
             matcher: ({ url }) => url.pathname.startsWith("/story/"),
-            handler: new NetworkFirst(),
+            handler: new StaleWhileRevalidate(),
         },
         // Cache images with CacheFirst strategy, off for now
         {
-            matcher: /^http:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            matcher: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: new CacheFirst({
                 cacheName: "images",
                 plugins: [
