@@ -49,6 +49,7 @@ export function PWAInstallPrompt() {
                 setShowPrompt(false);
                 setDeferredPrompt(null);
             }}
+centered
         >
             <Card
                 shadow="lg"
