@@ -68,11 +68,12 @@ export function Shell({
                                 display: "inline",
                                 backgroundColor: "ButtonFace",
                                 color: "yellow",
+                                backgroundImage: "url(/icon0.svg"
                             }}
                         >
                             <use
-                                xlinkHref="/achebestan_logo.svg"
-                                href="/achebestan_logo.svg"
+                                xlinkHref="/icon0.svg"
+                                href="/icon0.svg"
                             />
                         </svg>
                     </Group>

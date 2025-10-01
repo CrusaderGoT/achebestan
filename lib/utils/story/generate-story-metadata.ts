@@ -42,7 +42,7 @@ export async function generateStoryMetadata(
         ? `${story.title}: ${story.subtitle}`
         : story.title;
 
-    const pageTitle = `${fullTitle} by ${story.author.name} | Achebestan`;
+    const pageTitle = `${fullTitle} by ${story.author.name}`;
 
     // Construct URLs
     const baseUrl = "https://achebestan.vercel.app";
@@ -56,10 +56,10 @@ export async function generateStoryMetadata(
               story.blurb,
               140
           )} Read this original story on Achebestan.`
-        : `Discover ${story.title} by ${story.author.name}. ${truncateText(
+        : `Read ${story.title} by ${story.author.name}. ${truncateText(
               story.content,
               120
-          )} Read on Achebestan.`;
+          )} - on Achebestan.`;
 
     // Generate keywords based on content
     const dynamicKeywords = [

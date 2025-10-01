@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "upgrade": "npx drizzle-kit generate && npx drizzle-kit migrate",
-    "prebuild": "npm run upgrade"
+    "prebuild": "npm run upgrade",
+    "dev:pwa": "next dev"
   },
   "dependencies": {
     "@mantine/core": "^8.1.3",
