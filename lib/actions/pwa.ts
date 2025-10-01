@@ -23,7 +23,8 @@ export const subscribeToPush = authActionClient
             await db
                 .update(pushSubscriptions)
                 .set({
-                    keys: parsedInput.keys,
+                    p256dh: parsedInput.keys.p256dh,
+                    auth: parsedInput.keys.auth,
                     updatedAt: new Date(),
                 })
                 .where(eq(pushSubscriptions.id, existing.id));
@@ -35,7 +36,8 @@ export const subscribeToPush = authActionClient
         await db.insert(pushSubscriptions).values({
             userId: ctx.user.id,
             endpoint: parsedInput.endpoint,
-            keys: parsedInput.keys,
+            p256dh: parsedInput.keys.p256dh,
+            auth: parsedInput.keys.auth,
         });
 
         revalidatePath("/settings/notifications");
