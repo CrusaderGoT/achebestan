@@ -27,9 +27,9 @@ const serwist = new Serwist({
             matcher: ({ url }) => url.pathname.startsWith("/story/"),
             handler: new NetworkFirst(),
         },
-        // Cache images with CacheFirst strategy
+        // Cache images with CacheFirst strategy, off for now
         {
-            matcher: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            matcher: /^http:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: new CacheFirst({
                 cacheName: "images",
                 plugins: [
@@ -43,7 +43,7 @@ const serwist = new Serwist({
         },
         // Cache API calls with NetworkFirst
         {
-            matcher: /^https:\/\/api\.yourapp\.com\/.*/,
+            matcher: /^https:\/\/api\.achebestan\.vercel\.app\/.*/,
             handler: new NetworkFirst({
                 cacheName: "api-cache",
                 networkTimeoutSeconds: 10,
