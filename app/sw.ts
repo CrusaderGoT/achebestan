@@ -43,7 +43,7 @@ const serwist = new Serwist({
         },
         // Cache API calls with NetworkFirst
         {
-            matcher: /^https:\/\/api\.achebestan\.vercel\.app\/.*/,
+            matcher: /^https:\/\/api\/achebestan\.vercel\.app\/.*/,
             handler: new NetworkFirst({
                 cacheName: "api-cache",
                 networkTimeoutSeconds: 10,
