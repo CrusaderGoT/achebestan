@@ -9,11 +9,10 @@ const withSerwist = withSerwistInit({
     scope: "/",
     register: true,
     reloadOnOnline: true,
-    disable: process.env.NODE_ENV === "development", // Disable in dev if needed
+    disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig: NextConfig = {
-    /* config options here */
     reactStrictMode: true,
     experimental: {
         optimizePackageImports: [
@@ -39,7 +38,48 @@ const nextConfig: NextConfig = {
             },
         ],
     },
-    
+    async headers() {
+        return [
+            {
+                source: "/(.*)",
+                headers: [
+                    {
+                        key: "X-Content-Type-Options",
+                        value: "nosniff",
+                    },
+                    {
+                        key: "X-Frame-Options",
+                        value: "DENY",
+                    },
+                    {
+                        key: "Referrer-Policy",
+                        value: "strict-origin-when-cross-origin",
+                    },
+                    {
+                        key: "Content-Security-Policy",
+                        value: "img-src 'self' https://res.cloudinary.com data: blob:; media-src 'self' https://res.cloudinary.com blob:;",
+                    },
+                ],
+            },
+            {
+                source: "/sw.js",
+                headers: [
+                    {
+                        key: "Content-Type",
+                        value: "application/javascript; charset=utf-8",
+                    },
+                    {
+                        key: "Cache-Control",
+                        value: "no-cache, no-store, must-revalidate",
+                    },
+                    {
+                        key: "Content-Security-Policy",
+                        value: "default-src 'self'; script-src 'self'",
+                    },
+                ],
+            },
+        ];
+    },
 };
 
 export default withSerwist(nextConfig);

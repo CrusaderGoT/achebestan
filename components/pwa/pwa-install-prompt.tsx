@@ -73,6 +73,7 @@ export function PWAInstallPrompt() {
                     fullWidth
                     leftSection={<IconDownload size={16} />}
                     onClick={handleInstall}
+                    id="installPwaBtn"
                 >
                     Install Now
                 </Button>
