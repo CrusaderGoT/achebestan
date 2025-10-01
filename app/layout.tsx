@@ -18,6 +18,7 @@ import {
 
 import { Notifications } from "@mantine/notifications";
 
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { NavigationProgress } from "@mantine/nprogress";
@@ -106,6 +107,8 @@ export default function RootLayout({
                     </Suspense>
 
                     <Notifications limit={1} />
+
+                    <ServiceWorkerRegister />
 
                     <Shell>{children}</Shell>
                 </MantineProvider>

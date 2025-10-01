@@ -14,6 +14,7 @@ import { SearchOptions } from "@/types/story";
 import { revalidatePath } from "next/cache";
 import { redirect, unauthorized } from "next/navigation";
 import { sanitizeHTML } from "../utils/sanitize-html";
+import { sendNotificationToAllSubscribers } from "../utils/pwa/send-to-subscriber";
 
 export const createStoryAction = authActionClient
     .inputSchema(storyInsertSchema, {
@@ -66,6 +67,29 @@ export const createStoryAction = authActionClient
         }
 
         revalidatePath(`/`);
+
+        // Send push notification to all subscribers
+        await sendNotificationToAllSubscribers({
+            title: `${ctx.user.name} Published A New Story📝`,
+            body: createdStory.title,
+            icon: "/web-app-manifest-192x192.png",
+            badge: "/icon1.png",
+            tag: `story-${createdStory.title}`,
+            data: {
+                url: `/story/${createdStory.isbn}`,
+                storyId: createdStory.isbn,
+            },
+            actions: [
+                {
+                    action: "open",
+                    title: "Read Now",
+                },
+                {
+                    action: "close",
+                    title: "Dismiss",
+                },
+            ],
+        });
 
         return createdStory;
     });

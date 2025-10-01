@@ -41,6 +41,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "schema-dts": "^1.1.5",
+    "web-push": "^3.6.7",
     "ws": "^8.18.3",
     "zod": "^3.25.76"
   },
@@ -49,6 +50,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
