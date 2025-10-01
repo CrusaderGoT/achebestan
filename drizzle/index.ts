@@ -4,6 +4,7 @@ import "dotenv/config";
 import * as book from "@/drizzle/schemas/book";
 import * as comment from "@/drizzle/schemas/comment";
 import * as favourite from "@/drizzle/schemas/favourite";
+import * as pwa from "@/drizzle/schemas/pwa";
 import * as rating from "@/drizzle/schemas/rating";
 import * as reaction from "@/drizzle/schemas/reaction";
 import * as story from "@/drizzle/schemas/story";
@@ -60,6 +61,7 @@ export const db = drizzle(client, {
         ...comment,
         ...reaction,
         ...favourite,
+        ...pwa,
     },
 });
 
