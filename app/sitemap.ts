@@ -1,4 +1,5 @@
 import { readLatestStories } from "@/lib/actions/story";
+import { BASE_URL } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -6,11 +7,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const rootSiteMap: MetadataRoute.Sitemap = [
         {
-            url: "https://achebestan.vercel.app",
+            url: `${BASE_URL}`,
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 1.0,
-            images: ["https://achebestan.vercel.app/images/demo.jpg"],
+            images: [`${BASE_URL}/images/demo.jpg`],
         },
     ];
 
@@ -22,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const latestStoriesSiteMap: MetadataRoute.Sitemap = latestStories.map(
         (story) => ({
-            url: `https://achebestan.vercel.app/story/${story.isbn}`,
+            url: `${BASE_URL}/story/${story.isbn}`,
             lastModified: story.edited || story.created,
             changeFrequency: "always",
             priority: 1.0,

@@ -1,10 +1,11 @@
+import { BASE_URL } from "@/lib/constants";
 import { StoryBookProps } from "@/types/story";
 import { Metadata } from "next";
 
 export function generateHomeMetadata(
     stories: StoryBookProps[] | undefined
 ): Metadata {
-    const baseUrl = "https://achebestan.vercel.app";
+    const baseUrl = `${BASE_URL}`;
     const dynamicDescription = generateDynamicDescription(stories);
     const storyThemes = extractStoryThemes(stories);
 

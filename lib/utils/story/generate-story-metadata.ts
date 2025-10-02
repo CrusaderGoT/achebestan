@@ -1,4 +1,5 @@
 import { StoryProps } from "@/components/story/story-page";
+import { BASE_URL } from "@/lib/constants";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
 import { Metadata } from "next";
@@ -20,7 +21,7 @@ export async function generateStoryMetadata(
                 title: "Story Not Found | Achebestan",
                 description:
                     "The requested story could not be found on Achebestan - Discover and share original stories.",
-                url: "https://achebestan.vercel.app",
+                url: `${BASE_URL}`,
                 siteName: "Achebestan",
                 type: "website",
             },
@@ -45,7 +46,7 @@ export async function generateStoryMetadata(
     const pageTitle = `${fullTitle} by ${story.author.name}`;
 
     // Construct URLs
-    const baseUrl = "https://achebestan.vercel.app";
+    const baseUrl = `${BASE_URL}`;
     const canonicalUrl = `${baseUrl}/story/${story.isbn}`;
     const imageUrl = story.image || `${baseUrl}/images/story-placeholder.jpg`;
     const authorUrl = `${baseUrl}/author/${story.authorId}`;

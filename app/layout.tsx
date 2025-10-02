@@ -21,6 +21,7 @@ import { Notifications } from "@mantine/notifications";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
+import { BASE_URL } from "@/lib/constants";
 import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
@@ -91,7 +92,7 @@ export default function RootLayout({
 
                 {/* Preload critical resources */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="dns-prefetch" href="https://achebestan.vercel.app" />
+                <link rel="dns-prefetch" href={`${BASE_URL}`} />
 
                 {/* PWA manifest */}
                 <link rel="manifest" href="/manifest.json" />

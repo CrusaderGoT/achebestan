@@ -27,7 +27,7 @@ const serwist = new Serwist({
             matcher: ({ url }) => url.pathname.startsWith("/story/"),
             handler: new StaleWhileRevalidate(),
         },
-        // Cache images with CacheFirst strategy, off for now
+        // Cache images with CacheFirst strategy
         {
             matcher: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: new CacheFirst({

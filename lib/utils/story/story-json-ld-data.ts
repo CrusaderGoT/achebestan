@@ -1,4 +1,5 @@
 import { StoryProps } from "@/components/story/story-page";
+import { BASE_URL } from "@/lib/constants";
 import { CommentTreeProps } from "@/types/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
@@ -21,7 +22,7 @@ export function storyJsonLdData(
     const averageRating = calculateRatingsAverage(story.ratings);
     const totalRatings = story.ratings?.length || 0;
     const readingTime = estimateReadingTime(story.content);
-    const baseUrl = "https://achebestan.vercel.app";
+    const baseUrl = `${BASE_URL}`;
     const wordCount = story.content.split(/\s+/).length;
     const highestRate = highestRating(story.ratings);
     const lowestRate = lowestRating(story.ratings);

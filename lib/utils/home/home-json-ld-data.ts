@@ -1,8 +1,9 @@
+import { BASE_URL } from "@/lib/constants";
 import { StoryBookProps } from "@/types/story";
 import { Graph } from "schema-dts";
 
 export function homeJsonLdData(stories: StoryBookProps[] | undefined): Graph {
-    const baseUrl = "https://achebestan.vercel.app";
+    const baseUrl = `${BASE_URL}`;
 
     return {
         "@context": "https://schema.org",

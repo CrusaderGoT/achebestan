@@ -1,5 +1,6 @@
 "use client";
 
+import { BASE_URL } from "@/lib/constants";
 import { PickedStoryProps } from "@/types/story";
 import {
     ActionIcon,
@@ -63,10 +64,7 @@ export function ShareStoryDrawer({
 
 export function CopyStoryUrl({ isbn }: { isbn: string }) {
     return (
-        <CopyButton
-            value={`https://achebestan.vercel.app/story/${isbn}`}
-            timeout={2000}
-        >
+        <CopyButton value={`${BASE_URL}/story/${isbn}`} timeout={2000}>
             {({ copied, copy }) => (
                 <ActionIcon
                     variant="default"

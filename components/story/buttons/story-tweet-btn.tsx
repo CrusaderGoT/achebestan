@@ -1,7 +1,8 @@
 "use client";
 
-import { PickedStoryProps } from "@/types/story";
+import { BASE_URL } from "@/lib/constants";
 import { createTweetText } from "@/lib/utils/helpers";
+import { PickedStoryProps } from "@/types/story";
 import { ActionIcon, ActionIconProps, Group, Text } from "@mantine/core";
 import { IconBrandX } from "@tabler/icons-react";
 import { useMemo } from "react";
@@ -16,7 +17,7 @@ type StoryTweetButtonProps = {
 
 export function StoryTweetButton({
     story,
-    baseUrl = "https://achebestan.vercel.app",
+    baseUrl = `${BASE_URL}`,
     hashtags = ["story", "reading"],
     via = "achebestan",
     customText,
