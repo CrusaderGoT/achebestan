@@ -9,7 +9,7 @@ const withSerwist = withSerwistInit({
     scope: "/",
     register: true,
     reloadOnOnline: true,
-    disable: process.env.NODE_ENV === "development",
+    //disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig: NextConfig = {
@@ -59,8 +59,8 @@ const nextConfig: NextConfig = {
                         key: "Content-Security-Policy",
                         value: [
                             "default-src 'self'",
-                            "img-src 'self' https://res.cloudinary.com https://*.cloudinary.com data: blob:",
-                            "media-src 'self' https://res.cloudinary.com https://*.cloudinary.com blob:",
+                            "img-src 'self' https://res.cloudinary.com/** https://*.cloudinary.com data: blob:",
+                            "media-src 'self' https://res.cloudinary.com/** https://*.cloudinary.com blob:",
                             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://widget.cloudinary.com",
                             "style-src 'self' 'unsafe-inline'",
                             "connect-src 'self' https://api.cloudinary.com https://*.cloudinary.com",
