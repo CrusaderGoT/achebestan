@@ -18,6 +18,8 @@ import { useState } from "react";
 
 import { PushNotificationToggle } from "@/components/pwa/push-notification-toggle";
 
+import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
+
 export function Shell({
     children,
 }: Readonly<{
