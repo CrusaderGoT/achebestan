@@ -65,9 +65,6 @@ export default async function StoryPage({
                 }}
             />
 
-                {/* PWA manifest */}
-                <link rel="manifest" href="/manifest.json" />
-
             {/* Additional meta for personal brand */}
             <meta name="author" content={`${story.author.name}`} />
 

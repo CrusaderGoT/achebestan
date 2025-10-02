@@ -26,7 +26,8 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
 const APP_NAME = "Achebestan";
-const APP_DEFAULT_TITLE = "Imagination Suppliments Reality";
+const APP_DEFAULT_TITLE =
+    "Achebestan - Dark Fiction, Poetry & Adventure Stories by Enemchukwu Chukwuemeka";
 const APP_TITLE_TEMPLATE = "%s - Achebestan";
 const APP_DESCRIPTION = "A World Of Stories...";
 
