@@ -49,14 +49,12 @@ export function PWAInstallPrompt() {
                 setShowPrompt(false);
                 setDeferredPrompt(null);
             }}
-centered
+            centered
+            withCloseButton={false}
+            
+
         >
-            <Card
-                shadow="lg"
-                padding="md"
-                radius="md"
-                withBorder
-            >
+            <Card shadow="lg" padding="md" radius="md" withBorder>
                 <Group justify="space-between" mb="xs">
                     <Text size="sm" fw={500}>
                         Install App
