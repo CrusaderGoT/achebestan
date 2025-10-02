@@ -13,7 +13,9 @@ export function usePushNotifications() {
         null
     );
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isPending, setIsPending] = useState(false); // data in transition
+    const [isFetching, setIsFetching] = useState(true); // initial data load
+
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -26,13 +28,13 @@ export function usePushNotifications() {
             checkSubscription();
         } else {
             setIsSupported(false);
-            setIsLoading(false);
+            setIsFetching(false);
         }
     }, []);
 
     const checkSubscription = async () => {
         try {
-            setIsLoading(true);
+            setIsFetching(true);
             const registration = await navigator.serviceWorker.ready;
             const sub = await registration.pushManager.getSubscription();
             setSubscription(sub);
@@ -47,13 +49,13 @@ export function usePushNotifications() {
             console.error("Error checking subscription:", err);
             setError("Failed to check subscription status");
         } finally {
-            setIsLoading(false);
+            setIsFetching(false);
         }
     };
 
     const subscribe = useCallback(async () => {
         try {
-            setIsLoading(true);
+            setIsPending(true);
             setError(null);
 
             // Request notification permission
@@ -93,13 +95,13 @@ export function usePushNotifications() {
             console.error("Error subscribing to push notifications:", err);
             setError("Failed to subscribe to notifications");
         } finally {
-            setIsLoading(false);
+            setIsPending(false);
         }
     }, []);
 
     const unsubscribe = useCallback(async () => {
         try {
-            setIsLoading(true);
+            setIsPending(true);
             setError(null);
 
             if (!subscription) {
@@ -124,17 +126,18 @@ export function usePushNotifications() {
             console.error("Error unsubscribing from push notifications:", err);
             setError("Failed to unsubscribe from notifications");
         } finally {
-            setIsLoading(false);
+            setIsPending(false);
         }
     }, [subscription]);
 
     return {
         isSupported,
         isSubscribed,
-        isLoading,
+        isPending,
         error,
         subscribe,
         unsubscribe,
+        isFetching,
     };
 }
 
