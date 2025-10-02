@@ -6,6 +6,7 @@ import {
     useComputedColorScheme,
     useMantineColorScheme,
 } from "@mantine/core";
+import { useIsomorphicEffect } from "@mantine/hooks";
 import { IconMoonStars, IconSun } from "@tabler/icons-react";
 import { Dispatch, SetStateAction } from "react";
 
@@ -16,9 +17,15 @@ type ModeToggleProps = {
 
 export function ModeToggle({ checked, setChecked, ...props }: ModeToggleProps) {
     const { setColorScheme } = useMantineColorScheme();
+
     const computedColorScheme = useComputedColorScheme("light", {
         getInitialValueInEffect: true,
     });
+
+    // for correct switch mode on page load
+    useIsomorphicEffect(() => {
+        setChecked(computedColorScheme !== "dark");
+    }, [computedColorScheme]);
 
     return (
         <Switch

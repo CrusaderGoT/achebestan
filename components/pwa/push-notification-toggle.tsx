@@ -1,10 +1,22 @@
 "use client";
 
 import { usePushNotifications } from "@/lib/hooks/pwa/use-push-notifications";
-import { Alert, Button, Card, Group, Loader, Stack, Text } from "@mantine/core";
+import {
+    Alert,
+    Button,
+    Dialog,
+    DialogProps,
+    Group,
+    Loader,
+    Stack,
+    Text,
+} from "@mantine/core";
 import { IconAlertCircle, IconBell, IconBellOff } from "@tabler/icons-react";
 
-export function PushNotificationToggle() {
+export function PushNotificationToggle({
+    userExists,
+    ...props
+}: DialogProps & { userExists: boolean }) {
     const {
         isSupported,
         isSubscribed,
@@ -14,36 +26,29 @@ export function PushNotificationToggle() {
         unsubscribe,
     } = usePushNotifications();
 
-    if (!isSupported) {
-        return (
-            <Alert
-                icon={<IconAlertCircle size={16} />}
-                title="Not Supported"
-                color="yellow"
-            >
-                Push notifications are not supported in your browser.
-            </Alert>
-        );
+    if (!isSupported || !userExists) {
+        return null;
     }
 
     return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Dialog {...props}>
             <Stack gap="md">
                 <Group justify="space-between">
-                    <div>
+                    <Stack>
                         <Text size="lg" fw={500}>
                             Push Notifications
                         </Text>
                         <Text size="sm" c="dimmed">
                             Get notified when new content is published
                         </Text>
-                    </div>
+                    </Stack>
+
                     {isLoading ? (
                         <Loader size="sm" />
                     ) : isSubscribed ? (
-                        <IconBell size={24} />
+                        <IconBell size={16} />
                     ) : (
-                        <IconBellOff size={24} />
+                        <IconBellOff size={16} />
                     )}
                 </Group>
 
@@ -82,6 +87,6 @@ export function PushNotificationToggle() {
                     </Text>
                 )}
             </Stack>
-        </Card>
+        </Dialog>
     );
 }

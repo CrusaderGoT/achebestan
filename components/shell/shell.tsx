@@ -10,13 +10,11 @@ import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Space, Text, Title } from "@mantine/core";
+import { AppShell, Burger, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-import { PushNotificationToggle } from "@/components/pwa/push-notification-toggle";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 
@@ -137,13 +135,12 @@ export function Shell({
                 <NavLinks session={session} />
 
                 <Group ml={"auto"} mt={"xs"} mr={"sm"}>
-                    <Text size="sm" c={"dimmed"}>
-                        mode toggle
-                    </Text>
                     <ModeToggle
                         size={"sm"}
                         checked={checkedModeToggle}
                         setChecked={setCheckedModeToggle}
+                        label="mode toggle"
+                        labelPosition="left"
                     />
                 </Group>
 
@@ -153,10 +150,6 @@ export function Shell({
                         setSecretValue={setSecretValue}
                     />
                 )}
-
-                <Space />
-
-                <PushNotificationToggle />
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
