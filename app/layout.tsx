@@ -18,7 +18,6 @@ import {
 
 import { Notifications } from "@mantine/notifications";
 
-import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
@@ -110,8 +109,6 @@ export default function RootLayout({
                     <Notifications limit={1} />
 
                     <ServiceWorkerRegister />
-
-                    <PWAInstallPrompt />
 
                     <Shell>{children}</Shell>
                 </MantineProvider>
