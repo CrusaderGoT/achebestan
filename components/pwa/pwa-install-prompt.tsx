@@ -56,15 +56,6 @@ centered
                 padding="md"
                 radius="md"
                 withBorder
-                style={{
-                    position: "fixed",
-                    bottom: 20,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    zIndex: 1000,
-                    maxWidth: 400,
-                    width: "90%",
-                }}
             >
                 <Group justify="space-between" mb="xs">
                     <Text size="sm" fw={500}>
