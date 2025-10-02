@@ -165,6 +165,8 @@ export function Shell({
                     opened={openedAuthModal}
                     close={closeAuthModal}
                 />
+
+                <PWAInstallPrompt />
             </AppShell.Main>
 
             <AppShell.Footer></AppShell.Footer>
