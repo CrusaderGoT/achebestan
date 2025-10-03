@@ -5,8 +5,7 @@ import { pushSubscriptions } from "@/drizzle/schemas/pwa";
 import { authActionClient } from "@/lib/safe-action";
 import { subscriptionSchema } from "@/zod-schemas/pwa";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const subscribeToPush = authActionClient
     .inputSchema(subscriptionSchema)
@@ -40,7 +39,6 @@ export const subscribeToPush = authActionClient
             auth: parsedInput.keys.auth,
         });
 
-        revalidatePath("/settings/notifications");
         return {
             success: true,
             message: "Successfully subscribed to notifications",
@@ -48,7 +46,7 @@ export const subscribeToPush = authActionClient
     });
 
 export const unsubscribeFromPush = authActionClient
-    .inputSchema(z.object({ endpoint: z.string().url() }))
+    .inputSchema(z.object({ endpoint: z.url() }))
     .action(async ({ parsedInput, ctx }) => {
         await db
             .delete(pushSubscriptions)
@@ -59,7 +57,6 @@ export const unsubscribeFromPush = authActionClient
                 )
             );
 
-        revalidatePath("/settings/notifications");
         return {
             success: true,
             message: "Successfully unsubscribed from notifications",
@@ -73,14 +70,14 @@ export const getSubscriptionStatus = authActionClient
             return { isSubscribed: false, subscriptionCount: 0 };
         }
 
-        const [subscriptions] = await db
+        const subscriptions = await db
             .select()
             .from(pushSubscriptions)
             .where(eq(pushSubscriptions.userId, ctx.user.id));
 
         return {
-            isSubscribed: !!subscriptions,
-            subscriptionCount: subscriptions,
-            subscriptions: [subscriptions],
+            isSubscribed: subscriptions.length > 0,
+            subscriptionCount: subscriptions.length,
+            subscriptions: subscriptions,
         };
     });

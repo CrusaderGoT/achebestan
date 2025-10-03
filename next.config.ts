@@ -9,8 +9,7 @@ const withSerwist = withSerwistInit({
     scope: "/",
     register: true,
     reloadOnOnline: true,
-    //disable: process.env.NODE_ENV === "development",
-    exclude: [/cloudinary\.com/],
+    disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig: NextConfig = {

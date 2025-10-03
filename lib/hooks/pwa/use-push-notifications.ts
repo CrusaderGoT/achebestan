@@ -1,10 +1,6 @@
 "use client";
 
-import {
-    getSubscriptionStatus,
-    subscribeToPush,
-    unsubscribeFromPush,
-} from "@/lib/actions/pwa";
+import { subscribeToPush, unsubscribeFromPush } from "@/lib/actions/pwa";
 import { useCallback, useEffect, useState } from "react";
 
 export function usePushNotifications() {
@@ -40,10 +36,7 @@ export function usePushNotifications() {
             setSubscription(sub);
 
             if (sub) {
-                const status = await getSubscriptionStatus({});
-                setIsSubscribed(status?.data?.isSubscribed ?? false);
-            } else {
-                setIsSubscribed(false);
+                setIsSubscribed(true);
             }
         } catch (err) {
             console.error("Error checking subscription:", err);
