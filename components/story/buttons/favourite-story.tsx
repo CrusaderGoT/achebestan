@@ -9,9 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 export function FavouriteStory({
     userId,
     storyId,
+    openAuthModal,
 }: {
     userId: string | undefined;
     storyId: number;
+    openAuthModal: () => void;
 }) {
     const [isFavourited, setIsFavourited] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true);
@@ -59,7 +61,13 @@ export function FavouriteStory({
 
     return (
         <ActionIcon
-            onClick={handleToggleFavourite}
+            onClick={() => {
+                if (!userId) {
+                    openAuthModal();
+                } else {
+                    handleToggleFavourite();
+                }
+            }}
             variant="subtle"
             color="red"
             loading={isPending}

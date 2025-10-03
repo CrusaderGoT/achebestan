@@ -18,8 +18,9 @@ import {
 
 import { authClient } from "@/lib/auth-client";
 import { PickedStoryProps } from "@/types/story";
-import { useDisclosure, useMounted } from "@mantine/hooks";
+import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
+import { AuthenticationModal } from "../forms/user/auth-modal";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
 import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";
@@ -31,12 +32,26 @@ export function StoryActions({ ...props }: PickedStoryProps) {
 
     const mounted = useMounted();
 
-    const { data: session } = authClient.useSession();
+    const { data: session, isPending: isPendingSession } =
+        authClient.useSession();
 
     const [
         openedCommentForm,
-        { toggle: toggleCommentForm, close: closeCommentForm },
-    ] = useDisclosure(!!session?.user);
+        {
+            toggle: toggleCommentForm,
+            close: closeCommentForm,
+            open: openCommentForm,
+        },
+    ] = useDisclosure(false);
+
+    const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
+        useDisclosure(false);
+
+    useIsomorphicEffect(() => {
+        if (!!session?.user.id) {
+            openCommentForm();
+        }
+    }, [session?.user.id]);
 
     if (!mounted) return null;
 
@@ -44,28 +59,39 @@ export function StoryActions({ ...props }: PickedStoryProps) {
         <>
             <Stack>
                 <Group justify="space-between" grow>
-                    <FavouriteStory
-                        userId={session?.user.id}
-                        storyId={props.id}
-                    />
+                    {!isPendingSession && (
+                        <FavouriteStory
+                            userId={session?.user.id}
+                            storyId={props.id}
+                            openAuthModal={openAuthModal}
+                        />
+                    )}
 
-                    <ActionIcon
-                        onClick={toggleCommentForm}
-                        color="gray"
-                        variant="subtle"
-                    >
-                        <Group gap={"xs"} wrap="nowrap">
-                            <Text visibleFrom="sm" fw={500}>
-                                {openedCommentForm ? "Close" : "Comment"}
-                            </Text>
+                    {!isPendingSession && (
+                        <ActionIcon
+                            onClick={() => {
+                                if (!session?.user.id) {
+                                    openAuthModal();
+                                } else {
+                                    toggleCommentForm();
+                                }
+                            }}
+                            color="gray"
+                            variant="subtle"
+                        >
+                            <Group gap={"xs"} wrap="nowrap">
+                                <Text visibleFrom="sm" fw={500}>
+                                    {openedCommentForm ? "Close" : "Comment"}
+                                </Text>
 
-                            {openedCommentForm ? (
-                                <IconMessage2Off />
-                            ) : (
-                                <IconMessage2 />
-                            )}
-                        </Group>
-                    </ActionIcon>
+                                {openedCommentForm ? (
+                                    <IconMessage2Off />
+                                ) : (
+                                    <IconMessage2 />
+                                )}
+                            </Group>
+                        </ActionIcon>
+                    )}
 
                     <IconCurrencyDollar color="green" />
 
@@ -76,11 +102,11 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                         closeStoryShare={closeStoryShare}
                     />
 
-                    <DeleteStory {...props} />
+                    {!isPendingSession && <DeleteStory {...props} />}
                 </Group>
 
                 <Transition
-                    mounted={openedCommentForm && !!session?.user.id}
+                    mounted={openedCommentForm}
                     transition="scale-y"
                     duration={400}
                     timingFunction="ease-in-out"
@@ -102,6 +128,11 @@ export function StoryActions({ ...props }: PickedStoryProps) {
             </Stack>
 
             <PushNotificationToggle userExists={!!session?.user} />
+
+            <AuthenticationModal
+                opened={openedAuthModal}
+                close={closeAuthModal}
+            />
         </>
     );
 }

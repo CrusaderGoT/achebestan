@@ -23,6 +23,7 @@ import {
     ActionIcon,
     Affix,
     AffixProps,
+    CloseButton,
     Group,
     Stack,
     Textarea,
@@ -213,77 +214,76 @@ export function RatingForm({
         <Affix {...props}>
             <RatingFormProvider form={form}>
                 <form onSubmit={form.onSubmit(handleSubmit)}>
-                    <Stack className={ratingStyles.ratingStack}>
-                        <Group justify="space-between">
-                            <Stack>
-                                <Textarea
-                                    placeholder="What Did You Think Of The Story?"
-                                    value={comment}
-                                    onChange={(event) => {
-                                        setComment(event.currentTarget.value);
-                                    }}
-                                    minRows={2}
-                                    maxRows={4}
-                                />
-                                <Group gap={"xl"} justify="space-between">
-                                    <RatingFields fractions={2} />
+                    <Stack gap={5} className={ratingStyles.ratingStack}>
+                        <CloseButton
+                            onClick={closeRatingForm}
+                            ml={"auto"}
+                            size={"xs"}
+                        />
 
-                                    <Group>
+                        <Textarea
+                            placeholder="What Did You Think Of The Story?"
+                            value={comment}
+                            onChange={(event) => {
+                                setComment(event.currentTarget.value);
+                            }}
+                            minRows={2}
+                            maxRows={4}
+                        />
+                        <Group gap={"xl"} justify="space-between">
+                            <RatingFields fractions={2} />
+
+                            <Group>
+                                <ActionIcon
+                                    size={"xs"}
+                                    color="green"
+                                    type="submit"
+                                    title="submit your rating"
+                                    variant="light"
+                                    loading={form.submitting}
+                                    disabled={isPendingDeleteRating}
+                                    className={cx(
+                                        form.isDirty() || commentChanged
+                                            ? publicStyles.show
+                                            : publicStyles.hide
+                                    )}
+                                >
+                                    <IconCheck />
+                                </ActionIcon>
+                                {userRating?.id &&
+                                    typeof userRating.id === "number" && (
                                         <ActionIcon
                                             size={"xs"}
-                                            color="green"
-                                            type="submit"
-                                            title="submit your rating"
+                                            color="red"
+                                            title="delete your rating"
                                             variant="light"
-                                            loading={form.submitting}
-                                            disabled={isPendingDeleteRating}
-                                            className={cx(
-                                                form.isDirty() || commentChanged
-                                                    ? publicStyles.show
-                                                    : publicStyles.hide
-                                            )}
-                                        >
-                                            <IconCheck />
-                                        </ActionIcon>
-                                        {userRating?.id &&
-                                            typeof userRating.id ===
-                                                "number" && (
-                                                <ActionIcon
-                                                    size={"xs"}
-                                                    color="red"
-                                                    title="delete your rating"
-                                                    variant="light"
-                                                    loading={
-                                                        isPendingDeleteRating
-                                                    }
-                                                    disabled={form.submitting}
-                                                    onClick={async () => {
-                                                        const deletedRate =
-                                                            await executeAsyncDeleteRating(
-                                                                {
-                                                                    storyISBN:
-                                                                        storyISBN,
-                                                                    userId: userId,
-                                                                }
-                                                            );
-
-                                                        if (deletedRate) {
-                                                            setComment("");
-                                                            form.setFieldValue(
-                                                                "stars",
-                                                                0
-                                                            );
-                                                            form.resetDirty();
-                                                            closeRatingForm();
+                                            loading={isPendingDeleteRating}
+                                            disabled={form.submitting}
+                                            onClick={async () => {
+                                                const deletedRate =
+                                                    await executeAsyncDeleteRating(
+                                                        {
+                                                            storyISBN:
+                                                                storyISBN,
+                                                            userId: userId,
                                                         }
-                                                    }}
-                                                >
-                                                    <IconTrashFilled />
-                                                </ActionIcon>
-                                            )}
-                                    </Group>
-                                </Group>
-                            </Stack>
+                                                    );
+
+                                                if (deletedRate) {
+                                                    setComment("");
+                                                    form.setFieldValue(
+                                                        "stars",
+                                                        0
+                                                    );
+                                                    form.resetDirty();
+                                                    closeRatingForm();
+                                                }
+                                            }}
+                                        >
+                                            <IconTrashFilled />
+                                        </ActionIcon>
+                                    )}
+                            </Group>
                         </Group>
                     </Stack>
                 </form>

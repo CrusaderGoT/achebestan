@@ -1,13 +1,7 @@
 "use client";
 
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
-import {
-    ActionIcon,
-    Group,
-    Rating,
-    TooltipFloating,
-    UnstyledButton,
-} from "@mantine/core";
+import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 
 import { authClient } from "@/lib/auth-client";
 import { calculateRatingsAverage } from "@/lib/utils/helpers";
@@ -33,7 +27,7 @@ export function StoryRating({
 
     const rating = calculateRatingsAverage(ratings);
 
-    const { data: session } = authClient.useSession();
+    const { data: session, isPending } = authClient.useSession();
 
     const mounted = useMounted();
 
@@ -42,12 +36,18 @@ export function StoryRating({
 
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
-            {session?.user.id && mounted ? (
+            {mounted && !isPending && (
                 <>
                     <ActionIcon.Group>
                         <ActionIcon
                             size={"sm"}
-                            onClick={() => toggle()}
+                            onClick={() => {
+                                if (!session?.user.id) {
+                                    openAuthModal();
+                                } else {
+                                    toggle();
+                                }
+                            }}
                             variant="outline"
                             color={opened ? "red" : "green"}
                         >
@@ -61,7 +61,13 @@ export function StoryRating({
                             size={"sm"}
                             variant="outline"
                             color={opened ? "red" : "green"}
-                            onClick={() => toggle()}
+                            onClick={() => {
+                                if (!session?.user.id) {
+                                    openAuthModal();
+                                } else {
+                                    toggle();
+                                }
+                            }}
                             className={cx(
                                 publicStyles.boldText,
                                 publicStyles.cursorPointer
@@ -71,7 +77,13 @@ export function StoryRating({
                         </ActionIcon.GroupSection>
                         <ActionIcon
                             size={"sm"}
-                            onClick={() => toggle()}
+                            onClick={() => {
+                                if (!session?.user.id) {
+                                    openAuthModal();
+                                } else {
+                                    toggle();
+                                }
+                            }}
                             variant="outline"
                             color={opened ? "red" : "green"}
                         >
@@ -83,26 +95,22 @@ export function StoryRating({
                         </ActionIcon>
                     </ActionIcon.Group>
 
-                    <RatingForm
-                        userRating={userRating}
-                        storyISBN={storyISBN}
-                        userId={session.user.id}
-                        closeRatingForm={close}
-                        position={{ bottom: 20, right: 20 }}
-                        className={cx(!opened && publicStyles.hide)}
-                    />
-                </>
-            ) : (
-                <Group>
-                    <UnstyledButton onClick={openAuthModal}>
-                        Rate and Comment
-                    </UnstyledButton>
+                    {session?.user.id && (
+                        <RatingForm
+                            userRating={userRating}
+                            storyISBN={storyISBN}
+                            userId={session.user.id}
+                            closeRatingForm={close}
+                            position={{ bottom: 20, right: 20 }}
+                            className={cx(!opened && publicStyles.hide)}
+                        />
+                    )}
 
                     <AuthenticationModal
                         opened={openedAuthModal}
                         close={closeAuthModal}
                     />
-                </Group>
+                </>
             )}
 
             {ratings.length > 0 && (
