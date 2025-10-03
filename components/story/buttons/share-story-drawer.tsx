@@ -76,7 +76,7 @@ export function CopyStoryUrl({ isbn }: { isbn: string }) {
     return (
         <CopyButton value={`${BASE_URL}/story/${isbn}`} timeout={2000}>
             {({ copied, copy }) => (
-                <ActionIcon variant="default" onClick={copy} size={"input-md"}>
+                <ActionIcon variant="default" onClick={copy}>
                     <Group gap={"xs"} wrap="nowrap">
                         {copied ? (
                             <IconCheck size={16} />

@@ -15,7 +15,6 @@ export function WebShare({ title, text, url }: ShareData) {
             onClick={async () => {
                 await share({ text, title, url });
             }}
-            size={"input-md"}
         >
             <Group gap={"xs"} wrap="nowrap">
                 <IconDotsCircleHorizontal size={16} />

@@ -20,7 +20,6 @@ export const useWebShare = () => {
         if (!error) return;
 
         notifications.show({
-            title: "Share Error",
             message: error,
             autoClose: 5000,
         });
