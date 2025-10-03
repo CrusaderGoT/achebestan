@@ -55,6 +55,10 @@ const nextConfig: NextConfig = {
                         key: "Referrer-Policy",
                         value: "strict-origin-when-cross-origin",
                     },
+                    {
+                        key: "Content-Security-Policy",
+                        value: "img-src 'self' https://res.cloudinary.com data: blob:; media-src 'self' https://res.cloudinary.com blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.cloudinary.com; font-src 'self'; object-src 'none'; base-uri 'self';",
+                    },
                 ],
             },
             {
