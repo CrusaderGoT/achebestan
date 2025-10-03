@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "achebestan",
         description: "A Place To Read Intriguing Stories.",
         theme_color: "black",
-        background_color: "gold",
+        background_color: "#EFBF04",
         display: "standalone",
         orientation: "portrait-primary",
         start_url: "/",
