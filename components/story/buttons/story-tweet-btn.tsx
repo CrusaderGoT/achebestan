@@ -62,7 +62,6 @@ export function StoryTweetButton({
             onClick={handleClick}
             aria-label={`Share ${story.title} on X (Twitter)`}
             title={`Share ${story.title} on X`}
-            flex={"100px  0"}
             mr={"auto"}
             {...props}
         >

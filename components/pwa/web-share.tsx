@@ -15,7 +15,6 @@ export function WebShare({ title, text, url }: ShareData) {
             onClick={async () => {
                 await share({ text, title, url });
             }}
-            flex={"120px  0"}
             size={"input-md"}
         >
             <Group gap={"xs"} wrap="nowrap">

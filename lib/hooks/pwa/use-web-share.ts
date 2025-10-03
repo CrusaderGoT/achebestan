@@ -34,14 +34,14 @@ export const useWebShare = () => {
         try {
             setError(null);
             if (!navigator.canShare(data)) {
-                notifications.show({ message: "Cannot Share" });
+                notifications.show({ message: "Cannot Share These Story." });
                 return;
             }
 
             await navigator.share(data);
         } catch (e) {
             console.log("share error", e);
-            setError("Error While Sharing");
+            setError((e as string) || "Error While Sharing");
         }
     }, []);
 

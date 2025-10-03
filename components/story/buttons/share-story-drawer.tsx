@@ -34,18 +34,18 @@ export function ShareStoryDrawer({
             <Drawer
                 opened={openedStoryShare}
                 onClose={closeStoryShare}
-                title={`Share story ${story.title.toUpperCase()} on socials`}
+                title={`Share story ${story.title.toUpperCase()}`}
                 position="bottom"
                 size={"xs"}
             >
                 <Stack>
-                    <Group justify="space-around">
+                    <Group grow>
                         <StoryTweetButton story={story} variant="subtle" />
                     </Group>
 
                     <Divider />
 
-                    <Group>
+                    <Group grow>
                         <CopyStoryUrl isbn={story.isbn} />
                         <WebShare
                             title={`Achebestan - Share ${story.title}`}
@@ -76,12 +76,7 @@ export function CopyStoryUrl({ isbn }: { isbn: string }) {
     return (
         <CopyButton value={`${BASE_URL}/story/${isbn}`} timeout={2000}>
             {({ copied, copy }) => (
-                <ActionIcon
-                    variant="default"
-                    onClick={copy}
-                    flex={"120px  0"}
-                    size={"input-md"}
-                >
+                <ActionIcon variant="default" onClick={copy} size={"input-md"}>
                     <Group gap={"xs"} wrap="nowrap">
                         {copied ? (
                             <IconCheck size={16} />
