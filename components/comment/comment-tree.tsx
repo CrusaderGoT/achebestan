@@ -15,10 +15,10 @@ import {
 
 import { IconArrowBack } from "@tabler/icons-react";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import { authClient } from "@/lib/auth-client";
-import { useMounted } from "@mantine/hooks";
+import { useDidUpdate, useMounted } from "@mantine/hooks";
 
 import {
     CommentNodeProps,
@@ -28,10 +28,12 @@ import {
     DRAWER_CONFIG_TYPE,
 } from "@/types/comment";
 
-import { flattenComments } from "@/lib/utils/comment/comments-tree-utils";
-import { commentsToTreeNodeData } from "@/lib/utils/comment/comments-tree-utils";
-import { buildCommentHierarchy } from "@/lib/utils/comment/comments-tree-utils";
-import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
+import {
+    buildCommentHierarchy,
+    commentsToTreeNodeData,
+    CommentTreeUtils,
+    flattenComments,
+} from "@/lib/utils/comment/comments-tree-utils";
 
 import {
     useCommentInteractions,
@@ -76,7 +78,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
         commentsNodeData
             .slice(0, CommentTreeUtils.initialExpandCount)
-            .filter((c) => !c.parentCommentId && !c.hasBeenDeleted)
+            .filter((c) => !c.parentCommentId && c.hasBeenDeleted !== true)
             .forEach((c) => {
                 values.push(c.value);
                 if (c.children?.length && c.children.length > 0) {
@@ -113,7 +115,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     }, [commentsNodeData]);
 
     // Enhanced auto-expansion with error handling
-    useEffect(() => {
+    useDidUpdate(() => {
         try {
             newCommentsToExpand.forEach((commentId) => {
                 if (

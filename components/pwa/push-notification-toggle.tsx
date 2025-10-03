@@ -39,7 +39,7 @@ export function PushNotificationToggle({
                 </Button>
             ) : (
                 <Stack>
-                    <Group justify="space-between" align="center">
+                    <Group justify="space-between">
                         <Stack>
                             <Text size="lg" fw={500}>
                                 Subcribe To Notifications
