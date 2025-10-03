@@ -41,7 +41,13 @@ export const useWebShare = () => {
             await navigator.share(data);
         } catch (e) {
             console.log("share error", e);
-            setError((e as string) || "Error While Sharing");
+            const message =
+                e instanceof Error
+                    ? e.message
+                    : typeof e === "string"
+                    ? e
+                    : "Error While Sharing";
+            setError(message);
         }
     }, []);
 
