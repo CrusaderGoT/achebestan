@@ -1,6 +1,8 @@
 "use client";
 
+import { WebShare } from "@/components/pwa/web-share";
 import { BASE_URL } from "@/lib/constants";
+import { createTweetText } from "@/lib/utils/story/story-utils";
 import { PickedStoryProps } from "@/types/story";
 import {
     ActionIcon,
@@ -45,6 +47,14 @@ export function ShareStoryDrawer({
 
                     <Group>
                         <CopyStoryUrl isbn={story.isbn} />
+                        <WebShare
+                            title={`Achebestan - Share ${story.title}`}
+                            text={createTweetText({
+                                title: story.title,
+                                blurb: story.blurb,
+                            })}
+                            url={`${BASE_URL}/story/${story.isbn}`}
+                        />
                     </Group>
                 </Stack>
             </Drawer>

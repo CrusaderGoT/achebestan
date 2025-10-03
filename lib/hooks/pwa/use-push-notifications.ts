@@ -1,6 +1,7 @@
 "use client";
 
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/actions/pwa";
+import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { useIsomorphicEffect } from "@mantine/hooks";
 import { useCallback, useState } from "react";
 
@@ -16,15 +17,12 @@ export function usePushNotifications() {
     const [error, setError] = useState<string | null>(null);
 
     useIsomorphicEffect(() => {
-        if (
-            typeof window !== "undefined" &&
-            "serviceWorker" in navigator &&
-            "PushManager" in window
-        ) {
-            setIsSupported(true);
+        const supported = isFeatureSupported(["serviceWorker", "pushManager"]);
+        setIsSupported(supported);
+
+        if (supported) {
             checkSubscription();
         } else {
-            setIsSupported(false);
             setIsFetching(false);
         }
     }, []);
