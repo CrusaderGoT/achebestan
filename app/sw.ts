@@ -38,8 +38,17 @@ const serwist = new Serwist({
     runtimeCaching: [
         {
             matcher: ({ url }) => url.pathname.startsWith("/story/"),
-            handler: new StaleWhileRevalidate({
+            handler: new NetworkFirst({
                 cacheName: "story-pages",
+                networkTimeoutSeconds: 5,
+                plugins: [
+                    {
+                        cacheWillUpdate: async ({ response }) => {
+                            // Only cache successful responses
+                            return response?.status === 200 ? response : null;
+                        },
+                    },
+                ],
             }),
         },
         // Cache images with CacheFirst strategy
@@ -58,7 +67,7 @@ const serwist = new Serwist({
                     },
                     {
                         // Add expiration plugin
-                        cacheDidUpdate: async ({ cacheName, request }) => {
+                        cacheDidUpdate: async ({ cacheName }) => {
                             const cache = await caches.open(cacheName);
                             const keys = await cache.keys();
 
@@ -122,7 +131,12 @@ self.addEventListener("push", (event: PushEvent) => {
             return;
         }
 
-        const options: NotificationOptions = {
+        const options: NotificationOptions & {
+            vibrate?: number[];
+            actions?: [];
+            timestamp?: number;
+            renotify?: boolean;
+        } = {
             body: data.body || "",
             icon: data.icon || "/web-app-manifest-512x512.png",
             badge: data.badge || "/web-app-manifest-192x192.png",
@@ -262,13 +276,13 @@ self.addEventListener("activate", (event) => {
     event.waitUntil(
         (async () => {
             const cacheNames = await caches.keys();
-            const validCacheNames = new Set(Object.values(CACHE_NAMES));
+            const validCacheNames = new Set<string>(Object.values(CACHE_NAMES));
 
             await Promise.all(
                 cacheNames.map(async (cacheName) => {
                     // Delete old cache versions
                     if (
-                        !validCacheNames.has(cacheName as any) &&
+                        !validCacheNames.has(cacheName) &&
                         (cacheName.startsWith("images-") ||
                             cacheName.startsWith("api-cache-") ||
                             cacheName.startsWith("static-resources-"))
