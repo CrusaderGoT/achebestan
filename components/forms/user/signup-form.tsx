@@ -66,7 +66,7 @@ export function SignupForm({
 
     return (
         <SignupFormProvider form={form}>
-            <Paper withBorder p={"md"} pos={"relative"}>
+            <Paper withBorder p={"md"}>
                 <Title order={3} ta={"center"} mb={"md"}>
                     Sign Up To Become A Writer!
                 </Title>

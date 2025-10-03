@@ -19,17 +19,16 @@ export function AuthenticationModal({
     const [signupFormState, setSignupFormState] =
         useState<LoginFormState>("idle");
 
+    const isFormPending =
+        signupFormState === "pending" || loginFormState === "pending";
+
     return (
         <Modal
             opened={opened}
             onClose={close}
             centered
-            withCloseButton={
-                signupFormState !== "pending" || loginFormState !== "pending"
-            }
-            closeOnClickOutside={
-                loginFormState !== "pending" || signupFormState !== "pending"
-            }
+            withCloseButton={!isFormPending}
+            closeOnClickOutside={!isFormPending}
             title="Authentication"
         >
             <AuthTabs
