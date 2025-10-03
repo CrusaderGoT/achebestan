@@ -18,8 +18,7 @@ import {
 
 import { authClient } from "@/lib/auth-client";
 import { PickedStoryProps } from "@/types/story";
-import { useDisclosure, useInViewport, useMounted } from "@mantine/hooks";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useDisclosure, useMounted } from "@mantine/hooks";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
 import { DeleteStory } from "./buttons/delete-story";
@@ -30,39 +29,20 @@ export function StoryActions({ ...props }: PickedStoryProps) {
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
         useDisclosure(false);
 
-    const [
-        openedCommentForm,
-        { toggle: toggleCommentForm, close: closeCommentForm },
-    ] = useDisclosure(true);
-
     const mounted = useMounted();
 
     const { data: session } = authClient.useSession();
 
-    const [openedPND, setOpenedPND] = useState(false);
-
-    const { ref, inViewport } = useInViewport();
-
-    const closedPNDRef = useRef(false);
-
-    useEffect(() => {
-        if (inViewport && closedPNDRef.current !== true) {
-            setOpenedPND(true);
-        } else if (!inViewport) {
-            setOpenedPND(false);
-        }
-    }, [inViewport, closedPNDRef]);
-
-    const handleClosePND = useCallback(() => {
-        setOpenedPND(false);
-        closedPNDRef.current = true;
-    }, [closedPNDRef, setOpenedPND]);
+    const [
+        openedCommentForm,
+        { toggle: toggleCommentForm, close: closeCommentForm },
+    ] = useDisclosure(!!session?.user);
 
     if (!mounted) return null;
 
     return (
         <>
-            <Stack ref={ref}>
+            <Stack>
                 <Group justify="space-between" grow>
                     <FavouriteStory
                         userId={session?.user.id}
@@ -121,13 +101,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                 </Transition>
             </Stack>
 
-            <PushNotificationToggle
-                opened={openedPND}
-                onClose={handleClosePND}
-                withCloseButton
-                shadow="sm"
-                userExists={!!session?.user}
-            />
+            <PushNotificationToggle userExists={!!session?.user} />
         </>
     );
 }

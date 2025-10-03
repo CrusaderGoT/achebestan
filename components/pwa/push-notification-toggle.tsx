@@ -1,21 +1,14 @@
 "use client";
 
 import { usePushNotifications } from "@/lib/hooks/pwa/use-push-notifications";
-import {
-    Alert,
-    Button,
-    Dialog,
-    DialogProps,
-    Group,
-    Stack,
-    Text,
-} from "@mantine/core";
+import { Alert, Button, Group, Stack, Text } from "@mantine/core";
 import { IconAlertCircle, IconBell, IconBellOff } from "@tabler/icons-react";
 
 export function PushNotificationToggle({
     userExists,
-    ...props
-}: DialogProps & { userExists: boolean }) {
+}: {
+    userExists: boolean;
+}) {
     const {
         isSubscribed,
         isSupported,
@@ -30,69 +23,57 @@ export function PushNotificationToggle({
         return null;
     }
 
-    if (isSubscribed) {
-        return (
-            <>
+    return (
+        <>
+            {isSubscribed ? (
                 <Button
+                    fullWidth
                     size="md"
                     onClick={unsubscribe}
+                    loading={isPending}
                     variant={"outline"}
                     color={"red"}
                     leftSection={<IconBellOff size={16} />}
                 >
                     Disable Notifications
                 </Button>
+            ) : (
+                <Stack>
+                    <Group justify="space-between" align="center">
+                        <Stack>
+                            <Text size="lg" fw={500}>
+                                Subcribe To Notifications
+                            </Text>
+                            <Text size="sm" c="dimmed">
+                                Get notified when new content is published
+                            </Text>
+                        </Stack>
 
-                {error && (
-                    <Alert
-                        icon={<IconAlertCircle size={16} />}
-                        title="Error"
-                        color="red"
+                        <IconBell size={16} />
+                    </Group>
+
+                    <Button
+                        fullWidth
+                        onClick={subscribe}
+                        loading={isPending}
+                        variant={"filled"}
+                        color={"green"}
+                        leftSection={<IconBell size={16} />}
                     >
-                        {error}
-                    </Alert>
-                )}
-            </>
-        );
-    }
+                        Enable Notifications
+                    </Button>
+                </Stack>
+            )}
 
-    return (
-        <Dialog {...props}>
-            <Stack>
-                <Group justify="space-between" align="center">
-                    <Stack>
-                        <Text size="lg" fw={500}>
-                            Subcribe To Notifications
-                        </Text>
-                        <Text size="sm" c="dimmed">
-                            Get notified when new content is published
-                        </Text>
-                    </Stack>
-
-                    <IconBell size={16} />
-                </Group>
-
-                {error && (
-                    <Alert
-                        icon={<IconAlertCircle size={16} />}
-                        title="Error"
-                        color="red"
-                    >
-                        {error}
-                    </Alert>
-                )}
-
-                <Button
-                    fullWidth
-                    onClick={subscribe}
-                    loading={isPending}
-                    variant={"filled"}
-                    color={"green"}
-                    leftSection={<IconBell size={16} />}
+            {error && (
+                <Alert
+                    icon={<IconAlertCircle size={16} />}
+                    title="Error"
+                    color="red"
                 >
-                    Enable Notifications
-                </Button>
-            </Stack>
-        </Dialog>
+                    {error}
+                </Alert>
+            )}
+        </>
     );
 }
