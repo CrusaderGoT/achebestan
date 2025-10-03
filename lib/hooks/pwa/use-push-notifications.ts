@@ -1,7 +1,8 @@
 "use client";
 
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/actions/pwa";
-import { useCallback, useEffect, useState } from "react";
+import { useIsomorphicEffect } from "@mantine/hooks";
+import { useCallback, useState } from "react";
 
 export function usePushNotifications() {
     const [isSupported, setIsSupported] = useState(false);
@@ -14,7 +15,7 @@ export function usePushNotifications() {
 
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    useIsomorphicEffect(() => {
         if (
             typeof window !== "undefined" &&
             "serviceWorker" in navigator &&
