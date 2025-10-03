@@ -28,12 +28,10 @@ import {
     DRAWER_CONFIG_TYPE,
 } from "@/types/comment";
 
-import {
-    buildCommentHierarchy,
-    commentsToTreeNodeData,
-    CommentTreeUtils,
-    flattenComments,
-} from "@/lib/utils/helpers";
+import { flattenComments } from "@/lib/utils/comment/comments-tree-utils";
+import { commentsToTreeNodeData } from "@/lib/utils/comment/comments-tree-utils";
+import { buildCommentHierarchy } from "@/lib/utils/comment/comments-tree-utils";
+import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 
 import {
     useCommentInteractions,

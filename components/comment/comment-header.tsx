@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 
-import { CommentTreeUtils } from "@/lib/utils/helpers";
+import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);

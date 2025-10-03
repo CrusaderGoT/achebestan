@@ -6,10 +6,8 @@ import {
     forceRenderBookmarkIndicators,
     shouldReRenderBookmarks,
 } from "@/lib/utils/bookmark-renderer";
-import {
-    estimateReadingTime,
-    formatEstimatedReadingTime,
-} from "@/lib/utils/helpers";
+import { formatEstimatedReadingTime } from "@/lib/utils/story/story-utils";
+import { estimateReadingTime } from "@/lib/utils/story/story-utils";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";

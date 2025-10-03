@@ -1,4 +1,5 @@
-import { CommentTreeUtils, flattenComments } from "@/lib/utils/helpers";
+import { flattenComments } from "@/lib/utils/comment/comments-tree-utils";
+import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 import {
     CommentInteractionHandlers,
     CommentsToTreeNodeDataType,

@@ -15,7 +15,7 @@ import { CommentContent } from "./comment-content";
 import { CommentNodeHeader } from "./comment-header";
 import { LikeDislikeButton } from "./like-dislike-btns";
 
-import { CommentTreeUtils } from "@/lib/utils/helpers";
+import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 import cx from "clsx";

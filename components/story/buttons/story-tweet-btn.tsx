@@ -1,7 +1,7 @@
 "use client";
 
 import { BASE_URL } from "@/lib/constants";
-import { createTweetText } from "@/lib/utils/helpers";
+import { createTweetText } from "@/lib/utils/story/story-utils";
 import { PickedStoryProps } from "@/types/story";
 import { ActionIcon, ActionIconProps, Group, Text } from "@mantine/core";
 import { IconBrandX } from "@tabler/icons-react";
