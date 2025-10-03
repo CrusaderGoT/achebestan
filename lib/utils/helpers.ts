@@ -1,7 +1,10 @@
 import { DRAWER_CONFIG } from "@/components/comment/comment-tree";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { TreeNodeData } from "@mantine/core";
-import { CommentsToTreeNodeDataType, CommentTreeProps } from "../../types/comment";
+import {
+    CommentsToTreeNodeDataType,
+    CommentTreeProps,
+} from "../../types/comment";
 
 // STORY HELPERS
 
@@ -178,6 +181,12 @@ export function commentsToTreeNodeData(
     comments: CommentTreeProps[]
 ): CommentsToTreeNodeDataType {
     return comments.map((comment) => {
+        //filter out deleted comment data
+        if (comment.hasBeenDeleted) {
+            comment.user = null;
+            comment.text = "Deleted";
+        }
+
         const baseNode = {
             value: `${comment.id}`,
             label: comment.text,

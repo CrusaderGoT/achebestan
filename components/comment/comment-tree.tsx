@@ -259,7 +259,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                 </ActionIcon>
                             )}
 
-                        <Text truncate="end" maw={200}>
+                        <Text truncate="end" maw={200} c="dimmed" size="xs">
                             {drawer.drawerTitle}
                         </Text>
                     </Group>

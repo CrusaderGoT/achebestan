@@ -1,10 +1,10 @@
+import { CommentTreeUtils, flattenComments } from "@/lib/utils/helpers";
 import {
     CommentInteractionHandlers,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
     DrawerState,
 } from "@/types/comment";
-import { CommentTreeUtils, flattenComments } from "@/lib/utils/helpers";
 import { useTree } from "@mantine/core";
 import { useFocusTrap, useStateHistory } from "@mantine/hooks";
 import { useCallback, useMemo, useState } from "react";

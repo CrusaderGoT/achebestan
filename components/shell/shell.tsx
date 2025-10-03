@@ -27,7 +27,8 @@ export function Shell({
 
     const [secretValue, setSecretValue] = useState<string>("");
 
-    const { data: session } = authClient.useSession();
+    const { data: session, isPending: isPendingSession } =
+        authClient.useSession();
 
     const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
 
@@ -144,7 +145,7 @@ export function Shell({
                     />
                 </Group>
 
-                {!session?.user.id && (
+                {!session?.user.id && !isPendingSession && (
                     <ActivateAuth
                         secretValue={secretValue}
                         setSecretValue={setSecretValue}
