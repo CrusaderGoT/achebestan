@@ -108,7 +108,10 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             prevCommentsRef.current.map((c) => c.id)
         );
         const newComments = commentsNodeData.filter(
-            (c) => !prevCommentIds.has(c.id) && !c.parentCommentId
+            (c) =>
+                !prevCommentIds.has(c.id) &&
+                !c.parentCommentId &&
+                c.hasBeenDeleted !== true
         );
         prevCommentsRef.current = commentsNodeData;
         return newComments.map((c) => c.value);
