@@ -3,6 +3,7 @@
 import {
     ActionIcon,
     Box,
+    Button,
     Group,
     Image as MantineImage,
     SimpleGrid,
@@ -15,68 +16,55 @@ import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import stylesPublic from "@/styles/public.module.css";
 import styles from "@/styles/story-page.module.css";
 
-import { StoryUpdateType } from "@/types/story";
-import { StoryInsertType } from "@/types/story";
+import { authClient } from "@/lib/auth-client";
+import { handleFileUpload } from "@/lib/utils/image-upload";
+import { StoryInsertType, StoryUpdateType } from "@/types/story";
 import { UseFormReturnType } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import cx from "clsx";
 
-type StoryImageDropzoneType =
+type ImageDropzoneType =
     | Partial<DropzoneProps> &
           (
               | {
-                    action: "create";
+                    action: "createStory";
                     form: UseFormReturnType<StoryInsertType>;
                     field: keyof StoryInsertType | keyof StoryUpdateType;
                 }
               | {
-                    action: "update";
+                    action: "updateStory";
                     form: UseFormReturnType<StoryUpdateType>;
                     field: keyof StoryInsertType | keyof StoryUpdateType;
                 }
+              | ({
+                    action: "uploadImage";
+                } & UploadImageDropZoneProps)
           );
 
-export function StoryImageDropzone({
-    form,
-    action,
-    field,
-    ...props
-}: StoryImageDropzoneType) {
-    const [hiddenDropzone, setHiddenDropzone] = useState(false);
-
-    // effect for clearing image if dropzone is visibly
-    useEffect(() => {
-        if (!form.values.image) return;
-
-        if (!hiddenDropzone && form.values.image.length > 0) {
-            form.setFieldValue(field, []);
-        }
-    }, [hiddenDropzone, field, form.values.image?.length, form]);
-
+export function ImageDropzone({ ...props }: ImageDropzoneType) {
     return (
         <Box>
-            {action === "create" && (
+            {props.action === "createStory" && (
                 <FormDropZone
-                    form={form}
-                    hiddenDropzone={hiddenDropzone}
-                    setHiddenDropzone={setHiddenDropzone}
-                    field={field}
                     {...props}
+                    form={props.form}
+                    field={props.field}
                 />
             )}
-
-            {action === "update" && (
+            {props.action === "updateStory" && (
                 <FormDropZone
-                    form={form}
-                    hiddenDropzone={hiddenDropzone}
-                    setHiddenDropzone={setHiddenDropzone}
-                    field={field}
                     {...props}
+                    form={props.form}
+                    field={props.field}
                 />
+            )}
+            {props.action === "uploadImage" && (
+                <UploadImageDropZone {...props} />
             )}
         </Box>
     );
@@ -105,19 +93,22 @@ type FormDropZoneType = {
     form:
         | UseFormReturnType<StoryInsertType>
         | UseFormReturnType<StoryUpdateType>;
-    setHiddenDropzone: Dispatch<SetStateAction<boolean>>;
     field: keyof StoryInsertType | keyof StoryUpdateType;
-    hiddenDropzone: boolean;
 } & Partial<DropzoneProps>;
 
-function FormDropZone({
-    form,
-    setHiddenDropzone,
-    field,
-    hiddenDropzone,
-    ...props
-}: FormDropZoneType) {
+function FormDropZone({ form, field, ...props }: FormDropZoneType) {
     const [image, setImage] = useState<File[]>([]);
+
+    const [hiddenDropzone, setHiddenDropzone] = useState(false);
+
+    // effect for clearing image if dropzone is visibly
+    useEffect(() => {
+        if (!form.values.image) return;
+
+        if (!hiddenDropzone && form.values.image.length > 0) {
+            form.setFieldValue(field, []);
+        }
+    }, [hiddenDropzone, field, form.values.image?.length, form]);
 
     form.watch(field, ({ value }) => {
         if (typeof value === "object" && value) {
@@ -126,7 +117,7 @@ function FormDropZone({
     });
 
     return (
-        <Box>
+        <>
             <Dropzone
                 onDrop={(files) => {
                     setHiddenDropzone(true);
@@ -144,44 +135,7 @@ function FormDropZone({
                 {...form.getInputProps(field)}
                 {...props}
             >
-                <Group
-                    justify="center"
-                    gap="xl"
-                    mih={220}
-                    className={stylesPublic.pointerEventsNone}
-                >
-                    <Dropzone.Accept>
-                        <IconUpload
-                            size={52}
-                            color="var(--mantine-color-blue-6)"
-                            stroke={1.5}
-                        />
-                    </Dropzone.Accept>
-                    <Dropzone.Reject>
-                        <IconX
-                            size={52}
-                            color="var(--mantine-color-red-6)"
-                            stroke={1.5}
-                        />
-                    </Dropzone.Reject>
-                    <Dropzone.Idle>
-                        <IconPhoto
-                            size={52}
-                            color="var(--mantine-color-dimmed)"
-                            stroke={1.5}
-                        />
-                    </Dropzone.Idle>
-
-                    <div>
-                        <Text size="xl" inline>
-                            Drag images here or click to select files
-                        </Text>
-                        <Text size="sm" c="dimmed" inline mt={7}>
-                            Attach as many files as you like, each file should
-                            not exceed 5mb
-                        </Text>
-                    </div>
-                </Group>
+                <DropZoneDetails />
             </Dropzone>
 
             <Stack
@@ -216,6 +170,182 @@ function FormDropZone({
                     )}
                 </SimpleGrid>
             </Stack>
-        </Box>
+        </>
+    );
+}
+
+export type UploadImageDropZoneProps = {
+    imageUniqueId?: string;
+    onSetttled?: () => void;
+} & Partial<DropzoneProps>;
+
+function UploadImageDropZone({
+    imageUniqueId,
+    onSetttled,
+    ...props
+}: UploadImageDropZoneProps) {
+    const [uploading, setUploading] = useState(false);
+
+    const [error, setError] = useState<string | null>(null);
+
+    const [image, setImage] = useState<File | null>(null);
+
+    const [hiddenDropzone, setHiddenDropzone] = useState(false);
+
+    useEffect(() => {
+        if (!error) return;
+
+        notifications.show({
+            message: error,
+            autoClose: 5000,
+        });
+
+        const timer = setTimeout(() => setError(null), 5000);
+        return () => clearTimeout(timer);
+    }, [error, setError]);
+
+    async function upload(file: File) {
+        setUploading(true);
+        try {
+            const newUserImage = await handleFileUpload(file, imageUniqueId, {
+                throwOnError: true,
+            });
+
+            if (!newUserImage) {
+                throw new Error("Upload Failed");
+            }
+
+            const { data } = await authClient.updateUser({
+                image: newUserImage.secure_url,
+            });
+
+            if (!data?.status) {
+                throw new Error("Failed To Update User Image");
+            } else {
+                if (onSetttled) {
+                    onSetttled();
+                }
+                setImage(null);
+            }
+        } catch (e) {
+            const errMsg =
+                e instanceof Error
+                    ? e.message
+                    : "An Unknown Error Occured While Uploading Your Image, Try Again.";
+            notifications.show({
+                title: "User Image Upload Error",
+                message: errMsg,
+            });
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    return (
+        <>
+            <Dropzone
+                onDrop={(files) => {
+                    setImage(files[0]);
+                    setHiddenDropzone(true);
+                }}
+                onReject={() => {
+                    setError("Select images only");
+                }}
+                maxSize={5 * 1024 ** 2}
+                accept={IMAGE_MIME_TYPE}
+                className={cx(hiddenDropzone && image && stylesPublic.hide)}
+                {...props}
+            >
+                <DropZoneDetails />
+            </Dropzone>
+
+            <Stack
+                className={cx(
+                    stylesPublic.fullWidth,
+                    hiddenDropzone && image
+                        ? stylesPublic.show
+                        : stylesPublic.hide
+                )}
+                gap={5}
+            >
+                <ActionIcon
+                    onClick={() => {
+                        setHiddenDropzone(false);
+                    }}
+                    className={cx(stylesPublic.fullWidth)}
+                    variant="light"
+                    color="red"
+                    disabled={uploading}
+                >
+                    <IconX />
+                </ActionIcon>
+
+                <SimpleGrid cols={{ base: 1 }}>
+                    {image ? (
+                        <PreviewImage file={image} />
+                    ) : (
+                        <Title order={3} ta={"center"}>
+                            Tap X To Show Dropzone
+                        </Title>
+                    )}
+                </SimpleGrid>
+
+                <Button
+                    onClick={async () => {
+                        if (!image) {
+                            notifications.show({
+                                message: "No Image In DropZone",
+                            });
+                            return;
+                        }
+                        await upload(image);
+                    }}
+                >
+                    Upload
+                </Button>
+            </Stack>
+        </>
+    );
+}
+
+function DropZoneDetails() {
+    return (
+        <Group
+            justify="center"
+            gap="xl"
+            mih={220}
+            className={stylesPublic.pointerEventsNone}
+        >
+            <Dropzone.Accept>
+                <IconUpload
+                    size={52}
+                    color="var(--mantine-color-blue-6)"
+                    stroke={1.5}
+                />
+            </Dropzone.Accept>
+            <Dropzone.Reject>
+                <IconX
+                    size={52}
+                    color="var(--mantine-color-red-6)"
+                    stroke={1.5}
+                />
+            </Dropzone.Reject>
+            <Dropzone.Idle>
+                <IconPhoto
+                    size={52}
+                    color="var(--mantine-color-dimmed)"
+                    stroke={1.5}
+                />
+            </Dropzone.Idle>
+
+            <div>
+                <Text size="xl" inline>
+                    Drag images here or click to select files
+                </Text>
+                <Text size="sm" c="dimmed" inline mt={7}>
+                    Attach one image file, should not exceed 5mb
+                </Text>
+            </div>
+        </Group>
     );
 }

@@ -10,7 +10,7 @@ import {
     TextInput,
     TextInputProps,
 } from "@mantine/core";
-import { StoryImageDropzone } from "../../ui/dropzone";
+import { ImageDropzone } from "../../ui/dropzone";
 import {
     StoryRichTextEditor,
     StoryRichTextEditorProps,
@@ -27,8 +27,8 @@ export function UpdateStoryFormFields() {
 
     return (
         <Stack>
-            <StoryImageDropzone
-                action="update"
+            <ImageDropzone
+                action="updateStory"
                 form={form}
                 maxFiles={1}
                 field="image"

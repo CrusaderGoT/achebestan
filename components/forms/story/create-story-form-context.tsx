@@ -7,7 +7,7 @@ import storypageStyles from "@/styles/story-page.module.css";
 
 import { StoryInsertType } from "@/types/story";
 
-import { StoryImageDropzone } from "../../ui/dropzone";
+import { ImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
 export const [StoryFormProvider, useStoryFormContext, useStoryForm] =
@@ -18,9 +18,9 @@ export function StoryFormFields() {
 
     return (
         <Stack>
-            <StoryImageDropzone
+            <ImageDropzone
                 maxFiles={1}
-                action="create"
+                action="createStory"
                 form={form}
                 field="image"
             />

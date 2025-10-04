@@ -4,17 +4,20 @@ import styles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
+import { authClient } from "@/lib/auth-client";
+
 import {
     Flex,
-    Image as MantineImage,
     Mark,
     Stack,
     Text,
-    Title,
+    Title
 } from "@mantine/core";
-import Image from "next/image";
+import { HomeImageBox } from "./home-image";
 
 function HomeHero() {
+    const { data: session, isPending } = authClient.useSession();
+
     return (
         <Flex gap={0} direction={{ base: "column", md: "row" }}>
             <Stack
@@ -42,18 +45,13 @@ function HomeHero() {
                 gap={0}
                 className={cx(styles.heroSection, styles.heroImageSection)}
             >
-                <figure>
-                    <MantineImage
-                        component={Image}
-                        src={"/images/demo.jpg"}
-                        alt="image"
-                        width={998}
-                        height={998}
-                        className={styles.heroImage}
-                    />
-                    <figcaption>A Mad Man, circa 2025</figcaption>
-                </figure>
-                <Text className={styles.heroSignature}>Crusader</Text>
+                <HomeImageBox session={session} />
+                
+                <Text className={styles.heroSignature}>
+                    {isPending || !session?.user || session.user.isAnonymous
+                        ? "Achebestan"
+                        : session.user.name}
+                </Text>
             </Stack>
         </Flex>
     );

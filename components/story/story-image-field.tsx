@@ -4,7 +4,7 @@ import { StoryUpdateType } from "@/types/story";
 import { Box, Button } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useState } from "react";
-import { StoryImageDropzone } from "../ui/dropzone";
+import { ImageDropzone } from "../ui/dropzone";
 
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
@@ -40,10 +40,10 @@ export function StoryImageField({
             )}
             hidden={storyAuthorId !== session.data?.user.id}
         >
-            <StoryImageDropzone
+            <ImageDropzone
                 maxFiles={1}
                 form={form}
-                action="update"
+                action="updateStory"
                 field="image"
             />
 
