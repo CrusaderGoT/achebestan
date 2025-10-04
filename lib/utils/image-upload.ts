@@ -1,3 +1,5 @@
+"use server"; // to llow for direct use in use client components
+
 import {
     v2 as cloudinary,
     UploadApiErrorResponse,
@@ -17,7 +19,7 @@ type CloudinaryResult =
     | { success: false; error: UploadApiErrorResponse; errorType: "cloudinary" }
     | { success: false; error: { message: string }; errorType: "conversion" };
 
-async function uploadImageFile(
+export async function uploadImageFile(
     file: File,
     publicId: string | undefined
 ): Promise<CloudinaryResult> {

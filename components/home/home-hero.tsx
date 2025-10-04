@@ -6,13 +6,7 @@ import cx from "clsx";
 
 import { authClient } from "@/lib/auth-client";
 
-import {
-    Flex,
-    Mark,
-    Stack,
-    Text,
-    Title
-} from "@mantine/core";
+import { Flex, Mark, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { HomeImageBox } from "./home-image";
 
 function HomeHero() {
@@ -45,8 +39,12 @@ function HomeHero() {
                 gap={0}
                 className={cx(styles.heroSection, styles.heroImageSection)}
             >
-                <HomeImageBox session={session} />
-                
+                {isPending ? (
+                    <Skeleton animate />
+                ) : (
+                    <HomeImageBox session={session} />
+                )}
+
                 <Text className={styles.heroSignature}>
                     {isPending || !session?.user || session.user.isAnonymous
                         ? "Achebestan"

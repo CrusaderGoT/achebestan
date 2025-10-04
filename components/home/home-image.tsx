@@ -4,8 +4,6 @@ import { ImageDropzone, UploadImageDropZoneProps } from "../ui/dropzone";
 
 import { ActionIcon, Box, Image as MantineImage } from "@mantine/core";
 
-import Image from "next/image";
-
 import { authClient } from "@/lib/auth-client";
 
 import homeStyles from "@/styles/home-hero.module.css";
@@ -23,12 +21,8 @@ export function HomeImage({ userImage }: { userImage?: string | null }) {
     return (
         <figure>
             <MantineImage
-                component={Image}
-                src={userImage || "/images/demo.jpg"}
+                src={userImage ? userImage : "/images/demo.jpg"}
                 alt="image"
-                width={998}
-                height={998}
-                className={homeStyles.heroImage}
             />
             <figcaption>A Mad Man, circa 2025</figcaption>
         </figure>
@@ -46,14 +40,15 @@ export function HomeImageBox({
     ] = useDisclosure(false);
 
     return (
-        <Box className={publicStyles.relative}>
+        <Box className={cx(publicStyles.relative, homeStyles.heroImage)}>
             {openedImageField && session?.user && !session.user.isAnonymous ? (
                 <HomeImageUpload
                     imageUniqueId={session.user.id}
                     onSetttled={closeImageField}
+                    maxFiles={1}
                 />
             ) : (
-                <HomeImage userImage={session?.user.id} />
+                <HomeImage userImage={session?.user.image} />
             )}
 
             <ActionIcon

@@ -46,25 +46,58 @@ type ImageDropzoneType =
                 } & UploadImageDropZoneProps)
           );
 
-export function ImageDropzone({ ...props }: ImageDropzoneType) {
+export function ImageDropzone({ action, ...props }: ImageDropzoneType) {
     return (
         <Box>
-            {props.action === "createStory" && (
+            {action === "createStory" && (
                 <FormDropZone
                     {...props}
-                    form={props.form}
-                    field={props.field}
+                    form={
+                        (
+                            props as Extract<
+                                ImageDropzoneType,
+                                { action: "createStory" }
+                            >
+                        ).form
+                    }
+                    field={
+                        (
+                            props as Extract<
+                                ImageDropzoneType,
+                                { action: "createStory" }
+                            >
+                        ).field
+                    }
                 />
             )}
-            {props.action === "updateStory" && (
+            {action === "updateStory" && (
                 <FormDropZone
                     {...props}
-                    form={props.form}
-                    field={props.field}
+                    form={
+                        (
+                            props as Extract<
+                                ImageDropzoneType,
+                                { action: "updateStory" }
+                            >
+                        ).form
+                    }
+                    field={
+                        (
+                            props as Extract<
+                                ImageDropzoneType,
+                                { action: "updateStory" }
+                            >
+                        ).field
+                    }
                 />
             )}
-            {props.action === "uploadImage" && (
-                <UploadImageDropZone {...props} />
+            {action === "uploadImage" && (
+                <UploadImageDropZone
+                    {...(props as Extract<
+                        ImageDropzoneType,
+                        { action: "uploadImage" }
+                    >)}
+                />
             )}
         </Box>
     );
@@ -198,6 +231,7 @@ function UploadImageDropZone({
         notifications.show({
             message: error,
             autoClose: 5000,
+            color: "red",
         });
 
         const timer = setTimeout(() => setError(null), 5000);
@@ -249,7 +283,7 @@ function UploadImageDropZone({
                     setHiddenDropzone(true);
                 }}
                 onReject={() => {
-                    setError("Select images only");
+                    setError("Select Image Not Bigger Than 5mb");
                 }}
                 maxSize={5 * 1024 ** 2}
                 accept={IMAGE_MIME_TYPE}
@@ -300,6 +334,8 @@ function UploadImageDropZone({
                         }
                         await upload(image);
                     }}
+                    fullWidth
+                    loading={uploading}
                 >
                     Upload
                 </Button>
