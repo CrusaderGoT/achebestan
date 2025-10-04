@@ -40,7 +40,7 @@ function HomeHero() {
                 className={cx(styles.heroSection, styles.heroImageSection)}
             >
                 {isPending ? (
-                    <Skeleton animate />
+                    <Skeleton animate width={300} height={200} />
                 ) : (
                     <HomeImageBox session={session} />
                 )}
