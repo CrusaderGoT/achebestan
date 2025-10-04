@@ -1,10 +1,38 @@
 :root {
   @mixin light-root {
-    --mantine-color-body: #f9f9f9;
+    --mantine-color-body: hsla(0, 0%, 95%, 1);
+
+    /* Apply a linear gradient for the shiny effect */
+    background-image: linear-gradient(
+      to bottom,
+      /* Highlight at the top with a semi-transparent white */
+        hsla(0, 0%, 100%, 0.5) 0%,
+      /* A translucent gray to create depth */ hsla(0, 0%, 80%, 0.1) 50%,
+      /* Subtle shadow at the bottom with a dark, transparent color */
+        hsla(0, 0%, 0%, 0.05) 100%
+    );
+
+    /* Ensure the background covers the entire page */
+    min-height: 100vh;
+    background-attachment: fixed;
+    background-size: cover;
   }
 
   @mixin dark-root {
-    --mantine-color-body: #333;
+    --mantine-color-body: hsla(240, 50%, 5%, 1);
+    /* Add the linear gradient for the shiny effect */
+    background-image: linear-gradient(
+      to bottom,
+      hsla(0, 0%, 100%, 0.1) 0%,
+      /* A subtle, semi-transparent white highlight at the top */ transparent
+        50%,
+      /* Fully transparent in the middle */ hsla(0, 0%, 0%, 0.5) 100%
+        /* A dark semi-transparent shadow at the bottom */
+    );
+    /* Ensure the background covers the entire page */
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
   }
 }
 
