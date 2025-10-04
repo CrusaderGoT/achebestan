@@ -36,6 +36,7 @@ export function StoryImageField({
         <Box
             className={cx(
                 storypageStyles.storyImageFieldBox,
+                storypageStyles.storyImage,
                 openedImageField ? publicStyles.show : publicStyles.hide
             )}
             hidden={storyAuthorId !== session.data?.user.id}
@@ -46,8 +47,6 @@ export function StoryImageField({
                 action="updateStory"
                 field="image"
             />
-
-            {session.data?.user.role}
 
             {image && (
                 <Button

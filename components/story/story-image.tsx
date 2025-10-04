@@ -31,12 +31,8 @@ export function StoryImage({
 }: StoryImageType) {
     return (
         <Box className={cx(openedImageField && publicStyles.hide)}>
-            <Box>
-                <Image
-                    src={image}
-                    alt={title}
-                    className={storypageStyles.storyImage}
-                />
+            <Box className={storypageStyles.storyImage}>
+                <Image src={image} alt={title} />
             </Box>
 
             <Box className={storypageStyles.storyBadgeTime}>

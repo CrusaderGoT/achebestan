@@ -19,7 +19,6 @@ import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 import stylesPublic from "@/styles/public.module.css";
-import styles from "@/styles/story-page.module.css";
 
 import { authClient } from "@/lib/auth-client";
 import { handleFileUpload } from "@/lib/utils/image-upload";
@@ -115,7 +114,6 @@ function PreviewImage({ file }: { file: File }) {
             <MantineImage
                 src={imageUrl}
                 onLoad={() => URL.revokeObjectURL(imageUrl)}
-                className={styles.storyImage}
             />
             <figcaption>{file.name}</figcaption>
         </figure>
