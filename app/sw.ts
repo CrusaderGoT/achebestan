@@ -246,11 +246,6 @@ const queue = new BackgroundSyncQueue("notification-queue", {
 self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
-// Bypass service worker entirely for Cloudinary requests
-  if (url.hostname.includes('cloudinary.com')) {
-    return; // Browser handles it directly, no SW intervention
-  }
-
     // Queue notification API requests when offline
     if (
         url.pathname.includes("/api/notifications") &&
