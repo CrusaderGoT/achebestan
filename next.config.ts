@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
                     },
                     {
                         key: "Content-Security-Policy",
-                        value: "img-src 'self' https://res.cloudinary.com data: blob:; media-src 'self' https://res.cloudinary.com blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.cloudinary.com; font-src 'self'; object-src 'none'; base-uri 'self';",
+                        value: "img-src 'self' https://res.cloudinary.com data: blob:; media-src 'self' https://res.cloudinary.com blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://res.cloudinary.com https://api.cloudinary.com; font-src 'self'; object-src 'none'; base-uri 'self'; worker-src 'self' blob:;",
                     },
                 ],
             },
@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
                     },
                     {
                         key: "Content-Security-Policy",
-                        value: "default-src 'self'; script-src 'self'",
+                        value: "default-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self' https://res.cloudinary.com https://api.cloudinary.com;",
                     },
                 ],
             },
