@@ -1,12 +1,7 @@
+import { readLatestStories } from "@/lib/actions/story";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import {
-    BackgroundSyncQueue,
-    CacheFirst,
-    NetworkFirst,
-    Serwist,
-    StaleWhileRevalidate,
-} from "serwist";
+import { BackgroundSyncQueue, NetworkFirst, Serwist } from "serwist";
 
 // Declare the value of `injectionPoint` to TypeScript
 declare global {
@@ -24,12 +19,6 @@ const CACHE_NAMES = {
     STATIC: "static-resources-v1",
 } as const;
 
-const CACHE_EXPIRATION = {
-    IMAGES: 30 * 24 * 60 * 60, // 30 days in seconds
-    API: 5 * 60, // 5 minutes in seconds
-    MAX_ENTRIES: 50,
-} as const;
-
 const serwist = new Serwist({
     precacheEntries: self.__SW_MANIFEST,
     skipWaiting: true,
@@ -40,53 +29,6 @@ const serwist = new Serwist({
             matcher: ({ url }) => url.pathname.startsWith("/story/"),
             handler: new NetworkFirst({
                 cacheName: "story-pages",
-                networkTimeoutSeconds: 5,
-                plugins: [
-                    {
-                        cacheWillUpdate: async ({ response }) => {
-                            // Only cache successful responses
-                            return response?.status === 200 ? response : null;
-                        },
-                    },
-                ],
-            }),
-        },
-        // Cache images with CacheFirst strategy
-        {
-            matcher: ({ request }) =>
-                request.destination === "image" ||
-                /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i.test(request.url),
-            handler: new CacheFirst({
-                cacheName: CACHE_NAMES.IMAGES,
-                plugins: [
-                    {
-                        cacheWillUpdate: async ({ response }) => {
-                            // Only cache successful responses
-                            return response?.status === 200 ? response : null;
-                        },
-                    },
-                    {
-                        // Add expiration plugin
-                        cacheDidUpdate: async ({ cacheName }) => {
-                            const cache = await caches.open(cacheName);
-                            const keys = await cache.keys();
-
-                            // Limit cache entries
-                            if (keys.length > CACHE_EXPIRATION.MAX_ENTRIES) {
-                                await cache.delete(keys[0]);
-                            }
-                        },
-                    },
-                ],
-            }),
-        },
-        // Cache API calls with NetworkFirst - FIXED URL
-        {
-            matcher: ({ url }) =>
-                url.hostname === "api.achebestan.vercel.app" ||
-                url.pathname.startsWith("/api/"),
-            handler: new NetworkFirst({
-                cacheName: CACHE_NAMES.API,
                 networkTimeoutSeconds: 10,
                 plugins: [
                     {
@@ -98,21 +40,47 @@ const serwist = new Serwist({
                 ],
             }),
         },
-        // Cache static assets with StaleWhileRevalidate
-        {
-            matcher: ({ request }) =>
-                request.destination === "style" ||
-                request.destination === "script" ||
-                request.destination === "font" ||
-                /\.(?:js|css|woff2?)$/i.test(request.url),
-            handler: new StaleWhileRevalidate({
-                cacheName: CACHE_NAMES.STATIC,
-            }),
-        },
-        // Use default cache for everything else
         ...defaultCache,
     ],
     disableDevLogs: true,
+    fallbacks: {
+        entries: [
+            {
+                url: "/~offline",
+                matcher({ request }) {
+                    return request.destination === "document";
+                },
+            },
+        ],
+    },
+});
+
+let urlsToPrecache = ["/", "/story/new"];
+
+self.addEventListener("install", async (event) => {
+    const storiesISBNs: string[] = [];
+
+    const stories = await readLatestStories(10);
+
+    if (stories) {
+        stories.forEach((story) => {
+            const url = `/story/${story.isbn}`;
+            storiesISBNs.push(url);
+        });
+        // update the urlsToPrecache
+        urlsToPrecache = [...storiesISBNs, ...urlsToPrecache];
+    }
+
+    const requestPromises = Promise.all(
+        urlsToPrecache.map((entry) => {
+            return serwist.handleRequest({
+                request: new Request(entry),
+                event,
+            });
+        })
+    );
+
+    event.waitUntil(requestPromises);
 });
 
 // Enhanced push notification handler
