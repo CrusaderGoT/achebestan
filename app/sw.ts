@@ -60,9 +60,11 @@ let urlsToPrecache = ["/", "/story/new"];
 self.addEventListener("install", async (event) => {
     const storiesISBNs: string[] = [];
 
-    const stories = await (await fetch("/api/stories")).json();
+    const storyFetchResult = await fetch("/api/stories");
 
-    if (stories) {
+    if (storyFetchResult.status === 200) {
+        const stories = await storyFetchResult.json();
+        
         const parsedStories = stories as StorySelectType[];
 
         parsedStories.forEach((story) => {
