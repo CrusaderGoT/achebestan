@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { readLatestStories } from "@/lib/actions/story";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     try {

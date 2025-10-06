@@ -19,6 +19,7 @@ export function RouteNavigationProgress() {
             return;
         }
 
+        nprogress.reset(); // reset any ongoing progress
         nprogress.start();
 
         const timer = setTimeout(() => {
@@ -45,6 +46,7 @@ export function RouteNavigationProgress() {
                 link.href.startsWith(window.location.origin)
             ) {
                 // Internal navigation link clicked
+                nprogress.reset(); // reset any ongoing progress
                 nprogress.start();
             }
         };
@@ -68,6 +70,7 @@ export function NavigationLink({
 }: NavigationLinkProps) {
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         // Start progress on link click
+        nprogress.reset(); // reset any ongoing progress
         nprogress.start();
 
         // Call original onClick if provided

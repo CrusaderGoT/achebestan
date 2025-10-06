@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthenticationModal } from "@/components/forms/user/auth-modal";
-import { ActivateAuth } from "@/components/shell/activate-auth";
 import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
@@ -10,7 +9,7 @@ import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Title } from "@mantine/core";
+import { AppShell, Burger, Group, Skeleton, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
@@ -24,8 +23,6 @@ export function Shell({
     children: React.ReactNode;
 }>) {
     const router = useRouter();
-
-    const [secretValue, setSecretValue] = useState<string>("");
 
     const { data: session, isPending: isPendingSession } =
         authClient.useSession();
@@ -85,13 +82,6 @@ export function Shell({
                         visibleFrom="lg"
                     >
                         <AltNavLinks session={session} />
-
-                        {!session?.user.id && (
-                            <ActivateAuth
-                                secretValue={secretValue}
-                                setSecretValue={setSecretValue}
-                            />
-                        )}
                     </Group>
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
@@ -104,13 +94,13 @@ export function Shell({
                             ) : (
                                 <LogoutButton />
                             )
+                        ) : isPendingSession ? (
+                            <Skeleton width={10} />
                         ) : (
-                            secretValue.trim().toLowerCase() === "logmein" && (
-                                <OpenAuthenticationModalButton
-                                    openModal={openAuthModal}
-                                    disabled={openedAuthModal}
-                                />
-                            )
+                            <OpenAuthenticationModalButton
+                                openModal={openAuthModal}
+                                disabled={openedAuthModal}
+                            />
                         )}
 
                         <SearchSpotlight />
@@ -144,13 +134,6 @@ export function Shell({
                         labelPosition="left"
                     />
                 </Group>
-
-                {!session?.user.id && !isPendingSession && (
-                    <ActivateAuth
-                        secretValue={secretValue}
-                        setSecretValue={setSecretValue}
-                    />
-                )}
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
