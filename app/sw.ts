@@ -1,4 +1,4 @@
-import { readLatestStories } from "@/lib/actions/story";
+import { db } from "@/drizzle";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { BackgroundSyncQueue, NetworkFirst, Serwist } from "serwist";
@@ -57,10 +57,25 @@ const serwist = new Serwist({
 
 let urlsToPrecache = ["/", "/story/new"];
 
+const readLatestStorys = async (latest: number = 10) => {
+    try {
+        const latestStories = await db.query.story.findMany({
+            limit: latest,
+            orderBy: (stories, { desc }) => [desc(stories.created)],
+            with: {
+                author: true,
+            },
+        });
+        return latestStories;
+    } catch (e) {
+        console.log(e);
+    }
+};
+
 self.addEventListener("install", async (event) => {
     const storiesISBNs: string[] = [];
 
-    const stories = await readLatestStories(10);
+    const stories = await readLatestStorys(10);
 
     if (stories) {
         stories.forEach((story) => {
