@@ -7,7 +7,7 @@ import {
     useMantineColorScheme,
 } from "@mantine/core";
 import { IconMoonStars, IconSun } from "@tabler/icons-react";
-import { Dispatch, SetStateAction, useEffect, useLayoutEffect } from "react";
+import { Dispatch, SetStateAction, useLayoutEffect } from "react";
 
 type ModeToggleProps = {
     checked: boolean;
