@@ -67,6 +67,10 @@ export function CreateStoryForm() {
                         notifications.show({
                             message: "An Error Ocured",
                         });
+                        notifications.show({
+                            message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
+                        });
+                        router.replace("/");
                     }
                 } else {
                     notifications.show({
