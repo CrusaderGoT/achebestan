@@ -77,6 +77,15 @@ export function NavigationLink({
         onClick?.(e);
     };
 
+    // slow done progress, to make sure page loads, before it fills up
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            nprogress.stop();
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <Link {...props} onClick={handleClick}>
             {children}
