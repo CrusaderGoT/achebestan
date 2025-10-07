@@ -9,7 +9,7 @@ import {
 import { StoryInsertType } from "@/types/story";
 import { storyInsertSchema } from "@/zod-schemas/story";
 
-import { Button, Paper } from "@mantine/core";
+import { Button, Paper, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
@@ -17,58 +17,22 @@ import { createStoryAction } from "@/lib/actions/story";
 import { useNetwork } from "@mantine/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
-
-// Type guard to check if response is queued
-function isQueuedResponse(
-    data: unknown
-): data is { queued: true; title?: string } {
-    return (
-        typeof data === "object" &&
-        data !== null &&
-        "queued" in data &&
-        data.queued === true
-    );
-}
 
 export function CreateStoryForm() {
     const router = useRouter();
-    const [isQueued, setIsQueued] = useState(false);
-
-    const form = useStoryForm({
-        mode: "uncontrolled",
-        validate: zod4Resolver(storyInsertSchema),
-    });
 
     const network = useNetwork();
 
     const { executeAsync, isPending, hasSucceeded } = useAction(
         createStoryAction,
         {
-            onExecute(args) {
-                // check if offline and then show notification
-                // request will auto try again when online via background sync
-                if (!network.online) {
-                    notifications.show({
-                        message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
-                    });
-                }
-            },
             onSuccess(args) {
-                // Check if the request was queued (offline)
-                if (isQueuedResponse(args.data)) {
-                    setIsQueued(true);
-                    router.push(`/`);
-                    return;
-                }
-
                 // Normal online success
                 notifications.show({
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
                 });
 
-                router.push(`/story/${args.data.isbn}`);
+                router.replace(`/story/${args.data.isbn}`);
             },
             onError(args) {
                 if (args.error.validationErrors) {
@@ -79,7 +43,7 @@ export function CreateStoryForm() {
                             errorList.forEach((errorMsg, index) =>
                                 notifications.show({
                                     key: index,
-                                    message: `A Field Error Error ${errorMsg}`,
+                                    message: `A Validation Error Error ${errorMsg}`,
                                 })
                             );
                         }
@@ -89,24 +53,37 @@ export function CreateStoryForm() {
                     notifications.show({
                         message: args.error.serverError
                             ? args.error.serverError
-                            : "An Error Ocured",
+                            : "A Server Error Ocured",
                     });
-                    router.push(`/`);
-                    notifications.show({
-                        message: "Your Story Will be Published Later1.",
-                    });
+                } else if (args.error.thrownError) {
+                    // check if offline and then show notification
+                    // request will auto try again when online via background sync
+                    if (!network.online) {
+                        notifications.show({
+                            message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
+                        });
+                        router.replace("/");
+                    } else {
+                        notifications.show({
+                            message: "An Error Ocured",
+                        });
+                    }
                 } else {
                     notifications.show({
-                        message: "An Error Ocured",
-                    });
-                    router.push(`/`);
-                    notifications.show({
-                        message: "Your Story Will be Published Later2.",
+                        message: "An Unexpected Error Ocured",
                     });
                 }
             },
         }
     );
+
+    const form = useStoryForm({
+        mode: "uncontrolled",
+        validate: zod4Resolver(storyInsertSchema),
+        enhanceGetInputProps: () => ({
+            disabled: hasSucceeded || isPending,
+        }),
+    });
 
     async function handleSubmit(data: StoryInsertType) {
         await executeAsync({
@@ -125,23 +102,19 @@ export function CreateStoryForm() {
                         mt="md"
                         color="green"
                         loading={isPending || hasSucceeded}
+                        rightSection={
+                            isPending ? (
+                                <Text>Submitting Story...</Text>
+                            ) : hasSucceeded ? (
+                                <Text>Redirecting To New Story...</Text>
+                            ) : (
+                                <Text>Redirecting To Home...</Text>
+                            )
+                        }
                     >
                         Submit
                     </Button>
                 </form>
-
-                {(isPending || hasSucceeded) && (
-                    <LoadingOverlayWithText
-                        text={
-                            isPending
-                                ? "Submitting Story..."
-                                : isQueued
-                                ? "Redirecting To Home..."
-                                : "Redirecting To New Story"
-                        }
-                        visible={isPending || hasSucceeded}
-                    />
-                )}
             </Paper>
         </StoryFormProvider>
     );

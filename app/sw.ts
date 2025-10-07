@@ -250,27 +250,14 @@ self.addEventListener("fetch", (event) => {
             })
         );
     }
-    // Queue new story post/publish requests when offline
-    if (
-        url.pathname.includes("/story/new") &&
-        event.request.method === "POST"
-    ) {
+    // Queue new story post/publish/update requests when offline
+    if (url.pathname.includes("/story/") && event.request.method === "POST") {
         event.respondWith(
             fetch(event.request.clone()).catch(async (error) => {
                 console.log("Queuing request for background sync:", error);
                 await newStoryQueue.pushRequest({ request: event.request });
 
-                return new Response(
-                    JSON.stringify({
-                        data: {
-                            queued: true,
-                        },
-                    }),
-                    {
-                        headers: { "Content-Type": "application/json" },
-                        status: 202,
-                    }
-                );
+                return Response.error();
             })
         );
     }
