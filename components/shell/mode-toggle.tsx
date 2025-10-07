@@ -6,6 +6,7 @@ import {
     useComputedColorScheme,
     useMantineColorScheme,
 } from "@mantine/core";
+import { useMounted } from "@mantine/hooks";
 import { IconMoonStars, IconSun } from "@tabler/icons-react";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
@@ -21,10 +22,14 @@ export function ModeToggle({ checked, setChecked, ...props }: ModeToggleProps) {
         getInitialValueInEffect: true,
     });
 
+    const mounted = useMounted();
+
     // for correct switch mode on page load
     useEffect(() => {
+        if (!mounted) return;
+
         setChecked(computedColorScheme !== "dark");
-    }, [computedColorScheme, setChecked]);
+    }, [computedColorScheme, setChecked, mounted]);
 
     return (
         <Switch

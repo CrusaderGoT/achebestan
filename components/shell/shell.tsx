@@ -123,7 +123,7 @@ export function Shell({
             </AppShell.Header>
 
             <AppShell.Navbar py="md" px={4}>
-                <NavLinks session={session} />
+                {!isPendingSession && <NavLinks session={session} />}
 
                 <Group ml={"auto"} mt={"xs"} mr={"sm"}>
                     <ModeToggle
