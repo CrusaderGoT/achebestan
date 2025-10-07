@@ -220,7 +220,7 @@ const notificationQueue = new BackgroundSyncQueue("notification-queue", {
 
 // Background sync queue for offline requests
 const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
-    maxRetentionTime: 72 * 60, // Retry for max 24 hours (in minutes)
+    maxRetentionTime: 72 * 60, // Retry for max 72 hours (in minutes)
 });
 
 // Enhanced fetch handler for queuing
@@ -262,8 +262,9 @@ self.addEventListener("fetch", (event) => {
 
                 return new Response(
                     JSON.stringify({
-                        queued: true,
-                        message: "Request queued for background sync",
+                        data: {
+                            queued: true,
+                        },
                     }),
                     {
                         headers: { "Content-Type": "application/json" },

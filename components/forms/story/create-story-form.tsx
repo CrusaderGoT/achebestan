@@ -33,17 +33,25 @@ export function CreateStoryForm() {
         createStoryAction,
         {
             onExecute(args) {
-                // check if offline and then redirect back to home page
-                // as request will auto try again when online
-
+                // check if offline and then show notification
+                // request will auto try again when online via background sync
                 if (!network.online) {
-                    router.push(`/`);
                     notifications.show({
                         message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
                     });
                 }
             },
             onSuccess(args) {
+                // Check if the request was queued (offline)
+                if (!network.online) {
+                    notifications.show({
+                        message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
+                    });
+                    router.push(`/`);
+                    return;
+                }
+
+                // Normal online success
                 notifications.show({
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
                 });
