@@ -14,6 +14,7 @@ import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import { createStoryAction } from "@/lib/actions/story";
+import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,7 +22,7 @@ import { useState } from "react";
 export function CreateStoryForm() {
     const router = useRouter();
 
-    const [synced, setSynced] = useState(false)
+    const [synced, setSynced] = useState(false);
 
     const { executeAsync, isPending, hasSucceeded } = useAction(
         createStoryAction,
@@ -43,7 +44,7 @@ export function CreateStoryForm() {
                             errorList.forEach((errorMsg, index) =>
                                 notifications.show({
                                     key: index,
-                                    message: `A Validation Error Error ${errorMsg}`,
+                                    message: `A Validation Error Occured -> ${errorMsg}`,
                                 })
                             );
                         }
@@ -56,14 +57,22 @@ export function CreateStoryForm() {
                             : "A Server Error Ocured",
                     });
                 } else if (args.error.thrownError) {
-                    
-                     setSynced(true);
-  router.replace("/");
+                    // check if background sync is available
+                    if (isFeatureSupported(["serviceWorker", "SyncManager"])) {
+                        setSynced(true);
+
                         notifications.show({
+                            title: "Story Has Been Queued.",
                             message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
+                            autoClose: 7000,
                         });
-                        
-                    
+
+                        router.replace("/");
+                    } else {
+                        notifications.show({
+                            message: "An Error Ocured",
+                        });
+                    }
                 } else {
                     notifications.show({
                         message: "An Unexpected Error Ocured",

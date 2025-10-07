@@ -4,37 +4,34 @@ import {
     Switch,
     SwitchProps,
     useComputedColorScheme,
-    useMantineColorScheme,
+    useMantineColorScheme
 } from "@mantine/core";
-import { useMounted } from "@mantine/hooks";
+import { useIsomorphicEffect } from "@mantine/hooks";
 import { IconMoonStars, IconSun } from "@tabler/icons-react";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { useState } from "react";
 
-type ModeToggleProps = {
-    checked: boolean;
-    setChecked: Dispatch<SetStateAction<boolean>>;
-} & SwitchProps;
+type ModeToggleProps = SwitchProps;
 
-export function ModeToggle({ checked, setChecked, ...props }: ModeToggleProps) {
+export function ModeToggle({ ...props }: ModeToggleProps) {
     const { setColorScheme } = useMantineColorScheme();
 
     const computedColorScheme = useComputedColorScheme("light", {
         getInitialValueInEffect: true,
     });
 
-    const mounted = useMounted();
+    const [checkedModeToggle, setCheckedModeToggle] = useState(false);
 
     // for correct switch mode on page load
-    useEffect(() => {
-        if (!mounted) return;
-
-        setChecked(computedColorScheme !== "dark");
-    }, [computedColorScheme, setChecked, mounted]);
+    useIsomorphicEffect(() => {
+        setCheckedModeToggle(computedColorScheme !== "dark");
+    }, [computedColorScheme, setCheckedModeToggle]);
 
     return (
         <Switch
-            checked={checked}
-            onChange={(event) => setChecked(event.currentTarget.checked)}
+            checked={checkedModeToggle}
+            onChange={(event) =>
+                setCheckedModeToggle(event.currentTarget.checked)
+            }
             onClick={() =>
                 setColorScheme(
                     computedColorScheme === "light" ? "dark" : "light"

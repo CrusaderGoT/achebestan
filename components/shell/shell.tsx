@@ -9,11 +9,10 @@ import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
-import { AppShell, Burger, Group, Skeleton, Title } from "@mantine/core";
+import { AppShell, Burger, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 
@@ -31,8 +30,6 @@ export function Shell({
 
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
-
-    const [checkedModeToggle, setCheckedModeToggle] = useState(false);
 
     return (
         <AppShell
@@ -53,7 +50,7 @@ export function Shell({
                         align="center"
                         wrap="nowrap"
                         gap={5}
-                        onClick={() => router.push("/")}
+                        onClick={() => router.replace("/")}
                         className={cx(
                             shellStyles.websiteName,
                             publicStyles.noTapHighlight
@@ -94,9 +91,7 @@ export function Shell({
                             ) : (
                                 <LogoutButton />
                             )
-                        ) : isPendingSession ? (
-                            <Skeleton width={10} />
-                        ) : (
+                        ) : isPendingSession ? null : (
                             <OpenAuthenticationModalButton
                                 openModal={openAuthModal}
                                 disabled={openedAuthModal}
@@ -105,12 +100,7 @@ export function Shell({
 
                         <SearchSpotlight />
 
-                        <ModeToggle
-                            size="md"
-                            checked={checkedModeToggle}
-                            setChecked={setCheckedModeToggle}
-                            visibleFrom="lg"
-                        />
+                        <ModeToggle size="md" visibleFrom="lg" />
 
                         <Burger
                             opened={openedNavBar}
@@ -123,13 +113,11 @@ export function Shell({
             </AppShell.Header>
 
             <AppShell.Navbar py="md" px={4}>
-                {!isPendingSession && <NavLinks session={session} />}
+                <NavLinks session={session} />
 
                 <Group ml={"auto"} mt={"xs"} mr={"sm"}>
                     <ModeToggle
                         size={"sm"}
-                        checked={checkedModeToggle}
-                        setChecked={setCheckedModeToggle}
                         label="mode toggle"
                         labelPosition="left"
                     />
