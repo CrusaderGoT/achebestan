@@ -11,19 +11,16 @@ declare global {
 
 /**
  * Handles Android-like back-to-exit behavior on the home page.
- *
- * - When on "/", pressing back once shows a warning.
- * - Pressing back again within 2s exits (if PWA) or navigates away.
  */
-export function useBackToExitAtHome() {
+export function useExitOnHomePage() {
     const lastBackPress = useRef<number>(0);
 
     useEffect(() => {
-        const isPWA =
+        const isStandalone =
             window.matchMedia("(display-mode: standalone)").matches ||
-            window.navigator.standalone === true;
+            navigator.standalone === true;
 
-        // Ensure current page is root in history
+        // Make home page the root of history
         window.history.replaceState(null, "", window.location.pathname);
         window.history.pushState(null, "", window.location.pathname);
 
@@ -33,12 +30,10 @@ export function useBackToExitAtHome() {
                 const diff = now - lastBackPress.current;
 
                 if (diff < 2000) {
-                    // Pressed twice quickly → exit (if PWA)
-                    if (isPWA) {
-                        window.close(); // Works in standalone mode
+                    if (isStandalone) {
+                        window.close(); // Exits only in standalone PWA
                     } else {
-                        // In browser mode, go back or exit tab
-                        window.history.go(-2);
+                        window.history.go(-2); // Browser fallback
                     }
                 } else {
                     // First back press → show warning
@@ -47,6 +42,7 @@ export function useBackToExitAtHome() {
                         color: "yellow",
                         autoClose: 2000,
                         radius: "md",
+                        position: "bottom-center",
                     });
 
                     lastBackPress.current = now;

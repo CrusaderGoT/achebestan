@@ -1,66 +1,39 @@
-// RouteNavigationProgress.tsx
+// components/RouteNavigationProgress.tsx
 "use client";
 
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ComponentPropsWithRef, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
+import { MouseEvent } from "react";
 
 export function RouteNavigationProgress() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const isInitialLoad = useRef(true);
+    const isInitial = useRef(true);
 
-    // Handle route changes
     useEffect(() => {
-        if (isInitialLoad.current) {
-            isInitialLoad.current = false;
+        if (isInitial.current) {
+            isInitial.current = false;
             return;
         }
 
-        nprogress.reset(); // reset any ongoing progress
         nprogress.start();
-
-        const timer = setTimeout(() => {
-            nprogress.complete();
-        }, 200);
+        const timer = setTimeout(() => nprogress.complete(), 400);
 
         return () => clearTimeout(timer);
     }, [pathname, searchParams]);
 
-    // Handle link clicks globally
-    useEffect(() => {
-        if (typeof document === "undefined") return;
-
-        const handleLinkClick = (e: Event) => {
-            const target = e.target as HTMLElement;
-            const link = target.closest("a");
-
-            if (
-                link &&
-                link.href &&
-                !link.href.startsWith("#") &&
-                !link.hasAttribute("download") &&
-                link.target !== "_blank" &&
-                link.href.startsWith(window.location.origin)
-            ) {
-                // Internal navigation link clicked
-                nprogress.reset(); // reset any ongoing progress
-                nprogress.start();
-            }
-        };
-
-        document.addEventListener("click", handleLinkClick);
-        return () => document.removeEventListener("click", handleLinkClick);
-    }, []);
-
     return <NavigationProgress color="cyan" />;
 }
 
-// NavigationLink.tsx - Custom Link component with progress
-interface NavigationLinkProps extends ComponentPropsWithRef<typeof Link> {
+// components/NavigationLink.tsx
+
+interface NavigationLinkProps extends LinkProps {
     children: React.ReactNode;
+    className?: string;
+    onClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export function NavigationLink({
@@ -68,23 +41,14 @@ export function NavigationLink({
     onClick,
     ...props
 }: NavigationLinkProps) {
-    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        // Start progress on link click
-        nprogress.reset(); // reset any ongoing progress
+    const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
         nprogress.start();
-
-        // Call original onClick if provided
         onClick?.(e);
+
+        // fallback in case navigation finishes too quickly
+        const timer = setTimeout(() => nprogress.complete(), 1000);
+        setTimeout(() => clearTimeout(timer), 2000);
     };
-
-    // slow done progress, to make sure page loads, before it fills up
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            nprogress.stop();
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }, []);
 
     return (
         <Link {...props} onClick={handleClick}>
