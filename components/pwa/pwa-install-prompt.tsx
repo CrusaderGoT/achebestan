@@ -1,7 +1,9 @@
 "use client";
 
 import { Button, Card, CloseButton, Group, Modal, Text } from "@mantine/core";
+import { useLocalStorage } from "@mantine/hooks";
 import { IconDownload } from "@tabler/icons-react";
+import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,6 +12,11 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PWAInstallPrompt() {
+    const [declined, setDeclined] = useLocalStorage<Dayjs | null>({
+        key: "lastPwaInstallPromptDecline",
+        defaultValue: null,
+    });
+
     const [deferredPrompt, setDeferredPrompt] =
         useState<BeforeInstallPromptEvent | null>(null);
     const [showPrompt, setShowPrompt] = useState(false);
@@ -17,8 +24,12 @@ export function PWAInstallPrompt() {
     useEffect(() => {
         const handler = (e: Event) => {
             e.preventDefault();
-            setDeferredPrompt(e as BeforeInstallPromptEvent);
-            setShowPrompt(true);
+
+            // check if it has not declined before or it been more than 5 days since last decline
+            if (!declined || declined.diff(dayjs(), "days") > 5) {
+                setDeferredPrompt(e as BeforeInstallPromptEvent);
+                setShowPrompt(true);
+            }
         };
 
         window.addEventListener("beforeinstallprompt", handler);
@@ -26,7 +37,7 @@ export function PWAInstallPrompt() {
         return () => {
             window.removeEventListener("beforeinstallprompt", handler);
         };
-    }, []);
+    }, [declined]);
 
     const handleInstall = async () => {
         if (!deferredPrompt) return;
@@ -37,6 +48,8 @@ export function PWAInstallPrompt() {
         if (outcome === "accepted") {
             setDeferredPrompt(null);
             setShowPrompt(false);
+        } else if (outcome === "dismissed") {
+            setDeclined(dayjs());
         }
     };
 
@@ -51,8 +64,6 @@ export function PWAInstallPrompt() {
             }}
             centered
             withCloseButton={false}
-            
-
         >
             <Card shadow="lg" padding="md" radius="md" withBorder>
                 <Group justify="space-between" mb="xs">

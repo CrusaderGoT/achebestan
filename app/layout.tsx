@@ -38,7 +38,7 @@ export const metadata: Metadata = {
         template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
-    manifest: "/manifest.json",
+    manifest: "/manifest.webmanifest",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
@@ -94,7 +94,7 @@ export default function RootLayout({
                 <link rel="dns-prefetch" href={`${BASE_URL}`} />
 
                 {/* PWA manifest */}
-                <link rel="manifest" href="/manifest.json" />
+                <link rel="manifest" href="/manifest.webmanifest" />
 
                 {/* Favicon and icons with dark theme */}
                 <link rel="icon" href="/favicon.ico" />

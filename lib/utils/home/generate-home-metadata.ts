@@ -5,7 +5,6 @@ import { Metadata } from "next";
 export function generateHomeMetadata(
     stories: StoryBookProps[] | undefined
 ): Metadata {
-    const baseUrl = `${BASE_URL}`;
     const dynamicDescription = generateDynamicDescription(stories);
     const storyThemes = extractStoryThemes(stories);
 
@@ -48,14 +47,14 @@ export function generateHomeMetadata(
 
         // Enhanced meta tags
         keywords: comprehensiveKeywords.join(", "),
-        authors: [{ name: "Enemchukwu Chukwuemeka", url: baseUrl }],
+        authors: [{ name: "Enemchukwu Chukwuemeka", url: BASE_URL }],
         creator: "Enemchukwu Chukwuemeka (Achebestan)",
         publisher: "Achebestan",
         category: "Literature",
 
         // Canonical URL
         alternates: {
-            canonical: baseUrl,
+            canonical: BASE_URL,
         },
 
         // Comprehensive robots configuration
@@ -78,22 +77,22 @@ export function generateHomeMetadata(
             type: "website",
             title: "Achebestan's Mind Palace - Dark Fiction & Adventure",
             description: socialDescription,
-            url: baseUrl,
+            url: BASE_URL,
             siteName: "Achebestan's Mind Palace",
             locale: "en_US",
 
             // High-quality images for social sharing
             images: [
                 {
-                    url: `${baseUrl}/images/achebestan-og-home.jpg`,
-                    width: 1200,
-                    height: 630,
+                    url: `${BASE_URL}/web-app-manifest-512x512.png`,
+                    width: 512,
+                    height: 512,
                     alt: "Achebestan's Mind Palace - Dark Fiction and Adventure Stories by Nigerian Author Enemchukwu Chukwuemeka",
                     type: "image/jpeg",
                 },
                 // Author image for personal branding
                 {
-                    url: `${baseUrl}/images/demo.jpg`,
+                    url: `${BASE_URL}/images/demo.jpg`,
                     width: 998,
                     height: 998,
                     alt: "Enemchukwu Chukwuemeka (Achebestan) - Nigerian Author",
@@ -111,7 +110,7 @@ export function generateHomeMetadata(
             description: socialDescription,
             images: [
                 {
-                    url: `${baseUrl}/images/achebestan-og-home.jpg`,
+                    url: `${BASE_URL}/web-app-manifest-512x512.png`,
                     alt: "Enter Achebestan's Mind Palace - Dark Fiction and Adventure Stories",
                 },
             ],
