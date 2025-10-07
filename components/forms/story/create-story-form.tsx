@@ -17,10 +17,24 @@ import { createStoryAction } from "@/lib/actions/story";
 import { useNetwork } from "@mantine/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
+
+// Type guard to check if response is queued
+function isQueuedResponse(
+    data: unknown
+): data is { queued: true; title?: string } {
+    return (
+        typeof data === "object" &&
+        data !== null &&
+        "queued" in data &&
+        data.queued === true
+    );
+}
 
 export function CreateStoryForm() {
     const router = useRouter();
+    const [isQueued, setIsQueued] = useState(false);
 
     const form = useStoryForm({
         mode: "uncontrolled",
@@ -43,10 +57,8 @@ export function CreateStoryForm() {
             },
             onSuccess(args) {
                 // Check if the request was queued (offline)
-                if (!network.online) {
-                    notifications.show({
-                        message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
-                    });
+                if (isQueuedResponse(args.data)) {
+                    setIsQueued(true);
                     router.push(`/`);
                     return;
                 }
@@ -123,9 +135,9 @@ export function CreateStoryForm() {
                         text={
                             isPending
                                 ? "Submitting Story..."
-                                : hasSucceeded
-                                ? "Redirecting To New Story"
-                                : ""
+                                : isQueued
+                                ? "Redirecting To Home..."
+                                : "Redirecting To New Story"
                         }
                         visible={isPending || hasSucceeded}
                     />
