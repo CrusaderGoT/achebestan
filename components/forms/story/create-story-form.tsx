@@ -6,14 +6,15 @@ import {
     useStoryForm,
 } from "@/components/forms/story/create-story-form-context";
 
-import { storyInsertSchema } from "@/zod-schemas/story";
 import { StoryInsertType } from "@/types/story";
+import { storyInsertSchema } from "@/zod-schemas/story";
 
 import { Button, Paper } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import { createStoryAction } from "@/lib/actions/story";
+import { useNetwork } from "@mantine/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
@@ -26,9 +27,22 @@ export function CreateStoryForm() {
         validate: zod4Resolver(storyInsertSchema),
     });
 
+    const network = useNetwork();
+
     const { executeAsync, isPending, hasSucceeded } = useAction(
         createStoryAction,
         {
+            onExecute(args) {
+                // check if offline and then redirect back to home page
+                // as request will auto try again when online
+
+                if (!network.online) {
+                    router.push(`/`);
+                    notifications.show({
+                        message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
+                    });
+                }
+            },
             onSuccess(args) {
                 notifications.show({
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
@@ -57,9 +71,17 @@ export function CreateStoryForm() {
                             ? args.error.serverError
                             : "An Error Ocured",
                     });
+                    router.push(`/`);
+                    notifications.show({
+                        message: "Your Story Will be Published Later1.",
+                    });
                 } else {
                     notifications.show({
                         message: "An Error Ocured",
+                    });
+                    router.push(`/`);
+                    notifications.show({
+                        message: "Your Story Will be Published Later2.",
                     });
                 }
             },
@@ -74,7 +96,7 @@ export function CreateStoryForm() {
 
     return (
         <StoryFormProvider form={form}>
-            <Paper withBorder p={"xl"} pos={"relative"}>
+            <Paper withBorder p={"xs"} pos={"relative"}>
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <StoryFormFields />
 

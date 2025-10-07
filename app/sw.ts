@@ -64,7 +64,7 @@ self.addEventListener("install", async (event) => {
 
     if (storyFetchResult.status === 200) {
         const stories = await storyFetchResult.json();
-        
+
         const parsedStories = stories as StorySelectType[];
 
         parsedStories.forEach((story) => {
@@ -150,6 +150,10 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
         // Handle specific actions here based on event.action
     }
 
+    if (event.action === "close") {
+        return; // do noting on notification close
+    }
+
     const urlToOpen = new URL(
         event.notification.data?.url || "/",
         self.location.origin
@@ -210,8 +214,13 @@ self.addEventListener("notificationclose", (event: NotificationEvent) => {
 });
 
 // Background sync queue for offline requests
-const queue = new BackgroundSyncQueue("notification-queue", {
+const notificationQueue = new BackgroundSyncQueue("notification-queue", {
     maxRetentionTime: 24 * 60, // Retry for max 24 hours (in minutes)
+});
+
+// Background sync queue for offline requests
+const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
+    maxRetentionTime: 72 * 60, // Retry for max 24 hours (in minutes)
 });
 
 // Enhanced fetch handler for queuing
@@ -226,7 +235,30 @@ self.addEventListener("fetch", (event) => {
         event.respondWith(
             fetch(event.request.clone()).catch(async (error) => {
                 console.log("Queuing request for background sync:", error);
-                await queue.pushRequest({ request: event.request });
+                await notificationQueue.pushRequest({ request: event.request });
+
+                return new Response(
+                    JSON.stringify({
+                        queued: true,
+                        message: "Request queued for background sync",
+                    }),
+                    {
+                        headers: { "Content-Type": "application/json" },
+                        status: 202,
+                    }
+                );
+            })
+        );
+    }
+    // Queue new story post/publish requests when offline
+    if (
+        url.pathname.includes("/story/new") &&
+        event.request.method === "POST"
+    ) {
+        event.respondWith(
+            fetch(event.request.clone()).catch(async (error) => {
+                console.log("Queuing request for background sync:", error);
+                await newStoryQueue.pushRequest({ request: event.request });
 
                 return new Response(
                     JSON.stringify({
@@ -273,7 +305,10 @@ self.addEventListener("sync", (event) => {
     console.log("Background sync event:", event.tag);
 
     if (event.tag === "notification-queue") {
-        event.waitUntil(queue.replayRequests());
+        event.waitUntil(notificationQueue.replayRequests());
+    }
+    if (event.tag === "new-story-queue") {
+        event.waitUntil(newStoryQueue.replayRequests());
     }
 });
 
