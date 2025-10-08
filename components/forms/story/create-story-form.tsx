@@ -213,8 +213,11 @@ export function CreateStoryForm() {
         }
     }, 1000);
 
-    form.watch("content", () => {
-        throttledSaveDraft();
+    form.watch("content", ({ value, previousValue }) => {
+        if (previousValue !== value) {
+            notifications.show({ message: "constent field draft updated" });
+            throttledSaveDraft();
+        }
     });
 
     async function handleSubmit(data: StoryInsertType) {

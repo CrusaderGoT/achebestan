@@ -49,16 +49,13 @@ export const navlinkData = [
 
 export function NavLinks({
     session,
-    isPendingSession,
 }: {
     session: ReturnType<typeof authClient.useSession>["data"];
-    isPendingSession: boolean;
 }) {
     const pathname = usePathname();
 
     const items = navlinkData.map((item, index) => {
         // do not show nav that require auth or role
-        if (item.auth && (!session?.user.id || isPendingSession)) return null;
 
         return (
             <NavLink
@@ -70,6 +67,7 @@ export function NavLinks({
                 rightSection={item.rightSection}
                 leftSection={<item.icon size={16} stroke={1.5} />}
                 component={NavigationLink}
+                className={cx(!session?.user.id && publicStyles.hide)}
             />
         );
     });
