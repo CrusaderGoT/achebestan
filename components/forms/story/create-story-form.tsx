@@ -257,9 +257,10 @@ export function CreateStoryForm() {
                         processing={!!currentDraft?.id}
                         position="middle-start"
                         disabled={hasSucceeded || isPending || synced}
+                        size="xs"
                     />
 
-                    <Text fw={500}>
+                    <Text fw={500} size="xs">
                         {currentDraft?.id
                             ? `Editing Draft #${currentDraft.id}`
                             : "New Draft"}
@@ -270,8 +271,24 @@ export function CreateStoryForm() {
                             onClick={toggleDrafts}
                             variant="light"
                             ml="auto"
+                            size="xs"
                         >
                             Open Drafts ({drafts.length})
+                        </Button>
+                    )}
+
+                    {(currentDraftId || currentDraft) && (
+                        <Button
+                            onClick={() => {
+                                setCurrentDraft(null);
+                                setCurrentDraftId(null);
+                                form.reset();
+                            }}
+                            variant="default"
+                            size="xs"
+                            ml="auto"
+                        >
+                            New Draft
                         </Button>
                     )}
                 </Group>
