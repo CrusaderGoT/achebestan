@@ -40,6 +40,8 @@ import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
+import formStyles from "@/styles/story/create-story-form-styles.module.css";
+
 export function CreateStoryForm() {
     const router = useRouter();
 
@@ -274,7 +276,12 @@ export function CreateStoryForm() {
                     )}
                 </Group>
 
-                <Modal opened={openedDrafts} onClose={closeDrafts} centered>
+                <Modal
+                    opened={openedDrafts}
+                    onClose={closeDrafts}
+                    centered
+                    title="Drafts"
+                >
                     <Drafts
                         drafts={drafts}
                         setCurrentDraftId={setCurrentDraftId}
@@ -328,11 +335,12 @@ function Drafts({
             key={draft.id || randomId()}
             radius={"md"}
             value={`${draft.id}`}
+            className={formStyles.draftCard}
         >
             <Group wrap="nowrap" align="flex-start" justify="space-between">
                 <Group wrap="nowrap" align="flex-start" style={{ flex: 1 }}>
                     <Radio.Indicator />
-                    <Box style={{ flex: 1 }}>
+                    <Box style={{ flex: 1 }} className={formStyles.draftLabel}>
                         <Text fw={500}>{draft.title || "Untitled"}</Text>
 
                         <Box
@@ -343,6 +351,7 @@ function Drafts({
                                     sanitizeHTML(draft.content).slice(0, 50) ||
                                     "No Content",
                             }}
+                            className={formStyles.draftDescription}
                         />
 
                         <Text size="xs" c="dimmed" mt={4}>
