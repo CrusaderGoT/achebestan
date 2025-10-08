@@ -218,25 +218,16 @@ export function CreateStoryForm() {
         }
     }, 1000);
 
-    const { start, clear } = useTimeout(
-        ({
-            previousValue,
-            value,
-        }: {
-            previousValue: string;
-            value: string;
-        }) => {
-            if (previousValue !== value) {
-                notifications.show({ message: "constent field draft updated" });
-                debouncedSaveDraft();
-            }
-        },
-        5000
-    );
+    const { start, clear } = useTimeout(() => {
+        notifications.show({ message: "constent field draft updated" });
+        debouncedSaveDraft();
+    }, 5000);
 
     form.watch("content", ({ value, previousValue }) => {
-        clear(); // clear any ongoing timeout
-        start({ previousValue, value });
+        if (previousValue !== value) {
+            clear(); // clear any ongoing timeout
+            start({ previousValue, value });
+        }
     });
 
     async function handleSubmit(data: StoryInsertType) {
