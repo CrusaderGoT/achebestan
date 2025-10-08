@@ -15,6 +15,7 @@ import {
     Button,
     Group,
     Indicator,
+    Loader,
     Modal,
     Paper,
     Radio,
@@ -287,6 +288,8 @@ export function CreateStoryForm() {
                         {currentDraft?.id
                             ? `Editing Draft #${currentDraft.id}`
                             : "New Draft"}
+
+                        {savingDraft && <Loader size={"xs"} />}
                     </Text>
 
                     {drafts.length > 0 && (
