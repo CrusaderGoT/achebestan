@@ -34,7 +34,7 @@ import {
 } from "@/lib/hooks/story/use-index-db";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
-import { randomId, useDisclosure, useThrottledCallback } from "@mantine/hooks";
+import { randomId, useDebouncedCallback, useDisclosure } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -181,7 +181,7 @@ export function CreateStoryForm() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDraftId]);
 
-    const throttledSaveDraft = useThrottledCallback(async () => {
+    const debouncedSaveDraft = useDebouncedCallback(async () => {
         const currentFormValues = form.getValues();
 
         if (!currentFormValues) return;
@@ -216,7 +216,7 @@ export function CreateStoryForm() {
     form.watch("content", ({ value, previousValue }) => {
         if (previousValue !== value) {
             notifications.show({ message: "constent field draft updated" });
-            throttledSaveDraft();
+            debouncedSaveDraft();
         }
     });
 
@@ -261,7 +261,7 @@ export function CreateStoryForm() {
                         color={currentDraft?.id ? "red" : "green"}
                         processing={!!currentDraft?.id}
                         position="middle-start"
-                        disabled={hasSucceeded || isPending || synced}
+                        disabled={form.submitting}
                         size="xs"
                     />
 
@@ -314,7 +314,7 @@ export function CreateStoryForm() {
 
                 <form
                     onSubmit={form.onSubmit(handleSubmit)}
-                    onChange={throttledSaveDraft}
+                    onChange={debouncedSaveDraft}
                 >
                     <StoryFormFields />
 
