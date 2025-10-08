@@ -262,9 +262,11 @@ export function CreateStoryForm() {
                     />
                 </Modal>
 
-                <Button onClick={toggleDrafts} mb="md" variant="light">
-                    Open Drafts ({drafts.length})
-                </Button>
+                {drafts.length > 0 && (
+                    <Button onClick={toggleDrafts} mb="md" variant="light">
+                        Open Drafts ({drafts.length})
+                    </Button>
+                )}
 
                 <form
                     onSubmit={form.onSubmit(handleSubmit)}
