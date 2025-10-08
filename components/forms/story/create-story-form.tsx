@@ -160,7 +160,9 @@ export function CreateStoryForm() {
                 if (draft) {
                     setCurrentDraft(draft);
                     form.setValues(draft);
-                    closeDrafts();
+                    if (openedDrafts) {
+                        closeDrafts();
+                    }
                 } else {
                     notifications.show({
                         message: "Draft not found",

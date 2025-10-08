@@ -1,12 +1,13 @@
 "use client";
 
-import { Stack, Textarea, TextInput } from "@mantine/core";
+import { Box, Stack, Textarea, TextInput } from "@mantine/core";
 import { createFormContext } from "@mantine/form";
 
 import storypageStyles from "@/styles/story-page.module.css";
 
 import { StoryInsertType } from "@/types/story";
 
+import { LoadingOverlayWithText } from "@/components/ui/loading-overlay-with-text";
 import { ImageDropzone } from "../../ui/dropzone";
 import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 
@@ -47,12 +48,19 @@ export function StoryFormFields() {
                 {...form.getInputProps("blurb")}
             />
 
-            <StoryRichTextEditor
-                key={form.key("content")}
-                value={form.values.content}
-                {...form.getInputProps("content")}
-                className={storypageStyles.storyContent}
-            />
+            <Box m={0} p={0} pos={"relative"}>
+                <StoryRichTextEditor
+                    key={form.key("content")}
+                    value={form.values.content}
+                    {...form.getInputProps("content")}
+                    className={storypageStyles.storyContent}
+                />
+
+                <LoadingOverlayWithText
+                    text="Submitting"
+                    visible={form.submitting}
+                />
+            </Box>
         </Stack>
     );
 }

@@ -1,6 +1,6 @@
 .draftCard {
   position: relative;
-  padding: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-xs);
   transition: border-color 150ms ease;
 
   &[data-checked] {
