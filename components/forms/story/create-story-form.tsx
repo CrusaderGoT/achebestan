@@ -34,7 +34,12 @@ import {
 } from "@/lib/hooks/story/use-index-db";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
-import { randomId, useDebouncedCallback, useDisclosure } from "@mantine/hooks";
+import {
+    randomId,
+    useDebouncedCallback,
+    useDisclosure,
+    useTimeout,
+} from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -213,11 +218,25 @@ export function CreateStoryForm() {
         }
     }, 1000);
 
+    const { start, clear } = useTimeout(
+        ({
+            previousValue,
+            value,
+        }: {
+            previousValue: string;
+            value: string;
+        }) => {
+            if (previousValue !== value) {
+                notifications.show({ message: "constent field draft updated" });
+                debouncedSaveDraft();
+            }
+        },
+        5000
+    );
+
     form.watch("content", ({ value, previousValue }) => {
-        if (previousValue !== value) {
-            notifications.show({ message: "constent field draft updated" });
-            debouncedSaveDraft();
-        }
+        clear(); // clear any ongoing timeout
+        start({ previousValue, value });
     });
 
     async function handleSubmit(data: StoryInsertType) {
