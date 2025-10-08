@@ -229,9 +229,8 @@ export function CreateStoryForm() {
         start: startSaveContentDraft,
         clear: clearOngoingSaveContentDraft,
     } = useTimeout(() => {
-        notifications.show({ message: "constent field draft updated" });
         throttledSaveDraft();
-    }, 500);
+    }, 1000);
 
     form.watch("content", ({ value, previousValue }) => {
         if (previousValue !== value) {
@@ -280,7 +279,6 @@ export function CreateStoryForm() {
                     <Indicator
                         color={currentDraft?.id ? "red" : "green"}
                         processing={!!currentDraft?.id}
-                        disabled={form.submitting}
                         size="xs"
                     />
 

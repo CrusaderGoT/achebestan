@@ -1,6 +1,6 @@
 {
   "name": "achebestan",
-  "version": "3.4.0",
+  "version": "3.10.0",
   "private": true,
   "scripts": {
     "dev": "npm run upgrade && next dev --turbopack",
