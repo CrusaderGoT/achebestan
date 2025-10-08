@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 
+import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
 import cx from "clsx";
 import { NavigationLink } from "../ui/route-navigation-progress";
@@ -48,14 +49,16 @@ export const navlinkData = [
 
 export function NavLinks({
     session,
+    isPendingSession,
 }: {
     session: ReturnType<typeof authClient.useSession>["data"];
+    isPendingSession: boolean;
 }) {
     const pathname = usePathname();
 
     const items = navlinkData.map((item, index) => {
-        // do not show nwv that require auth or role
-        if (item.auth && !session?.user.id) return null;
+        // do not show nav that require auth or role
+        if (item.auth && (!session?.user.id || isPendingSession)) return null;
 
         return (
             <NavLink
@@ -83,14 +86,14 @@ export function AltNavLinks({
 
     const items = navlinkData.map((item, index) => {
         // do not show nwv that require auth or role
-        if (item.auth && !session?.user.id) return null;
         return (
             <UnstyledButton
                 key={index}
                 href={item.href}
                 className={cx(
                     shellStyles.mobileNavBar,
-                    pathname === item.href && shellStyles.mobileNavBarActive
+                    pathname === item.href && shellStyles.mobileNavBarActive,
+                    !session?.user.id && publicStyles.hide
                 )}
                 component={NavigationLink}
             >
