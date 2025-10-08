@@ -9,15 +9,35 @@ import {
 import { StoryInsertType } from "@/types/story";
 import { storyInsertSchema } from "@/zod-schemas/story";
 
-import { Button, Paper, Text } from "@mantine/core";
+import {
+    ActionIcon,
+    Box,
+    Button,
+    Group,
+    Modal,
+    Paper,
+    Radio,
+    Stack,
+    Text,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import { createStoryAction } from "@/lib/actions/story";
+import {
+    deleteDraft,
+    getDraft,
+    saveDraft,
+    storyIndexDB,
+    StoryIndexDbSchemaType,
+} from "@/lib/hooks/story/use-index-db";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
+import { sanitizeHTML } from "@/lib/utils/sanitize-html";
+import { randomId, useDisclosure, useThrottledCallback } from "@mantine/hooks";
+import { IconTrash } from "@tabler/icons-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export function CreateStoryForm() {
     const router = useRouter();
@@ -27,8 +47,19 @@ export function CreateStoryForm() {
     const { executeAsync, isPending, hasSucceeded } = useAction(
         createStoryAction,
         {
-            onSuccess(args) {
-                // Normal online success
+            async onSuccess(args) {
+                // Delete the current draft on successful submission
+                if (currentDraft?.id) {
+                    try {
+                        await deleteDraft(currentDraft.id);
+                        notifications.show({
+                            message: "Draft deleted successfully",
+                        });
+                    } catch (error) {
+                        console.error("Failed to delete draft:", error);
+                    }
+                }
+
                 notifications.show({
                     message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
                 });
@@ -40,7 +71,6 @@ export function CreateStoryForm() {
                     console.log(args.error.validationErrors);
                     Object.values(args.error.validationErrors).forEach(
                         (errorList) => {
-                            // change to alert later
                             errorList.forEach((errorMsg, index) =>
                                 notifications.show({
                                     key: index,
@@ -57,7 +87,6 @@ export function CreateStoryForm() {
                             : "A Server Error Ocured",
                     });
                 } else if (args.error.thrownError) {
-                    // check if background sync is available
                     if (isFeatureSupported(["serviceWorker", "SyncManager"])) {
                         setSynced(true);
 
@@ -90,16 +119,157 @@ export function CreateStoryForm() {
         }),
     });
 
+    const [drafts, setDrafts] = useState<StoryIndexDbSchemaType[]>([]);
+    const [currentDraft, setCurrentDraft] =
+        useState<StoryIndexDbSchemaType | null>(null);
+    const [currentDraftId, setCurrentDraftId] = useState<number | null>(null);
+
+    const [openedDrafts, { toggle: toggleDrafts, close: closeDrafts }] =
+        useDisclosure();
+
+    // Load all drafts on mount
+    useEffect(() => {
+        async function loadDrafts() {
+            try {
+                const { drafts } = await storyIndexDB();
+                if (drafts.length > 0) {
+                    setDrafts(drafts);
+                }
+            } catch (error) {
+                console.error("Failed to load drafts:", error);
+            }
+        }
+        loadDrafts();
+    }, []);
+
+    // Load selected draft when currentDraftId changes
+    useEffect(() => {
+        async function loadCurrentDraft() {
+            if (!currentDraftId) {
+                setCurrentDraft(null);
+                form.reset();
+                return;
+            }
+
+            try {
+                const draft = await getDraft(currentDraftId);
+
+                if (draft) {
+                    setCurrentDraft(draft);
+                    form.setValues(draft);
+                    closeDrafts();
+                    notifications.show({
+                        message: `Loaded draft: ${draft.title || "Untitled"}`,
+                    });
+                } else {
+                    notifications.show({
+                        message: "Draft not found",
+                        color: "red",
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load draft:", error);
+                notifications.show({
+                    message: "Failed to load draft",
+                    color: "red",
+                });
+            }
+        }
+        loadCurrentDraft();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentDraftId]);
+
+    const throttledSaveDraft = useThrottledCallback(async () => {
+        const currentFormValues = form.getValues();
+
+        if (!currentFormValues) return;
+
+        try {
+            const draftData = {
+                ...currentFormValues,
+                ...(currentDraft && {
+                    id: currentDraft.id,
+                    created: currentDraft.created,
+                }),
+            };
+
+            const newDraftId = await saveDraft(draftData);
+
+            if (!currentDraft) {
+                const newDraft = await getDraft(newDraftId);
+                if (newDraft) {
+                    setCurrentDraft(newDraft);
+                    setCurrentDraftId(newDraftId);
+                }
+            }
+
+            // Refresh drafts list
+            const { drafts: updatedDrafts } = await storyIndexDB();
+            setDrafts(updatedDrafts);
+        } catch (error) {
+            console.error("Failed to save draft:", error);
+        }
+    }, 1000);
+
     async function handleSubmit(data: StoryInsertType) {
         await executeAsync({
             ...data,
         });
     }
 
+    async function handleDeleteDraft(draftId: number) {
+        try {
+            await deleteDraft(draftId);
+
+            // Refresh drafts list
+            const { drafts: updatedDrafts } = await storyIndexDB();
+            setDrafts(updatedDrafts);
+
+            // If we deleted the current draft, reset the form
+            if (currentDraft?.id === draftId) {
+                setCurrentDraft(null);
+                setCurrentDraftId(null);
+                form.reset();
+            }
+
+            notifications.show({
+                message: "Draft deleted successfully",
+            });
+        } catch (error) {
+            console.error("Failed to delete draft:", error);
+            notifications.show({
+                message: "Failed to delete draft",
+                color: "red",
+            });
+        }
+    }
+
     return (
         <StoryFormProvider form={form}>
             <Paper withBorder p={"xs"} pos={"relative"}>
-                <form onSubmit={form.onSubmit(handleSubmit)}>
+                <Text fw={500} mb="md">
+                    {currentDraft?.id
+                        ? `Editing Draft #${currentDraft.id}`
+                        : "New Draft"}
+                </Text>
+
+                <Modal opened={openedDrafts} onClose={closeDrafts} centered>
+                    <Drafts
+                        drafts={drafts}
+                        setCurrentDraftId={setCurrentDraftId}
+                        currentDraftId={currentDraftId}
+                        onDeleteDraft={handleDeleteDraft}
+                    />
+                </Modal>
+
+                <Button onClick={toggleDrafts} mb="md" variant="light">
+                    Open Drafts ({drafts.length})
+                </Button>
+
+                <form
+                    onSubmit={form.onSubmit(handleSubmit)}
+                    onChange={throttledSaveDraft}
+                >
                     <StoryFormFields />
 
                     <Button
@@ -122,5 +292,90 @@ export function CreateStoryForm() {
                 </form>
             </Paper>
         </StoryFormProvider>
+    );
+}
+
+function Drafts({
+    drafts,
+    currentDraftId,
+    setCurrentDraftId,
+    onDeleteDraft,
+}: {
+    drafts: StoryIndexDbSchemaType[];
+    currentDraftId: number | null;
+    setCurrentDraftId: Dispatch<SetStateAction<number | null>>;
+    onDeleteDraft: (id: number) => void;
+}) {
+    const cards = drafts.map((draft) => (
+        <Radio.Card
+            key={draft.id || randomId()}
+            radius={"md"}
+            value={`${draft.id}`}
+        >
+            <Group wrap="nowrap" align="flex-start" justify="space-between">
+                <Group wrap="nowrap" align="flex-start" style={{ flex: 1 }}>
+                    <Radio.Indicator />
+                    <Box style={{ flex: 1 }}>
+                        <Text fw={500}>{draft.title || "Untitled"}</Text>
+
+                        <Box
+                            size="sm"
+                            c="dimmed"
+                            dangerouslySetInnerHTML={{
+                                __html:
+                                    sanitizeHTML(draft.content).slice(0, 50) ||
+                                    "No Content",
+                            }}
+                        />
+
+                        <Text size="xs" c="dimmed" mt={4}>
+                            {new Date(draft.updated).toLocaleDateString()} at{" "}
+                            {new Date(draft.updated).toLocaleTimeString()}
+                        </Text>
+                    </Box>
+                </Group>
+                <ActionIcon
+                    color="red"
+                    variant="subtle"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (draft.id) {
+                            onDeleteDraft(draft.id);
+                        }
+                    }}
+                >
+                    <IconTrash size={18} />
+                </ActionIcon>
+            </Group>
+        </Radio.Card>
+    ));
+
+    return (
+        <>
+            <Radio.Group
+                value={currentDraftId?.toString() || ""}
+                onChange={(value) =>
+                    setCurrentDraftId(value ? Number(value) : null)
+                }
+                label="Select a draft to edit"
+                description="Choose a draft to continue working on"
+            >
+                <Stack pt="md" gap="xs">
+                    {cards.length > 0 ? (
+                        cards
+                    ) : (
+                        <Text c="dimmed" ta="center" py="xl">
+                            No drafts available
+                        </Text>
+                    )}
+                </Stack>
+            </Radio.Group>
+
+            {currentDraftId && (
+                <Text fz="xs" mt="md">
+                    Current Draft ID: {currentDraftId}
+                </Text>
+            )}
+        </>
     );
 }

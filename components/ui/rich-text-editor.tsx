@@ -41,11 +41,7 @@ export function StoryRichTextEditor({
         <Input.Wrapper {...props}>
             <RichTextEditor
                 editor={editor}
-                style={
-                    props.error
-                        ? { borderColor: "red", color: "red" }
-                        : { minHeight: "600px" }
-                }
+                style={props.error ? { borderColor: "red", color: "red" } : {}}
             >
                 <RichTextEditor.Toolbar
                     sticky
@@ -86,7 +82,7 @@ export function StoryRichTextEditor({
                     </RichTextEditor.ControlsGroup>
                 </RichTextEditor.Toolbar>
 
-                <RichTextEditor.Content />
+                <RichTextEditor.Content mih={400} />
             </RichTextEditor>
             <Input.Error m={0} />
         </Input.Wrapper>
