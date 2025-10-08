@@ -14,6 +14,7 @@ import {
     Box,
     Button,
     Group,
+    Indicator,
     Modal,
     Paper,
     Radio,
@@ -158,9 +159,6 @@ export function CreateStoryForm() {
                     setCurrentDraft(draft);
                     form.setValues(draft);
                     closeDrafts();
-                    notifications.show({
-                        message: `Loaded draft: ${draft.title || "Untitled"}`,
-                    });
                 } else {
                     notifications.show({
                         message: "Draft not found",
@@ -211,6 +209,10 @@ export function CreateStoryForm() {
         }
     }, 1000);
 
+    form.watch("content", () => {
+        throttledSaveDraft();
+    });
+
     async function handleSubmit(data: StoryInsertType) {
         await executeAsync({
             ...data,
@@ -247,11 +249,30 @@ export function CreateStoryForm() {
     return (
         <StoryFormProvider form={form}>
             <Paper withBorder p={"xs"} pos={"relative"}>
-                <Text fw={500} mb="md">
-                    {currentDraft?.id
-                        ? `Editing Draft #${currentDraft.id}`
-                        : "New Draft"}
-                </Text>
+                <Group mb="md">
+                    <Indicator
+                        color={currentDraft?.id ? "red" : "green"}
+                        processing={!!currentDraft?.id}
+                        position="middle-start"
+                        disabled={hasSucceeded || isPending || synced}
+                    />
+
+                    <Text fw={500}>
+                        {currentDraft?.id
+                            ? `Editing Draft #${currentDraft.id}`
+                            : "New Draft"}
+                    </Text>
+
+                    {drafts.length > 0 && (
+                        <Button
+                            onClick={toggleDrafts}
+                            variant="light"
+                            ml="auto"
+                        >
+                            Open Drafts ({drafts.length})
+                        </Button>
+                    )}
+                </Group>
 
                 <Modal opened={openedDrafts} onClose={closeDrafts} centered>
                     <Drafts
@@ -261,12 +282,6 @@ export function CreateStoryForm() {
                         onDeleteDraft={handleDeleteDraft}
                     />
                 </Modal>
-
-                {drafts.length > 0 && (
-                    <Button onClick={toggleDrafts} mb="md" variant="light">
-                        Open Drafts ({drafts.length})
-                    </Button>
-                )}
 
                 <form
                     onSubmit={form.onSubmit(handleSubmit)}
