@@ -67,7 +67,9 @@ export function NavLinks({
                 rightSection={item.rightSection}
                 leftSection={<item.icon size={16} stroke={1.5} />}
                 component={NavigationLink}
-                className={cx(!session?.user.id && publicStyles.hide)}
+                className={cx(
+                    item.auth && !session?.user.id && publicStyles.hide
+                )}
             />
         );
     });
@@ -91,7 +93,7 @@ export function AltNavLinks({
                 className={cx(
                     shellStyles.mobileNavBar,
                     pathname === item.href && shellStyles.mobileNavBarActive,
-                    !session?.user.id && publicStyles.hide
+                    item.auth && !session?.user.id && publicStyles.hide
                 )}
                 component={NavigationLink}
             >

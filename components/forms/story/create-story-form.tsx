@@ -36,8 +36,8 @@ import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import {
     randomId,
-    useDebouncedCallback,
     useDisclosure,
+    useThrottledCallback,
     useTimeout,
 } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
@@ -186,12 +186,16 @@ export function CreateStoryForm() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDraftId]);
 
-    const debouncedSaveDraft = useDebouncedCallback(async () => {
+    const [savingDraft, setSavingDraft] = useState(false);
+
+    const throttledSaveDraft = useThrottledCallback(async () => {
         const currentFormValues = form.getValues();
 
         if (!currentFormValues) return;
 
         try {
+            setSavingDraft(true);
+
             const draftData = {
                 ...currentFormValues,
                 ...(currentDraft && {
@@ -215,18 +219,23 @@ export function CreateStoryForm() {
             setDrafts(updatedDrafts);
         } catch (error) {
             console.error("Failed to save draft:", error);
+        } finally {
+            setSavingDraft(false);
         }
     }, 1000);
 
-    const { start, clear } = useTimeout(() => {
+    const {
+        start: startSaveContentDraft,
+        clear: clearOngoingSaveContentDraft,
+    } = useTimeout(() => {
         notifications.show({ message: "constent field draft updated" });
-        debouncedSaveDraft();
-    }, 5000);
+        throttledSaveDraft();
+    }, 500);
 
     form.watch("content", ({ value, previousValue }) => {
         if (previousValue !== value) {
-            clear(); // clear any ongoing timeout
-            start({ previousValue, value });
+            clearOngoingSaveContentDraft(); // clear any ongoing timeout
+            startSaveContentDraft();
         }
     });
 
@@ -270,7 +279,6 @@ export function CreateStoryForm() {
                     <Indicator
                         color={currentDraft?.id ? "red" : "green"}
                         processing={!!currentDraft?.id}
-                        position="middle-start"
                         disabled={form.submitting}
                         size="xs"
                     />
@@ -324,7 +332,7 @@ export function CreateStoryForm() {
 
                 <form
                     onSubmit={form.onSubmit(handleSubmit)}
-                    onChange={debouncedSaveDraft}
+                    onChange={throttledSaveDraft}
                 >
                     <StoryFormFields />
 
