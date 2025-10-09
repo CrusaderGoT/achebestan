@@ -3,7 +3,7 @@
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { calculateRatingsAverage } from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure, useMounted } from "@mantine/hooks";

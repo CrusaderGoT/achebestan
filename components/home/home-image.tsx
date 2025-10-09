@@ -4,7 +4,7 @@ import { ImageDropzone, UploadImageDropZoneProps } from "../ui/dropzone";
 
 import { ActionIcon, Box, Image as MantineImage } from "@mantine/core";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import homeStyles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";

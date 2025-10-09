@@ -1,22 +1,26 @@
 "use client";
 
 import { authClient } from "@/lib/auth/auth-client";
-import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";
+
 import { Button, Paper, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
-import {
-    SignupFields,
-    SignupFormProvider,
-    useSignupForm,
-} from "./signup-form-context";
 
 import { LoginFormState } from "@/types/user";
+import {
+    organizationInsertSchema,
+    OrganizationInsertSchemaType,
+} from "@/zod-schemas/organization";
 import { notifications } from "@mantine/notifications";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
+import {
+    OrganizationFormFields,
+    OrganizationFormProvider,
+    useOrganizationForm,
+} from "./create-organization-form-context";
 
-export function SignupForm({
+export function OrganizationCreateForm({
     redirectAfterSuccess = true,
     closeModal,
     formState,
@@ -27,15 +31,18 @@ export function SignupForm({
     formState: LoginFormState;
     setFormState: Dispatch<SetStateAction<LoginFormState>>;
 }) {
-    const form = useSignupForm({
+    const form = useOrganizationForm({
         mode: "uncontrolled",
-        validate: zod4Resolver(signupSchema),
+        validate: zod4Resolver(organizationInsertSchema),
         validateInputOnBlur: true,
     });
 
-    async function handleSubmit(data: SignupSchemaType) {
-        await authClient.signUp.email(
-            { ...data },
+    async function handleSubmit(formData: OrganizationInsertSchemaType) {
+        await authClient.organization.create(
+            {
+                ...formData,
+                keepCurrentActiveOrganization: false,
+            },
             {
                 onRequest: () => setFormState("pending"),
                 onError(errCtx) {
@@ -65,7 +72,7 @@ export function SignupForm({
     }
 
     return (
-        <SignupFormProvider form={form}>
+        <OrganizationFormProvider form={form}>
             <Paper withBorder p={"md"}>
                 <Title order={3} ta={"center"} mb={"md"}>
                     Sign Up To Become A Writer!
@@ -73,7 +80,7 @@ export function SignupForm({
 
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <Stack>
-                        <SignupFields />
+                        <OrganizationFormFields />
 
                         <Button
                             type="submit"
@@ -83,7 +90,7 @@ export function SignupForm({
                             }
                             color="green"
                         >
-                            Signup
+                            Create
                         </Button>
                     </Stack>
                 </form>
@@ -91,7 +98,7 @@ export function SignupForm({
                 <LoadingOverlayWithText
                     text={
                         formState === "pending"
-                            ? "If Only It Was That Easy To Become A Writer. Anyway Signing Up New User"
+                            ? "Create New Organization"
                             : formState === "success" && redirectAfterSuccess
                             ? "Redirecting To Home Page"
                             : ""
@@ -99,6 +106,6 @@ export function SignupForm({
                     visible={formState === "pending" || formState === "success"}
                 />
             </Paper>
-        </SignupFormProvider>
+        </OrganizationFormProvider>
     );
 }

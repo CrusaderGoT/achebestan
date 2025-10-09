@@ -4,8 +4,11 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { nextCookies } from "better-auth/next-js";
-import { admin, anonymous } from "better-auth/plugins";
+import { admin, anonymous, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
+import { getUserRole } from "../actions/user";
+import { MEMBER_ROLES } from "../constants";
+import { customAccessControl, writer } from "./permissions";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -22,7 +25,19 @@ export const auth = betterAuth({
     },
     plugins: [
         nextCookies(),
-        admin(),
+        admin({
+            customAccessControl,
+            roles: {
+                writer,
+            },
+        }),
+        organization({
+            async allowUserToCreateOrganization(user) {
+                const role = await getUserRole(user.id);
+
+                return role === MEMBER_ROLES.superAdmin;
+            },
+        }),
         anonymous({
             disableDeleteAnonymousUser: true, // since the anon user is updated
             onLinkAccount: async ({ anonymousUser, newUser }) => {

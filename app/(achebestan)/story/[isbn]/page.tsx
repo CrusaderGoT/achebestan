@@ -5,7 +5,7 @@ import { StoryRating } from "@/components/story/story-rating";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
 import { readStory } from "@/lib/actions/story";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";

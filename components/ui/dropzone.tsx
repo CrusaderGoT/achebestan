@@ -16,11 +16,17 @@ import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 
-import { useEffect, useState } from "react";
+import {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 
 import stylesPublic from "@/styles/public.module.css";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { handleFileUpload } from "@/lib/utils/image-upload";
 import { StoryInsertType, StoryUpdateType } from "@/types/story";
 import { UseFormReturnType } from "@mantine/form";
@@ -272,6 +278,192 @@ function UploadImageDropZone({
             setUploading(false);
         }
     }
+
+    return (
+        <>
+            <Dropzone
+                onDrop={(files) => {
+                    setImage(files[0]);
+                    setHiddenDropzone(true);
+                }}
+                onReject={() => {
+                    setError("Select Image Not Bigger Than 5mb");
+                }}
+                maxSize={5 * 1024 ** 2}
+                accept={IMAGE_MIME_TYPE}
+                className={cx(hiddenDropzone && image && stylesPublic.hide)}
+                {...props}
+            >
+                <DropZoneDetails />
+            </Dropzone>
+
+            <Stack
+                className={cx(
+                    stylesPublic.fullWidth,
+                    hiddenDropzone && image
+                        ? stylesPublic.show
+                        : stylesPublic.hide
+                )}
+                gap={5}
+            >
+                <ActionIcon
+                    onClick={() => {
+                        setHiddenDropzone(false);
+                    }}
+                    className={cx(stylesPublic.fullWidth)}
+                    variant="light"
+                    color="red"
+                    disabled={uploading}
+                >
+                    <IconX />
+                </ActionIcon>
+
+                <SimpleGrid cols={{ base: 1 }}>
+                    {image ? (
+                        <PreviewImage file={image} />
+                    ) : (
+                        <Title order={3} ta={"center"}>
+                            Tap X To Show Dropzone
+                        </Title>
+                    )}
+                </SimpleGrid>
+
+                <Button
+                    onClick={async () => {
+                        if (!image) {
+                            notifications.show({
+                                message: "No Image In DropZone",
+                            });
+                            return;
+                        }
+                        await upload(image);
+                    }}
+                    fullWidth
+                    loading={uploading}
+                >
+                    Upload
+                </Button>
+            </Stack>
+        </>
+    );
+}
+export type UploadDropZoneProps = {
+    imageUniqueId?: string;
+    onSetttled?: () => void;
+    execute?: (imageURL: string) => void;
+    executeAsync?: (imageURL: string) => Promise<void>;
+    errorHandler?: (err: string) => void;
+    uploadFromOutside?: {
+        uploadStatus: boolean;
+        setUploadStatus: Dispatch<SetStateAction<boolean>>;
+    };
+} & Partial<DropzoneProps>;
+
+export function UploadDropZone({
+    imageUniqueId,
+    onSetttled,
+    executeAsync,
+    execute,
+    errorHandler,
+    uploadFromOutside,
+    ...props
+}: UploadDropZoneProps) {
+    const [uploading, setUploading] = useState(false);
+
+    const [error, setError] = useState<string | null>(null);
+
+    const [image, setImage] = useState<File | null>(null);
+
+    const [hiddenDropzone, setHiddenDropzone] = useState(false);
+
+    useEffect(() => {
+        if (!error) return;
+
+        notifications.show({
+            message: error,
+            autoClose: 5000,
+            color: "red",
+        });
+
+        const timer = setTimeout(() => setError(null), 5000);
+        return () => clearTimeout(timer);
+    }, [error, setError]);
+
+    const upload = useCallback(
+        async (file: File) => {
+            setUploading(true);
+            try {
+                const newUserImage = await handleFileUpload(
+                    file,
+                    imageUniqueId,
+                    {
+                        throwOnError: false,
+                    }
+                );
+
+                if (!newUserImage) {
+                    if (errorHandler) {
+                        errorHandler("Upload Failed");
+                    } else {
+                        notifications.show({ message: "Upload Failed" });
+                    }
+                    return;
+                }
+
+                if (executeAsync) {
+                    await executeAsync(newUserImage.secure_url);
+                } else if (execute) {
+                    execute(newUserImage.secure_url);
+                } else {
+                    notifications.show({
+                        message: "no happened with uploaded image",
+                    });
+                }
+
+                if (onSetttled) {
+                    onSetttled();
+                }
+                setImage(null);
+            } catch (e) {
+                const errMsg =
+                    e instanceof Error
+                        ? e.message
+                        : "An Unknown Error Occured While Uploading Your Image, Try Again.";
+                notifications.show({
+                    title: "User Image Upload Error",
+                    message: errMsg,
+                });
+            } finally {
+                setUploading(false);
+            }
+        },
+        [errorHandler, execute, executeAsync, imageUniqueId, onSetttled]
+    );
+
+    // effect for auto upload from outside dropzone
+    useEffect(() => {
+        async function startUpload() {
+            if (!image) {
+                notifications.show({
+                    message: "No Image In DropZone",
+                });
+                return;
+            }
+            await upload(image);
+        }
+        if (
+            uploadFromOutside?.uploadStatus &&
+            uploadFromOutside.setUploadStatus
+        ) {
+            try {
+                startUpload();
+            } finally {
+                uploadFromOutside.setUploadStatus(false);
+            }
+        } else {
+            return;
+        }
+    }, [image, upload, uploadFromOutside]);
 
     return (
         <>

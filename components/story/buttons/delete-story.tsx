@@ -18,7 +18,7 @@ import { IconTrashX } from "@tabler/icons-react";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { PickedStoryProps } from "@/types/story";
 import { redirect } from "next/navigation";
 

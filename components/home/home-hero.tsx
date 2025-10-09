@@ -4,7 +4,7 @@ import styles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Flex, Mark, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { HomeImageBox } from "./home-image";

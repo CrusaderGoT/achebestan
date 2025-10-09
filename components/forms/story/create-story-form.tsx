@@ -32,7 +32,7 @@ import {
     saveDraft,
     storyIndexDB,
     StoryIndexDbSchemaType,
-} from "@/lib/hooks/story/use-index-db";
+} from "@/lib/index-db";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import {
@@ -279,7 +279,6 @@ export function CreateStoryForm() {
                     <Indicator
                         color={currentDraft?.id ? "red" : "green"}
                         processing={!!currentDraft?.id}
-                        size="xs"
                     />
 
                     <Text fw={500} size="xs">
