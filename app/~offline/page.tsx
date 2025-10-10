@@ -1,3 +1,4 @@
+import { Button, Center, Flex, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,19 +7,21 @@ export const metadata: Metadata = {
 
 export default function OfflinePage() {
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">You&apos;re Offline</h1>
-                <p className="text-gray-600 mb-4">
+        <Flex className="min-h-screen flex items-center justify-center">
+            <Center className="text-center">
+                <Title order={1} className="text-4xl font-bold mb-4">
+                    You&apos;re Offline
+                </Title>
+                <Text className="text-gray-600 mb-4">
                     Please check your internet connection
-                </p>
-                <button
+                </Text>
+                <Button
                     onClick={() => window.location.reload()}
                     className="bg-blue-600 text-white px-6 py-2 rounded"
                 >
                     Retry
-                </button>
-            </div>
-        </div>
+                </Button>
+            </Center>
+        </Flex>
     );
 }

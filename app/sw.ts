@@ -441,7 +441,12 @@ self.addEventListener("push", (event: PushEvent) => {
             return;
         }
 
-        const options: NotificationOptions = {
+        const options: NotificationOptions & {
+            vibrate: number[];
+            actions: string[];
+            timestamp: number;
+            renotify: boolean;
+        } = {
             body: data.body || "",
             icon: data.icon || "/web-app-manifest-512x512.png",
             badge: data.badge || "/web-app-manifest-192x192.png",

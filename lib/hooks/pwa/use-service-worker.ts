@@ -1,11 +1,13 @@
 // hooks/useServiceWorker.ts
 import { notifications } from "@mantine/notifications";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function useServiceWorker() {
     const [updateAvailable, setUpdateAvailable] = useState(false);
     const [registration, setRegistration] =
         useState<ServiceWorkerRegistration | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         if (typeof window !== "undefined" && "serviceWorker" in navigator) {
@@ -50,10 +52,13 @@ export function useServiceWorker() {
                     console.log("[Client] Story synced:", event.data.url);
                     // You can show a toast notification here
                     notifications.show({
-                        title: "Offline - Story Publishing",
-                        message: `Story Will Continue Publishing When You Come Online`,
+                        title: "Changes synced successfully",
+                        message: `Your story has been Published!`,
                     });
                     // Or trigger a data refetch
+                    if (event.data.url) {
+                        router.push(event.data.url);
+                    }
                 }
             });
 
@@ -63,7 +68,7 @@ export function useServiceWorker() {
                 window.location.reload();
             });
         }
-    }, []);
+    }, [router]);
 
     const updateServiceWorker = () => {
         if (registration?.waiting) {

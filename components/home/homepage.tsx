@@ -6,6 +6,7 @@ import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
 import { useExitOnHomePage } from "@/lib/hooks/home/use-exit-on-home-page";
 import { StoryBookProps } from "@/types/story";
+import { ServiceWorkerUpdate } from "../pwa/service-worker-update";
 
 export function HomePage({
     stories,
@@ -54,6 +55,8 @@ export function HomePage({
                     })}
                 </Grid>
             )}
+
+            <ServiceWorkerUpdate />
         </Stack>
     );
 }
