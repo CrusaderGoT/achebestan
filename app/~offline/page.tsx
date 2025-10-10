@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Center, Flex, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 
