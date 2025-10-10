@@ -6,9 +6,19 @@ export const metadata: Metadata = {
 
 export default function OfflinePage() {
     return (
-        <>
-            <h1>This is offline fallback page</h1>
-            <h2>When offline, any page route will fallback to this page</h2>
-        </>
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+                <h1 className="text-4xl font-bold mb-4">You&apos;re Offline</h1>
+                <p className="text-gray-600 mb-4">
+                    Please check your internet connection
+                </p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-6 py-2 rounded"
+                >
+                    Retry
+                </button>
+            </div>
+        </div>
     );
 }

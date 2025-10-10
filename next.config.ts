@@ -2,17 +2,14 @@ import type { NextConfig } from "next";
 
 import withSerwistInit from "@serwist/next";
 
-const revision = "d05feaf207e6f41cd8747d6a96963365d92085e0";
-
 const withSerwist = withSerwistInit({
     swSrc: "app/sw.ts",
     swDest: "public/sw.js",
     cacheOnNavigation: true,
     scope: "/",
     register: true,
-    reloadOnOnline: false,
+    reloadOnOnline: true,
     disable: process.env.NODE_ENV === "development",
-    additionalPrecacheEntries: [{ url: "/~offline", revision }],
 });
 
 const nextConfig: NextConfig = {

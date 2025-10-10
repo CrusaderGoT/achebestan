@@ -1,14 +1,18 @@
 import { StorySelectType } from "@/types/story";
 import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import type {
+    BackgroundSyncQueueEntry,
+    PrecacheEntry,
+    SerwistGlobalConfig,
+} from "serwist";
 import {
     BackgroundSyncQueue,
     CacheableResponsePlugin,
-    Serwist,
-    StaleWhileRevalidate,
-    NetworkFirst,
     CacheFirst,
     ExpirationPlugin,
+    NetworkFirst,
+    Serwist,
+    StaleWhileRevalidate,
 } from "serwist";
 
 // Declare the value of `injectionPoint` to TypeScript
@@ -137,29 +141,41 @@ serwist.addToPrecacheList([
 // Install event - Keep it simple and fast
 self.addEventListener("install", (event) => {
     console.log("[SW] Installing service worker");
-    
+
     event.waitUntil(
         (async () => {
             try {
                 // Pre-cache the offline page immediately
                 const cache = await caches.open(CACHE_NAMES.RUNTIME);
                 await cache.add("/~offline");
-                
+
                 // Try to fetch and cache stories list, but don't block installation
                 try {
                     const response = await fetch("/api/stories");
                     if (response.ok) {
-                        const storiesCache = await caches.open(CACHE_NAMES.STORIES_LIST);
-                        await storiesCache.put("/api/stories", response.clone());
-                        
+                        const storiesCache = await caches.open(
+                            CACHE_NAMES.STORIES_LIST
+                        );
+                        await storiesCache.put(
+                            "/api/stories",
+                            response.clone()
+                        );
+
                         // Cache story pages in the background (non-blocking)
-                        const stories: StorySelectType[] = await response.json();
-                        cacheStoryPages(stories).catch(err => 
-                            console.error("[SW] Failed to cache story pages:", err)
+                        const stories: StorySelectType[] =
+                            await response.json();
+                        cacheStoryPages(stories).catch((err) =>
+                            console.error(
+                                "[SW] Failed to cache story pages:",
+                                err
+                            )
                         );
                     }
                 } catch (error) {
-                    console.warn("[SW] Could not fetch stories during install:", error);
+                    console.warn(
+                        "[SW] Could not fetch stories during install:",
+                        error
+                    );
                     // Don't fail installation if this fails
                 }
             } catch (error) {
@@ -172,14 +188,14 @@ self.addEventListener("install", (event) => {
 // Helper function to cache story pages (non-blocking)
 async function cacheStoryPages(stories: StorySelectType[]) {
     const cache = await caches.open(CACHE_NAMES.STORY);
-    const urls = stories.map(story => `/story/${story.isbn}`);
-    
+    const urls = stories.map((story) => `/story/${story.isbn}`);
+
     // Cache in batches to avoid overwhelming the browser
     const batchSize = 5;
     for (let i = 0; i < urls.length; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
         await Promise.allSettled(
-            batch.map(async url => {
+            batch.map(async (url) => {
                 try {
                     const response = await fetch(url);
                     if (response.ok) {
@@ -191,34 +207,38 @@ async function cacheStoryPages(stories: StorySelectType[]) {
             })
         );
         // Small delay between batches
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
     }
 }
 
 // Activate event - Clean up old caches
 self.addEventListener("activate", (event) => {
     console.log("[SW] Activating service worker");
-    
+
     event.waitUntil(
         (async () => {
             try {
                 const cacheNames = await caches.keys();
-                const validCacheNames = new Set<string>(Object.values(CACHE_NAMES));
-                
+                const validCacheNames = new Set<string>(
+                    Object.values(CACHE_NAMES)
+                );
+
                 // Delete old caches
                 await Promise.all(
                     cacheNames.map(async (cacheName) => {
-                        if (!validCacheNames.has(cacheName) && 
-                            !cacheName.startsWith("serwist-precache-")) {
+                        if (
+                            !validCacheNames.has(cacheName) &&
+                            !cacheName.startsWith("serwist-precache-")
+                        ) {
                             console.log("[SW] Deleting old cache:", cacheName);
                             await caches.delete(cacheName);
                         }
                     })
                 );
-                
+
                 // Claim all clients immediately
                 await self.clients.claim();
-                
+
                 console.log("[SW] Service worker activated");
             } catch (error) {
                 console.error("[SW] Activation error:", error);
@@ -248,7 +268,7 @@ const notificationQueue = new BackgroundSyncQueue("notification-queue", {
 const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
     maxRetentionTime: 72 * 60, // 72 hours
     onSync: async ({ queue }) => {
-        let entry;
+        let entry: BackgroundSyncQueueEntry | undefined;
         while ((entry = await queue.shiftRequest())) {
             try {
                 const response = await fetch(entry.request.clone());
@@ -256,13 +276,13 @@ const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 console.log("[SW] Replayed story request");
-                
+
                 // Notify the client of successful sync
                 const clients = await self.clients.matchAll();
-                clients.forEach(client => {
+                clients.forEach((client) => {
                     client.postMessage({
                         type: "STORY_SYNCED",
-                        url: entry.request.url,
+                        url: entry?.request.url,
                     });
                 });
             } catch (error) {
@@ -278,7 +298,7 @@ const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
 self.addEventListener("fetch", (event) => {
     const { request } = event;
     const url = new URL(request.url);
-    
+
     // Skip non-GET requests for notification and story endpoints
     // Handle them separately below
     if (request.method !== "GET") {
@@ -290,9 +310,14 @@ self.addEventListener("fetch", (event) => {
                         const response = await fetch(request.clone());
                         return response;
                     } catch (error) {
-                        console.log("[SW] Queuing notification for background sync");
-                        await notificationQueue.pushRequest({ request: request.clone() });
-                        
+                        console.log(
+                            "[SW] Queuing notification for background sync",
+                            error
+                        );
+                        await notificationQueue.pushRequest({
+                            request: request.clone(),
+                        });
+
                         return new Response(
                             JSON.stringify({
                                 queued: true,
@@ -308,7 +333,7 @@ self.addEventListener("fetch", (event) => {
             );
             return;
         }
-        
+
         // Queue new story POST requests when offline
         if (url.pathname.startsWith("/story/") && request.method === "POST") {
             event.respondWith(
@@ -317,15 +342,21 @@ self.addEventListener("fetch", (event) => {
                         const response = await fetch(request.clone());
                         return response;
                     } catch (error) {
-                        console.log("[SW] Queuing story for background sync");
-                        await newStoryQueue.pushRequest({ request: request.clone() });
-                        
+                        console.log(
+                            "[SW] Queuing story for background sync",
+                            error
+                        );
+                        await newStoryQueue.pushRequest({
+                            request: request.clone(),
+                        });
+
                         // Return a more informative error response
                         return new Response(
                             JSON.stringify({
                                 queued: true,
                                 offline: true,
-                                message: "Your changes will be saved when you're back online",
+                                message:
+                                    "Your changes will be saved when you're back online",
                             }),
                             {
                                 headers: { "Content-Type": "application/json" },
@@ -338,7 +369,7 @@ self.addEventListener("fetch", (event) => {
             return;
         }
     }
-    
+
     // For navigation requests, ensure we serve cached content when offline
     if (request.mode === "navigate") {
         event.respondWith(
@@ -346,27 +377,28 @@ self.addEventListener("fetch", (event) => {
                 try {
                     // Try network first
                     const response = await fetch(request.clone());
-                    
+
                     // Cache successful responses
                     if (response.ok && url.pathname.startsWith("/story/")) {
                         const cache = await caches.open(CACHE_NAMES.STORY);
                         cache.put(request, response.clone());
                     }
-                    
+
                     return response;
                 } catch (error) {
                     // Network failed, try cache
+                    console.log("[SW] Network failed, trying cache", error);
                     const cachedResponse = await caches.match(request);
                     if (cachedResponse) {
                         return cachedResponse;
                     }
-                    
+
                     // No cache, return offline page
                     const offlineResponse = await caches.match("/~offline");
                     if (offlineResponse) {
                         return offlineResponse;
                     }
-                    
+
                     // Last resort fallback
                     return new Response(
                         "Offline - No cached version available",
@@ -386,7 +418,7 @@ self.addEventListener("fetch", (event) => {
 // Handle sync events
 self.addEventListener("sync", (event) => {
     console.log("[SW] Background sync event:", event.tag);
-    
+
     if (event.tag === "notification-queue") {
         event.waitUntil(notificationQueue.replayRequests());
     } else if (event.tag === "new-story-queue") {
@@ -400,15 +432,15 @@ self.addEventListener("push", (event: PushEvent) => {
         console.warn("[SW] Push event received without data");
         return;
     }
-    
+
     try {
         const data = event.data.json();
-        
+
         if (!data.title) {
             console.error("[SW] Push notification missing title");
             return;
         }
-        
+
         const options: NotificationOptions = {
             body: data.body || "",
             icon: data.icon || "/web-app-manifest-512x512.png",
@@ -425,13 +457,13 @@ self.addEventListener("push", (event: PushEvent) => {
             silent: data.silent ?? false,
             renotify: data.renotify ?? false,
         };
-        
+
         event.waitUntil(
             self.registration.showNotification(data.title, options)
         );
     } catch (error) {
         console.error("[SW] Error processing push notification:", error);
-        
+
         event.waitUntil(
             self.registration.showNotification("New Notification", {
                 body: "You have a new notification",
@@ -444,16 +476,16 @@ self.addEventListener("push", (event: PushEvent) => {
 // Enhanced notification click handler
 self.addEventListener("notificationclick", (event: NotificationEvent) => {
     event.notification.close();
-    
+
     if (event.action === "close") {
         return;
     }
-    
+
     const urlToOpen = new URL(
         event.notification.data?.url || "/",
         self.location.origin
     ).href;
-    
+
     event.waitUntil(
         (async () => {
             try {
@@ -461,14 +493,14 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
                     type: "window",
                     includeUncontrolled: true,
                 });
-                
+
                 // Try to find and focus existing window with same URL
                 for (const client of clientList) {
                     if (client.url === urlToOpen && "focus" in client) {
                         return await client.focus();
                     }
                 }
-                
+
                 // Try to navigate an existing window
                 if (clientList.length > 0) {
                     const client = clientList[0] as WindowClient;
@@ -477,7 +509,7 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
                         return await client.navigate(urlToOpen);
                     }
                 }
-                
+
                 // Open new window
                 if (self.clients.openWindow) {
                     return await self.clients.openWindow(urlToOpen);
@@ -499,11 +531,11 @@ self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "SKIP_WAITING") {
         self.skipWaiting();
     }
-    
+
     if (event.data && event.data.type === "CLAIM_CLIENTS") {
         self.clients.claim();
     }
-    
+
     if (event.data && event.data.type === "CACHE_URLS") {
         const urls = event.data.urls || [];
         event.waitUntil(
