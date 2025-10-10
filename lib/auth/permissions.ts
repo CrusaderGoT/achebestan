@@ -15,7 +15,9 @@ const customPermissions = {
 
 export const customAccessControl = createAccessControl(customPermissions);
 
-export const user = customAccessControl.newRole({});
+export const user = customAccessControl.newRole({
+    comment: ["create"]
+});
 
 export const admin = customAccessControl.newRole({
     ...adminAc.statements,
