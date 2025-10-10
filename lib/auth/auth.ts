@@ -8,7 +8,12 @@ import { admin, anonymous, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { getUserRole } from "../actions/user";
 import { MEMBER_ROLES } from "../constants";
-import { customAccessControl, writer } from "./permissions";
+import {
+    admin as adminRole,
+    customAccessControl,
+    user as userRole,
+    writer,
+} from "./permissions";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -29,6 +34,8 @@ export const auth = betterAuth({
             customAccessControl,
             roles: {
                 writer,
+                userRole,
+                adminRole,
             },
         }),
         organization({

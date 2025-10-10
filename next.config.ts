@@ -10,7 +10,7 @@ const withSerwist = withSerwistInit({
     cacheOnNavigation: true,
     scope: "/",
     register: true,
-    reloadOnOnline: true,
+    reloadOnOnline: false,
     disable: process.env.NODE_ENV === "development",
     additionalPrecacheEntries: [{ url: "/~offline", revision }],
 });

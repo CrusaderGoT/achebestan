@@ -10,16 +10,13 @@ import { StoryInsertType } from "@/types/story";
 import { storyInsertSchema } from "@/zod-schemas/story";
 
 import {
-    ActionIcon,
-    Box,
     Button,
+    Checkbox,
     Group,
     Indicator,
     Loader,
     Modal,
     Paper,
-    Radio,
-    Stack,
     Text,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -34,9 +31,7 @@ import {
     StoryIndexDbSchemaType,
 } from "@/lib/index-db";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
-import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import {
-    randomId,
     useDisclosure,
     useThrottledCallback,
     useTimeout,
@@ -44,33 +39,38 @@ import {
 import { IconTrash } from "@tabler/icons-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import formStyles from "@/styles/story/create-story-form-styles.module.css";
+import { Drafts } from "./drafts";
 
 export function CreateStoryForm() {
     const router = useRouter();
 
     const [synced, setSynced] = useState(false);
 
+    const [drafts, setDrafts] = useState<StoryIndexDbSchemaType[]>([]);
+
+    const [currentDraft, setCurrentDraft] =
+        useState<StoryIndexDbSchemaType | null>(null);
+
+    const [currentDraftId, setCurrentDraftId] = useState<number | null>(null);
+
+    const [openedDrafts, { toggle: toggleDrafts, close: closeDrafts }] =
+        useDisclosure();
+
+    const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(false);
+
+    const [savingDraft, setSavingDraft] = useState(false);
+
+    const { start: stopSavingDraft, clear: clearOngoingStopSavingDraft } =
+        useTimeout(() => setSavingDraft(false), 1000);
+
     const { executeAsync, isPending, hasSucceeded } = useAction(
         createStoryAction,
         {
-            async onSuccess(args) {
-                // Delete the current draft on successful submission
-                if (currentDraft?.id) {
-                    try {
-                        await deleteDraft(currentDraft.id);
-                        notifications.show({
-                            message: "Draft deleted successfully",
-                        });
-                    } catch (error) {
-                        console.error("Failed to delete draft:", error);
-                    }
-                }
-
+            onSuccess(args) {
                 notifications.show({
-                    message: `Story '${args.data.title.toLocaleUpperCase()}' Has Been Published`,
+                    message: `Story '${args.data.title}' Has Been Published`,
                 });
 
                 router.replace(`/story/${args.data.isbn}`);
@@ -128,14 +128,6 @@ export function CreateStoryForm() {
         }),
     });
 
-    const [drafts, setDrafts] = useState<StoryIndexDbSchemaType[]>([]);
-    const [currentDraft, setCurrentDraft] =
-        useState<StoryIndexDbSchemaType | null>(null);
-    const [currentDraftId, setCurrentDraftId] = useState<number | null>(null);
-
-    const [openedDrafts, { toggle: toggleDrafts, close: closeDrafts }] =
-        useDisclosure();
-
     // Load all drafts on mount
     useEffect(() => {
         async function loadDrafts() {
@@ -164,6 +156,7 @@ export function CreateStoryForm() {
                 const draft = await getDraft(currentDraftId);
 
                 if (draft) {
+                    form.reset(); // clear existing inputs first
                     setCurrentDraft(draft);
                     form.setValues(draft);
                     if (openedDrafts) {
@@ -186,8 +179,6 @@ export function CreateStoryForm() {
         loadCurrentDraft();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDraftId]);
-
-    const [savingDraft, setSavingDraft] = useState(false);
 
     const throttledSaveDraft = useThrottledCallback(async () => {
         const currentFormValues = form.getValues();
@@ -221,7 +212,8 @@ export function CreateStoryForm() {
         } catch (error) {
             console.error("Failed to save draft:", error);
         } finally {
-            setSavingDraft(false);
+            clearOngoingStopSavingDraft();
+            stopSavingDraft();
         }
     }, 1000);
 
@@ -240,9 +232,14 @@ export function CreateStoryForm() {
     });
 
     async function handleSubmit(data: StoryInsertType) {
-        await executeAsync({
-            ...data,
-        });
+        await Promise.all([
+            await executeAsync({
+                ...data,
+            }),
+            currentDraftId &&
+                deleteDraftOnSubmit &&
+                (await handleDeleteDraft(currentDraftId)),
+        ]);
     }
 
     async function handleDeleteDraft(draftId: number) {
@@ -274,31 +271,21 @@ export function CreateStoryForm() {
 
     return (
         <StoryFormProvider form={form}>
-            <Paper withBorder p={"xs"} pos={"relative"}>
-                <Group mb="md">
+            <Paper withBorder p={"xs"}>
+                <Group mb="md" mx="xs">
                     <Indicator
-                        color={currentDraft?.id ? "red" : "green"}
+                        color={currentDraft?.id ? "yellow" : "green"}
                         processing={!!currentDraft?.id}
+                        disabled={hasSucceeded || isPending || synced}
+                        zIndex={20}
                     />
 
                     <Text fw={500} size="xs">
                         {currentDraft?.id
                             ? `Editing Draft #${currentDraft.id}`
-                            : "New Draft"}
-
-                        {savingDraft && <Loader size={"xs"} />}
+                            : "New Draft"}{" "}
+                        {savingDraft && <Loader size={10} />}
                     </Text>
-
-                    {drafts.length > 0 && (
-                        <Button
-                            onClick={toggleDrafts}
-                            variant="light"
-                            ml="auto"
-                            size="xs"
-                        >
-                            Open Drafts ({drafts.length})
-                        </Button>
-                    )}
 
                     {(currentDraftId || currentDraft) && (
                         <Button
@@ -312,6 +299,17 @@ export function CreateStoryForm() {
                             ml="auto"
                         >
                             New Draft
+                        </Button>
+                    )}
+
+                    {drafts.length > 0 && (
+                        <Button
+                            onClick={toggleDrafts}
+                            variant="light"
+                            ml="auto"
+                            size="xs"
+                        >
+                            Open Drafts ({drafts.length})
                         </Button>
                     )}
                 </Group>
@@ -334,114 +332,37 @@ export function CreateStoryForm() {
                     onSubmit={form.onSubmit(handleSubmit)}
                     onChange={throttledSaveDraft}
                 >
-                    <StoryFormFields />
+                    <StoryFormFields
+                        isProcessing={isPending || hasSucceeded || synced}
+                    />
 
-                    <Button
-                        type="submit"
-                        mt="md"
-                        color="green"
-                        loading={isPending || hasSucceeded || synced}
-                        rightSection={
-                            isPending ? (
-                                <Text>Submitting Story...</Text>
-                            ) : hasSucceeded ? (
-                                <Text>Redirecting To New Story...</Text>
-                            ) : synced ? (
-                                <Text>Redirecting To Home...</Text>
-                            ) : null
-                        }
-                    >
-                        Submit
-                    </Button>
+                    <Group mt="md">
+                        <Button
+                            type="submit"
+                            color="green"
+                            mr={"auto"}
+                            loading={isPending || hasSucceeded || synced}
+                        >
+                            Submit
+                        </Button>
+
+                        {(currentDraft || currentDraftId) && (
+                            <Checkbox
+                                ml="auto"
+                                label="Delete Draft"
+                                size="sm"
+                                checked={deleteDraftOnSubmit}
+                                onChange={(e) =>
+                                    setDeleteDraftOnSubmit(e.target.checked)
+                                }
+                                color={"red"}
+                                icon={IconTrash}
+                                iconColor="black"
+                            />
+                        )}
+                    </Group>
                 </form>
             </Paper>
         </StoryFormProvider>
-    );
-}
-
-function Drafts({
-    drafts,
-    currentDraftId,
-    setCurrentDraftId,
-    onDeleteDraft,
-}: {
-    drafts: StoryIndexDbSchemaType[];
-    currentDraftId: number | null;
-    setCurrentDraftId: Dispatch<SetStateAction<number | null>>;
-    onDeleteDraft: (id: number) => void;
-}) {
-    const cards = drafts.map((draft) => (
-        <Radio.Card
-            key={draft.id || randomId()}
-            radius={"md"}
-            value={`${draft.id}`}
-            className={formStyles.draftCard}
-        >
-            <Group wrap="nowrap" align="flex-start" justify="space-between">
-                <Group wrap="nowrap" align="flex-start" style={{ flex: 1 }}>
-                    <Radio.Indicator />
-                    <Box style={{ flex: 1 }} className={formStyles.draftLabel}>
-                        <Text fw={500}>{draft.title || "Untitled"}</Text>
-
-                        <Box
-                            size="sm"
-                            c="dimmed"
-                            dangerouslySetInnerHTML={{
-                                __html:
-                                    sanitizeHTML(draft.content).slice(0, 50) ||
-                                    "No Content",
-                            }}
-                            className={formStyles.draftDescription}
-                        />
-
-                        <Text size="xs" c="dimmed" mt={4}>
-                            {new Date(draft.updated).toLocaleDateString()} at{" "}
-                            {new Date(draft.updated).toLocaleTimeString()}
-                        </Text>
-                    </Box>
-                </Group>
-                <ActionIcon
-                    color="red"
-                    variant="subtle"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (draft.id) {
-                            onDeleteDraft(draft.id);
-                        }
-                    }}
-                >
-                    <IconTrash size={18} />
-                </ActionIcon>
-            </Group>
-        </Radio.Card>
-    ));
-
-    return (
-        <>
-            <Radio.Group
-                value={currentDraftId?.toString() || ""}
-                onChange={(value) =>
-                    setCurrentDraftId(value ? Number(value) : null)
-                }
-                label="Select a draft to edit"
-                description="Choose a draft to continue working on"
-            >
-                <Stack pt="md" gap="xs">
-                    {cards.length > 0 ? (
-                        cards
-                    ) : (
-                        <Text c="dimmed" ta="center" py="xl">
-                            No drafts available
-                        </Text>
-                    )}
-                </Stack>
-            </Radio.Group>
-
-            {currentDraftId && (
-                <Text fz="xs" mt="md">
-                    Current Draft ID: {currentDraftId}
-                </Text>
-            )}
-        </>
     );
 }

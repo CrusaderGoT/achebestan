@@ -107,7 +107,7 @@ export default function RootLayout({
                         <RouteNavigationProgress />
                     </Suspense>
 
-                    <Notifications limit={1} />
+                    <Notifications limit={5} zIndex={9999} />
 
                     <Shell>{children}</Shell>
                 </MantineProvider>

@@ -1,7 +1,12 @@
 import { StorySelectType } from "@/types/story";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { BackgroundSyncQueue, NetworkFirst, Serwist } from "serwist";
+import {
+    BackgroundSyncQueue,
+    CacheableResponsePlugin,
+    Serwist,
+    StaleWhileRevalidate,
+} from "serwist";
 
 // Declare the value of `injectionPoint` to TypeScript
 declare global {
@@ -17,6 +22,7 @@ const CACHE_NAMES = {
     IMAGES: "images-v1",
     API: "api-cache-v1",
     STATIC: "static-resources-v1",
+    STORY: "story-page",
 } as const;
 
 const serwist = new Serwist({
@@ -25,22 +31,23 @@ const serwist = new Serwist({
     clientsClaim: true,
     navigationPreload: true,
     runtimeCaching: [
+        ...defaultCache,
         {
-            matcher: ({ url }) => url.pathname.startsWith("/story/"),
-            handler: new NetworkFirst({
-                cacheName: "story-pages",
-                networkTimeoutSeconds: 10,
+            matcher: ({ url }) =>
+                url.pathname.startsWith("/story/") &&
+                !url.pathname.includes("new"), // do not use strategy from "/story/new"
+            handler: new StaleWhileRevalidate({
+                cacheName: CACHE_NAMES.STORY,
                 plugins: [
-                    {
-                        cacheWillUpdate: async ({ response }) => {
-                            // Only cache successful responses
-                            return response?.status === 200 ? response : null;
+                    new CacheableResponsePlugin({
+                        statuses: [0, 200],
+                        headers: {
+                            "Content-Type": "text/html",
                         },
-                    },
+                    }),
                 ],
             }),
         },
-        ...defaultCache,
     ],
     disableDevLogs: true,
     fallbacks: {
@@ -55,7 +62,10 @@ const serwist = new Serwist({
     },
 });
 
-let urlsToPrecache = ["/", "/story/new"];
+serwist.addToPrecacheList([
+    { url: "/", revision: "dynamic" },
+    { url: "/story/new", revision: "changesincommit" },
+]);
 
 self.addEventListener("install", async (event) => {
     const storiesISBNs: string[] = [];
@@ -71,20 +81,46 @@ self.addEventListener("install", async (event) => {
             const url = `/story/${story.isbn}`;
             storiesISBNs.push(url);
         });
-        // update the urlsToPrecache
-        urlsToPrecache = [...storiesISBNs, ...urlsToPrecache];
+
+        if (storiesISBNs.length > 0) {
+            // precache stories
+            const requestPromises = Promise.all([
+                storiesISBNs.map((entry) => {
+                    return serwist.handleRequest({
+                        request: new Request(entry),
+                        event,
+                    });
+                }),
+                serwist.addToPrecacheList(
+                    storiesISBNs.map((entry) => {
+                        return { url: entry };
+                    })
+                ),
+            ]);
+
+            event.waitUntil(requestPromises);
+        }
     }
+});
 
-    const requestPromises = Promise.all(
-        urlsToPrecache.map((entry) => {
-            return serwist.handleRequest({
-                request: new Request(entry),
-                event,
-            });
-        })
+// Clean up old caches on activation
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        (async () => {
+            const cacheNames = await caches.keys();
+            const validCacheNames = new Set<string>(Object.values(CACHE_NAMES));
+
+            await Promise.all(
+                cacheNames.map(async (cacheName) => {
+                    // Delete old cache versions
+                    if (!validCacheNames.has(cacheName)) {
+                        console.log("Deleting old cache:", cacheName);
+                        await caches.delete(cacheName);
+                    }
+                })
+            );
+        })()
     );
-
-    event.waitUntil(requestPromises);
 });
 
 // Enhanced push notification handler
@@ -261,31 +297,6 @@ self.addEventListener("fetch", (event) => {
             })
         );
     }
-});
-
-// Clean up old caches on activation
-self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        (async () => {
-            const cacheNames = await caches.keys();
-            const validCacheNames = new Set<string>(Object.values(CACHE_NAMES));
-
-            await Promise.all(
-                cacheNames.map(async (cacheName) => {
-                    // Delete old cache versions
-                    if (
-                        !validCacheNames.has(cacheName) &&
-                        (cacheName.startsWith("images-") ||
-                            cacheName.startsWith("api-cache-") ||
-                            cacheName.startsWith("static-resources-"))
-                    ) {
-                        console.log("Deleting old cache:", cacheName);
-                        await caches.delete(cacheName);
-                    }
-                })
-            );
-        })()
-    );
 });
 
 // Handle sync events for background sync

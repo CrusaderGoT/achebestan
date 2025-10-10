@@ -14,7 +14,11 @@ import { StoryRichTextEditor } from "../../ui/rich-text-editor";
 export const [StoryFormProvider, useStoryFormContext, useStoryForm] =
     createFormContext<StoryInsertType>();
 
-export function StoryFormFields() {
+export function StoryFormFields({
+    isProcessing = false,
+}: {
+    isProcessing?: boolean;
+}) {
     const form = useStoryFormContext();
 
     return (
@@ -58,7 +62,7 @@ export function StoryFormFields() {
 
                 <LoadingOverlayWithText
                     text="Submitting"
-                    visible={form.submitting}
+                    visible={form.submitting || isProcessing}
                 />
             </Box>
         </Stack>
