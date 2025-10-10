@@ -1,11 +1,11 @@
 "use client";
 
 import { Button, Center, Flex, Text, Title } from "@mantine/core";
-import type { Metadata } from "next";
+//import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: "Offline",
-};
+//export const metadata: Metadata = {
+//    title: "Offline",
+//};
 
 export default function OfflinePage() {
     return (
