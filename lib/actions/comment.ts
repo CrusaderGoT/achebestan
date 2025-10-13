@@ -10,13 +10,26 @@ import {
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
+import { auth } from "../auth/auth";
 import { authActionClient } from "../safe-action";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
     .action(async ({ parsedInput, ctx }) => {
+        const permission = await auth.api.hasPermission({
+            headers: await headers(),
+            body: {
+                permissions: {
+                    comment: ["create"],
+                },
+            },
+        });
+
+        if (!permission) throw unauthorized();
+
         const [newComment] = await db
             .insert(comment)
             .values({
@@ -79,25 +92,36 @@ export const deleteCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        if (ctx.user.id !== parsedInput.userId) throw unauthorized();
+        const permission = await auth.api.hasPermission({
+            headers: await headers(),
+            body: {
+                permissions: {
+                    comment: ["delete"],
+                },
+            },
+        });
 
-        // delete comment by marking it as deleted, to preserve child comments
-        const [deletedComment] = await db
-            .update(comment)
-            .set({
-                hasBeenDeleted: true,
-            })
-            .where(
-                and(
-                    eq(comment.id, parsedInput.commentId),
-                    eq(comment.userId, parsedInput.userId)
+        if (ctx.user.id === parsedInput.userId || permission.success) {
+            // delete comment by marking it as deleted, to preserve child comments
+            const [deletedComment] = await db
+                .update(comment)
+                .set({
+                    hasBeenDeleted: true,
+                })
+                .where(
+                    and(
+                        eq(comment.id, parsedInput.commentId),
+                        eq(comment.userId, parsedInput.userId)
+                    )
                 )
-            )
-            .returning({ text: comment.text });
+                .returning({ text: comment.text });
 
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
+            revalidatePath(`/story/${parsedInput.storyISBN}`);
 
-        return deletedComment;
+            return deletedComment;
+        } else {
+            throw unauthorized();
+        }
     });
 
 export const readStoryComments = async (isbn: string) => {

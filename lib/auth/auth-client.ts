@@ -13,15 +13,15 @@ import {
 
 export const authClient = createAuthClient({
     plugins: [
-        adminClient({
-            customAccessControl,
+        adminClient(),
+        anonymousClient(),
+        organizationClient({
+            ac: customAccessControl,
             roles: {
                 writer,
                 userRole,
                 adminRole,
             },
         }),
-        anonymousClient(),
-        organizationClient(),
     ],
 });

@@ -63,6 +63,7 @@ export function HomeImageBox({
                 )}
                 color="yellow"
                 variant="light"
+                size={"xs"}
             >
                 <IconPhotoEdit />
             </ActionIcon>

@@ -37,11 +37,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
 
     const [
         openedCommentForm,
-        {
-            toggle: toggleCommentForm,
-            close: closeCommentForm,
-            open: openCommentForm,
-        },
+        { toggle: toggleCommentForm, open: openCommentForm },
     ] = useDisclosure(false);
 
     const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
@@ -119,7 +115,6 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                                 <CreateCommentForm
                                     storyISBN={props.isbn}
                                     text=""
-                                    closeCommentForm={closeCommentForm}
                                 />
                             </Box>
                         </>

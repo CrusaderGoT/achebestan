@@ -6,7 +6,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { admin, anonymous, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
-import { getUserRole } from "../actions/user";
+import { getUserRole as getUserRoles } from "../actions/user";
 import { MEMBER_ROLES } from "../constants";
 import {
     admin as adminRole,
@@ -30,17 +30,16 @@ export const auth = betterAuth({
     },
     plugins: [
         nextCookies(),
-        admin({
-            customAccessControl,
+        admin(),
+        organization({
+            ac: customAccessControl,
             roles: {
                 writer,
                 userRole,
                 adminRole,
             },
-        }),
-        organization({
             async allowUserToCreateOrganization(user) {
-                const role = await getUserRole(user.id);
+                const role = await getUserRoles(user.id);
 
                 return role === MEMBER_ROLES.superAdmin;
             },

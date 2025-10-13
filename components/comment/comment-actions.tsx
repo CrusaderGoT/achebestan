@@ -16,6 +16,8 @@ type CommentActionsProps = {
     isPendingUpdateComment: boolean;
     storyISBN: string;
     isEditOpen: boolean;
+    canCreateComment: boolean;
+    canDeleteComment: boolean;
 };
 
 export function CommentActions({
@@ -30,6 +32,8 @@ export function CommentActions({
     isPendingUpdateComment,
     storyISBN,
     isEditOpen,
+    canCreateComment,
+    canDeleteComment,
 }: CommentActionsProps) {
     const {
         executeAsync: executeAsyncDeleteComment,
@@ -38,19 +42,21 @@ export function CommentActions({
 
     return (
         <Group gap="xs">
-            <Button
-                variant="subtle"
-                size="xs"
-                onClick={() => {
-                    handleCloseEdit();
-                    handleReplyToggle(commentId);
-                }}
-                leftSection={<IconMessageReply size={15} />}
-            >
-                {isReplyOpen ? "Cancel" : "Reply"}
-            </Button>
+            {canCreateComment && (
+                <Button
+                    variant="subtle"
+                    size="xs"
+                    onClick={() => {
+                        handleCloseEdit();
+                        handleReplyToggle(commentId);
+                    }}
+                    leftSection={<IconMessageReply size={15} />}
+                >
+                    {isReplyOpen ? "Cancel" : "Reply"}
+                </Button>
+            )}
 
-            {userId === commentUserId ? (
+            {userId === commentUserId || canDeleteComment ? (
                 <>
                     <Button
                         variant="subtle"

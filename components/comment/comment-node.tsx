@@ -8,7 +8,7 @@ import {
     CommentRenderContext,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -58,6 +58,35 @@ export function CommentNode({
             tree.collapse(node.value);
         }
     }, [expanded, showDrawerButton, tree, node.value]);
+
+    const [canDeleteComment, setCanDeleteComment] = useState(false);
+
+    const [canCreateComment, setCanCreateComment] = useState(false);
+
+    useEffect(() => {
+        async function checkCommentPerms() {
+            const [canDelete, canCreate] = await Promise.all([
+                authClient.organization.hasPermission({
+                    permissions: {
+                        comment: ["delete"],
+                    },
+                }),
+                authClient.organization.hasPermission({
+                    permissions: {
+                        comment: ["create"],
+                    },
+                }),
+            ]);
+
+            if (!canDelete.error) {
+                setCanDeleteComment(canDelete.data.success);
+            }
+            if (!canCreate.error) {
+                setCanCreateComment(canCreate.data.success);
+            }
+        }
+        checkCommentPerms();
+    }, []);
 
     if (!comment) return null;
 
@@ -134,6 +163,8 @@ export function CommentNode({
                                 handleCloseEdit={handleCloseEdit}
                                 handleCloseReply={handleCloseReply}
                                 storyISBN={comment.storyISBN}
+                                canCreateComment={canCreateComment}
+                                canDeleteComment={canDeleteComment}
                             />
                         )}
 

@@ -6,4 +6,4 @@ export const MEMBER_ROLES = {
     admin: "admin",
     user: "user",
     moderator: "moderator",
-};
+} as const;
