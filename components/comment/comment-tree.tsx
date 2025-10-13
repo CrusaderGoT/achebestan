@@ -15,10 +15,10 @@ import {
 
 import { IconArrowBack } from "@tabler/icons-react";
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 
 import { authClient } from "@/lib/auth/auth-client";
-import { useDidUpdate, useMounted } from "@mantine/hooks";
+import { useMounted } from "@mantine/hooks";
 
 import {
     CommentNodeProps,
@@ -41,6 +41,7 @@ import {
 } from "@/lib/hooks/comment/comment-tree-hooks";
 import { CommentNode } from "./comment-node";
 
+import { useAutoExpandComments } from "@/lib/hooks/comment/auto-expand-comments";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 
 export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
@@ -100,42 +101,10 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     });
 
     // Auto-expansion logic
-    const prevCommentsRef = useRef<CommentsToTreeNodeDataType>([]);
-    const autoExpandedRef = useRef(new Set());
-
-    const newCommentsToExpand = useMemo(() => {
-        const prevCommentIds = new Set(
-            prevCommentsRef.current.map((c) => c.id)
-        );
-        const newComments = commentsNodeData.filter(
-            (c) =>
-                !prevCommentIds.has(c.id) &&
-                !c.parentCommentId &&
-                c.hasBeenDeleted !== true
-        );
-        prevCommentsRef.current = commentsNodeData;
-        return newComments.map((c) => c.value);
-    }, [commentsNodeData]);
-
-    // Enhanced auto-expansion with error handling
-    useDidUpdate(() => {
-        try {
-            newCommentsToExpand.forEach((commentId) => {
-                if (
-                    commentId &&
-                    !autoExpandedRef.current.has(commentId) &&
-                    !tree.expandedState[commentId]
-                ) {
-                    requestAnimationFrame(() => {
-                        tree.expand(commentId);
-                    });
-                    autoExpandedRef.current.add(commentId);
-                }
-            });
-        } catch (error) {
-            console.error("Error auto-expanding comments:", error);
-        }
-    }, [newCommentsToExpand, tree]);
+    useAutoExpandComments({
+        commentsNodeData,
+        tree,
+    });
 
     // Render functions
     const renderMainNode = useCallback(
