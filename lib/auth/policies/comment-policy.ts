@@ -1,3 +1,4 @@
+"use server";
 // lib/auth/policies/comment-policy.ts
 
 import { PermissionsForResource } from "@/types/permissions";
