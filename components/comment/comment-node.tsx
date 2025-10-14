@@ -8,7 +8,7 @@ import {
     CommentRenderContext,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -61,6 +61,35 @@ export function CommentNode({
         }
     }, [expanded, showDrawerButton, tree, node.value]);
 
+    const [permissions, setPermissions] = useState({
+        canDelete: false,
+        canUpdate: false,
+        canCreate: false,
+    });
+
+    useEffect(() => {
+        async function checkCommentPermissions() {
+            if (!session?.user) {
+                return {
+                    canDelete: false,
+                    canUpdate: false,
+                    canCreate: false,
+                };
+            }
+
+            const policy = await CommentPolicy.create(
+                session.user as UserSelectType
+            );
+
+            return {
+                canDelete: await policy.canDelete(),
+                canUpdate: await policy.canUpdate(),
+                canCreate: await policy.canCreate(),
+            };
+        }
+        checkCommentPermissions().then(setPermissions);
+    }, [session?.user]);
+
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
@@ -81,10 +110,6 @@ export function CommentNode({
                 .forEach((c) => tree.expand(c.id.toString()));
         }
     };
-
-    const permissions = session?.user
-        ? new CommentPolicy(session.user as UserSelectType, comment)
-        : null;
 
     return (
         <Stack
@@ -139,15 +164,9 @@ export function CommentNode({
                                 handleCloseEdit={handleCloseEdit}
                                 handleCloseReply={handleCloseReply}
                                 storyISBN={comment.storyISBN}
-                                canCreateComment={
-                                    permissions?.canCreate() || false
-                                }
-                                canDeleteComment={
-                                    permissions?.canDelete() || false
-                                }
-                                canUpdateComment={
-                                    permissions?.canUpdate() || false
-                                }
+                                canCreateComment={permissions.canCreate}
+                                canDeleteComment={permissions.canDelete}
+                                canUpdateComment={permissions.canUpdate}
                             />
                         )}
 

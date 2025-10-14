@@ -19,9 +19,10 @@ import { authActionClient } from "../safe-action";
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
     .action(async ({ parsedInput, ctx }) => {
-        const permission = new CommentPolicy(ctx.user as UserSelectType);
+        const policy = await CommentPolicy.create(ctx.user as UserSelectType);
+        const canCreate = await policy.canCreate();
 
-        if (!permission.canCreate()) throw unauthorized();
+        if (!canCreate) throw unauthorized;
 
         const [newComment] = await db
             .insert(comment)
@@ -52,12 +53,14 @@ export const updateCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const permission = new CommentPolicy(
+        const policy = await CommentPolicy.create(
             ctx.user as UserSelectType,
             parsedInput
         );
 
-        if (!permission.canUpdate()) throw unauthorized();
+        const canUpdate = await policy.canDelete();
+
+        if (!canUpdate) throw unauthorized();
 
         // update the text
         const [updatedComment] = await db
@@ -90,12 +93,14 @@ export const deleteCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const permission = new CommentPolicy(
+        const policy = await CommentPolicy.create(
             ctx.user as UserSelectType,
             parsedInput
         );
 
-        if (!permission.canDelete()) throw unauthorized();
+        const canDelete = await policy.canDelete();
+
+        if (!canDelete) throw unauthorized();
 
         // delete comment by marking it as deleted, to preserve child comments
         const [deletedComment] = await db
