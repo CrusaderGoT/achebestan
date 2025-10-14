@@ -8,27 +8,20 @@ import {
     commentUpdateSchema,
 } from "@/zod-schemas/comment";
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
+import { UserSelectType } from "@/zod-schemas/user";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
-import { auth } from "../auth/auth";
+import { CommentPolicy } from "../auth/policies/comment-policy";
 import { authActionClient } from "../safe-action";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
     .action(async ({ parsedInput, ctx }) => {
-        const permission = await auth.api.hasPermission({
-            headers: await headers(),
-            body: {
-                permissions: {
-                    comment: ["create"],
-                },
-            },
-        });
+        const permission = new CommentPolicy(ctx.user as UserSelectType);
 
-        if (!permission) throw unauthorized();
+        if (!permission.canCreate()) throw unauthorized();
 
         const [newComment] = await db
             .insert(comment)
@@ -59,7 +52,12 @@ export const updateCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        if (ctx.user.id !== parsedInput.userId) throw unauthorized();
+        const permission = new CommentPolicy(
+            ctx.user as UserSelectType,
+            parsedInput
+        );
+
+        if (!permission.canUpdate()) throw unauthorized();
 
         // update the text
         const [updatedComment] = await db
@@ -92,36 +90,30 @@ export const deleteCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const permission = await auth.api.hasPermission({
-            headers: await headers(),
-            body: {
-                permissions: {
-                    comment: ["delete"],
-                },
-            },
-        });
+        const permission = new CommentPolicy(
+            ctx.user as UserSelectType,
+            parsedInput
+        );
 
-        if (ctx.user.id === parsedInput.userId || permission.success) {
-            // delete comment by marking it as deleted, to preserve child comments
-            const [deletedComment] = await db
-                .update(comment)
-                .set({
-                    hasBeenDeleted: true,
-                })
-                .where(
-                    and(
-                        eq(comment.id, parsedInput.commentId),
-                        eq(comment.userId, parsedInput.userId)
-                    )
+        if (!permission.canDelete()) throw unauthorized();
+
+        // delete comment by marking it as deleted, to preserve child comments
+        const [deletedComment] = await db
+            .update(comment)
+            .set({
+                hasBeenDeleted: true,
+            })
+            .where(
+                and(
+                    eq(comment.id, parsedInput.commentId),
+                    eq(comment.userId, parsedInput.userId)
                 )
-                .returning({ text: comment.text });
+            )
+            .returning({ text: comment.text });
 
-            revalidatePath(`/story/${parsedInput.storyISBN}`);
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
 
-            return deletedComment;
-        } else {
-            throw unauthorized();
-        }
+        return deletedComment;
     });
 
 export const readStoryComments = async (isbn: string) => {

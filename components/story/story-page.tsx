@@ -2,7 +2,7 @@
 
 import { StorySelectType, StoryUpdateType } from "@/types/story";
 import { storyUpdateSchema } from "@/zod-schemas/story";
-import { userSelectType } from "@/zod-schemas/user";
+import { UserSelectType } from "@/zod-schemas/user";
 
 import { ActionIcon, Box, Card, Stack } from "@mantine/core";
 
@@ -31,7 +31,7 @@ import {
 import { useState } from "react";
 
 export interface StoryProps extends StorySelectType {
-    author: userSelectType;
+    author: UserSelectType;
 }
 
 export function Story({

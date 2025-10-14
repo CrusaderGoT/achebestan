@@ -12,10 +12,16 @@ import {
 /**
  * make sure to use `as const` so typescript can infer the type correctly
  */
-const customPermissions = {
+export const customPermissions = {
     ...defaultStatements,
-    story: ["create", "delete", "suspend"],
-    comment: ["create", "delete"],
+    story: [
+        "create:owner",
+        "delete:owner",
+        "suspend:all",
+        "delete:all",
+        "update:owner",
+    ],
+    comment: ["create:owner", "delete:owner", "update:owner", "delete:all"],
 } as const;
 
 export const customAccessControl = createAccessControl(customPermissions);
@@ -23,12 +29,12 @@ export const customAccessControl = createAccessControl(customPermissions);
 // ROLES
 
 export const user = customAccessControl.newRole({
-    comment: ["create"],
+    comment: ["create:owner", "update:owner", "delete:owner"],
 });
 
 export const writer = customAccessControl.newRole({
-    story: ["create"],
-    comment: ["create"],
+    story: ["create:owner", "update:owner", "delete:owner"],
+    comment: ["create:owner", "update:owner", "delete:owner"],
 });
 
 export const admin = customAccessControl.newRole({

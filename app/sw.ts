@@ -34,7 +34,7 @@ const CACHE_NAMES = {
     RUNTIME: "runtime-v2",
 } as const;
 
-const CACHE_VERSION = "v2"; // Increment when you need to force cache refresh
+const CACHE_VERSION = "v3"; // Increment when you need to force cache refresh
 
 // Initialize Serwist
 const serwist = new Serwist({

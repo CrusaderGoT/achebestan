@@ -5,12 +5,12 @@ import {
     storySelectSchema,
     storyUpdateSchema,
 } from "@/zod-schemas/story";
-import { userSelectType } from "@/zod-schemas/user";
+import { UserSelectType } from "@/zod-schemas/user";
 import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod/v4";
 
 export interface StoryBookProps extends StorySelectType {
-    author: userSelectType;
+    author: UserSelectType;
 }
 
 export type PickedStoryProps = Pick<

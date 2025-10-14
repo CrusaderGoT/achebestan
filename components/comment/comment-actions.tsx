@@ -12,12 +12,12 @@ type CommentActionsProps = {
     isReplyOpen: boolean;
     commentId: number;
     commentUserId: string;
-    userId: string;
     isPendingUpdateComment: boolean;
     storyISBN: string;
     isEditOpen: boolean;
     canCreateComment: boolean;
     canDeleteComment: boolean;
+    canUpdateComment: boolean;
 };
 
 export function CommentActions({
@@ -28,12 +28,12 @@ export function CommentActions({
     commentId,
     handleEditToggle,
     commentUserId,
-    userId,
     isPendingUpdateComment,
     storyISBN,
     isEditOpen,
     canCreateComment,
     canDeleteComment,
+    canUpdateComment,
 }: CommentActionsProps) {
     const {
         executeAsync: executeAsyncDeleteComment,
@@ -56,42 +56,42 @@ export function CommentActions({
                 </Button>
             )}
 
-            {userId === commentUserId || canDeleteComment ? (
-                <>
-                    <Button
-                        variant="subtle"
-                        color="yellow"
-                        size="xs"
-                        leftSection={<IconEdit size={15} />}
-                        onClick={() => {
-                            handleCloseReply();
-                            handleEditToggle(commentId);
-                        }}
-                        disabled={isPendingUpdateComment}
-                        title="Edit Comment"
-                    >
-                        {isEditOpen ? "Cancel" : "Edit"}
-                    </Button>
+            {canUpdateComment && (
+                <Button
+                    variant="subtle"
+                    color="yellow"
+                    size="xs"
+                    leftSection={<IconEdit size={15} />}
+                    onClick={() => {
+                        handleCloseReply();
+                        handleEditToggle(commentId);
+                    }}
+                    disabled={isPendingUpdateComment}
+                    title="Edit Comment"
+                >
+                    {isEditOpen ? "Cancel" : "Edit"}
+                </Button>
+            )}
 
-                    <Button
-                        variant="subtle"
-                        size="xs"
-                        color="red"
-                        leftSection={<IconTrashX size={15} />}
-                        onClick={async () =>
-                            await executeAsyncDeleteComment({
-                                commentId: commentId,
-                                userId: commentUserId,
-                                storyISBN: storyISBN,
-                            })
-                        }
-                        disabled={isPendingDeleteComment}
-                        title="Delete Comment"
-                    >
-                        Delete
-                    </Button>
-                </>
-            ) : null}
+            {canDeleteComment && (
+                <Button
+                    variant="subtle"
+                    size="xs"
+                    color="red"
+                    leftSection={<IconTrashX size={15} />}
+                    onClick={async () =>
+                        await executeAsyncDeleteComment({
+                            commentId: commentId,
+                            userId: commentUserId,
+                            storyISBN: storyISBN,
+                        })
+                    }
+                    disabled={isPendingDeleteComment}
+                    title="Delete Comment"
+                >
+                    Delete
+                </Button>
+            )}
         </Group>
     );
 }

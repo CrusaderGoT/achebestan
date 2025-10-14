@@ -1,6 +1,6 @@
 "use client";
 
-import { userSelectType } from "@/zod-schemas/user";
+import { UserSelectType } from "@/zod-schemas/user";
 import { Avatar, Badge, Box, Code, Group, Image } from "@mantine/core";
 import { IconUserCircle } from "@tabler/icons-react";
 
@@ -15,7 +15,7 @@ dayjs.extend(relativeTime);
 type StoryImageType = {
     image: string | null;
     title: string;
-    author: userSelectType;
+    author: UserSelectType;
     created: Date;
     edited: Date | null;
     openedImageField: boolean;

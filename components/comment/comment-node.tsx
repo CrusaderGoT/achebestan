@@ -8,7 +8,7 @@ import {
     CommentRenderContext,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -17,7 +17,9 @@ import { LikeDislikeButton } from "./like-dislike-btns";
 
 import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 
+import { CommentPolicy } from "@/lib/auth/policies/comment-policy";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
+import { UserSelectType } from "@/zod-schemas/user";
 import cx from "clsx";
 import { DRAWER_CONFIG } from "./comment-tree";
 
@@ -59,35 +61,6 @@ export function CommentNode({
         }
     }, [expanded, showDrawerButton, tree, node.value]);
 
-    const [canDeleteComment, setCanDeleteComment] = useState(false);
-
-    const [canCreateComment, setCanCreateComment] = useState(false);
-
-    useEffect(() => {
-        async function checkCommentPerms() {
-            const [canDelete, canCreate] = await Promise.all([
-                authClient.organization.hasPermission({
-                    permissions: {
-                        comment: ["delete"],
-                    },
-                }),
-                authClient.organization.hasPermission({
-                    permissions: {
-                        comment: ["create"],
-                    },
-                }),
-            ]);
-
-            if (!canDelete.error) {
-                setCanDeleteComment(canDelete.data.success);
-            }
-            if (!canCreate.error) {
-                setCanCreateComment(canCreate.data.success);
-            }
-        }
-        checkCommentPerms();
-    }, []);
-
     if (!comment) return null;
 
     const isReplyOpen = activeReplyId === Number(node.value);
@@ -108,6 +81,10 @@ export function CommentNode({
                 .forEach((c) => tree.expand(c.id.toString()));
         }
     };
+
+    const permissions = session?.user
+        ? new CommentPolicy(session.user as UserSelectType, comment)
+        : null;
 
     return (
         <Stack
@@ -154,7 +131,6 @@ export function CommentNode({
                             <CommentActions
                                 commentId={comment.id}
                                 commentUserId={comment.userId}
-                                userId={session.user.id}
                                 isReplyOpen={isReplyOpen}
                                 isPendingUpdateComment={isPendingUpdateComment}
                                 isEditOpen={isEditOpen}
@@ -163,8 +139,15 @@ export function CommentNode({
                                 handleCloseEdit={handleCloseEdit}
                                 handleCloseReply={handleCloseReply}
                                 storyISBN={comment.storyISBN}
-                                canCreateComment={canCreateComment}
-                                canDeleteComment={canDeleteComment}
+                                canCreateComment={
+                                    permissions?.canCreate() || false
+                                }
+                                canDeleteComment={
+                                    permissions?.canDelete() || false
+                                }
+                                canUpdateComment={
+                                    permissions?.canUpdate() || false
+                                }
                             />
                         )}
 

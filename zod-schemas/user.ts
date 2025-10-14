@@ -41,7 +41,7 @@ export type UserUpdateSchemaType = z.infer<typeof userUpdateSchema>;
 
 export const userSelectSchema = createSelectSchema(user);
 
-export type userSelectType = z.infer<typeof userSelectSchema>;
+export type UserSelectType = z.infer<typeof userSelectSchema>;
 
 export const loginSchema = z.object({
     email: z.email({ error: "enter a valid email" }),
