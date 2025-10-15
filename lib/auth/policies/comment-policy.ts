@@ -4,11 +4,14 @@ import { PermissionsForResource } from "@/types/permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
 import { authClient } from "../auth-client";
+
+type CommentType = Partial<CommentSelectType> | Partial<CommentUpdateType>;
+
 export class CommentPolicy {
     private readonly user: UserSelectType;
-    private readonly comment?: Comment;
+    private readonly comment?: CommentType;
 
-    private constructor(user: UserSelectType, comment?: Comment) {
+    private constructor(user: UserSelectType, comment?: CommentType) {
         this.user = user;
         this.comment = comment;
     }
@@ -18,7 +21,7 @@ export class CommentPolicy {
      */
     public static async create(
         user: UserSelectType,
-        comment?: Comment
+        comment?: CommentType
     ): Promise<CommentPolicy> {
         return new CommentPolicy(user, comment);
     }
@@ -44,7 +47,7 @@ export class CommentPolicy {
             return result.data.success;
         } catch (error) {
             console.error("Permission check failed:", error);
-            
+
             return false;
         }
     }
