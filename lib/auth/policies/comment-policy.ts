@@ -1,27 +1,20 @@
-"use server";
 // lib/auth/policies/comment-policy.ts
 
 import { PermissionsForResource } from "@/types/permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
-import { headers } from "next/headers";
-import { auth } from "../auth";
+import { notifications } from "@mantine/notifications";
+import { authClient } from "../auth-client";
 
 type Comment = Partial<CommentSelectType> | Partial<CommentUpdateType>;
 
 export class CommentPolicy {
     private readonly user: UserSelectType;
     private readonly comment?: Comment;
-    private readonly requestHeaders: Headers;
 
-    private constructor(
-        user: UserSelectType,
-        requestHeaders: Headers,
-        comment?: Comment
-    ) {
+    private constructor(user: UserSelectType, comment?: Comment) {
         this.user = user;
         this.comment = comment;
-        this.requestHeaders = requestHeaders;
     }
 
     /**
@@ -31,8 +24,7 @@ export class CommentPolicy {
         user: UserSelectType,
         comment?: Comment
     ): Promise<CommentPolicy> {
-        const requestHeaders = await headers();
-        return new CommentPolicy(user, requestHeaders, comment);
+        return new CommentPolicy(user, comment);
     }
 
     private isOwner(): boolean {
@@ -43,17 +35,23 @@ export class CommentPolicy {
         permissions: PermissionsForResource<"comment">[]
     ): Promise<boolean> {
         try {
-            const result = await auth.api.hasPermission({
-                headers: this.requestHeaders,
-                body: {
-                    permissions: {
-                        comment: permissions,
-                    },
+            const result = await authClient.organization.hasPermission({
+                permissions: {
+                    comment: permissions,
                 },
             });
-            return result.success;
+
+            if (result.error) {
+                throw new Error(result.error.message);
+            }
+
+            return result.data.success;
         } catch (error) {
             console.error("Permission check failed:", error);
+            notifications.show({
+                message:
+                    "You Do Not Have Permission To Perform This Comment Action",
+            });
             return false;
         }
     }
