@@ -7,6 +7,7 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
+import publicStyles from "@/styles/public.module.css";
 import { LoginFormState } from "@/types/user";
 import {
     organizationInsertSchema,
@@ -35,6 +36,11 @@ export function OrganizationCreateForm({
         mode: "uncontrolled",
         validate: zod4Resolver(organizationInsertSchema),
         validateInputOnBlur: true,
+        initialValues: {
+            name: "",
+            slug: "",
+            metadata: { description: "" },
+        },
     });
 
     async function handleSubmit(formData: OrganizationInsertSchemaType) {
@@ -46,15 +52,17 @@ export function OrganizationCreateForm({
             {
                 onRequest: () => setFormState("pending"),
                 onError(errCtx) {
+                    console.log(errCtx);
+
                     notifications.show({
-                        message: `Error -> ${errCtx.error.message}`,
+                        message: `Error Creating Organization`,
                         color: "red",
                     });
                     setFormState("error");
                 },
                 onSuccess() {
                     notifications.show({
-                        message: "Successfully Signed Up",
+                        message: "Successfully Created Organization",
                     });
 
                     setFormState("success");
@@ -74,8 +82,8 @@ export function OrganizationCreateForm({
     return (
         <OrganizationFormProvider form={form}>
             <Paper withBorder p={"md"}>
-                <Title order={3} ta={"center"} mb={"md"}>
-                    Sign Up To Become A Writer!
+                <Title order={5} className={publicStyles.title}>
+                    Create An Organization
                 </Title>
 
                 <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -98,7 +106,7 @@ export function OrganizationCreateForm({
                 <LoadingOverlayWithText
                     text={
                         formState === "pending"
-                            ? "Create New Organization"
+                            ? "Creating New Organization"
                             : formState === "success" && redirectAfterSuccess
                             ? "Redirecting To Home Page"
                             : ""

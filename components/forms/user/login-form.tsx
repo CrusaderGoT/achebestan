@@ -16,6 +16,8 @@ import { notifications } from "@mantine/notifications";
 import { Dispatch, SetStateAction } from "react";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
+import publicStyles from "@/styles/public.module.css";
+
 export function LoginForm({
     redirectAfterSuccess = true,
     closeModal,
@@ -66,7 +68,7 @@ export function LoginForm({
     return (
         <LoginFormProvider form={form}>
             <Paper withBorder p={"md"}>
-                <Title order={3} ta={"center"} mb={"md"}>
+                <Title order={5} className={publicStyles.title}>
                     Log In To Make Edits!
                 </Title>
 

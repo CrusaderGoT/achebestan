@@ -16,6 +16,8 @@ import { LoginFormState } from "@/types/user";
 import { notifications } from "@mantine/notifications";
 import { LoadingOverlayWithText } from "../../ui/loading-overlay-with-text";
 
+import publicStyles from "@/styles/public.module.css";
+
 export function SignupForm({
     redirectAfterSuccess = true,
     closeModal,
@@ -38,9 +40,9 @@ export function SignupForm({
             { ...data },
             {
                 onRequest: () => setFormState("pending"),
-                onError(errCtx) {
+                onError() {
                     notifications.show({
-                        message: `Error -> ${errCtx.error.message}`,
+                        message: `Error Signing Up`,
                         color: "red",
                     });
                     setFormState("error");
@@ -67,7 +69,7 @@ export function SignupForm({
     return (
         <SignupFormProvider form={form}>
             <Paper withBorder p={"md"}>
-                <Title order={3} ta={"center"} mb={"md"}>
+                <Title order={5} className={publicStyles.title}>
                     Sign Up To Become A Writer!
                 </Title>
 

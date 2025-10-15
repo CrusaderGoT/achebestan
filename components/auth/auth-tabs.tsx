@@ -1,16 +1,15 @@
 // For file /tabs/[activeTab].tsx
 "use client";
 
-import { AnonymousSignin } from "@/components/user/anonymous-signin";
+import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { authClient } from "@/lib/auth/auth-client";
-import { MEMBER_ROLES } from "@/lib/constants";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
 import { IconDots } from "@tabler/icons-react";
 import { Dispatch, SetStateAction } from "react";
-import { OrganizationCreateForm } from "../organization/create-organization-form";
-import { LoginForm } from "./login-form";
-import { SignupForm } from "./signup-form";
+import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
+import { LoginForm } from "../forms/user/login-form";
+import { SignupForm } from "../forms/user/signup-form";
 
 type AuthTabsProps = {
     closeModal?: () => void;
@@ -51,11 +50,9 @@ export function AuthTabs({
                     Sign Up
                 </Tabs.Tab>
 
-                {session?.user.role === MEMBER_ROLES.superAdmin && (
-                    <Tabs.Tab value="second" color="green">
-                        Create Organization
-                    </Tabs.Tab>
-                )}
+                <Tabs.Tab value="third" color="green">
+                    Create Organization
+                </Tabs.Tab>
             </Tabs.List>
 
             {/** login only to user that are not anon */}
@@ -89,18 +86,16 @@ export function AuthTabs({
             </Tabs.Panel>
 
             {/** only show organization tabs to superadmin*/}
-            {session?.user.role === MEMBER_ROLES.superAdmin && (
-                <Tabs.Panel value="second" pt="xs">
-                    <Stack gap={"xs"}>
-                        <OrganizationCreateForm
-                            closeModal={closeModal}
-                            redirectAfterSuccess={false}
-                            formState={signupFormState}
-                            setFormState={setSignupFormState}
-                        />
-                    </Stack>
-                </Tabs.Panel>
-            )}
+            <Tabs.Panel value="third" pt="xs">
+                <Stack gap={"xs"}>
+                    <OrganizationCreateForm
+                        closeModal={closeModal}
+                        redirectAfterSuccess={false}
+                        formState={signupFormState}
+                        setFormState={setSignupFormState}
+                    />
+                </Stack>
+            </Tabs.Panel>
 
             <Tabs.Panel value="default" pt="xs">
                 <Center>

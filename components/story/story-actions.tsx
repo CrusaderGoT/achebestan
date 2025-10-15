@@ -20,7 +20,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import { PickedStoryProps } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
-import { AuthenticationModal } from "../forms/user/auth-modal";
+import { AuthenticationModal } from "../auth/auth-modal";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
 import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";

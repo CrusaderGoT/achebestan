@@ -63,3 +63,12 @@
 .noTapHighlight {
   -webkit-tap-highlight-color: transparent;
 }
+
+.title {
+  text-align: center;
+  margin-bottom: var(--mantine-spacing-md);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-skip-ink: none;
+}

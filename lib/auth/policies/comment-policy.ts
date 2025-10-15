@@ -3,11 +3,7 @@
 import { PermissionsForResource } from "@/types/permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
-import { notifications } from "@mantine/notifications";
 import { authClient } from "../auth-client";
-
-type Comment = Partial<CommentSelectType> | Partial<CommentUpdateType>;
-
 export class CommentPolicy {
     private readonly user: UserSelectType;
     private readonly comment?: Comment;
@@ -18,7 +14,7 @@ export class CommentPolicy {
     }
 
     /**
-     * Factory method to create a policy instance with current request headers
+     * Factory method to create a policy instance
      */
     public static async create(
         user: UserSelectType,
@@ -48,10 +44,7 @@ export class CommentPolicy {
             return result.data.success;
         } catch (error) {
             console.error("Permission check failed:", error);
-            notifications.show({
-                message:
-                    "You Do Not Have Permission To Perform This Comment Action",
-            });
+            
             return false;
         }
     }

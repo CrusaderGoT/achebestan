@@ -10,7 +10,7 @@ import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
 import { RatingForm } from "../forms/rating/rating-form";
-import { AuthenticationModal } from "../forms/user/auth-modal";
+import { AuthenticationModal } from "../auth/auth-modal";
 
 type StoryRatingProps = {
     ratings: RatingSelectType[];

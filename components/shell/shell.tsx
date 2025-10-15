@@ -1,11 +1,11 @@
 "use client";
 
-import { AuthenticationModal } from "@/components/forms/user/auth-modal";
+import { AuthenticationModal } from "@/components/auth/auth-modal";
 import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
-import { LogoutButton } from "@/components/user/logout-btn";
-import { OpenAuthenticationModalButton } from "@/components/user/open-auth-modal-btn";
+import { LogoutButton } from "@/components/auth/logout-btn";
+import { OpenAuthenticationModalButton } from "@/components/auth/open-auth-modal-btn";
 import { authClient } from "@/lib/auth/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
