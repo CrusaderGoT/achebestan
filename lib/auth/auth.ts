@@ -7,10 +7,12 @@ import { nextCookies } from "better-auth/next-js";
 import { admin, anonymous, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { getUserRole as getUserRoles } from "../actions/user";
-import { MEMBER_ROLES } from "../constants";
+import { ORG_ROLES } from "../constants";
 import {
     admin as adminRole,
     customAccessControl,
+    owner,
+    superAdmin,
     user as userRole,
     writer,
 } from "./permissions";
@@ -37,11 +39,15 @@ export const auth = betterAuth({
                 writer,
                 userRole,
                 adminRole,
+                owner,
+                superAdmin,
             },
             async allowUserToCreateOrganization(user) {
-                const role = await getUserRoles(user.id);
+                const roles = await getUserRoles(user.id);
 
-                return role === MEMBER_ROLES.superAdmin;
+                if (!roles) return false;
+
+                return roles.includes(ORG_ROLES.superAdmin);
             },
         }),
         anonymous({

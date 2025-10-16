@@ -1,9 +1,8 @@
 export const BASE_URL = "https://achebestan.vercel.app/";
 
-export const MEMBER_ROLES = {
+export const ORG_ROLES = {
     writer: "writer",
-    superAdmin: "super-admin", // platform owner
-    admin: "admin", // platform wide
-    user: "user",
-    moderator: "moderator", // org specific
+    superAdmin: "superAdmin", // platform owner
+    admin: "admin", // org specific
+    member: "member", // default user
 } as const;

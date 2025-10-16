@@ -7,6 +7,8 @@ import { createAuthClient } from "better-auth/react";
 import {
     admin as adminRole,
     customAccessControl,
+    owner,
+    superAdmin,
     user as userRole,
     writer,
 } from "./permissions";
@@ -21,6 +23,8 @@ export const authClient = createAuthClient({
                 writer,
                 userRole,
                 adminRole,
+                owner,
+                superAdmin,
             },
         }),
     ],
