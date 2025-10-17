@@ -1,33 +1,36 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
-import { ActionIcon } from "@mantine/core";
+import { authClient } from "@/lib/auth-client";
+import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconLogout } from "@tabler/icons-react";
 
-export function LogoutButton() {
+export function LogoutButton({ ...props }: ActionIconProps) {
     return (
-        <ActionIcon
-            onClick={async () => {
-                const { data, error } = await authClient.signOut();
+        <Tooltip label="logout">
+            <ActionIcon
+                onClick={async () => {
+                    const { data, error } = await authClient.signOut();
 
-                if (data?.success) {
-                    notifications.show({
-                        message: "Logged Out",
-                    });
-                } else {
-                    notifications.show({
-                        message: `Error While Logging Out -> ${
-                            error?.message || "Logout Error"
-                        }`,
-                    });
-                }
-            }}
-            color="red"
-            size={"lg"}
-            variant="subtle"
-        >
-            <IconLogout />
-        </ActionIcon>
+                    if (data?.success) {
+                        notifications.show({
+                            message: "Logged Out",
+                        });
+                    } else {
+                        notifications.show({
+                            message: `Error While Logging Out -> ${
+                                error?.message || "Logout Error"
+                            }`,
+                        });
+                    }
+                }}
+                color="red"
+                size={"lg"}
+                variant="subtle"
+                {...props}
+            >
+                <IconLogout />
+            </ActionIcon>
+        </Tooltip>
     );
 }

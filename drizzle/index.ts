@@ -8,7 +8,7 @@ import * as pwa from "@/drizzle/schemas/pwa";
 import * as rating from "@/drizzle/schemas/rating";
 import * as reaction from "@/drizzle/schemas/reaction";
 import * as story from "@/drizzle/schemas/story";
-import * as user from "@/drizzle/schemas/user";
+import * as authSchemas from "@/drizzle/schemas/user";
 
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -55,7 +55,7 @@ export const db = drizzle(client, {
     casing: "snake_case",
     schema: {
         ...story,
-        ...user,
+        ...authSchemas,
         ...book,
         ...rating,
         ...comment,

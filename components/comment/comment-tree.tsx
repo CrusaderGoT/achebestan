@@ -17,7 +17,7 @@ import { IconArrowBack } from "@tabler/icons-react";
 
 import { useCallback, useMemo } from "react";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useMounted } from "@mantine/hooks";
 
 import {

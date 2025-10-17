@@ -7,7 +7,7 @@ import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconPencilMinus } from "@tabler/icons-react";
 import { useState } from "react";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";

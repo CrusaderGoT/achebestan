@@ -1,30 +1,44 @@
 import { db } from "@/drizzle";
-import { account, session, user, verification } from "@/drizzle/schemas/user";
+
+import * as authSchemas from "@/drizzle/schemas/user";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
+import { user } from "@/drizzle/schemas/user";
 import { nextCookies } from "better-auth/next-js";
 import { admin, anonymous, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
-import { getUserRole as getUserRoles } from "../actions/user";
-import { ORG_ROLES } from "../constants";
+import { getUserRole as getUserRoles } from "./actions/user";
 import {
     admin as adminRole,
     customAccessControl,
+    member,
     owner,
     superAdmin,
     user as userRole,
     writer,
-} from "./permissions";
+} from "./auth/permissions";
+import { ORG_ROLES } from "./constants";
+
+import "dotenv/config";
+
+const envadminIdList = process.env.ADMIN_IDS;
+
+let adminIdList: string[] = [];
+
+if (envadminIdList) {
+    try {
+        adminIdList = JSON.parse(envadminIdList);
+    } catch (e) {
+        console.log("Failed to parse ADMIN_IDS", e);
+    }
+}
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg", // or "mysql", "sqlite"
         schema: {
-            user,
-            session,
-            account,
-            verification,
+            ...authSchemas,
         },
     }),
     emailAndPassword: {
@@ -32,15 +46,29 @@ export const auth = betterAuth({
     },
     plugins: [
         nextCookies(),
-        admin(),
+        admin({
+            ac: customAccessControl,
+            roles: {
+                writer,
+                user: userRole,
+                admin: adminRole,
+                owner,
+                superAdmin,
+                member,
+            },
+            defaultRole: "user",
+            adminRoles: ["admin", "superAdmin"],
+            adminUserIds: adminIdList,
+        }),
         organization({
             ac: customAccessControl,
             roles: {
                 writer,
-                userRole,
-                adminRole,
+                user: userRole,
+                admin: adminRole,
                 owner,
                 superAdmin,
+                member,
             },
             async allowUserToCreateOrganization(user) {
                 const roles = await getUserRoles(user.id);

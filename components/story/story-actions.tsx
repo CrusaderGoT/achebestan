@@ -16,7 +16,7 @@ import {
     IconMessage2Off,
 } from "@tabler/icons-react";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { PickedStoryProps } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";

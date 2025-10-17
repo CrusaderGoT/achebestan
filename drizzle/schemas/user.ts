@@ -1,3 +1,5 @@
+// drizzle/schemas/user.ts
+
 import { relations } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { favouriteUserStories } from "./favourite";

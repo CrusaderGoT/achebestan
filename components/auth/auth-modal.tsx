@@ -30,6 +30,7 @@ export function AuthenticationModal({
             withCloseButton={!isFormPending}
             closeOnClickOutside={!isFormPending}
             title="Authentication"
+            p={"xs"}
         >
             <AuthTabs
                 loginFormState={loginFormState}

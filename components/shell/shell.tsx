@@ -1,12 +1,12 @@
 "use client";
 
 import { AuthenticationModal } from "@/components/auth/auth-modal";
+import { LogoutButton } from "@/components/auth/logout-btn";
+import { OpenAuthenticationModalButton } from "@/components/auth/open-auth-modal-btn";
 import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
-import { LogoutButton } from "@/components/auth/logout-btn";
-import { OpenAuthenticationModalButton } from "@/components/auth/open-auth-modal-btn";
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
 import { AppShell, Burger, Group, Title } from "@mantine/core";
@@ -82,16 +82,7 @@ export function Shell({
                     </Group>
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
-                        {session?.user.id ? (
-                            session.user.isAnonymous ? (
-                                <OpenAuthenticationModalButton
-                                    openModal={openAuthModal}
-                                    disabled={openedAuthModal}
-                                />
-                            ) : (
-                                <LogoutButton />
-                            )
-                        ) : isPendingSession ? null : (
+                        {!isPendingSession && (
                             <OpenAuthenticationModalButton
                                 openModal={openAuthModal}
                                 disabled={openedAuthModal}
@@ -115,12 +106,14 @@ export function Shell({
             <AppShell.Navbar py="md" px={4}>
                 <NavLinks session={session} />
 
-                <Group ml={"auto"} mt={"xs"} mr={"sm"}>
+                <Group justify="space-between" mt={"auto"} mx={"sm"}>
                     <ModeToggle
                         size={"sm"}
                         label="mode toggle"
                         labelPosition="left"
                     />
+
+                    {session && <LogoutButton size={"sm"} />}
                 </Group>
             </AppShell.Navbar>
 

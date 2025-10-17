@@ -7,6 +7,7 @@ import { createAccessControl } from "better-auth/plugins/access";
 import {
     adminAc,
     defaultStatements,
+    memberAc,
     ownerAc,
 } from "better-auth/plugins/organization/access";
 
@@ -31,6 +32,11 @@ export const customAccessControl = createAccessControl(customPermissions);
 // ROLES
 
 export const user = customAccessControl.newRole({
+    comment: ["create:owner", "update:owner", "delete:owner"],
+});
+
+export const member = customAccessControl.newRole({
+    ...memberAc.statements,
     comment: ["create:owner", "update:owner", "delete:owner"],
 });
 

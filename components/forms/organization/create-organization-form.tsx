@@ -1,13 +1,12 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 
-import { Button, Paper, Stack, Title } from "@mantine/core";
+import { Button, Stack } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
-import publicStyles from "@/styles/public.module.css";
 import { LoginFormState } from "@/types/user";
 import {
     organizationInsertSchema,
@@ -81,39 +80,32 @@ export function OrganizationCreateForm({
 
     return (
         <OrganizationFormProvider form={form}>
-            <Paper withBorder p={"md"}>
-                <Title order={5} className={publicStyles.title}>
-                    Create An Organization
-                </Title>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+                <Stack>
+                    <OrganizationFormFields />
 
-                <form onSubmit={form.onSubmit(handleSubmit)}>
-                    <Stack>
-                        <OrganizationFormFields />
+                    <Button
+                        type="submit"
+                        loading={
+                            formState === "pending" || formState === "success"
+                        }
+                        color="green"
+                    >
+                        Create
+                    </Button>
+                </Stack>
+            </form>
 
-                        <Button
-                            type="submit"
-                            loading={
-                                formState === "pending" ||
-                                formState === "success"
-                            }
-                            color="green"
-                        >
-                            Create
-                        </Button>
-                    </Stack>
-                </form>
-
-                <LoadingOverlayWithText
-                    text={
-                        formState === "pending"
-                            ? "Creating New Organization"
-                            : formState === "success" && redirectAfterSuccess
-                            ? "Redirecting To Home Page"
-                            : ""
-                    }
-                    visible={formState === "pending" || formState === "success"}
-                />
-            </Paper>
+            <LoadingOverlayWithText
+                text={
+                    formState === "pending"
+                        ? "Creating New Organization"
+                        : formState === "success" && redirectAfterSuccess
+                        ? "Redirecting To Home Page"
+                        : ""
+                }
+                visible={formState === "pending" || formState === "success"}
+            />
         </OrganizationFormProvider>
     );
 }

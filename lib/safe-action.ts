@@ -1,6 +1,6 @@
 import { createSafeActionClient } from "next-safe-action";
 import { headers } from "next/headers";
-import { auth } from "./auth/auth";
+import { auth } from "./auth";
 
 export const actionClient = createSafeActionClient({
     async handleServerError(e) {

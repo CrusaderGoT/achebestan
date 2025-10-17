@@ -16,7 +16,7 @@ import { StoryImageField } from "@/components/story/story-image-field";
 import { StorySubtitle } from "@/components/story/story-subtitle";
 import { StoryTitle } from "@/components/story/story-title";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
 import { useDisclosure } from "@mantine/hooks";

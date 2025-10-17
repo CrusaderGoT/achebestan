@@ -7,24 +7,36 @@ import { createAuthClient } from "better-auth/react";
 import {
     admin as adminRole,
     customAccessControl,
+    member,
     owner,
     superAdmin,
     user as userRole,
     writer,
-} from "./permissions";
+} from "./auth/permissions";
 
 export const authClient = createAuthClient({
     plugins: [
-        adminClient(),
+        adminClient({
+            ac: customAccessControl,
+            roles: {
+                writer,
+                user: userRole,
+                admin: adminRole,
+                owner,
+                superAdmin,
+                member,
+            },
+        }),
         anonymousClient(),
         organizationClient({
             ac: customAccessControl,
             roles: {
                 writer,
-                userRole,
-                adminRole,
+                user: userRole,
+                admin: adminRole,
                 owner,
                 superAdmin,
+                member,
             },
         }),
     ],

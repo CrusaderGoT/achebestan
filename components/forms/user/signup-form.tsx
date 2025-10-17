@@ -1,8 +1,8 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";
-import { Button, Paper, Stack, Title } from "@mantine/core";
+import { Button, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
@@ -68,7 +68,7 @@ export function SignupForm({
 
     return (
         <SignupFormProvider form={form}>
-            <Paper withBorder p={"md"}>
+            <Stack>
                 <Title order={5} className={publicStyles.title}>
                     Sign Up To Become A Writer!
                 </Title>
@@ -100,7 +100,7 @@ export function SignupForm({
                     }
                     visible={formState === "pending" || formState === "success"}
                 />
-            </Paper>
+            </Stack>
         </SignupFormProvider>
     );
 }

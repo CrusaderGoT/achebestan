@@ -1,8 +1,8 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { LoginSchemaType, loginSchema } from "@/zod-schemas/user";
-import { Button, Paper, Stack, Title } from "@mantine/core";
+import { Button, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { redirect } from "next/navigation";
 import {
@@ -67,7 +67,7 @@ export function LoginForm({
 
     return (
         <LoginFormProvider form={form}>
-            <Paper withBorder p={"md"}>
+            <Stack>
                 <Title order={5} className={publicStyles.title}>
                     Log In To Make Edits!
                 </Title>
@@ -96,7 +96,7 @@ export function LoginForm({
                     }
                     visible={formState === "pending"}
                 />
-            </Paper>
+            </Stack>
         </LoginFormProvider>
     );
 }

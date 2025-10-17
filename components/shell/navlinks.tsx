@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { NavLink, UnstyledButton } from "@mantine/core";
 import {
     IconBook,

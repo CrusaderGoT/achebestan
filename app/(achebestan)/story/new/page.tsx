@@ -1,5 +1,5 @@
 import { CreateStoryForm } from "@/components/forms/story/create-story-form";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 import { notFound } from "next/navigation";

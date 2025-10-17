@@ -3,7 +3,7 @@
 import { PermissionsForResource } from "@/types/permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
-import { authClient } from "../auth-client";
+import { authClient } from "../../auth-client";
 
 type CommentType = Partial<CommentSelectType> | Partial<CommentUpdateType>;
 
