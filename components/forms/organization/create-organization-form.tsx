@@ -54,7 +54,9 @@ export function OrganizationCreateForm({
                     console.log(errCtx);
 
                     notifications.show({
-                        message: `Error Creating Organization`,
+                        message: `Error Creating Organization -> ${
+                            errCtx.error.message || "Try Again"
+                        }`,
                         color: "red",
                     });
                     setFormState("error");
@@ -72,6 +74,9 @@ export function OrganizationCreateForm({
 
                     if (redirectAfterSuccess) {
                         redirect("/");
+                    } else {
+                        // clear success state to remove overlay
+                        setFormState("idle");
                     }
                 },
             }

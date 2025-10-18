@@ -60,6 +60,9 @@ export function SignupForm({
 
                     if (redirectAfterSuccess) {
                         redirect("/");
+                    } else {
+                        // clear success state to remove overlay
+                        setFormState("idle");
                     }
                 },
             }

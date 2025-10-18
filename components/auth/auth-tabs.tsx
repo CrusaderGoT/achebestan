@@ -3,15 +3,16 @@
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { authClient } from "@/lib/auth-client";
-import { ORG_ROLES } from "@/lib/constants";
+import { SitePolicy } from "@/lib/auth/policies/site-policy";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
 import { IconDots } from "@tabler/icons-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
 import { SuperAdminForm } from "../forms/user/super-admin-form";
+import { ListOrganizations } from "../organization/list-organizations";
 
 type AuthTabsProps = {
     closeModal?: () => void;
@@ -28,7 +29,14 @@ const AUTH_TABS = {
     signup: "second",
     organization: "third",
     superadmin: "fourth",
+    organizations: "fifth",
 };
+
+type SitePermissionsType = {
+    createOrganization: boolean;
+    createSuperAdmin: boolean;
+};
+
 export function AuthTabs({
     loginFormState,
     setLoginFormState,
@@ -37,6 +45,33 @@ export function AuthTabs({
     setSignupFormState,
 }: AuthTabsProps) {
     const { data: session, isPending } = authClient.useSession();
+
+    const [permission, setPermissions] = useState<SitePermissionsType>({
+        createOrganization: false,
+        createSuperAdmin: false,
+    });
+
+    //useEffect for assigning permission
+    useEffect(() => {
+        async function getSitePermissions(): Promise<SitePermissionsType> {
+            if (!session) {
+                return {
+                    createOrganization: false,
+                    createSuperAdmin: false,
+                };
+            }
+
+            return {
+                createOrganization: await SitePolicy.hasSitePermission([
+                    "create:organization",
+                ]),
+                createSuperAdmin: await SitePolicy.hasSitePermission([
+                    "create:super-admin",
+                ]),
+            };
+        }
+        getSitePermissions().then(setPermissions);
+    }, [session]);
 
     if (isPending) {
         return (
@@ -64,15 +99,24 @@ export function AuthTabs({
 
                 {session && (
                     <>
-                        <Tabs.Tab value={AUTH_TABS.organization} color="white">
-                            Create Organization
-                        </Tabs.Tab>
+                        {permission.createOrganization && (
+                            <Tabs.Tab
+                                value={AUTH_TABS.organization}
+                                color="white"
+                            >
+                                Create Organization
+                            </Tabs.Tab>
+                        )}
 
-                        {!session.user.role?.includes(ORG_ROLES.superAdmin) && (
+                        {permission.createSuperAdmin && (
                             <Tabs.Tab value={AUTH_TABS.superadmin} color="red">
                                 Create Super Admin
                             </Tabs.Tab>
                         )}
+
+                        <Tabs.Tab value={AUTH_TABS.organizations} color="red">
+                            Select Organization
+                        </Tabs.Tab>
                     </>
                 )}
             </Tabs.List>
@@ -107,22 +151,28 @@ export function AuthTabs({
             {session && (
                 <>
                     {/** only show organization tabs to superadmin*/}
-                    <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
-                        <Stack gap={"xs"}>
-                            <OrganizationCreateForm
-                                closeModal={closeModal}
-                                redirectAfterSuccess={false}
-                                formState={signupFormState}
-                                setFormState={setSignupFormState}
-                            />
-                        </Stack>
-                    </Tabs.Panel>
+                    {permission.createOrganization && (
+                        <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
+                            <Stack gap={"xs"}>
+                                <OrganizationCreateForm
+                                    closeModal={closeModal}
+                                    redirectAfterSuccess={false}
+                                    formState={signupFormState}
+                                    setFormState={setSignupFormState}
+                                />
+                            </Stack>
+                        </Tabs.Panel>
+                    )}
 
-                    {!session.user.role?.includes(ORG_ROLES.superAdmin) && (
+                    {permission.createSuperAdmin && (
                         <Tabs.Panel value={AUTH_TABS.superadmin}>
                             <SuperAdminForm session={session} />
                         </Tabs.Panel>
                     )}
+
+                    <Tabs.Panel value={AUTH_TABS.organizations}>
+                        <ListOrganizations />
+                    </Tabs.Panel>
                 </>
             )}
 
@@ -130,6 +180,7 @@ export function AuthTabs({
                 <Center>
                     <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.
+                        {JSON.stringify([permission, session?.session.activeOrganizationId, session?.user.role])}
                     </Text>
                 </Center>
             </Tabs.Panel>

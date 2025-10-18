@@ -69,7 +69,7 @@ export function CommentNode({
 
     useEffect(() => {
         async function checkCommentPermissions() {
-            if (!session?.user) {
+            if (!session) {
                 return {
                     canDelete: false,
                     canUpdate: false,
@@ -88,7 +88,7 @@ export function CommentNode({
             };
         }
         checkCommentPermissions().then(setPermissions);
-    }, [session?.user]);
+    }, [session]);
 
     if (!comment) return null;
 

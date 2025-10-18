@@ -59,6 +59,9 @@ export function LoginForm({
 
                     if (redirectAfterSuccess) {
                         redirect("/");
+                    } else {
+                        // clear success state to remove overlay
+                        setFormState("idle");
                     }
                 },
             }
@@ -78,7 +81,10 @@ export function LoginForm({
 
                         <Button
                             type="submit"
-                            loading={formState === "pending"}
+                            loading={
+                                formState === "pending" ||
+                                formState === "success"
+                            }
                             color="orange"
                         >
                             Login
@@ -94,7 +100,7 @@ export function LoginForm({
                             ? "Redirecting To Home Page"
                             : ""
                     }
-                    visible={formState === "pending"}
+                    visible={formState === "pending" || formState === "success"}
                 />
             </Stack>
         </LoginFormProvider>

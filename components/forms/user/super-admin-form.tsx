@@ -82,6 +82,7 @@ export function SuperAdminForm({
                         inputMode="numeric"
                         mx={"auto"}
                         mt={"sm"}
+                        disabled={form.submitting}
                     />
 
                     <Button type="submit" loading={form.submitting} color="red">

@@ -3,6 +3,7 @@ import { db } from "@/drizzle";
 import * as authSchemas from "@/drizzle/schemas/user";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError } from "better-auth/api";
 
 import { user } from "@/drizzle/schemas/user";
 import { nextCookies } from "better-auth/next-js";
@@ -76,6 +77,30 @@ export const auth = betterAuth({
                 if (!roles) return false;
 
                 return roles.includes(ORG_ROLES.superAdmin);
+            },
+            organizationCreation: {
+                beforeCreate: async ({ organization: org, user }) => {
+                    // check if name exists already
+                    const exists = await db.query.organization.findFirst({
+                        where(fields, operators) {
+                            return operators.eq(fields.name, org.name);
+                        },
+                    });
+
+                    if (exists) {
+                        throw new APIError("CONFLICT", {
+                            message: "Organization Name Is Already Taken",
+                        });
+                    }
+                    return {
+                        data: {
+                            ...org,
+                            metadata: {
+                                createdBy: user,
+                            },
+                        },
+                    };
+                },
             },
         }),
         anonymous({
