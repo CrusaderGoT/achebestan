@@ -18,12 +18,9 @@ export class SitePolicy {
                 throw new Error(result.error.message);
             }
 
-            console.error(result.data.success)
-
             return result.data.success;
-            
         } catch (error) {
-            console.error("Permission check failed:", error);
+            console.log("Permission check failed:", error);
 
             return false;
         }

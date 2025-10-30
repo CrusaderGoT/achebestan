@@ -39,6 +39,7 @@ export function AuthenticationModal({
                 setSignupFormState={setSignupFormState}
                 closeModal={close}
             />
+            
         </Modal>
     );
 }

@@ -1,23 +1,25 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import publicStyles from "@/styles/public.module.css";
 import { Box, Center, Group, Radio, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function ListOrganizations() {
+type ListOrganizationsProps = { id: string; slug: string } | null;
+
+export function ListOrganizations({
+    activeOrg,
+}: {
+    activeOrg: ListOrganizationsProps;
+}) {
     const { data: organizations } = authClient.useListOrganizations();
 
-    const [value, setValue] = useState<{ id: string; slug: string } | null>(
-        null
-    );
-
-    const router = useRouter();
+    const [value, setValue] = useState<ListOrganizationsProps>(activeOrg);
 
     useEffect(() => {
-        async function setActiveOrg() {
-            if (!value) return;
+        async function handleSwitchActiveOrg() {
+            if (!value || activeOrg?.id === value.id) return;
 
             const { data, error } = await authClient.organization.setActive({
                 organizationId: value.id,
@@ -26,17 +28,16 @@ export function ListOrganizations() {
 
             if (error) {
                 notifications.show({
-                    message: `Error Activating Organization: ${value} -> ${error.message}`,
+                    message: `Error Activating Organization`,
                 });
                 return;
             }
             notifications.show({
                 message: `Successfully Activated Organization: ${data.name}`,
             });
-            router.refresh();
         }
-        setActiveOrg();
-    }, [value, router]);
+        handleSwitchActiveOrg();
+    }, [value, activeOrg?.id]);
 
     if (!organizations || organizations.length < 1)
         return (
@@ -51,14 +52,11 @@ export function ListOrganizations() {
             radius={"md"}
             value={`${JSON.stringify({ id: org.id, slug: org.slug })}`}
             h={80}
-            //className={formStyles.draftCard}
+            className={publicStyles.card}
         >
             <Group wrap="nowrap" align="flex-start">
                 <Radio.Indicator />
-                <Box
-                    flex={1}
-                    //className={formStyles.draftLabel}
-                >
+                <Box flex={1} className={publicStyles.cardLabel}>
                     <Text fw={500}>{org.name}</Text>
                 </Box>
             </Group>
@@ -79,6 +77,11 @@ export function ListOrganizations() {
                     {cards}
                 </Stack>
             </Radio.Group>
+            {value && (
+                <Text fz="xs" mt="md">
+                    Current Draft ID: {JSON.stringify(value)}
+                </Text>
+            )}
         </>
     );
 }

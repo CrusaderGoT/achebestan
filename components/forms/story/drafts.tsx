@@ -52,6 +52,7 @@ export function Drafts({
                     size={18}
                     onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         if (draft.id) {
                             onDeleteDraft(draft.id);
                         }

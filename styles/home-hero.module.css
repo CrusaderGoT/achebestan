@@ -50,6 +50,6 @@
 .imageFieldToggle {
   position: absolute;
   z-index: 20;
-  right: 5px;
+  right: 20px;
   top: 5px;
 }

@@ -1,5 +1,6 @@
+"use client";
+
 // hooks/useServiceWorker.ts
-import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -51,14 +52,7 @@ export function useServiceWorker() {
                 if (event.data.type === "STORY_SYNCED") {
                     console.log("[Client] Story synced:", event.data.url);
                     // You can show a toast notification here
-                    notifications.show({
-                        title: "Changes synced successfully",
-                        message: `Your story has been Published!`,
-                    });
                     // Or trigger a data refetch
-                    if (event.data.url) {
-                        router.push(event.data.url);
-                    }
                 }
             });
 

@@ -6,7 +6,6 @@ import { authClient } from "@/lib/auth-client";
 import { SitePolicy } from "@/lib/auth/policies/site-policy";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
-import { IconDots } from "@tabler/icons-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
@@ -44,7 +43,11 @@ export function AuthTabs({
     signupFormState,
     setSignupFormState,
 }: AuthTabsProps) {
-    const { data: session, isPending } = authClient.useSession();
+    const { data: session, isPending: isPendingSession } =
+        authClient.useSession();
+
+    const { data: organization, isPending: isPendingOrganization } =
+        authClient.useActiveOrganization();
 
     const [permission, setPermissions] = useState<SitePermissionsType>({
         createOrganization: false,
@@ -54,7 +57,7 @@ export function AuthTabs({
     //useEffect for assigning permission
     useEffect(() => {
         async function getSitePermissions(): Promise<SitePermissionsType> {
-            if (!session) {
+            if (!organization?.id || isPendingOrganization) {
                 return {
                     createOrganization: false,
                     createSuperAdmin: false,
@@ -66,17 +69,17 @@ export function AuthTabs({
                     "create:organization",
                 ]),
                 createSuperAdmin: await SitePolicy.hasSitePermission([
-                    "create:super-admin",
+                    "create:superadmin",
                 ]),
             };
         }
         getSitePermissions().then(setPermissions);
-    }, [session]);
+    }, [organization?.id, isPendingOrganization]);
 
-    if (isPending) {
+    if (isPendingSession || isPendingOrganization) {
         return (
             <Center>
-                <Loader loaders={{ dots: IconDots }} size={"xl"} />
+                <Loader size={"lg"} />
             </Center>
         );
     }
@@ -114,7 +117,7 @@ export function AuthTabs({
                             </Tabs.Tab>
                         )}
 
-                        <Tabs.Tab value={AUTH_TABS.organizations} color="red">
+                        <Tabs.Tab value={AUTH_TABS.organizations} color="blue">
                             Select Organization
                         </Tabs.Tab>
                     </>
@@ -171,7 +174,16 @@ export function AuthTabs({
                     )}
 
                     <Tabs.Panel value={AUTH_TABS.organizations}>
-                        <ListOrganizations />
+                        <ListOrganizations
+                            activeOrg={
+                                organization
+                                    ? {
+                                          id: organization.id,
+                                          slug: organization.slug,
+                                      }
+                                    : null
+                            }
+                        />
                     </Tabs.Panel>
                 </>
             )}
@@ -180,7 +192,6 @@ export function AuthTabs({
                 <Center>
                     <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.
-                        {JSON.stringify([permission, session?.session.activeOrganizationId, session?.user.role])}
                     </Text>
                 </Center>
             </Tabs.Panel>

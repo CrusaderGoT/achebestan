@@ -24,7 +24,7 @@ export const customPermissions = {
         "update:owner",
     ],
     comment: ["create:owner", "delete:owner", "update:owner", "delete:all"],
-    site: ["create:organization", "create:super-admin"],
+    site: ["create:organization", "create:superadmin"],
 } as const;
 
 export const customAccessControl = createAccessControl(customPermissions);

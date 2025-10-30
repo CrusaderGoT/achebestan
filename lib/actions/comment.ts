@@ -13,14 +13,18 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
+import { authClient } from "../auth-client";
 import { CommentPolicy } from "../auth/policies/comment-policy";
 import { authActionClient } from "../safe-action";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
     .action(async ({ parsedInput, ctx }) => {
-        const policy = await CommentPolicy.create(ctx.user as UserSelectType);
-        const canCreate = await policy.canCreate();
+        const canCreate = await authClient.organization.hasPermission({
+            permissions: {
+                comment: ["create:owner"],
+            },
+        });
 
         if (!canCreate) throw unauthorized;
 

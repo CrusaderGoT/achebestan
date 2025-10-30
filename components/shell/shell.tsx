@@ -86,6 +86,7 @@ export function Shell({
                             <OpenAuthenticationModalButton
                                 openModal={openAuthModal}
                                 disabled={openedAuthModal}
+                                color={session?.session.id ? "green" : "red"}
                             />
                         )}
 
