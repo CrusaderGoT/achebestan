@@ -16,11 +16,11 @@ import {
     IconMessage2Off,
 } from "@tabler/icons-react";
 
-import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { PickedStoryProps } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
-import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { AuthenticationModal } from "../auth/auth-modal";
+import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
 import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";
@@ -32,8 +32,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
 
     const mounted = useMounted();
 
-    const { data: session, isPending: isPendingSession } =
-        authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     const [
         openedCommentForm,
@@ -44,10 +43,10 @@ export function StoryActions({ ...props }: PickedStoryProps) {
         useDisclosure(false);
 
     useIsomorphicEffect(() => {
-        if (!!session?.user.id) {
+        if (!!sessionUser.data?.user.id) {
             openCommentForm();
         }
-    }, [session?.user.id]);
+    }, [sessionUser.data?.user.id]);
 
     if (!mounted) return null;
 
@@ -55,18 +54,18 @@ export function StoryActions({ ...props }: PickedStoryProps) {
         <>
             <Stack>
                 <Group justify="space-between" grow>
-                    {!isPendingSession && (
+                    {!sessionUser.isPending && (
                         <FavouriteStory
-                            userId={session?.user.id}
+                            userId={sessionUser.data?.user.id}
                             storyId={props.id}
                             openAuthModal={openAuthModal}
                         />
                     )}
 
-                    {!isPendingSession && (
+                    {!sessionUser.isPending && (
                         <ActionIcon
                             onClick={() => {
-                                if (!session?.user.id) {
+                                if (!sessionUser.data?.user.id) {
                                     openAuthModal();
                                 } else {
                                     toggleCommentForm();
@@ -98,7 +97,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                         closeStoryShare={closeStoryShare}
                     />
 
-                    {!isPendingSession && <DeleteStory {...props} />}
+                    {!sessionUser.isPending && <DeleteStory {...props} />}
                 </Group>
 
                 <Transition
@@ -122,7 +121,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                 </Transition>
             </Stack>
 
-            <PushNotificationToggle userExists={!!session?.user} />
+            <PushNotificationToggle userExists={!!sessionUser.data?.user} />
 
             <AuthenticationModal
                 opened={openedAuthModal}

@@ -3,6 +3,7 @@
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { SitePolicy } from "@/lib/auth/policies/site-policy";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
@@ -43,8 +44,7 @@ export function AuthTabs({
     signupFormState,
     setSignupFormState,
 }: AuthTabsProps) {
-    const { data: session, isPending: isPendingSession } =
-        authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     const { data: organization, isPending: isPendingOrganization } =
         authClient.useActiveOrganization();
@@ -76,7 +76,7 @@ export function AuthTabs({
         getSitePermissions().then(setPermissions);
     }, [organization?.id, isPendingOrganization]);
 
-    if (isPendingSession || isPendingOrganization) {
+    if (sessionUser.isPending || isPendingOrganization) {
         return (
             <Center>
                 <Loader size={"lg"} />
@@ -87,7 +87,7 @@ export function AuthTabs({
     return (
         <Tabs defaultValue={AUTH_TABS.default}>
             <Tabs.List grow>
-                {!session && (
+                {!sessionUser.data && (
                     <>
                         {/** login to only to user that are not anon */}
                         <Tabs.Tab value={AUTH_TABS.login} color="orange">
@@ -100,7 +100,7 @@ export function AuthTabs({
                     </>
                 )}
 
-                {session && (
+                {sessionUser.data && (
                     <>
                         {permission.createOrganization && (
                             <Tabs.Tab
@@ -124,7 +124,7 @@ export function AuthTabs({
                 )}
             </Tabs.List>
 
-            {!session && (
+            {!sessionUser.data && (
                 <>
                     <Tabs.Panel value={AUTH_TABS.login} pt="xs">
                         <LoginForm
@@ -151,7 +151,7 @@ export function AuthTabs({
                 </>
             )}
 
-            {session && (
+            {sessionUser.data && (
                 <>
                     {/** only show organization tabs to superadmin*/}
                     {permission.createOrganization && (
@@ -169,7 +169,7 @@ export function AuthTabs({
 
                     {permission.createSuperAdmin && (
                         <Tabs.Panel value={AUTH_TABS.superadmin}>
-                            <SuperAdminForm session={session} />
+                            <SuperAdminForm session={sessionUser.data} />
                         </Tabs.Panel>
                     )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import {
     useDislikeComment,
     useLikeComment,
@@ -29,7 +29,7 @@ export function LikeDislikeButton({
     dislikes = 0,
     userReaction,
 }: LikeDislikeButtonProps) {
-    const { data: session } = authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     const {
         executeAsync: executeAsyncLikeComment,
@@ -60,17 +60,17 @@ export function LikeDislikeButton({
     useEffect(() => {
         setDislikeReaction(userReaction?.disliked ?? undefined);
         setLikeReaction(userReaction?.liked ?? undefined);
-    }, [userReaction, session?.user.id]);
+    }, [userReaction, sessionUser.data?.user.id]);
 
     return (
         <ActionIcon.Group>
             <ActionIcon
                 variant="default"
                 onClick={async () => {
-                    if (session?.user.id) {
+                    if (sessionUser.data?.user.id) {
                         const result = await executeAsyncLikeComment({
                             commentId: commentId,
-                            userId: session.user.id,
+                            userId: sessionUser.data.user.id,
                         });
 
                         if (result.data?.deleted) {
@@ -87,7 +87,7 @@ export function LikeDislikeButton({
                         }
                     }
                 }}
-                disabled={isPendingDislikeComment || !session?.user.id}
+                disabled={isPendingDislikeComment || !sessionUser.data?.user.id}
                 loading={isPendingLikeComment}
                 size={"md"}
                 title={likeReaction ? "remove like" : "like"}
@@ -116,10 +116,10 @@ export function LikeDislikeButton({
             <ActionIcon
                 variant="default"
                 onClick={async () => {
-                    if (session?.user.id) {
+                    if (sessionUser.data?.user.id) {
                         const result = await executeAsyncDislikeComment({
                             commentId: commentId,
-                            userId: session.user.id,
+                            userId: sessionUser.data.user.id,
                         });
 
                         if (result.data?.deleted) {
@@ -136,7 +136,7 @@ export function LikeDislikeButton({
                         }
                     }
                 }}
-                disabled={isPendingLikeComment || !session?.user.id}
+                disabled={isPendingLikeComment || !sessionUser.data?.user.id}
                 loading={isPendingDislikeComment}
                 size={"md"}
                 title={dislikeReaction ? "remove dislike" : "dislike"}

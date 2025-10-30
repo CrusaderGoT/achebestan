@@ -4,13 +4,12 @@ import styles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
-import { authClient } from "@/lib/auth-client";
-
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { Flex, Mark, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { HomeImageBox } from "./home-image";
 
 function HomeHero() {
-    const { data: session, isPending } = authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     return (
         <Flex gap={0} direction={{ base: "column", md: "row" }}>
@@ -39,16 +38,18 @@ function HomeHero() {
                 gap={0}
                 className={cx(styles.heroSection, styles.heroImageSection)}
             >
-                {isPending ? (
+                {sessionUser.isPending ? (
                     <Skeleton animate width={300} height={200} />
                 ) : (
-                    <HomeImageBox session={session} />
+                    <HomeImageBox session={sessionUser.data} />
                 )}
 
                 <Text className={styles.heroSignature}>
-                    {isPending || !session?.user || session.user.isAnonymous
+                    {sessionUser.isPending ||
+                    !sessionUser.data?.user ||
+                    sessionUser.data.user.isAnonymous
                         ? "Achebestan"
-                        : session.user.name}
+                        : sessionUser.data.user.name}
                 </Text>
             </Stack>
         </Flex>

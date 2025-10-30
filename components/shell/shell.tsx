@@ -6,7 +6,6 @@ import { OpenAuthenticationModalButton } from "@/components/auth/open-auth-modal
 import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
-import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import shellStyles from "@/styles/shell.module.css";
 import { AppShell, Burger, Group, Title } from "@mantine/core";
@@ -15,6 +14,7 @@ import cx from "clsx";
 import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 
 export function Shell({
     children,
@@ -23,8 +23,7 @@ export function Shell({
 }>) {
     const router = useRouter();
 
-    const { data: session, isPending: isPendingSession } =
-        authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
 
@@ -78,15 +77,15 @@ export function Shell({
                         wrap="nowrap"
                         visibleFrom="lg"
                     >
-                        <AltNavLinks session={session} />
+                        <AltNavLinks session={sessionUser.data} />
                     </Group>
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
-                        {!isPendingSession && (
+                        {!sessionUser.isPending && (
                             <OpenAuthenticationModalButton
                                 openModal={openAuthModal}
                                 disabled={openedAuthModal}
-                                color={session?.session.id ? "green" : "red"}
+                                color={sessionUser.data ? "green" : "red"}
                             />
                         )}
 
@@ -105,7 +104,7 @@ export function Shell({
             </AppShell.Header>
 
             <AppShell.Navbar py="md" px={4}>
-                <NavLinks session={session} />
+                <NavLinks session={sessionUser.data} />
 
                 <Group justify="space-between" mt={"auto"} mx={"sm"}>
                     <ModeToggle
@@ -114,7 +113,7 @@ export function Shell({
                         labelPosition="left"
                     />
 
-                    {session && <LogoutButton size={"sm"} />}
+                    {sessionUser.data && <LogoutButton size={"sm"} />}
                 </Group>
             </AppShell.Navbar>
 

@@ -17,7 +17,6 @@ import { IconArrowBack } from "@tabler/icons-react";
 
 import { useCallback, useMemo } from "react";
 
-import { authClient } from "@/lib/auth-client";
 import { useMounted } from "@mantine/hooks";
 
 import {
@@ -41,6 +40,7 @@ import {
 } from "@/lib/hooks/comment/comment-tree-hooks";
 import { CommentNode } from "./comment-node";
 
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { useAutoExpandComments } from "@/lib/hooks/comment/auto-expand-comments";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 
@@ -55,7 +55,7 @@ export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
 // Main CommentTree component
 export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     const mounted = useMounted();
-    const { data: session } = authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
     const interactions = useCommentInteractions();
 
     // Memoize comment data
@@ -123,7 +123,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     nodeProps={props}
                     context={context}
                     interactions={interactions}
-                    session={session}
+                    session={sessionUser.data}
                 />
             );
         },
@@ -133,7 +133,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             commentMap,
             drawer.handleOpenDrawer,
             interactions,
-            session,
+            sessionUser.data,
         ]
     );
 
@@ -153,7 +153,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     nodeProps={props}
                     context={context}
                     interactions={interactions}
-                    session={session}
+                    session={sessionUser.data}
                 />
             );
         },
@@ -163,7 +163,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             drawer.drawerCommentMap,
             drawer.handleOpenDrawer,
             interactions,
-            session,
+            sessionUser.data,
         ]
     );
 

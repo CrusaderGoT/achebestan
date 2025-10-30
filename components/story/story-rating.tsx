@@ -3,14 +3,14 @@
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 
-import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { calculateRatingsAverage } from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
-import { RatingForm } from "../forms/rating/rating-form";
 import { AuthenticationModal } from "../auth/auth-modal";
+import { RatingForm } from "../forms/rating/rating-form";
 
 type StoryRatingProps = {
     ratings: RatingSelectType[];
@@ -27,7 +27,7 @@ export function StoryRating({
 
     const rating = calculateRatingsAverage(ratings);
 
-    const { data: session, isPending } = authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     const mounted = useMounted();
 
@@ -36,13 +36,13 @@ export function StoryRating({
 
     return (
         <Group align="center" justify="space-between" gap={"xs"}>
-            {mounted && !isPending && (
+            {mounted && !sessionUser.isPending && (
                 <>
                     <ActionIcon.Group>
                         <ActionIcon
                             size={"sm"}
                             onClick={() => {
-                                if (!session?.user.id) {
+                                if (!sessionUser.data?.user.id) {
                                     openAuthModal();
                                 } else {
                                     toggle();
@@ -62,7 +62,7 @@ export function StoryRating({
                             variant="outline"
                             color={opened ? "red" : "green"}
                             onClick={() => {
-                                if (!session?.user.id) {
+                                if (!sessionUser.data?.user.id) {
                                     openAuthModal();
                                 } else {
                                     toggle();
@@ -78,7 +78,7 @@ export function StoryRating({
                         <ActionIcon
                             size={"sm"}
                             onClick={() => {
-                                if (!session?.user.id) {
+                                if (!sessionUser.data?.user.id) {
                                     openAuthModal();
                                 } else {
                                     toggle();
@@ -95,11 +95,11 @@ export function StoryRating({
                         </ActionIcon>
                     </ActionIcon.Group>
 
-                    {session?.user.id && (
+                    {sessionUser.data?.user.id && (
                         <RatingForm
                             userRating={userRating}
                             storyISBN={storyISBN}
-                            userId={session.user.id}
+                            userId={sessionUser.data.user.id}
                             closeRatingForm={close}
                             position={{ bottom: 20, right: 20 }}
                             className={cx(!opened && publicStyles.hide)}

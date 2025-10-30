@@ -20,6 +20,7 @@ import { Notifications } from "@mantine/notifications";
 
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
+import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
 import { BASE_URL } from "@/lib/constants";
 import { NavigationProgress } from "@mantine/nprogress";
 import type { Metadata, Viewport } from "next";
@@ -109,7 +110,9 @@ export default function RootLayout({
 
                     <Notifications limit={5} zIndex={9999} />
 
-                    <Shell>{children}</Shell>
+                    <CentralizedAuthContextProvider>
+                        <Shell>{children}</Shell>
+                    </CentralizedAuthContextProvider>
                 </MantineProvider>
             </body>
         </html>

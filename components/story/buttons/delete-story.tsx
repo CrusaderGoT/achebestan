@@ -18,7 +18,7 @@ import { IconTrashX } from "@tabler/icons-react";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
-import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { PickedStoryProps } from "@/types/story";
 import { redirect } from "next/navigation";
 
@@ -28,7 +28,7 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
 
     const { executeAsync, isPending, hasSucceeded } = useDeleteStory(authorId);
 
-    const { data: session } = authClient.useSession();
+    const { sessionUser } = useCentralizedAuth();
 
     return (
         <>
@@ -84,7 +84,7 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
                 variant="subtle"
                 color="red"
                 className={cx(
-                    session?.user.id !== authorId && publicStyles.hide
+                    sessionUser.data?.user.id !== authorId && publicStyles.hide
                 )}
             >
                 <Group>

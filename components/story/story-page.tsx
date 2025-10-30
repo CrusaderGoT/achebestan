@@ -16,7 +16,6 @@ import { StoryImageField } from "@/components/story/story-image-field";
 import { StorySubtitle } from "@/components/story/story-subtitle";
 import { StoryTitle } from "@/components/story/story-title";
 
-import { authClient } from "@/lib/auth-client";
 import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -28,6 +27,7 @@ import {
     useUpdateStoryForm,
 } from "@/components/forms/story/update-story-form-context";
 
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { useState } from "react";
 
 export interface StoryProps extends StorySelectType {
@@ -47,6 +47,8 @@ export function Story({
     bookId,
     blurb,
 }: StoryProps) {
+    const { sessionUser } = useCentralizedAuth();
+
     const [story, setStory] = useState<StorySelectType>({
         image: image,
         title: title,
@@ -160,8 +162,6 @@ export function Story({
         closeContentField();
     }
 
-    const session = authClient.useSession();
-
     return (
         <UpdateStoryFormProvider form={form}>
             <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -174,7 +174,7 @@ export function Story({
                                 openedImageField={openedImageField}
                                 form={form}
                                 isPending={isPending}
-                                session={session}
+                                session={sessionUser}
                                 storyAuthorId={story.authorId}
                             />
                         ) : (
@@ -195,7 +195,7 @@ export function Story({
                             title="Update Story Image"
                             className={cx(
                                 storypageStyles.storyImageFieldToggle,
-                                story.authorId !== session.data?.user.id &&
+                                story.authorId !== sessionUser.data?.user.id &&
                                     publicStyles.hide
                             )}
                             color="yellow"
@@ -214,7 +214,7 @@ export function Story({
                                 openedTitleField={openedTitleField}
                                 isPending={isPending}
                                 form={form}
-                                session={session}
+                                session={sessionUser}
                                 storyAuthorId={story.authorId}
                             />
 
@@ -224,7 +224,7 @@ export function Story({
                                 openedSubtitleField={openedSubtitleField}
                                 isPending={isPending}
                                 form={form}
-                                session={session}
+                                session={sessionUser}
                                 storyAuthorId={story.authorId}
                             />
                         </Box>
@@ -234,7 +234,7 @@ export function Story({
                             toggleContentField={toggleContentField}
                             openedContentField={openedContentField}
                             form={form}
-                            session={session}
+                            session={sessionUser}
                             storyAuthorId={story.authorId}
                             storyISBN={story.isbn}
                         />
