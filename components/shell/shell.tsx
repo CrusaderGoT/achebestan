@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { OfflineIndicator } from "./offline-indicator";
 
 export function Shell({
     children,
@@ -118,6 +119,7 @@ export function Shell({
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
+                <OfflineIndicator />
                 {children}
                 <AuthenticationModal
                     opened={openedAuthModal}
