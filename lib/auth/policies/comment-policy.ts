@@ -1,5 +1,4 @@
 // lib/auth/policies/comment-policy.ts
-"use server";
 
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
