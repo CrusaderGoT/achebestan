@@ -1,7 +1,7 @@
 import { readLatestStories } from "@/lib/actions/story";
 import { Container } from "@mantine/core";
 
-export default function StoryLayout({
+export default async function StoryLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;

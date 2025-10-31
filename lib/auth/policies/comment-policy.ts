@@ -1,17 +1,18 @@
 // lib/auth/policies/comment-policy.ts
+"use server";
 
-import { PermissionsForResource } from "@/types/permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { UserSelectType } from "@/zod-schemas/user";
-import { authClient } from "../../auth-client";
+import { BasePolicy } from "./base-policy";
 
 type CommentType = Partial<CommentSelectType> | Partial<CommentUpdateType>;
 
-export class CommentPolicy {
+export class CommentPolicy extends BasePolicy {
     private readonly user: UserSelectType;
     private readonly comment?: CommentType;
 
     private constructor(user: UserSelectType, comment?: CommentType) {
+        super();
         this.user = user;
         this.comment = comment;
     }
@@ -30,44 +31,24 @@ export class CommentPolicy {
         return this.comment?.userId === this.user.id;
     }
 
-    private async hasPermission(
-        permissions: PermissionsForResource<"comment">[]
-    ): Promise<boolean> {
-        try {
-            const result = await authClient.organization.hasPermission({
-                permissions: {
-                    comment: permissions,
-                },
-            });
-
-            if (result.error) {
-                throw new Error(result.error.message);
-            }
-
-            return result.data.success;
-        } catch (error) {
-            console.error("Permission check failed:", error);
-
-            return false;
-        }
-    }
-
     public async canCreate(): Promise<boolean> {
-        return this.hasPermission(["create:owner"]);
+        return CommentPolicy.hasPermission("comment", ["create:owner"]);
     }
 
     public async canDelete(): Promise<boolean> {
         // Check if user has delete:all permission OR (delete:owner AND is owner)
         const [hasDeleteAll, hasDeleteOwner] = await Promise.all([
-            this.hasPermission(["delete:all"]),
-            this.hasPermission(["delete:owner"]),
+            CommentPolicy.hasPermission("comment", ["delete:all"]),
+            CommentPolicy.hasPermission("comment", ["delete:owner"]),
         ]);
 
         return hasDeleteAll || (hasDeleteOwner && this.isOwner());
     }
 
     public async canUpdate(): Promise<boolean> {
-        const hasUpdateOwner = await this.hasPermission(["update:owner"]);
+        const hasUpdateOwner = await CommentPolicy.hasPermission("comment", [
+            "update:owner",
+        ]);
         return hasUpdateOwner && this.isOwner();
     }
 }

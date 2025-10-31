@@ -2,9 +2,8 @@
 "use client";
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
-import { authClient } from "@/lib/auth-client";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import { SitePolicy } from "@/lib/auth/policies/site-policy";
+import { OrganizationPolicy } from "@/lib/auth/policies/organization-policy";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -44,10 +43,7 @@ export function AuthTabs({
     signupFormState,
     setSignupFormState,
 }: AuthTabsProps) {
-    const { sessionUser } = useCentralizedAuth();
-
-    const { data: organization, isPending: isPendingOrganization } =
-        authClient.useActiveOrganization();
+    const { sessionUser, currentOrganization } = useCentralizedAuth();
 
     const [permission, setPermissions] = useState<SitePermissionsType>({
         createOrganization: false,
@@ -57,26 +53,27 @@ export function AuthTabs({
     //useEffect for assigning permission
     useEffect(() => {
         async function getSitePermissions(): Promise<SitePermissionsType> {
-            if (!organization?.id || isPendingOrganization) {
+            if (
+                !currentOrganization.data?.id ||
+                currentOrganization.isPending
+            ) {
                 return {
                     createOrganization: false,
                     createSuperAdmin: false,
                 };
             }
 
+            const policy = new OrganizationPolicy();
+
             return {
-                createOrganization: await SitePolicy.hasSitePermission([
-                    "create:organization",
-                ]),
-                createSuperAdmin: await SitePolicy.hasSitePermission([
-                    "create:superadmin",
-                ]),
+                createOrganization: await policy.canCreateOrg(),
+                createSuperAdmin: await policy.canCreateSuperUser(),
             };
         }
         getSitePermissions().then(setPermissions);
-    }, [organization?.id, isPendingOrganization]);
+    }, [currentOrganization.data?.id, currentOrganization.isPending]);
 
-    if (sessionUser.isPending || isPendingOrganization) {
+    if (sessionUser.isPending || currentOrganization.isPending) {
         return (
             <Center>
                 <Loader size={"lg"} />
@@ -176,10 +173,10 @@ export function AuthTabs({
                     <Tabs.Panel value={AUTH_TABS.organizations}>
                         <ListOrganizations
                             activeOrg={
-                                organization
+                                currentOrganization.data
                                     ? {
-                                          id: organization.id,
-                                          slug: organization.slug,
+                                          id: currentOrganization.data.id,
+                                          slug: currentOrganization.data.slug,
                                       }
                                     : null
                             }

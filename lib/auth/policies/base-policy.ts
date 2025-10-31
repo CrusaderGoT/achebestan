@@ -1,16 +1,20 @@
-// lib/auth/policies/organization-policy.ts
+// lib/auth/policies/base-policy.ts
 
-import { PermissionsForResource } from "@/types/permissions";
+import {
+    PermissionResource,
+    PermissionsForResource,
+} from "@/types/permissions";
 import { authClient } from "../../auth-client";
 
-export class SitePolicy {
-    public static async hasSitePermission(
-        permissions: PermissionsForResource<"site">[]
+export class BasePolicy {
+    public static async hasPermission<R extends PermissionResource>(
+        resource: R,
+        permissions: PermissionsForResource<R>[]
     ): Promise<boolean> {
         try {
             const result = await authClient.organization.hasPermission({
                 permissions: {
-                    site: permissions,
+                    [resource]: permissions,
                 },
             });
 
@@ -20,7 +24,7 @@ export class SitePolicy {
 
             return result.data.success;
         } catch (error) {
-            console.log("Permission check failed:", error);
+            console.error("Permission check failed:", error);
 
             return false;
         }
