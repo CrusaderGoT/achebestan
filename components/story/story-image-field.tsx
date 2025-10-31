@@ -1,4 +1,4 @@
-"use client";
+
 
 import { StoryUpdateType } from "@/types/story";
 import { Box, Button } from "@mantine/core";

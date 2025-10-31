@@ -1,4 +1,4 @@
-"use client";
+
 
 // hooks/useServiceWorker.ts
 import { useRouter } from "next/navigation";

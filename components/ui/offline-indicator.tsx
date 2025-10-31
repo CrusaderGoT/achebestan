@@ -1,7 +1,7 @@
-"use client";
+
 
 // components/OfflineIndicator.tsx
-"use client";
+
 
 import { useEffect, useState } from "react";
 

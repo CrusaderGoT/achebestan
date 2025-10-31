@@ -1,5 +1,3 @@
-"use client";
-
 import publicStyles from "@/styles/public.module.css";
 
 import {

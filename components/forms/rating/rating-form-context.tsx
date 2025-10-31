@@ -1,4 +1,4 @@
-"use client";
+
 
 import { RatingSelectType } from "@/zod-schemas/rating";
 

@@ -1,4 +1,4 @@
-"use client";
+
 
 import { UpdateStoryTitle } from "@/components/forms/story/update-story-form-context";
 import { StoryUpdateType } from "@/types/story";

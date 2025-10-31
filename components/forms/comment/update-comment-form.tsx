@@ -1,5 +1,3 @@
-"use client";
-
 import { useUpdateComment } from "@/lib/hooks/comment/comment-action-hooks";
 import { commentUpdateSchema, CommentUpdateType } from "@/zod-schemas/comment";
 import { Button, Stack, TextareaProps } from "@mantine/core";

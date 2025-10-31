@@ -1,4 +1,4 @@
-"use client";
+
 
 import { StoryIndexDbSchemaType } from "@/lib/index-db";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";

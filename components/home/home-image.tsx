@@ -1,4 +1,4 @@
-"use client";
+
 
 import { ImageDropzone, UploadImageDropZoneProps } from "../ui/dropzone";
 

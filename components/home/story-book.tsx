@@ -1,4 +1,4 @@
-"use client";
+
 
 import storybookStyles from "@/styles/story-book.module.css";
 import cx from "clsx";

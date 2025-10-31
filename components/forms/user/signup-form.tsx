@@ -1,4 +1,4 @@
-"use client";
+
 
 import { authClient } from "@/lib/auth-client";
 import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";

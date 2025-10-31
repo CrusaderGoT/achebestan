@@ -1,5 +1,3 @@
-"use client";
-
 import { authClient } from "@/lib/auth-client";
 import { UnstyledButton, UnstyledButtonProps } from "@mantine/core";
 import { notifications } from "@mantine/notifications";

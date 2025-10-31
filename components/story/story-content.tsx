@@ -1,4 +1,4 @@
-"use client";
+
 import { UpdateStoryContent } from "@/components/forms/story/update-story-form-context";
 import { useBookmark } from "@/lib/hooks/bookmark/use-bookmark";
 import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bookmark";

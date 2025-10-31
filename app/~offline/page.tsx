@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Button, Stack, Text, Title } from "@mantine/core";
 //import type { Metadata } from "next";

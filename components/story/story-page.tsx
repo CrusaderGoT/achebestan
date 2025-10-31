@@ -1,4 +1,4 @@
-"use client";
+
 
 import { StorySelectType, StoryUpdateType } from "@/types/story";
 import { storyUpdateSchema } from "@/zod-schemas/story";

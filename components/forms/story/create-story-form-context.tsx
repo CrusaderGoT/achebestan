@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Box, Stack, Textarea, TextInput } from "@mantine/core";
 import { createFormContext } from "@mantine/form";

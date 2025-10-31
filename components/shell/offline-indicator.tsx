@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Affix, Alert, Center } from "@mantine/core";
 import { useNetwork } from "@mantine/hooks";

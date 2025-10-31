@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useWebShare } from "@/lib/hooks/pwa/use-web-share";
 import { ActionIcon, Group, Text } from "@mantine/core";

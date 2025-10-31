@@ -1,4 +1,4 @@
-"use client";
+
 
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";

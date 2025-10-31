@@ -1,5 +1,5 @@
 // auth/context/centralized-auth-context.tsx
-"use client";
+
 
 import { createContext, ReactNode, useContext } from "react";
 import { authClient } from "../auth-client";

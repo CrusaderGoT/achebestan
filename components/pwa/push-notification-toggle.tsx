@@ -1,4 +1,4 @@
-"use client";
+
 
 import { usePushNotifications } from "@/lib/hooks/pwa/use-push-notifications";
 import { Alert, Button, Group, Stack, Text } from "@mantine/core";

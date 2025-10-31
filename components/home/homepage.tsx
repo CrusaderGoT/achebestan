@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Container, Grid, Stack } from "@mantine/core";
 
