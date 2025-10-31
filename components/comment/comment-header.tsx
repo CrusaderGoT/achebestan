@@ -1,3 +1,5 @@
+"use client";
+
 import { CommentTreeProps } from "@/types/comment";
 import { Avatar, Button, Group, Text } from "@mantine/core";
 import {

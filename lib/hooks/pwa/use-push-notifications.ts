@@ -1,4 +1,4 @@
-
+"use client";
 
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/actions/pwa";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";

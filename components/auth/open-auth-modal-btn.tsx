@@ -1,3 +1,5 @@
+"use client";
+
 import { ActionIcon, ActionIconProps } from "@mantine/core";
 
 import { IconLockAccess } from "@tabler/icons-react";

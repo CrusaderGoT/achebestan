@@ -1,4 +1,4 @@
-
+"use client";
 
 import { AuthenticationModal } from "@/components/auth/auth-modal";
 import { LogoutButton } from "@/components/auth/logout-btn";

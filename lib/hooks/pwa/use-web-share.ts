@@ -1,4 +1,4 @@
-
+"use client";
 
 import { useIsomorphicEffect } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";

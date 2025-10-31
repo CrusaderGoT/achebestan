@@ -1,4 +1,4 @@
-
+"use client";
 
 import { createFormContext } from "@mantine/form";
 

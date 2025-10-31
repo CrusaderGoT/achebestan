@@ -1,4 +1,4 @@
-
+"use client";
 
 import { BASE_URL } from "@/lib/constants";
 import { createTweetText } from "@/lib/utils/story/story-utils";

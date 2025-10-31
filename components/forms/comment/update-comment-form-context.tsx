@@ -1,3 +1,5 @@
+"use client";
+
 import { CommentUpdateType } from "@/zod-schemas/comment";
 import { Textarea, TextareaProps } from "@mantine/core";
 import { createFormContext } from "@mantine/form";

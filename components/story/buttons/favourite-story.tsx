@@ -1,4 +1,4 @@
-
+"use client";
 
 import { getfavouriteUserStory } from "@/lib/actions/favourite";
 import { useFavouriteStory } from "@/lib/hooks/favourite/favourite-story-hook";

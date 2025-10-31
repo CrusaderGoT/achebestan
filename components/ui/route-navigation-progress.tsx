@@ -1,5 +1,5 @@
 // components/RouteNavigationProgress.tsx
-
+"use client";
 
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
 import { usePathname, useSearchParams } from "next/navigation";

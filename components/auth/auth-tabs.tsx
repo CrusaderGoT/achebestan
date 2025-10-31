@@ -1,3 +1,6 @@
+// For file /tabs/[activeTab].tsx
+"use client";
+
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { OrganizationPolicy } from "@/lib/auth/policies/organization-policy";

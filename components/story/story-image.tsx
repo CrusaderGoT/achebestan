@@ -1,4 +1,4 @@
-
+"use client";
 
 import { UserSelectType } from "@/zod-schemas/user";
 import { Avatar, Badge, Box, Code, Group, Image } from "@mantine/core";

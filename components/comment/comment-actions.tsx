@@ -1,3 +1,5 @@
+"use client";
+
 import { useDeleteComment } from "@/lib/hooks/comment/comment-action-hooks";
 import { Button, Group } from "@mantine/core";
 import { IconEdit, IconMessageReply, IconTrashX } from "@tabler/icons-react";

@@ -1,4 +1,4 @@
-
+"use client";
 
 import { useServiceWorker } from "@/lib/hooks/pwa/use-service-worker";
 import { Affix, Button, Text } from "@mantine/core";

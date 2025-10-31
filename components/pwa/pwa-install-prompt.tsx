@@ -1,4 +1,4 @@
-
+"use client";
 
 import { Button, Card, CloseButton, Group, Modal, Text } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";

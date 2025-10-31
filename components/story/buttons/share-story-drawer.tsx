@@ -1,4 +1,4 @@
-
+"use client";
 
 import { WebShare } from "@/components/pwa/web-share";
 import { BASE_URL } from "@/lib/constants";

@@ -1,4 +1,4 @@
-
+"use client";
 
 import { OrganizationInsertSchemaType } from "@/zod-schemas/organization";
 import { Textarea, TextInput } from "@mantine/core";

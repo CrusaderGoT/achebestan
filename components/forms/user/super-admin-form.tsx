@@ -1,4 +1,4 @@
-
+"use client";
 
 import { authClient } from "@/lib/auth-client";
 import { validatePasscode } from "@/lib/utils/user/validate-passcode";

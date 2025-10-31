@@ -1,4 +1,4 @@
-
+"use client";
 
 import styles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";
