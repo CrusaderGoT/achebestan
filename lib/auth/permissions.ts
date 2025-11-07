@@ -23,7 +23,7 @@ export const customPermissions = {
         "delete:all",
         "update:owner",
     ],
-    comment: ["create:owner", "delete:owner", "update:owner", "delete:all"],
+    comment: ["create:owner", "delete:owner", "update:owner", "delete:all", "read:all"],
     site: ["create:organization", "create:superadmin"],
 } as const;
 

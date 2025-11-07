@@ -65,9 +65,14 @@ export function AuthTabs({
 
             const policy = new OrganizationPolicy();
 
+            const [createOrganization, createSuperAdmin] = await Promise.all([
+                await policy.canCreate(),
+                await policy.canCreateSuperAdmin(),
+            ]);
+
             return {
-                createOrganization: await policy.canCreateOrg(),
-                createSuperAdmin: await policy.canCreateSuperUser(),
+                createOrganization: createOrganization,
+                createSuperAdmin: createSuperAdmin,
             };
         }
         getSitePermissions().then(setPermissions);

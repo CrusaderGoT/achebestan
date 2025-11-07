@@ -8,7 +8,7 @@ import {
     CommentRenderContext,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -61,34 +61,43 @@ export function CommentNode({
         }
     }, [expanded, showDrawerButton, tree, node.value]);
 
-    const [permissions, setPermissions] = useState({
-        canDelete: false,
-        canUpdate: false,
-        canCreate: false,
-    });
+    const noPermissions = useMemo(
+        () => ({
+            canDelete: false,
+            canUpdate: false,
+            canCreate: false,
+            canRead: false,
+        }),
+        []
+    );
+
+    const [permissions, setPermissions] = useState(noPermissions);
 
     useEffect(() => {
         async function checkCommentPermissions() {
             if (!session) {
-                return {
-                    canDelete: false,
-                    canUpdate: false,
-                    canCreate: false,
-                };
+                return noPermissions;
             }
 
-            const policy = await CommentPolicy.create(
-                session.user as UserSelectType
-            );
+            const policy = CommentPolicy.create(session.user as UserSelectType);
+
+            const [canDelete, canUpdate, canCreate, canRead] =
+                await Promise.all([
+                    await policy.canDelete(),
+                    await policy.canUpdate(),
+                    await policy.canCreate(),
+                    await policy.canRead(),
+                ]);
 
             return {
-                canDelete: await policy.canDelete(),
-                canUpdate: await policy.canUpdate(),
-                canCreate: await policy.canCreate(),
+                canDelete: canDelete,
+                canUpdate: canUpdate,
+                canCreate: canCreate,
+                canRead: canRead,
             };
         }
         checkCommentPermissions().then(setPermissions);
-    }, [session]);
+    }, [session, noPermissions]);
 
     if (!comment) return null;
 

@@ -59,3 +59,10 @@ export interface CommentInteractionHandlers {
     handleCloseEdit: () => void;
     focusTrapRef: React.RefCallback<HTMLElement | null>;
 }
+
+export type CommentPermissionsType = {
+    canDelete: false;
+    canUpdate: false;
+    canCreate: false;
+    canView: false;
+};
