@@ -21,8 +21,11 @@ import { Notifications } from "@mantine/notifications";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
-import { BASE_URL } from "@/lib/constants";
+import { SerwistProvider } from "@/lib/serwist-client";
 import { NavigationProgress } from "@mantine/nprogress";
+
+import { BASE_URL } from "@/lib/constants";
+
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
@@ -110,9 +113,14 @@ export default function RootLayout({
 
                     <Notifications limit={5} zIndex={9999} />
 
-                    <CentralizedAuthContextProvider>
-                        <Shell>{children}</Shell>
-                    </CentralizedAuthContextProvider>
+                    <SerwistProvider
+                        swUrl="/serwist/sw.js"
+                        options={{ scope: "/" }}
+                    >
+                        <CentralizedAuthContextProvider>
+                            <Shell>{children}</Shell>
+                        </CentralizedAuthContextProvider>
+                    </SerwistProvider>
                 </MantineProvider>
             </body>
         </html>
