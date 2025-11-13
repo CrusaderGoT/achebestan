@@ -9,10 +9,9 @@ import {
     BackgroundSyncQueue,
     CacheableResponsePlugin,
     CacheFirst,
-    createSerwist,
     ExpirationPlugin,
     NetworkFirst,
-    RuntimeCache,
+    Serwist,
     StaleWhileRevalidate,
 } from "serwist";
 
@@ -35,119 +34,109 @@ const CACHE_NAMES = {
     RUNTIME: "runtime-v2",
 } as const;
 
-const CACHE_VERSION = "v2"; // Increment when you need to force cache refresh
+const CACHE_VERSION = "v3"; // Increment when you need to force cache refresh
 
 // Initialize Serwist
-createSerwist({
-    precache: {
-        entries: [
-            ...(self.__SW_MANIFEST ?? []),
-            { url: "/", revision: CACHE_VERSION },
-            { url: "/story/new", revision: CACHE_VERSION },
-            { url: "/~offline", revision: CACHE_VERSION },
-        ],
-        concurrency: 10,
-        cleanupOutdatedCaches: true,
-    },
+const serwist = new Serwist({
+    precacheEntries: self.__SW_MANIFEST,
     skipWaiting: true,
     clientsClaim: true,
-    navigationPreload: true,
-    disableDevLogs: true,
-    extensions: [
-        new RuntimeCache(
-            [
-                ...defaultCache,
-                // Story pages - StaleWhileRevalidate for fast loading with updates
-                {
-                    matcher: ({ url }) =>
-                        url.pathname.startsWith("/story/") &&
-                        !url.pathname.includes("new"),
-                    handler: new StaleWhileRevalidate({
-                        cacheName: CACHE_NAMES.STORY,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 50,
-                                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-                                purgeOnQuotaError: true,
-                            }),
-                        ],
+    navigationPreload: false, // Disable for better control - can cause issues with Next.js
+    runtimeCaching: [
+        ...defaultCache,
+        // Story pages - StaleWhileRevalidate for fast loading with updates
+        {
+            matcher: ({ url }) =>
+                url.pathname.startsWith("/story/") &&
+                !url.pathname.includes("new"),
+            handler: new StaleWhileRevalidate({
+                cacheName: CACHE_NAMES.STORY,
+                plugins: [
+                    new CacheableResponsePlugin({
+                        statuses: [0, 200],
                     }),
-                },
-                // API stories list - NetworkFirst for fresh data, fallback to cache
-                {
-                    matcher: ({ url }) => url.pathname === "/api/stories",
-                    handler: new NetworkFirst({
-                        cacheName: CACHE_NAMES.STORIES_LIST,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 1,
-                                maxAgeSeconds: 24 * 60 * 60, // 1 day
-                            }),
-                        ],
-                        networkTimeoutSeconds: 5, // Fallback to cache after 5s
+                    new ExpirationPlugin({
+                        maxEntries: 50,
+                        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                        purgeOnQuotaError: true,
                     }),
-                },
-                // Images - CacheFirst for performance
-                {
-                    matcher: ({ request }) => request.destination === "image",
-                    handler: new CacheFirst({
-                        cacheName: CACHE_NAMES.IMAGES,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 100,
-                                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-                                purgeOnQuotaError: true,
-                            }),
-                        ],
+                ],
+            }),
+        },
+        // API stories list - NetworkFirst for fresh data, fallback to cache
+        {
+            matcher: ({ url }) => url.pathname === "/api/stories",
+            handler: new NetworkFirst({
+                cacheName: CACHE_NAMES.STORIES_LIST,
+                plugins: [
+                    new CacheableResponsePlugin({
+                        statuses: [0, 200],
                     }),
-                },
-                // API routes - NetworkFirst with short timeout
-                {
-                    matcher: ({ url }) =>
-                        url.pathname.startsWith("/api/") &&
-                        url.pathname !== "/api/stories" &&
-                        !url.pathname.includes("/api/notifications"),
-                    handler: new NetworkFirst({
-                        cacheName: CACHE_NAMES.API,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 50,
-                                maxAgeSeconds: 5 * 60, // 5 minutes
-                            }),
-                        ],
-                        networkTimeoutSeconds: 3,
+                    new ExpirationPlugin({
+                        maxEntries: 1,
+                        maxAgeSeconds: 24 * 60 * 60, // 1 day
                     }),
-                },
-            ],
-            {
-                fallbacks: {
-                    entries: [
-                        {
-                            url: "/~offline",
-                            matcher({ request }) {
-                                return request.destination === "document";
-                            },
-                        },
-                    ],
-                },
-            }
-        ),
+                ],
+                networkTimeoutSeconds: 5, // Fallback to cache after 5s
+            }),
+        },
+        // Images - CacheFirst for performance
+        {
+            matcher: ({ request }) => request.destination === "image",
+            handler: new CacheFirst({
+                cacheName: CACHE_NAMES.IMAGES,
+                plugins: [
+                    new CacheableResponsePlugin({
+                        statuses: [0, 200],
+                    }),
+                    new ExpirationPlugin({
+                        maxEntries: 100,
+                        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+                        purgeOnQuotaError: true,
+                    }),
+                ],
+            }),
+        },
+        // API routes - NetworkFirst with short timeout
+        {
+            matcher: ({ url }) =>
+                url.pathname.startsWith("/api/") &&
+                url.pathname !== "/api/stories" &&
+                !url.pathname.includes("/api/notifications"),
+            handler: new NetworkFirst({
+                cacheName: CACHE_NAMES.API,
+                plugins: [
+                    new CacheableResponsePlugin({
+                        statuses: [0, 200],
+                    }),
+                    new ExpirationPlugin({
+                        maxEntries: 50,
+                        maxAgeSeconds: 5 * 60, // 5 minutes
+                    }),
+                ],
+                networkTimeoutSeconds: 3,
+            }),
+        },
     ],
+    disableDevLogs: true,
+    fallbacks: {
+        entries: [
+            {
+                url: "/~offline",
+                matcher({ request }) {
+                    return request.destination === "document";
+                },
+            },
+        ],
+    },
 });
 
 // Add core pages to precache
+serwist.addToPrecacheList([
+    { url: "/", revision: CACHE_VERSION },
+    { url: "/story/new", revision: CACHE_VERSION },
+    { url: "/~offline", revision: CACHE_VERSION },
+]);
 
 // Install event - Keep it simple and fast
 self.addEventListener("install", (event) => {
@@ -564,3 +553,6 @@ self.addEventListener("message", (event) => {
         );
     }
 });
+
+// Initialize Serwist event listeners
+serwist.addEventListeners();

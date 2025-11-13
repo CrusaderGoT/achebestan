@@ -49,7 +49,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@serwist/turbopack": "^10.0.0-preview.10",
     "@types/node": "^20",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
@@ -58,17 +57,21 @@
     "drizzle-kit": "^0.31.4",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "esbuild": "^0.25.0",
 =======
 >>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 =======
     "esbuild-wasm": "^0.25.12",
 >>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
+=======
+>>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "postcss": "^8.5.6",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -77,6 +80,9 @@
 =======
     "serwist": "^10.0.0-preview.14",
 >>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
+=======
+    "serwist": "^9.2.1",
+>>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
     "tsx": "^4.20.3",
     "typescript": "^5"
   },
