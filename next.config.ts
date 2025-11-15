@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+    basePath: "",
     reactStrictMode: true,
-    serverExternalPackages: ["esbuild", "@esbuild/linux-x64"],
+    serverExternalPackages: ["esbuild-wasm"],
     experimental: {
         optimizePackageImports: [
             "@mantine/core",

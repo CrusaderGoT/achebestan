@@ -21,7 +21,7 @@ import { Notifications } from "@mantine/notifications";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
-import { SerwistProvider } from "@/lib/serwist-client";
+import { SerwistProvider } from "$lib/client";
 import { NavigationProgress } from "@mantine/nprogress";
 
 import { BASE_URL } from "@/lib/constants";
@@ -115,7 +115,6 @@ export default function RootLayout({
 
                     <SerwistProvider
                         swUrl="/serwist/sw.js"
-                        options={{ scope: "/" }}
                     >
                         <CentralizedAuthContextProvider>
                             <Shell>{children}</Shell>

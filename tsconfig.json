@@ -27,12 +27,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "$lib/*": [
+        "./$lib/*"
       ]
     },
-    "types": [
-      // This allows Serwist to type `window.serwist`.
-      "@serwist/next/typings"
-    ]
+    
   },
   "include": [
     "next-env.d.ts",
@@ -43,6 +43,5 @@
   ],
   "exclude": [
     "node_modules",
-    "public/sw.js"
   ]
 }

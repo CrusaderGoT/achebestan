@@ -1,5 +1,5 @@
 import { StorySelectType } from "@/types/story";
-import { defaultCache } from "@serwist/next/worker";
+import { defaultCache } from "@serwist/turbopack/worker";
 import type {
     BackgroundSyncQueueEntry,
     PrecacheEntry,
