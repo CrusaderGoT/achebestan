@@ -1,24 +1,9 @@
 import type { NextConfig } from "next";
 
-import withSerwistInit from "@serwist/next";
-
-const withSerwist = withSerwistInit({
-    swSrc: "app/sw.ts",
-    swDest: "public/sw.js",
-    cacheOnNavigation: true,
-    scope: "/",
-    register: true,
-    reloadOnOnline: true,
-    disable: process.env.NODE_ENV === "development",
-});
-
 const nextConfig: NextConfig = {
     basePath: "",
     reactStrictMode: true,
-<<<<<<< HEAD
     serverExternalPackages: ["esbuild-wasm"],
-=======
->>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
     experimental: {
         optimizePackageImports: [
             "@mantine/core",
@@ -83,8 +68,17 @@ const nextConfig: NextConfig = {
                     },
                 ],
             },
+            {
+                source: "/:path*",
+                headers: [
+                    {
+                        key: "Service-Worker-Allowed",
+                        value: "/",
+                    },
+                ],
+            },
         ];
     },
 };
 
-export default withSerwist(nextConfig);
+export default nextConfig;

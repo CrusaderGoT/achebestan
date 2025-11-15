@@ -21,14 +21,11 @@ import { Notifications } from "@mantine/notifications";
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
-<<<<<<< HEAD
 import { SerwistProvider } from "$lib/client";
 import { NavigationProgress } from "@mantine/nprogress";
 
-=======
->>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 import { BASE_URL } from "@/lib/constants";
-import { NavigationProgress } from "@mantine/nprogress";
+
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
@@ -116,7 +113,6 @@ export default function RootLayout({
 
                     <Notifications limit={5} zIndex={9999} />
 
-<<<<<<< HEAD
                     <SerwistProvider
                         swUrl="/serwist/sw.js"
                     >
@@ -124,11 +120,6 @@ export default function RootLayout({
                             <Shell>{children}</Shell>
                         </CentralizedAuthContextProvider>
                     </SerwistProvider>
-=======
-                    <CentralizedAuthContextProvider>
-                        <Shell>{children}</Shell>
-                    </CentralizedAuthContextProvider>
->>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
                 </MantineProvider>
             </body>
         </html>
