@@ -6,7 +6,7 @@
     "dev": "npm run upgrade && next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "upgrade": "npx drizzle-kit generate && npx drizzle-kit migrate",
     "prebuild": "npm run upgrade",
     "dev:pwa": "next dev"
@@ -37,11 +37,11 @@
     "idb": "^8.0.3",
     "isomorphic-dompurify": "^2.26.0",
     "mantine-form-zod-resolver": "^1.3.0",
-    "next": "15.3.5",
+    "next": "16.0.1",
     "next-safe-action": "^8.0.7",
     "postgres": "^3.4.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "schema-dts": "^1.1.5",
     "serwist": "preview",
     "web-push": "^3.6.7",
@@ -49,10 +49,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
     "@types/web-push": "^3.6.4",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.4",
@@ -68,7 +67,7 @@
 =======
 >>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
     "eslint": "^9",
-    "eslint-config-next": "15.3.5",
+    "eslint-config-next": "16.0.1",
     "postcss": "^8.5.6",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
@@ -86,5 +85,9 @@
 >>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
     "tsx": "^4.20.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2"
   }
 }
