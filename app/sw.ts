@@ -6,7 +6,6 @@ import type {
     SerwistGlobalConfig,
 } from "serwist";
 import {
-    addEventListeners,
     BackgroundSyncQueue,
     CacheableResponsePlugin,
     CacheFirst,
@@ -39,12 +38,13 @@ const CACHE_NAMES = {
 const CACHE_VERSION = "v2"; // Increment when you need to force cache refresh
 
 // Initialize Serwist
-const serwist = createSerwist({
+createSerwist({
     precache: {
         entries: [
             ...(self.__SW_MANIFEST ?? []),
             { url: "/", revision: CACHE_VERSION },
             { url: "/story/new", revision: CACHE_VERSION },
+            { url: "/~offline", revision: CACHE_VERSION },
         ],
         concurrency: 10,
         cleanupOutdatedCaches: true,
@@ -132,7 +132,6 @@ const serwist = createSerwist({
                 },
             ],
             {
-                warmEntries: ["/~offline"],
                 fallbacks: {
                     entries: [
                         {
@@ -565,5 +564,3 @@ self.addEventListener("message", (event) => {
         );
     }
 });
-
-addEventListeners(serwist);

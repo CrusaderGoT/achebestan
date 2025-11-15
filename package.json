@@ -80,9 +80,6 @@
     "tsx": "^4.20.3",
     "typescript": "^5"
   },
-  "resolutions": {
-    "esbuild-wasm": "^0.25.12"
-  },
   "overrides": {
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2"
