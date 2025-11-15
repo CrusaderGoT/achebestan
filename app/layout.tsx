@@ -23,7 +23,6 @@ import { RouteNavigationProgress } from "@/components/ui/route-navigation-progre
 import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
 <<<<<<< HEAD
 <<<<<<< HEAD
-<<<<<<< HEAD
 import { SerwistProvider } from "$lib/client";
 import { NavigationProgress } from "@mantine/nprogress";
 
@@ -35,10 +34,8 @@ import { SerwistProvider } from "@/lib/serwist-client";
 >>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 import { NavigationProgress } from "@mantine/nprogress";
 
-=======
->>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 import { BASE_URL } from "@/lib/constants";
-import { NavigationProgress } from "@mantine/nprogress";
+
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
@@ -128,7 +125,6 @@ export default function RootLayout({
 
 <<<<<<< HEAD
 <<<<<<< HEAD
-<<<<<<< HEAD
                     <SerwistProvider
                         swUrl="/serwist/sw.js"
 =======
@@ -149,11 +145,6 @@ export default function RootLayout({
 >>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 =======
 >>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
-=======
-                    <CentralizedAuthContextProvider>
-                        <Shell>{children}</Shell>
-                    </CentralizedAuthContextProvider>
->>>>>>> 6661f0f (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
                 </MantineProvider>
             </body>
         </html>
