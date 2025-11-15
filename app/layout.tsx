@@ -22,20 +22,13 @@ import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
 import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
 <<<<<<< HEAD
-<<<<<<< HEAD
 import { SerwistProvider } from "$lib/client";
 import { NavigationProgress } from "@mantine/nprogress";
 
 =======
 >>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 import { BASE_URL } from "@/lib/constants";
-=======
-import { SerwistProvider } from "@/lib/serwist-client";
->>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
 import { NavigationProgress } from "@mantine/nprogress";
-
-import { BASE_URL } from "@/lib/constants";
-
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
@@ -124,27 +117,18 @@ export default function RootLayout({
                     <Notifications limit={5} zIndex={9999} />
 
 <<<<<<< HEAD
-<<<<<<< HEAD
                     <SerwistProvider
                         swUrl="/serwist/sw.js"
-=======
-                    <SerwistProvider
-                        swUrl="/serwist/sw.js"
-                        options={{ scope: "/" }}
->>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
                     >
                         <CentralizedAuthContextProvider>
                             <Shell>{children}</Shell>
                         </CentralizedAuthContextProvider>
                     </SerwistProvider>
-<<<<<<< HEAD
 =======
                     <CentralizedAuthContextProvider>
                         <Shell>{children}</Shell>
                     </CentralizedAuthContextProvider>
 >>>>>>> 4e8afd5 (Revert "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
-=======
->>>>>>> e9c9aca (Reapply "upgraded serwist to work with turbo pack. and removed the deprecated new Serwist initialization process.")
                 </MantineProvider>
             </body>
         </html>
