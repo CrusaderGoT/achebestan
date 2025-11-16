@@ -2,7 +2,7 @@
 
 import { StoryIndexDbSchemaType } from "@/lib/index-db";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
-import formStyles from "@/styles/story/create-story-form-styles.module.css";
+import formStyles from "@/styles/story/radio-card.module.css";
 import { Box, Group, Radio, Stack, Text } from "@mantine/core";
 import { randomId } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
@@ -26,39 +26,40 @@ export function Drafts({
             value={`${draft.id}`}
             className={formStyles.draftCard}
         >
-            <Group wrap="nowrap" align="flex-start" justify="space-between">
-                <Group wrap="nowrap" align="flex-start" flex={1}>
+            <Group wrap="nowrap" align="flex-start">
+                <Stack gap={"xl"}>
                     <Radio.Indicator />
-                    <Box flex={1} className={formStyles.draftLabel}>
-                        <Text fw={500}>{draft.title || "Untitled Draft"}</Text>
 
-                        <Box
-                            dangerouslySetInnerHTML={{
-                                __html:
-                                    sanitizeHTML(draft.content).trim() ||
-                                    "No Content Yet",
-                            }}
-                            className={formStyles.draftDescription}
-                        />
+                    <IconTrash
+                        size={18}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (draft.id) {
+                                onDeleteDraft(draft.id);
+                            }
+                        }}
+                        color="red"
+                    />
+                </Stack>
 
-                        <Text size="xs" c="dimmed" mt={4}>
-                            {new Date(draft.updated).toLocaleDateString()} at{" "}
-                            {new Date(draft.updated).toLocaleTimeString()}
-                        </Text>
-                    </Box>
-                </Group>
+                <Box className={formStyles.draftLabel} flex={1}>
+                    <Text fw={500}>{draft.title || "Untitled Draft"}</Text>
 
-                <IconTrash
-                    size={18}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        if (draft.id) {
-                            onDeleteDraft(draft.id);
-                        }
-                    }}
-                    color="red"
-                />
+                    <Box
+                        dangerouslySetInnerHTML={{
+                            __html:
+                                sanitizeHTML(draft.content).trim() ||
+                                "No Content Yet",
+                        }}
+                        className={formStyles.draftDescription}
+                    />
+
+                    <Text size="xs" c="dimmed" mt={4}>
+                        {new Date(draft.updated).toLocaleDateString()} at{" "}
+                        {new Date(draft.updated).toLocaleTimeString()}
+                    </Text>
+                </Box>
             </Group>
         </Radio.Card>
     ));

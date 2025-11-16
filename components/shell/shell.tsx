@@ -26,7 +26,8 @@ export function Shell({
 
     const { sessionUser } = useCentralizedAuth();
 
-    const [openedNavBar, { toggle: toggleNavbar }] = useDisclosure();
+    const [openedNavBar, { toggle: toggleNavbar, close: closeNavbar }] =
+        useDisclosure();
 
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
@@ -57,19 +58,6 @@ export function Shell({
                         )}
                     >
                         <Title order={3}>Achebestan</Title>
-
-                        <svg
-                            height={24}
-                            width={24}
-                            style={{
-                                display: "inline",
-                                backgroundColor: "ButtonFace",
-                                color: "yellow",
-                                backgroundImage: "url(/icon0.svg",
-                            }}
-                        >
-                            <use xlinkHref="/icon0.svg" href="/icon0.svg" />
-                        </svg>
                     </Group>
 
                     <Group
@@ -78,7 +66,9 @@ export function Shell({
                         wrap="nowrap"
                         visibleFrom="lg"
                     >
-                        <AltNavLinks session={sessionUser.data} />
+                        {!sessionUser.isPending && (
+                            <AltNavLinks session={sessionUser.data} />
+                        )}
                     </Group>
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
@@ -96,7 +86,7 @@ export function Shell({
 
                         <Burger
                             opened={openedNavBar}
-                            onClick={() => toggleNavbar()}
+                            onClick={toggleNavbar}
                             hiddenFrom="lg"
                             size="sm"
                         />
@@ -105,7 +95,12 @@ export function Shell({
             </AppShell.Header>
 
             <AppShell.Navbar py="md" px={4}>
-                <NavLinks session={sessionUser.data} />
+                {!sessionUser.isPending && (
+                    <NavLinks
+                        closeNavbar={closeNavbar}
+                        session={sessionUser.data}
+                    />
+                )}
 
                 <Group justify="space-between" mt={"auto"} mx={"sm"}>
                     <ModeToggle

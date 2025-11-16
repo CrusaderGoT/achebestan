@@ -19,14 +19,15 @@ export function PWAInstallPrompt() {
 
     const [deferredPrompt, setDeferredPrompt] =
         useState<BeforeInstallPromptEvent | null>(null);
+
     const [showPrompt, setShowPrompt] = useState(false);
 
     useEffect(() => {
         const handler = (e: Event) => {
             e.preventDefault();
 
-            // check if it has not declined before or it been more than 5 days since last decline
-            if (!declined || declined.diff(dayjs(), "days") > 5) {
+            // check if it has not declined before or it been more than 7 days since last decline
+            if (!declined || declined.diff(dayjs(), "days") > 7) {
                 setDeferredPrompt(e as BeforeInstallPromptEvent);
                 setShowPrompt(true);
             }

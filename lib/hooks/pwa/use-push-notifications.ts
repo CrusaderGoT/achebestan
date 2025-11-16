@@ -105,7 +105,7 @@ export function usePushNotifications() {
                 );
             }
         } catch (err) {
-            console.error("Error subscribing to push notifications:", err);
+            console.log("Error subscribing to push notifications:", err);
             const message =
                 err instanceof Error
                     ? err.message

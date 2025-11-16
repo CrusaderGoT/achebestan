@@ -47,11 +47,12 @@ export const navlinkData = [
     },
 ];
 
-export function NavLinks({
-    session,
-}: {
+type NavLinkProps = {
     session: ReturnType<typeof authClient.useSession>["data"];
-}) {
+    closeNavbar?: () => void;
+};
+
+export function NavLinks({ session, closeNavbar }: NavLinkProps) {
     const pathname = usePathname();
 
     const items = navlinkData.map((item, index) => {
@@ -70,6 +71,11 @@ export function NavLinks({
                 className={cx(
                     item.auth && !session?.user.id && publicStyles.hide
                 )}
+                onClick={() => {
+                    if (closeNavbar) {
+                        closeNavbar();
+                    }
+                }}
             />
         );
     });
@@ -77,11 +83,7 @@ export function NavLinks({
     return items;
 }
 
-export function AltNavLinks({
-    session,
-}: {
-    session?: ReturnType<typeof authClient.useSession>["data"];
-}) {
+export function AltNavLinks({ session }: NavLinkProps) {
     const pathname = usePathname();
 
     const items = navlinkData.map((item, index) => {
