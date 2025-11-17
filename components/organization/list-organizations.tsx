@@ -2,8 +2,17 @@
 
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
-import { Box, Center, Group, Radio, Stack, Text } from "@mantine/core";
+import {
+    ActionIcon,
+    Box,
+    Center,
+    Group,
+    Radio,
+    Stack,
+    Text,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconTrashFilled } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 type ListOrganizationsProps = { id: string; slug: string } | null;
@@ -42,25 +51,54 @@ export function ListOrganizations({
     if (!organizations || organizations.length < 1)
         return (
             <Center>
-                <Text c="dimmed">No Organizations Created Yet..</Text>
+                <Text c="dimmed">No Organizations Created Yet...</Text>
             </Center>
         );
 
     const cards = organizations.map((org) => (
-        <Radio.Card
-            key={org.id}
-            radius={"md"}
-            value={`${JSON.stringify({ id: org.id, slug: org.slug })}`}
-            h={80}
-            className={publicStyles.card}
-        >
-            <Group wrap="nowrap" align="flex-start">
-                <Radio.Indicator />
-                <Box flex={1} className={publicStyles.cardLabel}>
-                    <Text fw={500}>{org.name}</Text>
-                </Box>
-            </Group>
-        </Radio.Card>
+        <Group key={org.id} wrap="nowrap">
+            <Radio.Card
+                key={org.id}
+                radius={"md"}
+                value={`${JSON.stringify({ id: org.id, slug: org.slug })}`}
+                h={80}
+                className={publicStyles.card}
+            >
+                <Group wrap="nowrap" align="flex-start">
+                    <Radio.Indicator />
+
+                    <Box flex={1} className={publicStyles.cardLabel}>
+                        <Text fw={500}>{org.name}</Text>
+                    </Box>
+                </Group>
+            </Radio.Card>
+
+            <ActionIcon
+                variant="outline"
+                color="red"
+                onClick={async () => {
+                    const { data, error } =
+                        await authClient.organization.delete({
+                            organizationId: org.id,
+                        });
+
+                    if (error) {
+                        notifications.show({
+                            message: `Failed To Delete Organization -> ${
+                                error.message || ""
+                            }`,
+                            color: "red",
+                        });
+                    } else {
+                        notifications.show({
+                            message: `${data.name.toUpperCase()} Organization Deleted Successfully`,
+                        });
+                    }
+                }}
+            >
+                <IconTrashFilled size={14} />
+            </ActionIcon>
+        </Group>
     ));
 
     return (

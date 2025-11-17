@@ -42,10 +42,12 @@ export function LoginForm({
                 onRequest: () => setFormState("pending"),
                 onError(errCtx) {
                     notifications.show({
-                        message: `Error -> ${errCtx.error.message}`,
+                        message: `Error Logging In`,
                         color: "red",
                     });
                     setFormState("error");
+
+                    console.log(errCtx);
                 },
                 onSuccess() {
                     notifications.show({

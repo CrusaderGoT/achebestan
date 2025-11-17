@@ -55,7 +55,8 @@ export function AuthTabs({
         async function getSitePermissions(): Promise<SitePermissionsType> {
             if (
                 !currentOrganization.data?.id ||
-                currentOrganization.isPending
+                currentOrganization.isPending ||
+                !sessionUser.data?.user.id
             ) {
                 return {
                     createOrganization: false,
@@ -76,7 +77,11 @@ export function AuthTabs({
             };
         }
         getSitePermissions().then(setPermissions);
-    }, [currentOrganization.data?.id, currentOrganization.isPending]);
+    }, [
+        currentOrganization.data?.id,
+        currentOrganization.isPending,
+        sessionUser.data?.user.id,
+    ]);
 
     if (sessionUser.isPending || currentOrganization.isPending) {
         return (
@@ -193,7 +198,9 @@ export function AuthTabs({
             <Tabs.Panel value={AUTH_TABS.default} pt="xs">
                 <Center>
                     <Text fw={700}>
-                        This is the Authentication tab. Select a tab to start.
+                        This is the Authentication tab. Select a tab to start.{" "}
+                        {currentOrganization.data?.name ||
+                            sessionUser.data?.user.name}
                     </Text>
                 </Center>
             </Tabs.Panel>

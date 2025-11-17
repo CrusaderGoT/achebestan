@@ -6,11 +6,16 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
 
 import { user } from "@/drizzle/schemas/user";
-import { generateId } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { admin, anonymous, organization } from "better-auth/plugins";
 import { and, eq } from "drizzle-orm";
-import { getUserRole as getUserRoles } from "./actions/user";
+import {
+    addUserToOrganization,
+    checkIfOrganizationExist,
+    checkIfUserIsMember,
+    createOrganization,
+    getUserRole as getUserRoles,
+} from "./actions/auth";
 import {
     admin as adminRole,
     customAccessControl,
@@ -36,8 +41,8 @@ if (envadminIdList) {
     }
 }
 
-const orgName = "achebestan";
-const orgSlug = "achebestan";
+export const orgName = "achebestan";
+export const orgSlug = "achebestan";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -137,55 +142,28 @@ export const auth = betterAuth({
                 after: async (user) => {
                     try {
                         // Check if organization exists
-                        let org = await db
-                            .select()
-                            .from(authSchemas.organization)
-                            .where(eq(authSchemas.organization.slug, orgSlug))
-                            .limit(1);
+                        let org = await checkIfOrganizationExist(orgSlug);
 
                         // Create organization if it doesn't exist
                         if (!org || org.length === 0) {
-                            const [newOrg] = await db
-                                .insert(authSchemas.organization)
-                                .values({
-                                    id: generateId(),
-                                    name: orgName,
-                                    slug: orgSlug,
-                                    createdAt: new Date(),
-                                    metadata: JSON.stringify({
-                                        defaultOrg: true,
-                                    }),
-                                })
-                                .returning();
+                            const newOrg = await createOrganization(
+                                orgName,
+                                orgSlug
+                            );
 
                             org = [newOrg];
                             console.log(`Created organization: ${orgName}`);
                         }
 
                         // Check if user is already a member
-                        const existingMember = await db
-                            .select()
-                            .from(authSchemas.member)
-                            .where(
-                                and(
-                                    eq(authSchemas.member.userId, user.id),
-                                    eq(
-                                        authSchemas.member.organizationId,
-                                        org[0].id
-                                    )
-                                )
-                            )
-                            .limit(1);
+                        const existingMember = await checkIfUserIsMember(
+                            user.id,
+                            org[0].id
+                        );
 
                         // Add user to organization if not already a member
                         if (!existingMember || existingMember.length === 0) {
-                            await db.insert(authSchemas.member).values({
-                                id: generateId(),
-                                organizationId: org[0].id,
-                                userId: user.id,
-                                role: "member", // Change to "owner" for first user if desired
-                                createdAt: new Date(),
-                            });
+                            await addUserToOrganization(user.id, org[0].id);
 
                             console.log(
                                 `Added user ${user.id} to organization ${orgName}`
@@ -246,6 +224,48 @@ export const auth = betterAuth({
                             error
                         );
                         return { data: session };
+                    }
+                },
+            },
+        },
+        account: {
+            update: {
+                after: async (account) => {
+                    // check if user is a member of achebestan organization, else add them. also create org if it does not exist
+                    try {
+                        // Check if organization exists
+                        let org = await checkIfOrganizationExist(orgSlug);
+
+                        // Create organization if it doesn't exist
+                        if (!org || org.length === 0) {
+                            const newOrg = await createOrganization(
+                                orgName,
+                                orgSlug
+                            );
+
+                            org = [newOrg];
+                            console.log(`Created organization: ${orgName}`);
+                        }
+
+                        // Check if user is already a member
+                        const existingMember = await checkIfUserIsMember(
+                            account.id,
+                            org[0].id
+                        );
+
+                        // Add user to organization if not already a member
+                        if (!existingMember || existingMember.length === 0) {
+                            await addUserToOrganization(account.id, org[0].id);
+
+                            console.log(
+                                `Added user ${user.id} to organization ${orgName}`
+                            );
+                        }
+                    } catch (error) {
+                        console.error(
+                            "Failed to add account to organization:",
+                            error
+                        );
                     }
                 },
             },
