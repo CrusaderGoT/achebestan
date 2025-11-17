@@ -182,8 +182,8 @@ export const auth = betterAuth({
             create: {
                 before: async (session) => {
                     try {
-                        // Find the achebestan organization for this user
-                        const org = await db
+                        // Try to find the org where the user is already a member
+                        const [foundOrg] = await db
                             .select({
                                 id: authSchemas.organization.id,
                                 name: authSchemas.organization.name,
@@ -207,65 +207,51 @@ export const auth = betterAuth({
                             )
                             .limit(1);
 
-                        // Set achebestan as active organization
-                        if (org && org.length > 0) {
+                        if (foundOrg) {
                             return {
                                 data: {
                                     ...session,
-                                    activeOrganizationId: org[0].id,
+                                    activeOrganizationId: foundOrg.id,
                                 },
                             };
                         }
 
-                        return { data: session };
+                        // Ensure the organization exists (create if missing)
+                        let orgs = await checkIfOrganizationExist(orgSlug);
+                        if (!orgs || orgs.length === 0) {
+                            const newOrg = await createOrganization(
+                                orgName,
+                                orgSlug
+                            );
+                            orgs = [newOrg];
+                            console.log(`Created organization: ${orgName}`);
+                        }
+                        const orgId = orgs[0].id;
+
+                        // Ensure the user is a member (add if missing)
+                        const member = await checkIfUserIsMember(
+                            session.userId,
+                            orgId
+                        );
+                        if (!member || member.length === 0) {
+                            await addUserToOrganization(session.userId, orgId);
+                            console.log(
+                                `Added user ${session.userId} to organization ${orgName}`
+                            );
+                        }
+
+                        return {
+                            data: {
+                                ...session,
+                                activeOrganizationId: orgId,
+                            },
+                        };
                     } catch (error) {
                         console.error(
                             "Failed to set active organization:",
                             error
                         );
                         return { data: session };
-                    }
-                },
-            },
-        },
-        account: {
-            update: {
-                after: async (account) => {
-                    // check if user is a member of achebestan organization, else add them. also create org if it does not exist
-                    try {
-                        // Check if organization exists
-                        let org = await checkIfOrganizationExist(orgSlug);
-
-                        // Create organization if it doesn't exist
-                        if (!org || org.length === 0) {
-                            const newOrg = await createOrganization(
-                                orgName,
-                                orgSlug
-                            );
-
-                            org = [newOrg];
-                            console.log(`Created organization: ${orgName}`);
-                        }
-
-                        // Check if user is already a member
-                        const existingMember = await checkIfUserIsMember(
-                            account.id,
-                            org[0].id
-                        );
-
-                        // Add user to organization if not already a member
-                        if (!existingMember || existingMember.length === 0) {
-                            await addUserToOrganization(account.id, org[0].id);
-
-                            console.log(
-                                `Added user ${user.id} to organization ${orgName}`
-                            );
-                        }
-                    } catch (error) {
-                        console.error(
-                            "Failed to add account to organization:",
-                            error
-                        );
                     }
                 },
             },
