@@ -199,8 +199,7 @@ export function AuthTabs({
                 <Center>
                     <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.{" "}
-                        {currentOrganization.data?.name ||
-                            sessionUser.data?.user.name}
+                        {sessionUser.data?.user.id}
                     </Text>
                 </Center>
             </Tabs.Panel>

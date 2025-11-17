@@ -115,11 +115,6 @@ export function ListOrganizations({
                     {cards}
                 </Stack>
             </Radio.Group>
-            {value && (
-                <Text fz="xs" mt="md">
-                    Current Draft ID: {JSON.stringify(value)}
-                </Text>
-            )}
         </>
     );
 }
