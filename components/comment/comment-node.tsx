@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { useUpdateComment } from "@/lib/hooks/comment/comment-action-hooks";
 import {
     CommentInteractionHandlers,

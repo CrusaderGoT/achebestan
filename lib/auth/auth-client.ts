@@ -12,7 +12,7 @@ import {
     superAdmin,
     user as userRole,
     writer,
-} from "./auth/permissions";
+} from "./permissions";
 
 export const authClient = createAuthClient({
     plugins: [

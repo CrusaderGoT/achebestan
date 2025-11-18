@@ -6,7 +6,7 @@ import { UseFormReturnType } from "@mantine/form";
 import { useState } from "react";
 import { ImageDropzone } from "../ui/dropzone";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";

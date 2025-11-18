@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { signupSchema, SignupSchemaType } from "@/zod-schemas/user";
 import { Button, Stack, Title } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";

@@ -26,7 +26,7 @@ import {
 
 import stylesPublic from "@/styles/public.module.css";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { handleFileUpload } from "@/lib/utils/image-upload";
 import { StoryInsertType, StoryUpdateType } from "@/types/story";
 import { UseFormReturnType } from "@mantine/form";

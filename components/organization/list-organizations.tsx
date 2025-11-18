@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import {
     ActionIcon,
@@ -50,7 +50,7 @@ export function ListOrganizations({
         handleSwitchActiveOrg();
     }, [value, activeOrg?.id]);
 
-    if (!organizations || organizations.length < 1)
+    if (!organizations || organizations.length === 0)
         return (
             <Center>
                 <Text c="dimmed">No Organizations Created Yet...</Text>
@@ -113,7 +113,6 @@ export function ListOrganizations({
                     setValue(value ? JSON.parse(value) : null);
                 }}
                 label="Select an Organization"
-                description="Choose a draft to continue working on"
             >
                 <Stack pt="md" gap="xs">
                     {cards}

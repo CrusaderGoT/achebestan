@@ -1,6 +1,6 @@
 import { db } from "@/drizzle";
 import { pushSubscriptions } from "@/drizzle/schemas/pwa";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { notificationPayloadSchema } from "@/zod-schemas/pwa";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
