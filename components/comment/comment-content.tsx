@@ -32,19 +32,17 @@ export function CommentContent({
                 />
             )}
 
-            <Text size="sm">
-                {isEditOpen ? (
-                    <UpdateCommentForm
-                        text={comment.text}
-                        commentId={comment.id}
-                        storyISBN={comment.storyISBN}
-                        userId={comment.userId}
-                        closeCommentForm={handleCloseEdit}
-                    />
-                ) : (
-                    node.label
-                )}
-            </Text>
+            {isEditOpen ? (
+                <UpdateCommentForm
+                    text={comment.text}
+                    commentId={comment.id}
+                    storyISBN={comment.storyISBN}
+                    userId={comment.userId}
+                    closeCommentForm={handleCloseEdit}
+                />
+            ) : (
+                <Text size="sm">{node.label}</Text>
+            )}
         </Stack>
     );
 }

@@ -1,8 +1,17 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
+import {
+    canCreateComment,
+    canDeleteComment,
+    canUpdateComment,
+} from "@/lib/auth/policies";
+import { CommentType } from "@/lib/auth/policies/comment-policy";
 import { useDeleteComment } from "@/lib/hooks/comment/comment-action-hooks";
+import { UserSelectType } from "@/zod-schemas/user";
 import { Button, Group } from "@mantine/core";
 import { IconEdit, IconMessageReply, IconTrashX } from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
 
 type CommentActionsProps = {
     handleCloseReply: () => void;
@@ -15,9 +24,7 @@ type CommentActionsProps = {
     isPendingUpdateComment: boolean;
     storyISBN: string;
     isEditOpen: boolean;
-    canCreateComment: boolean;
-    canDeleteComment: boolean;
-    canUpdateComment: boolean;
+    session: ReturnType<typeof authClient.useSession>["data"];
 };
 
 export function CommentActions({
@@ -31,18 +38,53 @@ export function CommentActions({
     isPendingUpdateComment,
     storyISBN,
     isEditOpen,
-    canCreateComment,
-    canDeleteComment,
-    canUpdateComment,
+    session,
 }: CommentActionsProps) {
     const {
         executeAsync: executeAsyncDeleteComment,
         isPending: isPendingDeleteComment,
     } = useDeleteComment();
 
+    const noPermissions = useMemo(
+        () => ({
+            canDelete: false,
+            canUpdate: false,
+            canCreate: false,
+        }),
+        []
+    );
+
+    const [permissions, setPermissions] = useState(noPermissions);
+
+    useEffect(() => {
+        async function checkCommentPermissions() {
+            if (!session?.user.id) {
+                return noPermissions;
+            }
+
+            const comment: CommentType = {
+                id: commentId,
+                userId: commentUserId,
+            };
+
+            const [canDelete, canUpdate, canCreate] = await Promise.all([
+                await canDeleteComment(session.user as UserSelectType, comment),
+                await canUpdateComment(session.user as UserSelectType, comment),
+                await canCreateComment(),
+            ]);
+
+            return {
+                canDelete: canDelete,
+                canUpdate: canUpdate,
+                canCreate: canCreate,
+            };
+        }
+        checkCommentPermissions().then(setPermissions);
+    }, [session?.user, noPermissions, commentId, commentUserId]);
+
     return (
         <Group gap="xs">
-            {canCreateComment && (
+            {permissions.canCreate && (
                 <Button
                     variant="subtle"
                     size="xs"
@@ -56,7 +98,7 @@ export function CommentActions({
                 </Button>
             )}
 
-            {canUpdateComment && (
+            {permissions.canUpdate && (
                 <Button
                     variant="subtle"
                     color="yellow"
@@ -73,7 +115,7 @@ export function CommentActions({
                 </Button>
             )}
 
-            {canDeleteComment && (
+            {permissions.canDelete && (
                 <Button
                     variant="subtle"
                     size="xs"

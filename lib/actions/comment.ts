@@ -13,18 +13,17 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
-import { authClient } from "../auth-client";
-import { CommentPolicy } from "../auth/policies/comment-policy";
+import {
+    canCreateComment,
+    canDeleteComment,
+    canUpdateComment,
+} from "../auth/policies";
 import { authActionClient } from "../safe-action";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
     .action(async ({ parsedInput, ctx }) => {
-        const canCreate = await authClient.organization.hasPermission({
-            permissions: {
-                comment: ["create:owner"],
-            },
-        });
+        const canCreate = await canCreateComment();
 
         if (!canCreate) throw unauthorized;
 
@@ -57,12 +56,10 @@ export const updateCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const policy = await CommentPolicy.create(
+        const canUpdate = await canUpdateComment(
             ctx.user as UserSelectType,
             parsedInput
         );
-
-        const canUpdate = await policy.canDelete();
 
         if (!canUpdate) throw unauthorized();
 
@@ -97,12 +94,10 @@ export const deleteCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const policy = await CommentPolicy.create(
+        const canDelete = await canDeleteComment(
             ctx.user as UserSelectType,
             parsedInput
         );
-
-        const canDelete = await policy.canDelete();
 
         if (!canDelete) throw unauthorized();
 

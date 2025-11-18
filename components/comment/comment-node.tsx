@@ -8,7 +8,7 @@ import {
     CommentRenderContext,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -17,9 +17,7 @@ import { LikeDislikeButton } from "./like-dislike-btns";
 
 import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 
-import { CommentPolicy } from "@/lib/auth/policies/comment-policy";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
-import { UserSelectType } from "@/zod-schemas/user";
 import cx from "clsx";
 import { DRAWER_CONFIG } from "./comment-tree";
 
@@ -60,44 +58,6 @@ export function CommentNode({
             tree.collapse(node.value);
         }
     }, [expanded, showDrawerButton, tree, node.value]);
-
-    const noPermissions = useMemo(
-        () => ({
-            canDelete: false,
-            canUpdate: false,
-            canCreate: false,
-            canRead: false,
-        }),
-        []
-    );
-
-    const [permissions, setPermissions] = useState(noPermissions);
-
-    useEffect(() => {
-        async function checkCommentPermissions() {
-            if (!session) {
-                return noPermissions;
-            }
-
-            const policy = CommentPolicy.create(session.user as UserSelectType);
-
-            const [canDelete, canUpdate, canCreate, canRead] =
-                await Promise.all([
-                    await policy.canDelete(),
-                    await policy.canUpdate(),
-                    await policy.canCreate(),
-                    await policy.canRead(),
-                ]);
-
-            return {
-                canDelete: canDelete,
-                canUpdate: canUpdate,
-                canCreate: canCreate,
-                canRead: canRead,
-            };
-        }
-        checkCommentPermissions().then(setPermissions);
-    }, [session, noPermissions]);
 
     if (!comment) return null;
 
@@ -173,9 +133,7 @@ export function CommentNode({
                                 handleCloseEdit={handleCloseEdit}
                                 handleCloseReply={handleCloseReply}
                                 storyISBN={comment.storyISBN}
-                                canCreateComment={permissions.canCreate}
-                                canDeleteComment={permissions.canDelete}
-                                canUpdateComment={permissions.canUpdate}
+                                session={session}
                             />
                         )}
 

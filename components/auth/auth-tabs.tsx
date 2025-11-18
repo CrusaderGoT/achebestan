@@ -3,7 +3,10 @@
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import { OrganizationPolicy } from "@/lib/auth/policies/organization-policy";
+import {
+    canCreateOrganization,
+    canCreateSuperAdmin,
+} from "@/lib/auth/policies";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -32,8 +35,8 @@ const AUTH_TABS = {
 };
 
 type SitePermissionsType = {
-    createOrganization: boolean;
-    createSuperAdmin: boolean;
+    canCreateOrganization: boolean;
+    canCreateSuperAdmin: boolean;
 };
 
 export function AuthTabs({
@@ -45,9 +48,9 @@ export function AuthTabs({
 }: AuthTabsProps) {
     const { sessionUser, currentOrganization } = useCentralizedAuth();
 
-    const [permission, setPermissions] = useState<SitePermissionsType>({
-        createOrganization: false,
-        createSuperAdmin: false,
+    const [permissions, setPermissions] = useState<SitePermissionsType>({
+        canCreateOrganization: false,
+        canCreateSuperAdmin: false,
     });
 
     //useEffect for assigning permission
@@ -59,21 +62,19 @@ export function AuthTabs({
                 !sessionUser.data?.user.id
             ) {
                 return {
-                    createOrganization: false,
-                    createSuperAdmin: false,
+                    canCreateOrganization: false,
+                    canCreateSuperAdmin: false,
                 };
             }
 
-            const policy = new OrganizationPolicy();
-
             const [createOrganization, createSuperAdmin] = await Promise.all([
-                await policy.canCreate(),
-                await policy.canCreateSuperAdmin(),
+                await canCreateOrganization(),
+                await canCreateSuperAdmin(),
             ]);
 
             return {
-                createOrganization: createOrganization,
-                createSuperAdmin: createSuperAdmin,
+                canCreateOrganization: createOrganization,
+                canCreateSuperAdmin: createSuperAdmin,
             };
         }
         getSitePermissions().then(setPermissions);
@@ -109,7 +110,7 @@ export function AuthTabs({
 
                 {sessionUser.data && (
                     <>
-                        {permission.createOrganization && (
+                        {permissions.canCreateOrganization && (
                             <Tabs.Tab
                                 value={AUTH_TABS.organization}
                                 color="white"
@@ -118,7 +119,7 @@ export function AuthTabs({
                             </Tabs.Tab>
                         )}
 
-                        {permission.createSuperAdmin && (
+                        {permissions.canCreateSuperAdmin && (
                             <Tabs.Tab value={AUTH_TABS.superadmin} color="red">
                                 Create Super Admin
                             </Tabs.Tab>
@@ -161,7 +162,7 @@ export function AuthTabs({
             {sessionUser.data && (
                 <>
                     {/** only show organization tabs to superadmin*/}
-                    {permission.createOrganization && (
+                    {permissions.canCreateOrganization && (
                         <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
                             <Stack gap={"xs"}>
                                 <OrganizationCreateForm
@@ -174,7 +175,7 @@ export function AuthTabs({
                         </Tabs.Panel>
                     )}
 
-                    {permission.createSuperAdmin && (
+                    {permissions.canCreateSuperAdmin && (
                         <Tabs.Panel value={AUTH_TABS.superadmin}>
                             <SuperAdminForm session={sessionUser.data} />
                         </Tabs.Panel>
@@ -200,6 +201,7 @@ export function AuthTabs({
                     <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.{" "}
                         {sessionUser.data?.user.id}
+                        {JSON.stringify([permissions])}
                     </Text>
                 </Center>
             </Tabs.Panel>

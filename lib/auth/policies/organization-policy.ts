@@ -1,37 +1,33 @@
 // ============================================================
 // lib/auth/policies/organization-policy.ts
+"use server";
 
-import { BasePolicy } from "./base-policy";
+import { hasPermission } from "./base-policy";
 
 /**
- * Policy class for organization-related authorization
+ * Check if user can create organizations
  */
-export class OrganizationPolicy extends BasePolicy {
-    /**
-     * Check if user can create organizations
-     */
-    public async canCreate(): Promise<boolean> {
-        return this.hasPermission("site", ["create:organization"]);
-    }
+export async function canCreateOrganization(): Promise<boolean> {
+    return hasPermission("site", ["create:organization"]);
+}
 
-    /**
-     * Check if user can create super admin users
-     */
-    public async canCreateSuperAdmin(): Promise<boolean> {
-        return this.hasPermission("site", ["create:superadmin"]);
-    }
+/**
+ * Check if user can manage organization
+ */
+export async function canManageOrganization(): Promise<boolean> {
+    return hasPermission("organization", ["update"]);
+}
 
-    /**
-     * Check if user can manage organization settings
-     */
-    public async canManageSettings(): Promise<boolean> {
-        return this.hasPermission("organization", ["update"]);
-    }
+/**
+ * Check if user can delete organizations
+ */
+export async function canDeleteOrganization(): Promise<boolean> {
+    return hasPermission("organization", ["delete"]);
+}
 
-    /**
-     * Check if user can delete organizations
-     */
-    public async canDelete(): Promise<boolean> {
-        return this.hasPermission("organization", ["delete"]);
-    }
+/**
+ * Check if user can create super admin users
+ */
+export async function canCreateSuperAdmin(): Promise<boolean> {
+    return hasPermission("site", ["create:superadmin"]);
 }

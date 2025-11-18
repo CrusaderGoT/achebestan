@@ -4,6 +4,17 @@
 /**
  * Centralized export for all policies
  */
-export { BasePolicy, PermissionCheckError } from "./base-policy";
-export { CommentPolicy } from "./comment-policy";
-export { OrganizationPolicy } from "./organization-policy";
+export { hasPermission } from "./base-policy";
+
+export {
+    canCreateComment,
+    canDeleteComment,
+    canUpdateComment,
+} from "./comment-policy";
+
+export {
+    canCreateOrganization,
+    canCreateSuperAdmin,
+    canDeleteOrganization,
+    canManageOrganization,
+} from "./organization-policy";
