@@ -19,8 +19,10 @@ type ListOrganizationsProps = { id: string; slug: string } | null;
 
 export function ListOrganizations({
     activeOrg,
+    canDeleteOrg,
 }: {
     activeOrg: ListOrganizationsProps;
+    canDeleteOrg: boolean;
 }) {
     const { data: organizations } = authClient.useListOrganizations();
 
@@ -73,31 +75,33 @@ export function ListOrganizations({
                 </Group>
             </Radio.Card>
 
-            <ActionIcon
-                variant="outline"
-                color="red"
-                onClick={async () => {
-                    const { data, error } =
-                        await authClient.organization.delete({
-                            organizationId: org.id,
-                        });
+            {canDeleteOrg && (
+                <ActionIcon
+                    variant="outline"
+                    color="red"
+                    onClick={async () => {
+                        const { data, error } =
+                            await authClient.organization.delete({
+                                organizationId: org.id,
+                            });
 
-                    if (error) {
-                        notifications.show({
-                            message: `Failed To Delete Organization -> ${
-                                error.message || ""
-                            }`,
-                            color: "red",
-                        });
-                    } else {
-                        notifications.show({
-                            message: `${data.name.toUpperCase()} Organization Deleted Successfully`,
-                        });
-                    }
-                }}
-            >
-                <IconTrashFilled size={14} />
-            </ActionIcon>
+                        if (error) {
+                            notifications.show({
+                                message: `Failed To Delete Organization -> ${
+                                    error.message || ""
+                                }`,
+                                color: "red",
+                            });
+                        } else {
+                            notifications.show({
+                                message: `${data.name.toUpperCase()} Organization Deleted Successfully`,
+                            });
+                        }
+                    }}
+                >
+                    <IconTrashFilled size={14} />
+                </ActionIcon>
+            )}
         </Group>
     ));
 

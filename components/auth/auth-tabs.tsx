@@ -6,10 +6,12 @@ import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider
 import {
     canCreateOrganization,
     canCreateSuperAdmin,
+    canDeleteOrganization,
+    canManageOrganization,
 } from "@/lib/auth/policies";
 import { LoginFormState } from "@/types/user";
 import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
@@ -36,6 +38,8 @@ const AUTH_TABS = {
 
 type SitePermissionsType = {
     canCreateOrganization: boolean;
+    canDeleteOrganization: boolean;
+    canManageOrganization: boolean;
     canCreateSuperAdmin: boolean;
 };
 
@@ -48,10 +52,18 @@ export function AuthTabs({
 }: AuthTabsProps) {
     const { sessionUser, currentOrganization } = useCentralizedAuth();
 
-    const [permissions, setPermissions] = useState<SitePermissionsType>({
-        canCreateOrganization: false,
-        canCreateSuperAdmin: false,
-    });
+    const noPermissions: SitePermissionsType = useMemo(
+        () => ({
+            canCreateOrganization: false,
+            canCreateSuperAdmin: false,
+            canManageOrganization: false,
+            canDeleteOrganization: false,
+        }),
+        []
+    );
+
+    const [permissions, setPermissions] =
+        useState<SitePermissionsType>(noPermissions);
 
     //useEffect for assigning permission
     useEffect(() => {
@@ -61,19 +73,25 @@ export function AuthTabs({
                 currentOrganization.isPending ||
                 !sessionUser.data?.user.id
             ) {
-                return {
-                    canCreateOrganization: false,
-                    canCreateSuperAdmin: false,
-                };
+                return noPermissions;
             }
 
-            const [createOrganization, createSuperAdmin] = await Promise.all([
+            const [
+                createOrganization,
+                manageOrganization,
+                deleteOrganization,
+                createSuperAdmin,
+            ] = await Promise.all([
                 await canCreateOrganization(),
+                await canManageOrganization(),
+                await canDeleteOrganization(),
                 await canCreateSuperAdmin(),
             ]);
 
             return {
                 canCreateOrganization: createOrganization,
+                canManageOrganization: manageOrganization,
+                canDeleteOrganization: deleteOrganization,
                 canCreateSuperAdmin: createSuperAdmin,
             };
         }
@@ -82,6 +100,7 @@ export function AuthTabs({
         currentOrganization.data?.id,
         currentOrganization.isPending,
         sessionUser.data?.user.id,
+        noPermissions,
     ]);
 
     if (sessionUser.isPending || currentOrganization.isPending) {
@@ -191,6 +210,7 @@ export function AuthTabs({
                                       }
                                     : null
                             }
+                            canDeleteOrg={permissions.canDeleteOrganization}
                         />
                     </Tabs.Panel>
                 </>
@@ -201,7 +221,6 @@ export function AuthTabs({
                     <Text fw={700}>
                         This is the Authentication tab. Select a tab to start.{" "}
                         {sessionUser.data?.user.id}
-                        {JSON.stringify([permissions])}
                     </Text>
                 </Center>
             </Tabs.Panel>
