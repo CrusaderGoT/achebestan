@@ -9,7 +9,7 @@ import publicStyles from "@/styles/public.module.css";
 import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
-import { AuthenticationModal } from "../auth/auth-modal";
+import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { RatingForm } from "../forms/rating/rating-form";
 
 type StoryRatingProps = {
@@ -106,7 +106,7 @@ export function StoryRating({
                         />
                     )}
 
-                    <AuthenticationModal
+                    <AuthenticationDrawer
                         opened={openedAuthModal}
                         close={closeAuthModal}
                     />

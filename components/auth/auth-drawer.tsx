@@ -1,12 +1,12 @@
 "use client";
 
-import { Modal } from "@mantine/core";
+import { Drawer } from "@mantine/core";
 
 import { LoginFormState } from "@/types/user";
 import { useState } from "react";
 import { AuthTabs } from "./auth-tabs";
 
-export function AuthenticationModal({
+export function AuthenticationDrawer({
     opened,
     close,
 }: {
@@ -23,10 +23,11 @@ export function AuthenticationModal({
         signupFormState === "pending" || loginFormState === "pending";
 
     return (
-        <Modal
+        <Drawer
             opened={opened}
             onClose={close}
-            centered
+            position="top"
+            offset={70}
             withCloseButton={!isFormPending}
             closeOnClickOutside={!isFormPending}
             title="Authentication"
@@ -37,9 +38,8 @@ export function AuthenticationModal({
                 setLoginFormState={setLoginFormState}
                 signupFormState={signupFormState}
                 setSignupFormState={setSignupFormState}
-                closeModal={close}
+                closeDrawer={close}
             />
-            
-        </Modal>
+        </Drawer>
     );
 }

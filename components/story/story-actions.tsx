@@ -19,7 +19,7 @@ import {
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { PickedStoryProps } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
-import { AuthenticationModal } from "../auth/auth-modal";
+import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
 import { DeleteStory } from "./buttons/delete-story";
@@ -123,7 +123,7 @@ export function StoryActions({ ...props }: PickedStoryProps) {
 
             <PushNotificationToggle userExists={!!sessionUser.data?.user} />
 
-            <AuthenticationModal
+            <AuthenticationDrawer
                 opened={openedAuthModal}
                 close={closeAuthModal}
             />

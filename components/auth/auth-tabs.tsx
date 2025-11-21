@@ -10,16 +10,25 @@ import {
     canManageOrganization,
 } from "@/lib/auth/policies";
 import { LoginFormState } from "@/types/user";
-import { Center, Divider, Loader, Stack, Tabs, Text } from "@mantine/core";
+import {
+    Center,
+    Divider,
+    Loader,
+    ScrollArea,
+    Stack,
+    Tabs,
+    Text,
+} from "@mantine/core";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
 import { SuperAdminForm } from "../forms/user/super-admin-form";
 import { ListOrganizations } from "../organization/list-organizations";
+import { ManageMembers } from "../organization/manage-members";
 
 type AuthTabsProps = {
-    closeModal?: () => void;
+    closeDrawer?: () => void;
     loginFormState: LoginFormState;
     setLoginFormState: Dispatch<SetStateAction<LoginFormState>>;
 
@@ -33,7 +42,8 @@ const AUTH_TABS = {
     signup: "second",
     organization: "third",
     superadmin: "fourth",
-    organizations: "fifth",
+    listOrganizations: "fifth",
+    manageMembers: "sixth",
 };
 
 type SitePermissionsType = {
@@ -46,7 +56,7 @@ type SitePermissionsType = {
 export function AuthTabs({
     loginFormState,
     setLoginFormState,
-    closeModal,
+    closeDrawer: closeModal,
     signupFormState,
     setSignupFormState,
 }: AuthTabsProps) {
@@ -144,86 +154,98 @@ export function AuthTabs({
                             </Tabs.Tab>
                         )}
 
-                        <Tabs.Tab value={AUTH_TABS.organizations} color="blue">
+                        <Tabs.Tab
+                            value={AUTH_TABS.listOrganizations}
+                            color="blue"
+                        >
                             Select Organization
+                        </Tabs.Tab>
+
+                        <Tabs.Tab value={AUTH_TABS.manageMembers} color="blue">
+                            Manage Memeber
                         </Tabs.Tab>
                     </>
                 )}
             </Tabs.List>
 
-            {!sessionUser.data && (
-                <>
-                    <Tabs.Panel value={AUTH_TABS.login} pt="xs">
-                        <LoginForm
-                            closeModal={closeModal}
-                            redirectAfterSuccess={false}
-                            formState={loginFormState}
-                            setFormState={setLoginFormState}
-                        />
-                    </Tabs.Panel>
-
-                    <Tabs.Panel value={AUTH_TABS.signup} pt="xs">
-                        <Stack gap={"xs"}>
-                            <SignupForm
+            <ScrollArea p={"sm"}>
+                {!sessionUser.data && (
+                    <>
+                        <Tabs.Panel value={AUTH_TABS.login} pt="xs">
+                            <LoginForm
                                 closeModal={closeModal}
                                 redirectAfterSuccess={false}
-                                formState={signupFormState}
-                                setFormState={setSignupFormState}
+                                formState={loginFormState}
+                                setFormState={setLoginFormState}
                             />
+                        </Tabs.Panel>
 
-                            <Divider label="or" />
-                            <AnonymousSignin mx={"auto"} />
-                        </Stack>
-                    </Tabs.Panel>
-                </>
-            )}
-
-            {sessionUser.data && (
-                <>
-                    {/** only show organization tabs to superadmin*/}
-                    {permissions.canCreateOrganization && (
-                        <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
+                        <Tabs.Panel value={AUTH_TABS.signup} pt="xs">
                             <Stack gap={"xs"}>
-                                <OrganizationCreateForm
+                                <SignupForm
                                     closeModal={closeModal}
                                     redirectAfterSuccess={false}
                                     formState={signupFormState}
                                     setFormState={setSignupFormState}
                                 />
+
+                                <Divider label="or" />
+                                <AnonymousSignin mx={"auto"} />
                             </Stack>
                         </Tabs.Panel>
-                    )}
+                    </>
+                )}
 
-                    {permissions.canCreateSuperAdmin && (
-                        <Tabs.Panel value={AUTH_TABS.superadmin}>
-                            <SuperAdminForm session={sessionUser.data} />
+                {sessionUser.data && (
+                    <>
+                        {/** only show organization tabs to superadmin*/}
+                        {permissions.canCreateOrganization && (
+                            <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
+                                <Stack gap={"xs"}>
+                                    <OrganizationCreateForm
+                                        closeModal={closeModal}
+                                        redirectAfterSuccess={false}
+                                        formState={signupFormState}
+                                        setFormState={setSignupFormState}
+                                    />
+                                </Stack>
+                            </Tabs.Panel>
+                        )}
+
+                        {permissions.canCreateSuperAdmin && (
+                            <Tabs.Panel value={AUTH_TABS.superadmin}>
+                                <SuperAdminForm session={sessionUser.data} />
+                            </Tabs.Panel>
+                        )}
+
+                        <Tabs.Panel value={AUTH_TABS.listOrganizations}>
+                            <ListOrganizations
+                                activeOrg={
+                                    currentOrganization.data
+                                        ? {
+                                              id: currentOrganization.data.id,
+                                              slug: currentOrganization.data
+                                                  .slug,
+                                          }
+                                        : null
+                                }
+                                canDeleteOrg={permissions.canDeleteOrganization}
+                            />
                         </Tabs.Panel>
-                    )}
 
-                    <Tabs.Panel value={AUTH_TABS.organizations}>
-                        <ListOrganizations
-                            activeOrg={
-                                currentOrganization.data
-                                    ? {
-                                          id: currentOrganization.data.id,
-                                          slug: currentOrganization.data.slug,
-                                      }
-                                    : null
-                            }
-                            canDeleteOrg={permissions.canDeleteOrganization}
-                        />
-                    </Tabs.Panel>
-                </>
-            )}
+                        <Tabs.Panel value={AUTH_TABS.manageMembers}>
+                            <ManageMembers />
+                        </Tabs.Panel>
+                    </>
+                )}
 
-            <Tabs.Panel value={AUTH_TABS.default} pt="xs">
-                <Center>
-                    <Text fw={700}>
-                        This is the Authentication tab. Select a tab to start.{" "}
-                        {sessionUser.data?.user.id}
+                <Tabs.Panel value={AUTH_TABS.default} pt="sm">
+                    <Text fw={700} ta="center">
+                        This is the Authentication Drawer. Select a Tab to
+                        start. Current User: {sessionUser.data?.user.id}
                     </Text>
-                </Center>
-            </Tabs.Panel>
+                </Tabs.Panel>
+            </ScrollArea>
         </Tabs>
     );
 }

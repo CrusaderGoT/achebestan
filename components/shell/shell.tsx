@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthenticationModal } from "@/components/auth/auth-modal";
+import { AuthenticationDrawer } from "@/components/auth/auth-drawer";
 import { LogoutButton } from "@/components/auth/logout-btn";
 import { OpenAuthenticationModalButton } from "@/components/auth/open-auth-modal-btn";
 import { ModeToggle } from "@/components/shell/mode-toggle";
@@ -120,7 +120,7 @@ export function Shell({
             <AppShell.Main pos={"relative"}>
                 <OfflineIndicator />
                 {children}
-                <AuthenticationModal
+                <AuthenticationDrawer
                     opened={openedAuthModal}
                     close={closeAuthModal}
                 />

@@ -1,8 +1,4 @@
-// Permissions >> resource owner
-// WARNING! THEY ARE TO BE THOUGHT IN INSTANCES OF ALL ASPECT OF THAT RESOURCE.
-// e.g, A DELTE PERM WILL ALLOW HAVERS TO DO WHAT IT PERMITS IRREGARDLESS OF RESOURCE OWNER
-// ALWAYS ACCOUNT FOR INSTANCE A ROLE SHOULD NOT HAVE ORGANIZATION WIDE PERMISSION
-
+// lib/auth/permissions.ts
 import { createAccessControl } from "better-auth/plugins/access";
 import {
     adminAc,
@@ -16,15 +12,15 @@ import {
  */
 export const customPermissions = {
     ...defaultStatements,
+    site: ["create:organization", "create:superadmin", "update:role"],
+    comment: ["create:owner", "delete:owner", "update:owner", "delete:all"],
     story: [
         "create:owner",
         "delete:owner",
+        "update:owner",
         "suspend:all",
         "delete:all",
-        "update:owner",
     ],
-    comment: ["create:owner", "delete:owner", "update:owner", "delete:all"],
-    site: ["create:organization", "create:superadmin"],
 } as const;
 
 export const customAccessControl = createAccessControl(customPermissions);
@@ -47,19 +43,20 @@ export const writer = customAccessControl.newRole({
 
 export const admin = customAccessControl.newRole({
     ...adminAc.statements,
-    story: [...customPermissions.story],
+    story: ["suspend:all", "delete:all"],
     comment: [...customPermissions.comment],
 });
 
 export const owner = customAccessControl.newRole({
     ...ownerAc.statements,
-    story: [...customPermissions.story],
+    story: ["suspend:all", "delete:all"],
     comment: [...customPermissions.comment],
+    site: ["update:role"],
 });
 
 export const superAdmin = customAccessControl.newRole({
     ...ownerAc.statements,
-    story: [...customPermissions.story],
+    story: ["suspend:all", "delete:all"],
     comment: [...customPermissions.comment],
     site: [...customPermissions.site],
 });
