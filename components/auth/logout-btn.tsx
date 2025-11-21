@@ -5,7 +5,12 @@ import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconLogout } from "@tabler/icons-react";
 
-export function LogoutButton({ ...props }: ActionIconProps) {
+export function LogoutButton({
+    session,
+    ...props
+}: ActionIconProps & { session: ReturnType<typeof authClient.useSession> }) {
+    if (!session.data) return null;
+
     return (
         <Tooltip label="logout">
             <ActionIcon

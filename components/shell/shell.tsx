@@ -41,7 +41,7 @@ export function Shell({
                 collapsed: { desktop: true, mobile: !openedNavBar },
             }}
         >
-            <AppShell.Header zIndex={900}>
+            <AppShell.Header zIndex={300}>
                 <Group
                     className={shellStyles.headerGroup}
                     flex={1}
@@ -72,13 +72,11 @@ export function Shell({
                     </Group>
 
                     <Group gap={"xs"} justify="space-evenly" wrap="nowrap">
-                        {!sessionUser.isPending && (
-                            <OpenAuthenticationModalButton
-                                openModal={openAuthModal}
-                                disabled={openedAuthModal}
-                                color={sessionUser.data ? "green" : "red"}
-                            />
-                        )}
+                        <OpenAuthenticationModalButton
+                            openModal={openAuthModal}
+                            disabled={openedAuthModal}
+                            session={sessionUser}
+                        />
 
                         <SearchSpotlight />
 
@@ -89,6 +87,12 @@ export function Shell({
                             onClick={toggleNavbar}
                             hiddenFrom="lg"
                             size="sm"
+                        />
+
+                        <LogoutButton
+                            visibleFrom="lg"
+                            size={"sm"}
+                            session={sessionUser}
                         />
                     </Group>
                 </Group>
@@ -109,7 +113,7 @@ export function Shell({
                         labelPosition="left"
                     />
 
-                    {sessionUser.data && <LogoutButton size={"sm"} />}
+                    <LogoutButton size={"sm"} session={sessionUser} />
                 </Group>
             </AppShell.Navbar>
 
