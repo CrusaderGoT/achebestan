@@ -32,6 +32,8 @@ export function AuthenticationDrawer({
             closeOnClickOutside={!isFormPending}
             title="Authentication"
             p={"xs"}
+            size={"xl"}
+            overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
         >
             <AuthTabs
                 loginFormState={loginFormState}

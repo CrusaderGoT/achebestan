@@ -25,7 +25,7 @@ import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
 import { SuperAdminForm } from "../forms/user/super-admin-form";
 import { ListOrganizations } from "../organization/list-organizations";
-import { ManageMembers } from "../organization/manage-members";
+import { MembersTable } from "../organization/manage-members";
 
 type AuthTabsProps = {
     closeDrawer?: () => void;
@@ -234,7 +234,11 @@ export function AuthTabs({
                         </Tabs.Panel>
 
                         <Tabs.Panel value={AUTH_TABS.manageMembers}>
-                            <ManageMembers />
+                            <MembersTable
+                                canUpdateMembers={
+                                    permissions.canManageOrganization
+                                }
+                            />
                         </Tabs.Panel>
                     </>
                 )}
@@ -242,7 +246,8 @@ export function AuthTabs({
                 <Tabs.Panel value={AUTH_TABS.default} pt="sm">
                     <Text fw={700} ta="center">
                         This is the Authentication Drawer. Select a Tab to
-                        start. Current User: {sessionUser.data?.user.id}
+                        start. Current User:{" "}
+                        {currentOrganization.data?.members.map((m) => m.role)}
                     </Text>
                 </Tabs.Panel>
             </ScrollArea>

@@ -31,3 +31,10 @@ export async function canDeleteOrganization(): Promise<boolean> {
 export async function canCreateSuperAdmin(): Promise<boolean> {
     return hasPermission("site", ["create:superadmin"]);
 }
+
+/**
+ * Check if user can create super admin users
+ */
+export async function canMakeOwner(): Promise<boolean> {
+    return hasPermission("site", ["update:role"]);
+}

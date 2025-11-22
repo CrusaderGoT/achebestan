@@ -10,7 +10,6 @@ import {
     member,
     owner,
     superAdmin,
-    user as userRole,
     writer,
 } from "./permissions";
 
@@ -19,12 +18,8 @@ export const authClient = createAuthClient({
         adminClient({
             ac: customAccessControl,
             roles: {
-                writer,
-                user: userRole,
-                admin: adminRole,
-                owner,
                 superAdmin,
-                member,
+                admin: adminRole,
             },
         }),
         anonymousClient(),
@@ -32,10 +27,8 @@ export const authClient = createAuthClient({
             ac: customAccessControl,
             roles: {
                 writer,
-                user: userRole,
                 admin: adminRole,
                 owner,
-                superAdmin,
                 member,
             },
         }),

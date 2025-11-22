@@ -16,16 +16,15 @@ import {
     createOrganization,
     getUserRole as getUserRoles,
 } from "../actions/auth";
+import { ORG_ROLES } from "../constants";
 import {
     admin as adminRole,
     customAccessControl,
     member,
     owner,
     superAdmin,
-    user as userRole,
     writer,
 } from "./permissions";
-import { ORG_ROLES } from "../constants";
 
 import "dotenv/config";
 
@@ -59,14 +58,9 @@ export const auth = betterAuth({
         admin({
             ac: customAccessControl,
             roles: {
-                writer,
-                user: userRole,
-                admin: adminRole,
-                owner,
                 superAdmin,
-                member,
+                admin: adminRole,
             },
-            defaultRole: "user",
             adminRoles: ["admin", "superAdmin"],
             adminUserIds: adminIdList,
         }),
@@ -74,10 +68,8 @@ export const auth = betterAuth({
             ac: customAccessControl,
             roles: {
                 writer,
-                user: userRole,
                 admin: adminRole,
                 owner,
-                superAdmin,
                 member,
             },
             async allowUserToCreateOrganization(user) {

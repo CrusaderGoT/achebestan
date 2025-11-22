@@ -21,15 +21,18 @@ export const customPermissions = {
         "suspend:all",
         "delete:all",
     ],
+    user: [
+        "suspend:org",
+        "suspend:all",
+        "delete:all",
+        "update:org",
+        "update:all",
+    ],
 } as const;
 
 export const customAccessControl = createAccessControl(customPermissions);
 
 // ROLES
-
-export const user = customAccessControl.newRole({
-    comment: ["create:owner", "update:owner", "delete:owner"],
-});
 
 export const member = customAccessControl.newRole({
     ...memberAc.statements,
@@ -51,7 +54,6 @@ export const owner = customAccessControl.newRole({
     ...ownerAc.statements,
     story: ["suspend:all", "delete:all"],
     comment: [...customPermissions.comment],
-    site: ["update:role"],
 });
 
 export const superAdmin = customAccessControl.newRole({
