@@ -45,5 +45,3 @@ next-env.d.ts
 # Serwist
 public/sw*
 public/swe-worker*
-public/serwist/sw.js
-public/serwist/swe-worker-ab00d3c7d2d59769.js

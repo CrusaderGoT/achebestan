@@ -14,7 +14,7 @@ export function useServiceWorker() {
         if (typeof window !== "undefined" && "serviceWorker" in navigator) {
             // Register service worker
             navigator.serviceWorker
-                .register("/serwist/sw.js")
+                .register("/sw.js")
                 .then((reg) => {
                     setRegistration(reg);
                     console.log("[Client] Service Worker registered");

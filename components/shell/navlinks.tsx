@@ -12,19 +12,20 @@ import {
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 
-import publicStyles from "@/styles/public.module.css";
+import { canCreateStory } from "@/lib/auth/policies";
 import shellStyles from "@/styles/shell.module.css";
 import cx from "clsx";
+import { useEffect, useState } from "react";
 import { NavigationLink } from "../ui/route-navigation-progress";
 
-export const navlinkData = [
+const baseNavlinkData = [
     {
         icon: IconWriting,
         label: "New Story",
         href: "/story/new",
         description: "Write a new story",
         rightSection: <IconPlus size={16} stroke={1.5} />,
-        auth: true,
+        requiresCheck: "canCreateStory" as const,
     },
     {
         icon: IconBook,
@@ -54,9 +55,21 @@ type NavLinkProps = {
 
 export function NavLinks({ session, closeNavbar }: NavLinkProps) {
     const pathname = usePathname();
+    const [canCreate, setCanCreate] = useState<boolean | null>(null);
 
-    const items = navlinkData.map((item, index) => {
-        // do not show nav that require auth or role
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const result = await canCreateStory();
+            setCanCreate(result);
+        };
+        checkPermissions();
+    }, [session?.user?.id]);
+
+    const items = baseNavlinkData.map((item, index) => {
+        // Hide "New Story" if user cannot create stories
+        if (item.requiresCheck === "canCreateStory" && !canCreate) {
+            return null;
+        }
 
         return (
             <NavLink
@@ -68,9 +81,6 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
                 rightSection={item.rightSection}
                 leftSection={<item.icon size={16} stroke={1.5} />}
                 component={NavigationLink}
-                className={cx(
-                    item.auth && !session?.user.id && publicStyles.hide
-                )}
                 onClick={() => {
                     if (closeNavbar) {
                         closeNavbar();
@@ -80,22 +90,34 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
         );
     });
 
-    return items;
+    return <>{items}</>;
 }
 
 export function AltNavLinks({ session }: NavLinkProps) {
     const pathname = usePathname();
+    const [canCreate, setCanCreate] = useState<boolean | null>(null);
 
-    const items = navlinkData.map((item, index) => {
-        // do not show nwv that require auth or role
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const result = await canCreateStory();
+            setCanCreate(result);
+        };
+        checkPermissions();
+    }, [session?.user?.id]);
+
+    const items = baseNavlinkData.map((item, index) => {
+        // Hide "New Story" if user cannot create stories
+        if (item.requiresCheck === "canCreateStory" && !canCreate) {
+            return null;
+        }
+
         return (
             <UnstyledButton
                 key={index}
                 href={item.href}
                 className={cx(
                     shellStyles.mobileNavBar,
-                    pathname === item.href && shellStyles.mobileNavBarActive,
-                    item.auth && !session?.user.id && publicStyles.hide
+                    pathname === item.href && shellStyles.mobileNavBarActive
                 )}
                 component={NavigationLink}
             >
@@ -104,5 +126,5 @@ export function AltNavLinks({ session }: NavLinkProps) {
         );
     });
 
-    return items;
+    return <>{items}</>;
 }
