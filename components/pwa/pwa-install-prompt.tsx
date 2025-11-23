@@ -3,7 +3,7 @@
 import { Button, Card, CloseButton, Group, Modal, Text } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconDownload } from "@tabler/icons-react";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -12,9 +12,11 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PWAInstallPrompt() {
-    const [declined, setDeclined] = useLocalStorage<Dayjs | null>({
+    const [declined, setDeclined] = useLocalStorage<string | null>({
         key: "lastPwaInstallPromptDecline",
         defaultValue: null,
+        serialize: (value) => value || "",
+        deserialize: (value) => value || null,
     });
 
     const [deferredPrompt, setDeferredPrompt] =
@@ -26,8 +28,11 @@ export function PWAInstallPrompt() {
         const handler = (e: Event) => {
             e.preventDefault();
 
-            // check if it has not declined before or it been more than 7 days since last decline
-            if (!declined || declined.diff(dayjs(), "days") > 7) {
+            // check if it has not declined before or it's been more than 7 days since last decline
+            const shouldShow =
+                !declined || dayjs().diff(dayjs(declined), "days") >= 7;
+
+            if (shouldShow) {
                 setDeferredPrompt(e as BeforeInstallPromptEvent);
                 setShowPrompt(true);
             }
@@ -49,9 +54,13 @@ export function PWAInstallPrompt() {
         if (outcome === "accepted") {
             setDeferredPrompt(null);
             setShowPrompt(false);
-        } else if (outcome === "dismissed") {
-            setDeclined(dayjs());
         }
+    };
+
+    const handleDecline = () => {
+        setDeclined(dayjs().toISOString());
+        setShowPrompt(false);
+        setDeferredPrompt(null);
     };
 
     if (!showPrompt) return null;
@@ -59,10 +68,7 @@ export function PWAInstallPrompt() {
     return (
         <Modal
             opened={showPrompt}
-            onClose={() => {
-                setShowPrompt(false);
-                setDeferredPrompt(null);
-            }}
+            onClose={handleDecline}
             centered
             withCloseButton={false}
         >
@@ -71,7 +77,7 @@ export function PWAInstallPrompt() {
                     <Text size="sm" fw={500}>
                         Install App
                     </Text>
-                    <CloseButton onClick={() => setShowPrompt(false)} />
+                    <CloseButton onClick={handleDecline} />
                 </Group>
                 <Text size="sm" c="dimmed" mb="md">
                     Install this app on your device for a better experience and
