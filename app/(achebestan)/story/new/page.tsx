@@ -1,5 +1,6 @@
 import { CreateStoryForm } from "@/components/forms/story/create-story-form";
 import { auth } from "@/lib/auth/auth";
+import { canCreateStory } from "@/lib/auth/policies";
 import { headers } from "next/headers";
 
 import { notFound } from "next/navigation";
@@ -9,7 +10,9 @@ export default async function BookFormPage() {
         headers: await headers(),
     });
 
-    if (!session?.session.id) notFound();
+    const canCreate = await canCreateStory();
+
+    if (!session?.session.id || !canCreate) notFound();
 
     return <CreateStoryForm />;
 }

@@ -17,8 +17,10 @@ import {
 } from "@tabler/icons-react";
 
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { canCreateComment } from "@/lib/auth/policies";
 import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
@@ -35,21 +37,36 @@ export function StoryActions({
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
         useDisclosure(false);
 
-    const mounted = useMounted();
+    const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
+        useDisclosure(false);
+
+    const [canComment, setCanComment] = useState(false);
+
+    useEffect(() => {
+        async function checkCanComment() {
+            if (!sessionUser.data?.user.id) {
+                return false;
+            }
+
+            const can = await canCreateComment();
+
+            return can;
+        }
+        checkCanComment().then(setCanComment);
+    }, [sessionUser.data?.user.id]);
 
     const [
         openedCommentForm,
         { toggle: toggleCommentForm, open: openCommentForm },
     ] = useDisclosure(false);
 
-    const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
-        useDisclosure(false);
-
     useIsomorphicEffect(() => {
-        if (!!sessionUser.data?.user.id) {
+        if (!!sessionUser.data?.user && canComment) {
             openCommentForm();
         }
-    }, [sessionUser.data?.user.id]);
+    }, [sessionUser.data?.user, canComment]);
+
+    const mounted = useMounted();
 
     if (!mounted) return null;
 
@@ -65,7 +82,7 @@ export function StoryActions({
                         />
                     )}
 
-                    {!sessionUser.isPending && (
+                    {!sessionUser.isPending && canComment && (
                         <ActionIcon
                             onClick={() => {
                                 if (!sessionUser.data?.user.id) {
@@ -106,7 +123,7 @@ export function StoryActions({
                 </Group>
 
                 <Transition
-                    mounted={openedCommentForm}
+                    mounted={openedCommentForm && canComment}
                     transition="scale-y"
                     duration={400}
                     timingFunction="ease-in-out"
