@@ -1,13 +1,12 @@
 "use client";
 
 import { UpdateStoryTitle } from "@/components/forms/story/update-story-form-context";
-import { StoryUpdateType } from "@/types/story";
+import { StoryPermissionsType, StoryUpdateType } from "@/types/story";
 import { ActionIcon, Box, Group, Title } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { IconCheck, IconPencilMinus } from "@tabler/icons-react";
 import { useState } from "react";
 
-import { authClient } from "@/lib/auth/auth-client";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import cx from "clsx";
@@ -18,8 +17,7 @@ type StoryTitleType = {
     isPending: boolean;
     toggleTitleField: () => void;
     form: UseFormReturnType<StoryUpdateType>;
-    session: ReturnType<typeof authClient.useSession>;
-    storyAuthorId: string;
+    permissions?: StoryPermissionsType;
 };
 
 export function StoryTitle({
@@ -28,8 +26,7 @@ export function StoryTitle({
     isPending,
     toggleTitleField,
     form,
-    session,
-    storyAuthorId,
+    permissions,
 }: StoryTitleType) {
     const [dirty, setDirty] = useState(false);
 
@@ -59,7 +56,7 @@ export function StoryTitle({
 
             <Group
                 className={cx(
-                    storyAuthorId !== session.data?.user.id && publicStyles.hide
+                    !permissions?.canUpdateStory && publicStyles.hide
                 )}
             >
                 <ActionIcon

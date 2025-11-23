@@ -6,9 +6,11 @@ import {
     forceRenderBookmarkIndicators,
     shouldReRenderBookmarks,
 } from "@/lib/utils/bookmark-renderer";
-import { formatEstimatedReadingTime } from "@/lib/utils/story/story-utils";
-import { estimateReadingTime } from "@/lib/utils/story/story-utils";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
+import {
+    estimateReadingTime,
+    formatEstimatedReadingTime,
+} from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
 import { StoryContentType } from "@/types/story";
@@ -36,6 +38,7 @@ export function StoryContent({
     session,
     storyAuthorId,
     storyISBN,
+    permissions,
 }: StoryContentType) {
     const [dirty, setDirty] = useState(false);
 
@@ -150,14 +153,9 @@ export function StoryContent({
         scrollAreaTocRef
     );
 
-    const isAuthor = useMemo(
-        () => storyAuthorId === session.data?.user.id,
-        [storyAuthorId, session.data?.user.id]
-    );
-
     const shouldShowEditContent = useMemo(
-        () => openedContentField && isAuthor,
-        [openedContentField, isAuthor]
+        () => openedContentField && permissions?.canUpdateStory,
+        [openedContentField, permissions]
     );
 
     return (

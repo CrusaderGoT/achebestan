@@ -17,7 +17,7 @@ import {
 } from "@tabler/icons-react";
 
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import { PickedStoryProps } from "@/types/story";
+import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
@@ -26,13 +26,16 @@ import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";
 import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 
-export function StoryActions({ ...props }: PickedStoryProps) {
+export function StoryActions({
+    permissions,
+    ...props
+}: PickedStoryProps & { permissions?: StoryPermissionsType }) {
+    const { sessionUser } = useCentralizedAuth();
+
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
         useDisclosure(false);
 
     const mounted = useMounted();
-
-    const { sessionUser } = useCentralizedAuth();
 
     const [
         openedCommentForm,
@@ -97,7 +100,9 @@ export function StoryActions({ ...props }: PickedStoryProps) {
                         closeStoryShare={closeStoryShare}
                     />
 
-                    {!sessionUser.isPending && <DeleteStory {...props} />}
+                    {!sessionUser.isPending && permissions?.canDeleteStory && (
+                        <DeleteStory {...props} />
+                    )}
                 </Group>
 
                 <Transition

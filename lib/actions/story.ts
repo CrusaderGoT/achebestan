@@ -11,8 +11,14 @@ import { handleFileUpload } from "../utils/image-upload";
 import z from "zod/v4";
 
 import { SearchOptions } from "@/types/story";
+import { UserSelectType } from "@/types/user";
 import { revalidatePath } from "next/cache";
-import { redirect, unauthorized } from "next/navigation";
+import { redirect } from "next/navigation";
+import {
+    canCreateStory,
+    canDeleteStory,
+    canUpdateStory,
+} from "../auth/policies/story-policy";
 import { sendNotificationToAllSubscribers } from "../utils/pwa/send-to-subscriber";
 import { sanitizeHTML } from "../utils/sanitize-html";
 
@@ -22,8 +28,13 @@ export const createStoryAction = authActionClient
             flattenValidationErrors(ve).fieldErrors,
     })
     .action(async ({ parsedInput: inputData, ctx }) => {
-        // insert new story
+        const canCreate = await canCreateStory();
 
+        if (!canCreate) {
+            throw new Error("You Are Not Authorized To Create Stories!");
+        }
+
+        // insert new story
         const [createdStory] = await db
             .insert(story)
             .values({
@@ -109,8 +120,16 @@ export const updateStoryAction = authActionClient
             bindArgsParsedInputs: [isbn, authorId],
             ctx,
         }) => {
-            if (ctx.user.id !== authorId) {
-                unauthorized();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { image, ...updateDataWithoutImage } = updateData;
+
+            const canUpdate = await canUpdateStory(ctx.user as UserSelectType, {
+                authorId: authorId,
+                ...updateDataWithoutImage,
+            });
+
+            if (!canUpdate) {
+                throw new Error("You Are Not Authorized To Edit This Story!");
             }
 
             let imageUrl: string | undefined = undefined;
@@ -200,8 +219,13 @@ export const deleteStoryAction = authActionClient
             parsedInput: { isbn },
             bindArgsParsedInputs: [authorId],
         }) => {
-            if (ctx.user.id !== authorId) {
-                throw unauthorized();
+            const canDelete = await canDeleteStory(ctx.user as UserSelectType, {
+                authorId: authorId,
+                isbn: isbn,
+            });
+
+            if (!canDelete) {
+                throw new Error("You Are Not Authorized To Delete This Story!");
             }
 
             const [deletedStory] = await db

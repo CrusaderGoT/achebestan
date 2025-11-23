@@ -1,13 +1,14 @@
 import { authClient } from "@/lib/auth/auth-client";
+import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     favouriteInserSchema,
     storyInsertSchema,
     storySelectSchema,
     storyUpdateSchema,
 } from "@/zod-schemas/story";
-import { UserSelectType } from "@/zod-schemas/user";
 import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod/v4";
+import { UserSelectType } from "./user";
 
 export interface StoryBookProps extends StorySelectType {
     author: UserSelectType;
@@ -42,5 +43,23 @@ export type StoryContentType = {
     session: ReturnType<typeof authClient.useSession>;
     storyAuthorId: string;
     storyISBN: string;
+    permissions?: StoryPermissionsType;
 };
 
+export interface StoryProps extends StorySelectType {
+    author: UserSelectType;
+    permissions?: StoryPermissionsType;
+}
+
+export type StoryPermissionsType = {
+    canCreateStory: boolean;
+    canUpdateStory: boolean;
+    canDeleteStory: boolean;
+    canSuspendStory: boolean;
+};
+
+export type StoryRatingProps = {
+    ratings: RatingSelectType[];
+    isbn: string;
+    userRating?: UserRatingWithComment;
+};

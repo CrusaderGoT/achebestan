@@ -4,7 +4,7 @@ import {
     CommentInteractionHandlers,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
-    DrawerState,
+    CommentDrawerState,
 } from "@/types/comment";
 import { useTree } from "@mantine/core";
 import { useFocusTrap, useStateHistory } from "@mantine/hooks";
@@ -44,7 +44,7 @@ export function useCommentInteractions(): CommentInteractionHandlers {
 
 export function useDrawerState(
     commentsNodeData: CommentsToTreeNodeDataType
-): DrawerState {
+): CommentDrawerState {
     const [drawerOpened, setDrawerOpened] = useState(false);
 
     const [activeDrawerCommentId, activeDrawerHandlers, drawerHistory] =

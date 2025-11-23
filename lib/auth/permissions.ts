@@ -32,7 +32,7 @@ export const customPermissions = {
 
 export const customAccessControl = createAccessControl(customPermissions);
 
-// ROLES
+// ORG ROLES
 
 export const member = customAccessControl.newRole({
     ...memberAc.statements,
@@ -46,7 +46,7 @@ export const writer = customAccessControl.newRole({
 
 export const admin = customAccessControl.newRole({
     ...adminAc.statements,
-    story: ["suspend:all", "delete:all"],
+    story: ["suspend:all"],
     comment: [...customPermissions.comment],
 });
 
@@ -55,6 +55,8 @@ export const owner = customAccessControl.newRole({
     story: ["suspend:all", "delete:all"],
     comment: [...customPermissions.comment],
 });
+
+// SITE/PLATFORM-WIDE ROLES (admin is here also)
 
 export const superAdmin = customAccessControl.newRole({
     ...ownerAc.statements,

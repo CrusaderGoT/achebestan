@@ -247,7 +247,7 @@ export function AuthTabs({
                     <Text fw={700} ta="center">
                         This is the Authentication Drawer. Select a Tab to
                         start. Current User:{" "}
-                        {currentOrganization.data?.members.map((m) => m.role)}
+                        {sessionUser.data?.user.name}
                     </Text>
                 </Tabs.Panel>
             </ScrollArea>

@@ -1,4 +1,4 @@
-import { StoryProps } from "@/components/story/story-page";
+import { StoryProps } from "@/types/story";
 import { BASE_URL } from "@/lib/constants";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";

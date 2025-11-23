@@ -1,6 +1,5 @@
 "use client";
 
-import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
@@ -11,16 +10,11 @@ import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { RatingForm } from "../forms/rating/rating-form";
-
-type StoryRatingProps = {
-    ratings: RatingSelectType[];
-    storyISBN: string;
-    userRating?: UserRatingWithComment;
-};
+import { StoryRatingProps } from "@/types/story";
 
 export function StoryRating({
     ratings,
-    storyISBN,
+    isbn: storyISBN,
     userRating,
 }: StoryRatingProps) {
     const [opened, { close, toggle }] = useDisclosure(false);

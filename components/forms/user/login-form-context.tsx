@@ -2,7 +2,7 @@
 
 import { createFormContext } from "@mantine/form";
 
-import { LoginSchemaType } from "@/zod-schemas/user";
+import { LoginSchemaType } from "@/types/user";
 import { PasswordInput, Stack, TextInput } from "@mantine/core";
 import { IconAt, IconLockPassword } from "@tabler/icons-react";
 

@@ -1,246 +1,122 @@
 "use client";
 
-import { StorySelectType, StoryUpdateType } from "@/types/story";
-import { storyUpdateSchema } from "@/zod-schemas/story";
-import { UserSelectType } from "@/zod-schemas/user";
-
-import { ActionIcon, Box, Card, Stack } from "@mantine/core";
-
-import publicStyles from "@/styles/public.module.css";
-import storypageStyles from "@/styles/story-page.module.css";
-import cx from "clsx";
-
-import { StoryContent } from "@/components/story/story-content";
-import { StoryImage } from "@/components/story/story-image";
-import { StoryImageField } from "@/components/story/story-image-field";
-import { StorySubtitle } from "@/components/story/story-subtitle";
-import { StoryTitle } from "@/components/story/story-title";
-
-import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
-
-import { useDisclosure } from "@mantine/hooks";
-import { IconPhotoEdit } from "@tabler/icons-react";
-import { zod4Resolver } from "mantine-form-zod-resolver";
-
-import {
-    UpdateStoryFormProvider,
-    useUpdateStoryForm,
-} from "@/components/forms/story/update-story-form-context";
-
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import { useState } from "react";
+import {
+    canCreateStory,
+    canDeleteStory,
+    canSuspendStory,
+    canUpdateStory,
+} from "@/lib/auth/policies";
+import { CommentTreeProps } from "@/types/comment";
+import { StoryPermissionsType, StoryProps } from "@/types/story";
+import { UserSelectType } from "@/types/user";
+import { UserRatingWithComment } from "@/zod-schemas/rating";
+import { Center, Divider, Stack, Text } from "@mantine/core";
+import { useEffect, useMemo, useState } from "react";
+import { CommentTree } from "../comment/comment-tree";
+import { Story } from "./story";
+import { StoryActions } from "./story-actions";
+import { StoryRating } from "./story-rating";
+import { StoryRatingProps } from "@/types/story";
 
-export interface StoryProps extends StorySelectType {
-    author: UserSelectType;
-}
+export type StoryPageClientProps = {
+    story: StoryProps & StoryRatingProps;
+    comments?: CommentTreeProps[];
+    userRating?: UserRatingWithComment;
+};
 
-export function Story({
-    image,
-    author,
-    title,
-    subtitle,
-    content,
-    created,
-    edited,
-    isbn,
-    id,
-    bookId,
-    blurb,
-}: StoryProps) {
+export function StoryPageClient({
+    story,
+    comments,
+    userRating,
+}: StoryPageClientProps) {
     const { sessionUser } = useCentralizedAuth();
 
-    const [story, setStory] = useState<StorySelectType>({
-        image: image,
-        title: title,
-        subtitle: subtitle,
-        content: content,
-        created: created,
-        edited: edited,
-        isbn: isbn,
-        id: id,
-        bookId: bookId,
-        authorId: author.id,
-        blurb: blurb,
-    });
+    const noPermissions: StoryPermissionsType = useMemo(
+        () => ({
+            canDeleteStory: false,
+            canUpdateStory: false,
+            canCreateStory: false,
+            canSuspendStory: false,
+        }),
+        []
+    );
 
-    const [
-        openedImageField,
-        { toggle: toggleImageField, close: closeImageField },
-    ] = useDisclosure(false);
+    const [permissions, setPermissions] =
+        useState<StoryPermissionsType>(noPermissions);
 
-    const [
-        openedTitleField,
-        { toggle: toggleTitleField, close: closeTitleField },
-    ] = useDisclosure(false);
-
-    const [
-        openedSubtitleField,
-        { toggle: toggleSubtitleField, close: closeSubtitleField },
-    ] = useDisclosure(false);
-
-    const [
-        openedContentField,
-        { toggle: toggleContentField, close: closeContentField },
-    ] = useDisclosure(false);
-
-    const form = useUpdateStoryForm({
-        initialValues: {
-            title: title,
-            subtitle: subtitle,
-            content: content,
-            image: [],
-        },
-        mode: "uncontrolled",
-        cascadeUpdates: true,
-        validate: zod4Resolver(storyUpdateSchema),
-    });
-
-    const { executeAsync, isPending } = useUpdateStory(isbn, author.id);
-
-    async function handleSubmit(data: StoryUpdateType) {
-        // check if changed values or if image is present
-        if (form.isDirty() || form.values.image.length > 0) {
-            const submitData: StoryUpdateType = { image: [] };
-
-            if (form.isDirty("bookId")) submitData.bookId = data.bookId;
-
-            // make sure non empty string
-            if (form.isDirty("title") && !!form.getValues().title?.trim())
-                submitData.title = data.title;
-
-            if (form.isDirty("subtitle")) submitData.subtitle = data.subtitle;
-
-            // if image exists in form submission
-            if (form.values.image.length > 0) submitData.image = data.image;
-
-            // make sure non empty tag; tag with space will submit
-            if (form.isDirty("content") && !!form.getValues().content?.trim())
-                submitData.content = data.content;
-
-            // check if any data
-            const excludedFields: Array<keyof StoryUpdateType> = [
-                "subtitle",
-                "bookId",
-            ];
-
-            const isNotEmpty = (
-                Object.keys(submitData) as Array<keyof StoryUpdateType>
-            ).some((key) => {
-                if (excludedFields.includes(key)) {
-                    return true;
-                } else if (key === "image") {
-                    return submitData[key].length > 0;
-                } else {
-                    return Boolean(submitData[key]);
-                }
-            });
-
-            if (isNotEmpty) {
-                const updatedStory = await executeAsync({
-                    ...submitData,
-                });
-
-                if (updatedStory.data) {
-                    // reset neccessary form status;
-                    form.setInitialValues(submitData);
-                    form.setValues(submitData);
-                    form.resetDirty();
-
-                    // clear and close dropzone
-                    form.setFieldValue("image", []);
-                    closeImageField();
-
-                    // set story reactively
-                    setStory(updatedStory.data);
-                }
+    useEffect(() => {
+        async function checkStoryPermissions(): Promise<StoryPermissionsType> {
+            if (!sessionUser.data?.user.id) {
+                return noPermissions;
             }
-        }
 
-        // close all update input
-        closeTitleField();
-        closeSubtitleField();
-        closeContentField();
-    }
+            const storyPermArgs = {
+                id: story.id,
+                authorId: story.authorId,
+            };
+
+            const [canDelete, canUpdate, canCreate, canSuspend] =
+                await Promise.all([
+                    await canDeleteStory(
+                        sessionUser.data?.user as UserSelectType,
+                        storyPermArgs
+                    ),
+                    await canUpdateStory(
+                        sessionUser.data?.user as UserSelectType,
+                        storyPermArgs
+                    ),
+                    await canCreateStory(),
+                    await canSuspendStory(),
+                ]);
+
+            return {
+                canDeleteStory: canDelete,
+                canUpdateStory: canUpdate,
+                canCreateStory: canCreate,
+                canSuspendStory: canSuspend,
+            };
+        }
+        checkStoryPermissions().then(setPermissions);
+    }, [noPermissions, story.authorId, story.id, sessionUser.data?.user]);
 
     return (
-        <UpdateStoryFormProvider form={form}>
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-                <Card className={storypageStyles.storyCard} withBorder>
-                    <Card.Section
-                        className={storypageStyles.storyImageZoneSection}
-                    >
-                        {openedImageField ? (
-                            <StoryImageField
-                                openedImageField={openedImageField}
-                                form={form}
-                                isPending={isPending}
-                                session={sessionUser}
-                                storyAuthorId={story.authorId}
-                            />
-                        ) : (
-                            <StoryImage
-                                image={story.image}
-                                title={story.title}
-                                created={story.created}
-                                edited={story.edited}
-                                author={author}
-                                openedImageField={openedImageField}
-                            />
-                        )}
+        <Stack>
+            <Story
+                image={story.image}
+                title={story.title}
+                author={story.author}
+                content={story.content}
+                created={story.created}
+                edited={story.edited}
+                id={story.id}
+                isbn={story.isbn}
+                authorId={story.authorId}
+                subtitle={story.subtitle}
+                bookId={story.bookId}
+                blurb={story.blurb}
+                permissions={permissions}
+            />
 
-                        <ActionIcon
-                            onClick={() => {
-                                toggleImageField();
-                            }}
-                            title="Update Story Image"
-                            className={cx(
-                                storypageStyles.storyImageFieldToggle,
-                                story.authorId !== sessionUser.data?.user.id &&
-                                    publicStyles.hide
-                            )}
-                            color="yellow"
-                            variant="light"
-                            disabled={isPending}
-                        >
-                            <IconPhotoEdit />
-                        </ActionIcon>
-                    </Card.Section>
+            <StoryRating
+                ratings={story.ratings}
+                isbn={story.isbn}
+                userRating={userRating}
+            />
 
-                    <Stack mt="md">
-                        <Box>
-                            <StoryTitle
-                                title={story.title}
-                                toggleTitleField={toggleTitleField}
-                                openedTitleField={openedTitleField}
-                                isPending={isPending}
-                                form={form}
-                                session={sessionUser}
-                                storyAuthorId={story.authorId}
-                            />
+            <StoryActions {...story} />
 
-                            <StorySubtitle
-                                subtitle={story.subtitle}
-                                toggleSubtitleField={toggleSubtitleField}
-                                openedSubtitleField={openedSubtitleField}
-                                isPending={isPending}
-                                form={form}
-                                session={sessionUser}
-                                storyAuthorId={story.authorId}
-                            />
-                        </Box>
+            <Divider
+                label={comments && comments.length > 0 ? "comments" : ""}
+            />
 
-                        <StoryContent
-                            content={story.content}
-                            toggleContentField={toggleContentField}
-                            openedContentField={openedContentField}
-                            form={form}
-                            session={sessionUser}
-                            storyAuthorId={story.authorId}
-                            storyISBN={story.isbn}
-                        />
-                    </Stack>
-                </Card>
-            </form>
-        </UpdateStoryFormProvider>
+            {comments && comments.length > 0 ? (
+                <CommentTree comments={comments} />
+            ) : (
+                <Center>
+                    <Text c={"dimmed"}>No Comments Yet...</Text>
+                </Center>
+            )}
+        </Stack>
     );
 }

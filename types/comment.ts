@@ -1,7 +1,7 @@
-import { CommentSelectType } from "@/zod-schemas/comment";
+import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
-import { UserSelectType } from "@/zod-schemas/user";
+import { UserSelectType } from "./user";
 import {
     MantineSize,
     RenderTreeNodePayload,
@@ -19,7 +19,7 @@ export type CommentTreeProps = CommentSelectType & {
 
 export type CommentsToTreeNodeDataType = (TreeNodeData & CommentTreeProps)[]; // Hook for drawer management
 
-export interface DrawerState {
+export interface CommentDrawerState {
     drawerOpened: boolean;
     drawerCommentData: CommentsToTreeNodeDataType;
     drawerCommentMap: Map<string, CommentTreeProps>;
@@ -33,7 +33,7 @@ export interface DrawerState {
 }
 
 // Configuration
-export type DRAWER_CONFIG_TYPE = {
+export type COMMENT_DRAWER_CONFIG_TYPE = {
     drawerLevel: number;
     drawerSize: MantineSize;
     drawerPosition: "left" | "right" | "bottom";
@@ -66,3 +66,7 @@ export type CommentPermissionsType = {
     canCreate: false;
     canView: false;
 };
+
+export type CommentType =
+    | Partial<CommentSelectType>
+    | Partial<CommentUpdateType>;

@@ -24,7 +24,7 @@ import {
     CommentRenderContext,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
-    DRAWER_CONFIG_TYPE,
+    COMMENT_DRAWER_CONFIG_TYPE,
 } from "@/types/comment";
 
 import {
@@ -44,7 +44,7 @@ import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider
 import { useAutoExpandComments } from "@/lib/hooks/comment/auto-expand-comments";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 
-export const DRAWER_CONFIG: DRAWER_CONFIG_TYPE = {
+export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
     drawerLevel: 4,
     drawerSize: "sm" as MantineSize,
     drawerPosition: "bottom" as const,

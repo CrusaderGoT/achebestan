@@ -3,15 +3,14 @@
 import { db } from "@/drizzle";
 import { comment } from "@/drizzle/schemas/comment";
 import { reaction } from "@/drizzle/schemas/reaction";
+import { UserSelectType } from "@/types/user";
 import {
     commentInsertSchema,
     commentUpdateSchema,
 } from "@/zod-schemas/comment";
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
-import { UserSelectType } from "@/zod-schemas/user";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { unauthorized } from "next/navigation";
 import z from "zod/v4";
 import {
     canCreateComment,
@@ -25,7 +24,9 @@ export const createCommentAction = authActionClient
     .action(async ({ parsedInput, ctx }) => {
         const canCreate = await canCreateComment();
 
-        if (!canCreate) throw unauthorized;
+        if (!canCreate) {
+            throw new Error("You Cannot Make Comments!");
+        }
 
         const [newComment] = await db
             .insert(comment)
@@ -61,7 +62,9 @@ export const updateCommentAction = authActionClient
             parsedInput
         );
 
-        if (!canUpdate) throw unauthorized();
+        if (!canUpdate) {
+            throw new Error("You Cannot Edit This Comment!");
+        }
 
         // update the text
         const [updatedComment] = await db
@@ -99,7 +102,9 @@ export const deleteCommentAction = authActionClient
             parsedInput
         );
 
-        if (!canDelete) throw unauthorized();
+        if (!canDelete) {
+            throw new Error("You Are Not Authorized To Delete This Comment!");
+        }
 
         // delete comment by marking it as deleted, to preserve child comments
         const [deletedComment] = await db

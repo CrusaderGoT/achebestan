@@ -16,9 +16,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconTrashX } from "@tabler/icons-react";
 
 import publicStyles from "@/styles/public.module.css";
-import cx from "clsx";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { PickedStoryProps } from "@/types/story";
 import { redirect } from "next/navigation";
 
@@ -27,8 +25,6 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
         useDisclosure(false);
 
     const { executeAsync, isPending, hasSucceeded } = useDeleteStory(authorId);
-
-    const { sessionUser } = useCentralizedAuth();
 
     return (
         <>
@@ -79,14 +75,7 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
                 </Modal.Body>
             </Modal>
 
-            <ActionIcon
-                onClick={openDeleteModal}
-                variant="subtle"
-                color="red"
-                className={cx(
-                    sessionUser.data?.user.id !== authorId && publicStyles.hide
-                )}
-            >
+            <ActionIcon onClick={openDeleteModal} variant="subtle" color="red">
                 <Group>
                     <Text visibleFrom="sm" fw={500}>
                         Delete

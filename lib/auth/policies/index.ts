@@ -9,12 +9,18 @@ export { hasPermission } from "./base-policy";
 export {
     canCreateComment,
     canDeleteComment,
-    canUpdateComment,
+    canUpdateComment
 } from "./comment-policy";
 
 export {
     canCreateOrganization,
     canCreateSuperAdmin,
     canDeleteOrganization,
-    canManageOrganization,
+    canManageOrganization
 } from "./organization-policy";
+
+export {
+    canCreateStory,
+    canDeleteStory, canSuspendStory, canUpdateStory
+} from "./story-policy";
+

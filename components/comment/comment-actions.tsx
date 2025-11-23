@@ -6,9 +6,9 @@ import {
     canDeleteComment,
     canUpdateComment,
 } from "@/lib/auth/policies";
-import { CommentType } from "@/lib/auth/policies/comment-policy";
 import { useDeleteComment } from "@/lib/hooks/comment/comment-action-hooks";
-import { UserSelectType } from "@/zod-schemas/user";
+import { CommentType } from "@/types/comment";
+import { UserSelectType } from "@/types/user";
 import { Button, Group } from "@mantine/core";
 import { IconEdit, IconMessageReply, IconTrashX } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";

@@ -1,7 +1,4 @@
-import { CommentTree } from "@/components/comment/comment-tree";
-import { StoryActions } from "@/components/story/story-actions";
-import { Story } from "@/components/story/story-page";
-import { StoryRating } from "@/components/story/story-rating";
+import { StoryPageClient } from "@/components/story/story-page";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
 import { readStory } from "@/lib/actions/story";
@@ -9,7 +6,6 @@ import { auth } from "@/lib/auth/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";
-import { Center, Divider, Stack, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { Metadata } from "next";
@@ -75,42 +71,11 @@ export default async function StoryPage({
                 } (Achebestan)`}
             />
 
-            <Stack>
-                <Story
-                    image={story.image}
-                    title={story.title}
-                    author={story.author}
-                    content={story.content}
-                    created={story.created}
-                    edited={story.edited}
-                    id={story.id}
-                    isbn={story.isbn}
-                    authorId={story.authorId}
-                    subtitle={story.subtitle}
-                    bookId={story.bookId}
-                    blurb={story.blurb}
-                />
-
-                <StoryRating
-                    ratings={story.ratings}
-                    storyISBN={story.isbn}
-                    userRating={userRating}
-                />
-
-                <StoryActions {...story} />
-
-                <Divider
-                    label={comments && comments.length > 0 ? "comments" : ""}
-                />
-
-                {comments && comments.length > 0 ? (
-                    <CommentTree comments={comments} />
-                ) : (
-                    <Center>
-                        <Text c={"dimmed"}>No Comments Yet...</Text>
-                    </Center>
-                )}
-            </Stack>
+            <StoryPageClient
+                story={story}
+                comments={comments}
+                userRating={userRating}
+            />
         </>
     );
 }
