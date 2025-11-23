@@ -17,7 +17,7 @@ export {
     canCreateSuperAdmin,
     canDeleteOrganization,
     canManageOrganization
-} from "./organization-policy";
+} from "./site-policy";
 
 export {
     canCreateStory,

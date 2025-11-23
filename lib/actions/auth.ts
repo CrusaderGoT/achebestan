@@ -4,7 +4,7 @@ import { db } from "@/drizzle";
 import * as authSchemas from "@/drizzle/schemas/user";
 import { generateId } from "better-auth";
 import { and, eq } from "drizzle-orm";
-import { canMakeOwner } from "../auth/policies/organization-policy";
+import { canMakeOwner } from "../auth/policies/site-policy";
 
 export async function getUserRole(userId: string) {
     const role = await db.query.user
@@ -70,7 +70,6 @@ export async function addUserToOrganization(userId: string, orgId: string) {
 }
 
 export async function makeUserOwnerOfOrganizationIfNonExist(
-    
     memberId: string,
     orgId: string
 ) {
