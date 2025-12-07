@@ -33,6 +33,7 @@ export function AuthenticationDrawer({
             title="Authentication"
             size={300}
             overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+            withinPortal={false}
         >
             <AuthTabs
                 loginFormState={loginFormState}
