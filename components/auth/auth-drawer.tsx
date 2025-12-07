@@ -31,7 +31,7 @@ export function AuthenticationDrawer({
             withCloseButton={!isFormPending}
             closeOnClickOutside={!isFormPending}
             title="Authentication"
-            size={300}
+            size={"100%"}
             overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
             withinPortal={false}
         >
