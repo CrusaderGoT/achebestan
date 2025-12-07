@@ -69,7 +69,7 @@ export function estimateReadingTime(content: string): number {
     const wordsPerMinute = 238; // average-reading-speed > https://scholarwithin.com/average-reading-speed
     const wordCount = content.split(/\s+/).length;
 
-    return Math.round(wordCount / wordsPerMinute);
+    return wordCount / wordsPerMinute;
 }
 
 export function formatEstimatedReadingTime(mins: number) {
@@ -83,13 +83,21 @@ export function formatEstimatedReadingTime(mins: number) {
     }
 
     if (mins >= 60) {
-        const timeInHours = Math.round(mins / 60);
+        const timeInHours = Math.floor(mins / 60);
+        const remainingMins = Math.floor(mins % 60);
+
+        if (remainingMins === 0) {
+            return timeInHours === 1
+                ? `${timeInHours} hour read`
+                : `${timeInHours} hours read`;
+        }
+
         return timeInHours === 1
-            ? `${timeInHours} hour read`
-            : `${timeInHours} hours read`;
+            ? `${timeInHours} hour ${remainingMins} mins read`
+            : `${timeInHours} hours ${remainingMins} mins read`;
     }
 
-    const timeInMinutes = Math.round(mins);
+    const timeInMinutes = Math.floor(mins);
 
     return timeInMinutes === 1
         ? `${timeInMinutes} minute read`
