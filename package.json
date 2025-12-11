@@ -27,7 +27,7 @@
     "@tiptap/pm": "^2.25.0",
     "@tiptap/react": "^2.25.0",
     "@tiptap/starter-kit": "^2.25.0",
-    "better-auth": "^1.2.12",
+    "better-auth": "^1.4.2",
     "cloudinary": "^2.7.0",
     "dayjs": "^1.11.18",
     "dotenv": "^17.1.0",
