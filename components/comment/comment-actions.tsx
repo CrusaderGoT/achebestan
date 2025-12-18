@@ -3,14 +3,24 @@
 import { authClient } from "@/lib/auth/auth-client";
 import {
     canCreateComment,
-    canDeleteComment,
+    canDeleteAllComment,
+    canDeleteOwnComment,
     canUpdateComment,
 } from "@/lib/auth/policies";
-import { useDeleteComment } from "@/lib/hooks/comment/comment-action-hooks";
+import {
+    useDeleteComment,
+    useDeleteCommentThread,
+} from "@/lib/hooks/comment/comment-action-hooks";
 import { CommentType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
 import { Button, Group } from "@mantine/core";
-import { IconEdit, IconMessageReply, IconTrashX } from "@tabler/icons-react";
+import {
+    IconEdit,
+    IconMessageReply,
+    IconNeedleThread,
+    IconTrash,
+    IconTrashX,
+} from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 
 type CommentActionsProps = {
@@ -25,6 +35,7 @@ type CommentActionsProps = {
     storyISBN: string;
     isEditOpen: boolean;
     session: ReturnType<typeof authClient.useSession>["data"];
+    hasBeenDeleted: boolean | null;
 };
 
 export function CommentActions({
@@ -39,15 +50,12 @@ export function CommentActions({
     storyISBN,
     isEditOpen,
     session,
+    hasBeenDeleted,
 }: CommentActionsProps) {
-    const {
-        executeAsync: executeAsyncDeleteComment,
-        isPending: isPendingDeleteComment,
-    } = useDeleteComment();
-
     const noPermissions = useMemo(
         () => ({
-            canDelete: false,
+            canDeleteOwn: false,
+            canDeleteAll: false,
             canUpdate: false,
             canCreate: false,
         }),
@@ -67,14 +75,26 @@ export function CommentActions({
                 userId: commentUserId,
             };
 
-            const [canDelete, canUpdate, canCreate] = await Promise.all([
-                await canDeleteComment(session.user as UserSelectType, comment),
-                await canUpdateComment(session.user as UserSelectType, comment),
-                await canCreateComment(),
-            ]);
+            const [canDeleteAll, canDeleteOwn, canUpdate, canCreate] =
+                await Promise.all([
+                    await canDeleteAllComment(
+                        session.user as UserSelectType,
+                        comment
+                    ),
+                    await canDeleteOwnComment(
+                        session.user as UserSelectType,
+                        comment
+                    ),
+                    await canUpdateComment(
+                        session.user as UserSelectType,
+                        comment
+                    ),
+                    await canCreateComment(),
+                ]);
 
             return {
-                canDelete: canDelete,
+                canDeleteOwn: canDeleteOwn,
+                canDeleteAll: canDeleteAll,
                 canUpdate: canUpdate,
                 canCreate: canCreate,
             };
@@ -82,40 +102,79 @@ export function CommentActions({
         checkCommentPermissions().then(setPermissions);
     }, [session?.user, noPermissions, commentId, commentUserId]);
 
+    if (hasBeenDeleted && !permissions.canDeleteAll) return null;
+
     return (
         <Group gap="xs">
-            {permissions.canCreate && (
-                <Button
-                    variant="subtle"
-                    size="xs"
-                    onClick={() => {
-                        handleCloseEdit();
-                        handleReplyToggle(commentId);
-                    }}
-                    leftSection={<IconMessageReply size={15} />}
-                >
-                    {isReplyOpen ? "Cancel" : "Reply"}
-                </Button>
+            {!hasBeenDeleted && (
+                <>
+                    {permissions.canCreate && (
+                        <Button
+                            variant="subtle"
+                            size="xs"
+                            onClick={() => {
+                                handleCloseEdit();
+                                handleReplyToggle(commentId);
+                            }}
+                            leftSection={<IconMessageReply size={15} />}
+                        >
+                            {isReplyOpen ? "Cancel" : "Reply"}
+                        </Button>
+                    )}
+
+                    {permissions.canUpdate && (
+                        <Button
+                            variant="subtle"
+                            color="yellow"
+                            size="xs"
+                            leftSection={<IconEdit size={15} />}
+                            onClick={() => {
+                                handleCloseReply();
+                                handleEditToggle(commentId);
+                            }}
+                            disabled={isPendingUpdateComment}
+                            title="Edit Comment"
+                        >
+                            {isEditOpen ? "Cancel" : "Edit"}
+                        </Button>
+                    )}
+                </>
             )}
 
-            {permissions.canUpdate && (
-                <Button
-                    variant="subtle"
-                    color="yellow"
-                    size="xs"
-                    leftSection={<IconEdit size={15} />}
-                    onClick={() => {
-                        handleCloseReply();
-                        handleEditToggle(commentId);
-                    }}
-                    disabled={isPendingUpdateComment}
-                    title="Edit Comment"
-                >
-                    {isEditOpen ? "Cancel" : "Edit"}
-                </Button>
-            )}
+            <DeleteComment
+                commentId={commentId}
+                commentUserId={commentUserId}
+                storyISBN={storyISBN}
+                canDeleteOwn={permissions.canDeleteOwn}
+                canDeleteAll={permissions.canDeleteAll}
+                session={session}
+                hasBeenDeleted={hasBeenDeleted}
+            />
+        </Group>
+    );
+}
 
-            {permissions.canDelete && (
+type DeleteCommentProps = Pick<
+    CommentActionsProps,
+    "commentId" | "commentUserId" | "storyISBN" | "session" | "hasBeenDeleted"
+> & { canDeleteOwn: boolean; canDeleteAll: boolean };
+
+export function DeleteComment({ ...props }: DeleteCommentProps) {
+    const {
+        executeAsync: executeAsyncDeleteCommentThread,
+        isPending: isPendingDeleteCommentTree,
+    } = useDeleteCommentThread();
+
+    const {
+        executeAsync: executeAsyncDeleteComment,
+        isPending: isPendingDeleteComment,
+    } = useDeleteComment();
+
+    if (!props.canDeleteOwn && !props.canDeleteAll) return null;
+
+    return (
+        <Group>
+            {!props.hasBeenDeleted && (
                 <Button
                     variant="subtle"
                     size="xs"
@@ -123,15 +182,40 @@ export function CommentActions({
                     leftSection={<IconTrashX size={15} />}
                     onClick={async () =>
                         await executeAsyncDeleteComment({
-                            commentId: commentId,
-                            userId: commentUserId,
-                            storyISBN: storyISBN,
+                            commentId: props.commentId,
+                            userId: props.commentUserId,
+                            storyISBN: props.storyISBN,
                         })
                     }
                     disabled={isPendingDeleteComment}
                     title="Delete Comment"
                 >
                     Delete
+                </Button>
+            )}
+
+            {props.canDeleteAll && (
+                <Button
+                    variant="subtle"
+                    size="xs"
+                    color="violet"
+                    rightSection={
+                        <>
+                            <IconTrash size={15} />
+                            <IconNeedleThread size={15} />
+                        </>
+                    }
+                    onClick={async () =>
+                        await executeAsyncDeleteCommentThread({
+                            commentId: props.commentId,
+                            userId: props.commentUserId,
+                            storyISBN: props.storyISBN,
+                        })
+                    }
+                    disabled={isPendingDeleteCommentTree}
+                    title="Delete Comment"
+                >
+                    Delete Thread
                 </Button>
             )}
         </Group>

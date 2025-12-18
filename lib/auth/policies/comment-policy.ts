@@ -24,12 +24,11 @@ export async function canCreateComment(): Promise<boolean> {
 }
 
 /**
- * Check if user can delete the comment
+ * Check if user can delete all comment
  * User can delete if they have:
- * - delete:all permission, OR
- * - delete:owner permission AND they own the comment
+ * - delete:all permission
  */
-export async function canDeleteComment(
+export async function canDeleteAllComment(
     user: UserSelectType,
     comment: CommentType
 ): Promise<boolean> {
@@ -39,8 +38,21 @@ export async function canDeleteComment(
 
     // Check delete:all first (most permissive)
     const hasDeleteAll = await hasPermission("comment", ["delete:all"]);
-    if (hasDeleteAll) {
-        return true;
+
+    return hasDeleteAll;
+}
+
+/**
+ * Check if user can delete the comment
+ * User can delete if they have:
+ * - delete:owner permission AND they own the comment
+ */
+export async function canDeleteOwnComment(
+    user: UserSelectType,
+    comment: CommentType
+): Promise<boolean> {
+    if (!comment) {
+        return false;
     }
 
     // Check delete:owner with ownership

@@ -14,7 +14,8 @@ import { revalidatePath } from "next/cache";
 import z from "zod/v4";
 import {
     canCreateComment,
-    canDeleteComment,
+    canDeleteAllComment,
+    canDeleteOwnComment,
     canUpdateComment,
 } from "../auth/policies";
 import { authActionClient } from "../safe-action";
@@ -97,12 +98,12 @@ export const deleteCommentAction = authActionClient
         })
     )
     .action(async ({ parsedInput, ctx }) => {
-        const canDelete = await canDeleteComment(
-            ctx.user as UserSelectType,
-            parsedInput
-        );
+        const [canDeleteOwn, canDeleteAll] = await Promise.all([
+            await canDeleteOwnComment(ctx.user as UserSelectType, parsedInput),
+            await canDeleteAllComment(ctx.user as UserSelectType, parsedInput),
+        ]);
 
-        if (!canDelete) {
+        if (!canDeleteOwn && !canDeleteAll) {
             throw new Error("You Are Not Authorized To Delete This Comment!");
         }
 
@@ -289,4 +290,38 @@ export const dislikeCommentAction = authActionClient
             );
 
         return { disliked: true };
+    });
+
+export const deleteCommentThreadAction = authActionClient
+    .inputSchema(
+        z.object({
+            commentId: z.number(),
+            userId: z.string(),
+            storyISBN: z.string(),
+        })
+    )
+    .action(async ({ parsedInput, ctx }) => {
+        const canDelete = await canDeleteAllComment(
+            ctx.user as UserSelectType,
+            parsedInput
+        );
+
+        if (!canDelete) {
+            throw new Error("You Are Not Authorized To Delete This Comment!");
+        }
+
+        // delete comment which in turn will delete all comment that has it as a parent
+        const [deletedComment] = await db
+            .delete(comment)
+            .where(
+                and(
+                    eq(comment.id, parsedInput.commentId),
+                    eq(comment.userId, parsedInput.userId)
+                )
+            )
+            .returning({ text: comment.text });
+
+        revalidatePath(`/story/${parsedInput.storyISBN}`);
+
+        return deletedComment;
     });

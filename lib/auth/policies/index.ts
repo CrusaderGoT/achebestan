@@ -8,7 +8,8 @@ export { hasPermission } from "./base-policy";
 
 export {
     canCreateComment,
-    canDeleteComment,
+    canDeleteOwnComment,
+    canDeleteAllComment,
     canUpdateComment
 } from "./comment-policy";
 

@@ -27,6 +27,7 @@ export function AuthenticationDrawer({
             opened={opened}
             onClose={close}
             position="top"
+            offset={60}
             withCloseButton={!isFormPending}
             closeOnClickOutside={!isFormPending}
             title="Authentication"

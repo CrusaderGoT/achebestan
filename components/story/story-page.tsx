@@ -104,7 +104,7 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            <StoryActions {...story} />
+            <StoryActions permissions={permissions} {...story} />
 
             <Divider
                 label={comments && comments.length > 0 ? "comments" : ""}

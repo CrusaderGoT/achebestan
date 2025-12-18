@@ -31,7 +31,7 @@ import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 export function StoryActions({
     permissions,
     ...props
-}: PickedStoryProps & { permissions?: StoryPermissionsType }) {
+}: PickedStoryProps & { permissions: StoryPermissionsType }) {
     const { sessionUser } = useCentralizedAuth();
 
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =

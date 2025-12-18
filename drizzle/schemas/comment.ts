@@ -29,11 +29,13 @@ export const comment = table(
         hasBeenDeleted: t.boolean().default(false),
     },
     (table) => [
-        t.foreignKey({
-            columns: [table.parentCommentId],
-            foreignColumns: [table.id],
-            name: "comment_parent_comment_fk",
-        }),
+        t
+            .foreignKey({
+                columns: [table.parentCommentId],
+                foreignColumns: [table.id],
+                name: "comment_parent_comment_fk",
+            })
+            .onDelete("cascade"),
         t.index("comment_story_idx").on(table.storyISBN),
         t.index("comment_user_idx").on(table.userId),
         t.index("comment_parent_idx").on(table.parentCommentId),

@@ -121,7 +121,7 @@ export function CommentNode({
                             />
                         )}
 
-                        {!comment.hasBeenDeleted && session?.user.id && (
+                        {session?.user.id && (
                             <CommentActions
                                 commentId={comment.id}
                                 commentUserId={comment.userId}
@@ -134,6 +134,7 @@ export function CommentNode({
                                 handleCloseReply={handleCloseReply}
                                 storyISBN={comment.storyISBN}
                                 session={session}
+                                hasBeenDeleted={comment.hasBeenDeleted}
                             />
                         )}
 
