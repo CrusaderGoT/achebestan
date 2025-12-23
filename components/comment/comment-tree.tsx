@@ -41,7 +41,7 @@ import {
 import { CommentNode } from "./comment-node";
 
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import { useAutoExpandComments } from "@/lib/hooks/comment/auto-expand-comments";
+import { useAutoExpandNewComments } from "@/lib/hooks/comment/auto-expand-comments";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 
 export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
@@ -77,16 +77,27 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     const initialCommentsToExpand = useMemo<string[]>(() => {
         const values: string[] = [];
 
+        // Helper function to recursively add comment and all its descendants
+        const addCommentAndDescendants = (
+            comment: CommentsToTreeNodeDataType[number]
+        ) => {
+            values.push(comment.value);
+
+            if (comment.children?.length && comment.children.length > 0) {
+                comment.children.forEach((child) => {
+                    addCommentAndDescendants(
+                        child as CommentsToTreeNodeDataType[number]
+                    );
+                });
+            }
+        };
+
+        // Get top-level comments (no parent) that haven't been deleted
         commentsNodeData
+            .filter((c) => !c.parentCommentId && !c.hasBeenDeleted)
             .slice(0, CommentTreeUtils.initialExpandCount)
-            .filter((c) => !c.parentCommentId && c.hasBeenDeleted !== true)
-            .forEach((c) => {
-                values.push(c.value);
-                if (c.children?.length && c.children.length > 0) {
-                    c.children
-                        .slice(0, CommentTreeUtils.initialExpandCount)
-                        .forEach((ch) => values.push(ch.value));
-                }
+            .forEach((comment) => {
+                addCommentAndDescendants(comment);
             });
 
         return values;
@@ -101,7 +112,7 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     });
 
     // Auto-expansion logic
-    useAutoExpandComments({
+    useAutoExpandNewComments({
         commentsNodeData,
         tree,
     });

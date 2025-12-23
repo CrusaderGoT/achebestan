@@ -53,6 +53,7 @@ export function CommentNode({
         hasChildren
     );
 
+    // effect for keeping the inner thread comment parent collapsed in the main thread
     useEffect(() => {
         if (expanded && showDrawerButton) {
             tree.collapse(node.value);
