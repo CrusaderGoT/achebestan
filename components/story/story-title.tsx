@@ -54,11 +54,7 @@ export function StoryTitle({
                 />
             </Box>
 
-            <Group
-                className={cx(
-                    !permissions?.canUpdateStory && publicStyles.hide
-                )}
-            >
+            <Group className={cx(!permissions?.canUpdate && publicStyles.hide)}>
                 <ActionIcon
                     onClick={() => {
                         toggleTitleField();

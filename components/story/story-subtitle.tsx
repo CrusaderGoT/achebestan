@@ -42,7 +42,7 @@ export function StorySubtitle({
         <Group
             mt={5}
             className={cx(
-                !subtitle && !permissions?.canUpdateStory && publicStyles.hide
+                !subtitle && !permissions?.canUpdate && publicStyles.hide
             )}
         >
             <Box>
@@ -70,9 +70,7 @@ export function StorySubtitle({
 
             <Group
                 align="center"
-                className={cx(
-                    !permissions?.canUpdateStory && publicStyles.hide
-                )}
+                className={cx(!permissions?.canUpdate && publicStyles.hide)}
             >
                 <ActionIcon
                     onClick={() => {

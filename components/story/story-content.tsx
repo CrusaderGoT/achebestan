@@ -154,7 +154,7 @@ export function StoryContent({
     );
 
     const shouldShowEditContent = useMemo(
-        () => openedContentField && permissions?.canUpdateStory,
+        () => openedContentField && permissions?.canUpdate,
         [openedContentField, permissions]
     );
 

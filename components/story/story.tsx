@@ -191,8 +191,7 @@ export function Story({
                             title="Update Story Image"
                             className={cx(
                                 storypageStyles.storyImageFieldToggle,
-                                !permissions?.canUpdateStory &&
-                                    publicStyles.hide
+                                !permissions?.canUpdate && publicStyles.hide
                             )}
                             color="yellow"
                             variant="light"

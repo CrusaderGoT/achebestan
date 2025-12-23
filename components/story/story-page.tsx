@@ -1,18 +1,9 @@
 "use client";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
-import {
-    canCreateStory,
-    canDeleteStory,
-    canSuspendStory,
-    canUpdateStory,
-} from "@/lib/auth/policies";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryPermissionsType, StoryProps, StoryRatingProps } from "@/types/story";
-import { UserSelectType } from "@/types/user";
+import { StoryProps, StoryRatingProps } from "@/types/story";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Center, Divider, Stack, Text } from "@mantine/core";
-import { useEffect, useMemo, useState } from "react";
 import { CommentTree } from "../comment/comment-tree";
 import { Story } from "./story";
 import { StoryActions } from "./story-actions";
@@ -29,56 +20,6 @@ export function StoryPageClient({
     comments,
     userRating,
 }: StoryPageClientProps) {
-    const { sessionUser } = useCentralizedAuth();
-
-    const noPermissions: StoryPermissionsType = useMemo(
-        () => ({
-            canDeleteStory: false,
-            canUpdateStory: false,
-            canCreateStory: false,
-            canSuspendStory: false,
-        }),
-        []
-    );
-
-    const [permissions, setPermissions] =
-        useState<StoryPermissionsType>(noPermissions);
-
-    useEffect(() => {
-        async function checkStoryPermissions(): Promise<StoryPermissionsType> {
-            if (!sessionUser.data?.user.id) {
-                return noPermissions;
-            }
-
-            const storyPermArgs = {
-                id: story.id,
-                authorId: story.authorId,
-            };
-
-            const [canDelete, canUpdate, canCreate, canSuspend] =
-                await Promise.all([
-                    await canDeleteStory(
-                        sessionUser.data?.user as UserSelectType,
-                        storyPermArgs
-                    ),
-                    await canUpdateStory(
-                        sessionUser.data?.user as UserSelectType,
-                        storyPermArgs
-                    ),
-                    await canCreateStory(),
-                    await canSuspendStory(),
-                ]);
-
-            return {
-                canDeleteStory: canDelete,
-                canUpdateStory: canUpdate,
-                canCreateStory: canCreate,
-                canSuspendStory: canSuspend,
-            };
-        }
-        checkStoryPermissions().then(setPermissions);
-    }, [noPermissions, story.authorId, story.id, sessionUser.data?.user]);
-
     return (
         <Stack>
             <Story
@@ -94,7 +35,7 @@ export function StoryPageClient({
                 subtitle={story.subtitle}
                 bookId={story.bookId}
                 blurb={story.blurb}
-                permissions={permissions}
+                permissions={story.permissions}
             />
 
             <StoryRating
@@ -103,7 +44,7 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            <StoryActions permissions={permissions} {...story} />
+            <StoryActions permissions={story.permissions} {...story} />
 
             <Divider
                 label={comments && comments.length > 0 ? "comments" : ""}
