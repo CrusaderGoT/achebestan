@@ -17,7 +17,7 @@ export type CommentTreeProps = CommentSelectType & {
     rating?: RatingSelectType | null;
     user?: UserSelectType | null;
     reactions?: ReactionSelectType[] | null;
-    permissions: CommentPermissions | undefined;
+    permissions?: CommentPermissions | undefined;
 };
 
 export type CommentsToTreeNodeDataType = (TreeNodeData & CommentTreeProps)[]; // Hook for drawer management
