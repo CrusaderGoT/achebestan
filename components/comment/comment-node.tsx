@@ -135,6 +135,7 @@ export function CommentNode({
                                 storyISBN={comment.storyISBN}
                                 session={session}
                                 hasBeenDeleted={comment.hasBeenDeleted}
+                                permissions={comment.permissions}
                             />
                         )}
 

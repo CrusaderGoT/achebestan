@@ -1,7 +1,8 @@
+import { authClient } from "@/lib/auth/auth-client";
+import { CommentPermissions } from "@/lib/utils/comment/calculate-comment-permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
-import { UserSelectType } from "./user";
 import {
     MantineSize,
     RenderTreeNodePayload,
@@ -9,12 +10,14 @@ import {
     useTree,
 } from "@mantine/core";
 import { UseStateHistoryHandlers, UseStateHistoryValue } from "@mantine/hooks";
+import { UserSelectType } from "./user";
 
 export type CommentTreeProps = CommentSelectType & {
     childComments?: CommentSelectType[] | null;
     rating?: RatingSelectType | null;
     user?: UserSelectType | null;
     reactions?: ReactionSelectType[] | null;
+    permissions: CommentPermissions | undefined;
 };
 
 export type CommentsToTreeNodeDataType = (TreeNodeData & CommentTreeProps)[]; // Hook for drawer management
@@ -60,13 +63,39 @@ export interface CommentInteractionHandlers {
     focusTrapRef: React.RefCallback<HTMLElement | null>;
 }
 
-export type CommentPermissionsType = {
-    canDelete: false;
-    canUpdate: false;
-    canCreate: false;
-    canView: false;
-};
-
-export type CommentType =
+export type CommentPartialType =
     | Partial<CommentSelectType>
     | Partial<CommentUpdateType>;
+
+export type CommentPermissionsType = {
+    canDeleteOwn: boolean;
+    canDeleteAll: boolean;
+    canUpdate: boolean;
+    canCreate: boolean;
+};
+
+export type CommentActionsProps = {
+    handleCloseReply: () => void;
+    handleReplyToggle: (commentId: number) => void;
+    handleCloseEdit: () => void;
+    handleEditToggle: (commentId: number) => void;
+    isReplyOpen: boolean;
+    commentId: number;
+    commentUserId: string;
+    isPendingUpdateComment: boolean;
+    storyISBN: string;
+    isEditOpen: boolean;
+    session: ReturnType<typeof authClient.useSession>["data"];
+    hasBeenDeleted: boolean | null;
+    permissions?: CommentPermissionsType;
+};
+
+/**
+ * Type for flattening - represents a comment with potential nested children
+ */
+export type FlattenableComment = {
+    id: number;
+    userId: string;
+    childComments?: FlattenableComment[];
+    [key: string]: unknown; // Allow other properties
+};

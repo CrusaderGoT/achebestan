@@ -2,14 +2,14 @@
 // lib/auth/policies/comment-policy.ts
 "use server";
 
-import { CommentType } from "@/types/comment";
+import { CommentPartialType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
 import { hasPermission } from "./base-policy";
 
 /**
  * Check if the current user owns the comment
  */
-function isCommentOwner(user: UserSelectType, comment: CommentType): boolean {
+function isCommentOwner(user: UserSelectType, comment: CommentPartialType): boolean {
     if (!comment.userId) {
         return false;
     }
@@ -30,7 +30,7 @@ export async function canCreateComment(): Promise<boolean> {
  */
 export async function canDeleteAllComment(
     user: UserSelectType,
-    comment: CommentType
+    comment: CommentPartialType
 ): Promise<boolean> {
     if (!comment) {
         return false;
@@ -49,7 +49,7 @@ export async function canDeleteAllComment(
  */
 export async function canDeleteOwnComment(
     user: UserSelectType,
-    comment: CommentType
+    comment: CommentPartialType
 ): Promise<boolean> {
     if (!comment) {
         return false;
@@ -69,7 +69,7 @@ export async function canDeleteOwnComment(
  */
 export async function canUpdateComment(
     user: UserSelectType,
-    comment: CommentType
+    comment: CommentPartialType
 ): Promise<boolean> {
     if (!comment || !isCommentOwner(user, comment)) {
         return false;

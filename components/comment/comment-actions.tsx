@@ -1,18 +1,10 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
-import {
-    canCreateComment,
-    canDeleteAllComment,
-    canDeleteOwnComment,
-    canUpdateComment,
-} from "@/lib/auth/policies";
 import {
     useDeleteComment,
     useDeleteCommentThread,
 } from "@/lib/hooks/comment/comment-action-hooks";
-import { CommentType } from "@/types/comment";
-import { UserSelectType } from "@/types/user";
+import { CommentActionsProps } from "@/types/comment";
 import { Button, Group } from "@mantine/core";
 import {
     IconEdit,
@@ -21,22 +13,6 @@ import {
     IconTrash,
     IconTrashX,
 } from "@tabler/icons-react";
-import { useEffect, useMemo, useState } from "react";
-
-type CommentActionsProps = {
-    handleCloseReply: () => void;
-    handleReplyToggle: (commentId: number) => void;
-    handleCloseEdit: () => void;
-    handleEditToggle: (commentId: number) => void;
-    isReplyOpen: boolean;
-    commentId: number;
-    commentUserId: string;
-    isPendingUpdateComment: boolean;
-    storyISBN: string;
-    isEditOpen: boolean;
-    session: ReturnType<typeof authClient.useSession>["data"];
-    hasBeenDeleted: boolean | null;
-};
 
 export function CommentActions({
     handleCloseReply,
@@ -51,64 +27,23 @@ export function CommentActions({
     isEditOpen,
     session,
     hasBeenDeleted,
+    permissions,
 }: CommentActionsProps) {
-    const noPermissions = useMemo(
-        () => ({
-            canDeleteOwn: false,
-            canDeleteAll: false,
-            canUpdate: false,
-            canCreate: false,
-        }),
-        []
-    );
+    // Use pre-calculated permissions with fallback
+    const perms = permissions ?? {
+        canDeleteOwn: false,
+        canDeleteAll: false,
+        canUpdate: false,
+        canCreate: false,
+    };
 
-    const [permissions, setPermissions] = useState(noPermissions);
-
-    useEffect(() => {
-        async function checkCommentPermissions() {
-            if (!session?.user.id) {
-                return noPermissions;
-            }
-
-            const comment: CommentType = {
-                id: commentId,
-                userId: commentUserId,
-            };
-
-            const [canDeleteAll, canDeleteOwn, canUpdate, canCreate] =
-                await Promise.all([
-                    await canDeleteAllComment(
-                        session.user as UserSelectType,
-                        comment
-                    ),
-                    await canDeleteOwnComment(
-                        session.user as UserSelectType,
-                        comment
-                    ),
-                    await canUpdateComment(
-                        session.user as UserSelectType,
-                        comment
-                    ),
-                    await canCreateComment(),
-                ]);
-
-            return {
-                canDeleteOwn: canDeleteOwn,
-                canDeleteAll: canDeleteAll,
-                canUpdate: canUpdate,
-                canCreate: canCreate,
-            };
-        }
-        checkCommentPermissions().then(setPermissions);
-    }, [session?.user, noPermissions, commentId, commentUserId]);
-
-    if (hasBeenDeleted && !permissions.canDeleteAll) return null;
+    if (hasBeenDeleted && !perms.canDeleteAll) return null;
 
     return (
         <Group gap="xs">
             {!hasBeenDeleted && (
                 <>
-                    {permissions.canCreate && (
+                    {perms.canCreate && (
                         <Button
                             variant="subtle"
                             size="xs"
@@ -122,7 +57,7 @@ export function CommentActions({
                         </Button>
                     )}
 
-                    {permissions.canUpdate && (
+                    {perms.canUpdate && (
                         <Button
                             variant="subtle"
                             color="yellow"
@@ -145,8 +80,8 @@ export function CommentActions({
                 commentId={commentId}
                 commentUserId={commentUserId}
                 storyISBN={storyISBN}
-                canDeleteOwn={permissions.canDeleteOwn}
-                canDeleteAll={permissions.canDeleteAll}
+                canDeleteOwn={perms.canDeleteOwn}
+                canDeleteAll={perms.canDeleteAll}
                 session={session}
                 hasBeenDeleted={hasBeenDeleted}
             />

@@ -8,7 +8,7 @@ import {
     canUpdateStory,
 } from "@/lib/auth/policies";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryPermissionsType, StoryProps } from "@/types/story";
+import { StoryPermissionsType, StoryProps, StoryRatingProps } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Center, Divider, Stack, Text } from "@mantine/core";
@@ -17,7 +17,6 @@ import { CommentTree } from "../comment/comment-tree";
 import { Story } from "./story";
 import { StoryActions } from "./story-actions";
 import { StoryRating } from "./story-rating";
-import { StoryRatingProps } from "@/types/story";
 
 export type StoryPageClientProps = {
     story: StoryProps & StoryRatingProps;

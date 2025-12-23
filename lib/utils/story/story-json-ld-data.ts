@@ -1,14 +1,10 @@
-import { StoryProps } from "@/types/story";
 import { BASE_URL } from "@/lib/constants";
 import { CommentTreeProps } from "@/types/comment";
+import { StoryProps } from "@/types/story";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
 import { Graph } from "schema-dts";
-import { estimateReadingTime } from "./story-utils";
-import { truncateText } from "./story-utils";
-import { lowestRating } from "./story-utils";
-import { highestRating } from "./story-utils";
-import { calculateRatingsAverage } from "./story-utils";
+import { calculateRatingsAverage, estimateReadingTime, highestRating, lowestRating, truncateText } from "./story-utils";
 
 export function storyJsonLdData(
     story: StoryProps & {

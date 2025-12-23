@@ -20,11 +20,11 @@ import { useCallback, useMemo } from "react";
 import { useMounted } from "@mantine/hooks";
 
 import {
+    COMMENT_DRAWER_CONFIG_TYPE,
     CommentNodeProps,
     CommentRenderContext,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
-    COMMENT_DRAWER_CONFIG_TYPE,
 } from "@/types/comment";
 
 import {

@@ -11,7 +11,9 @@ import {
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import z from "zod/v4";
+import { auth } from "../auth/auth";
 import {
     canCreateComment,
     canDeleteAllComment,
@@ -19,6 +21,8 @@ import {
     canUpdateComment,
 } from "../auth/policies";
 import { authActionClient } from "../safe-action";
+import { batchCalculateCommentPermissions } from "../utils/comment/calculate-comment-permissions";
+import { flattenComments } from "../utils/comment/flattenable-comments";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
@@ -128,6 +132,11 @@ export const deleteCommentAction = authActionClient
 
 export const readStoryComments = async (isbn: string) => {
     try {
+        // Get session for permission calculation
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
         // Get all comments first
         const comments = await db.query.comment.findMany({
             where(fields, operators) {
@@ -157,11 +166,28 @@ export const readStoryComments = async (isbn: string) => {
             }),
         ]);
 
-        // Combine the data
+        // Flatten all comments (including nested childComments) for permission calculation
+        const allComments = flattenComments(comments);
+
+        // Calculate permissions for ALL comments in one batch
+        const permissionsMap = await batchCalculateCommentPermissions(
+            session?.user as UserSelectType,
+            allComments.map((c) => ({ id: c.id, userId: c.userId }))
+        );
+
+        // Combine the data with permissions
         return comments.map((comment) => ({
             ...comment,
             reactions: reactions.filter((r) => r.commentId === comment.id),
             user: users.find((u) => u.id === comment.userId) || null,
+            permissions: permissionsMap.get(comment.id),
+            // Recursively attach permissions to child comments
+            childComments: comment.childComments?.map((child) => ({
+                ...child,
+                reactions: reactions.filter((r) => r.commentId === child.id),
+                user: users.find((u) => u.id === child.userId) || null,
+                permissions: permissionsMap.get(child.id),
+            })),
         }));
     } catch (e) {
         console.log(e);
