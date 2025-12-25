@@ -1,0 +1,123 @@
+.container {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mantine-spacing-xl);
+}
+
+.content {
+  text-align: center;
+  max-width: 540px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.number {
+  font-size: clamp(6rem, 20vw, 12rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-6));
+  margin-bottom: var(--mantine-spacing-xl);
+  user-select: none;
+  position: relative;
+}
+
+.number::after {
+  content: "404";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  background: light-dark(
+    linear-gradient(
+      135deg,
+      var(--mantine-color-blue-7) 0%,
+      var(--mantine-color-violet-6) 100%
+    ),
+    linear-gradient(
+      135deg,
+      var(--mantine-color-blue-4) 0%,
+      var(--mantine-color-violet-4) 100%
+    )
+  );
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  opacity: 0;
+  animation: glitch 3s ease-in-out infinite;
+}
+
+.title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.description {
+  font-size: var(--mantine-font-size-lg);
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2));
+  line-height: 1.65;
+  margin-bottom: calc(var(--mantine-spacing-xl) * 1.5);
+  font-weight: 400;
+}
+
+.button {
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  transform: translateX(-4px);
+  background-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-6)
+  );
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glitch {
+  0%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  92%,
+  98% {
+    opacity: 0.8;
+    transform: translateX(-50%) translateX(2px);
+  }
+  94%,
+  96% {
+    opacity: 0.9;
+    transform: translateX(-50%) translateX(-2px);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    min-height: calc(100vh - 80px);
+    padding: var(--mantine-spacing-md);
+  }
+
+  .description {
+    font-size: var(--mantine-font-size-md);
+  }
+}
