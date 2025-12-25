@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { validatePasscode } from "@/lib/utils/user/validate-passcode";
 import { Button, PinInput, Stack } from "@mantine/core";
 import { createFormContext } from "@mantine/form";

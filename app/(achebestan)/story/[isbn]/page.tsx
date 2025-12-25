@@ -2,7 +2,7 @@ import { StoryPageClient } from "@/components/story/story-page";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
 import { readStory } from "@/lib/actions/story";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";

@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     favouriteInserSchema,

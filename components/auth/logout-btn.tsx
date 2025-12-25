@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconLogout } from "@tabler/icons-react";

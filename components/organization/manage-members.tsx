@@ -1,7 +1,7 @@
 "use client";
 
 import { makeUserOwnerOfOrganizationIfNonExist } from "@/lib/actions/auth";
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { ActionIcon, Avatar, Menu, Table, Text } from "@mantine/core";
 import { randomId } from "@mantine/hooks";

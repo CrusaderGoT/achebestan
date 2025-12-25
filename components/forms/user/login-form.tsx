@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { loginSchema } from "@/zod-schemas/user";
 import { LoginSchemaType } from "@/types/user";
 import { Button, Stack, Title } from "@mantine/core";

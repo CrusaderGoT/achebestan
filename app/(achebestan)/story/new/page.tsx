@@ -1,5 +1,5 @@
 import { CreateStoryForm } from "@/components/forms/story/create-story-form";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { canCreateStory } from "@/lib/auth/policies";
 import { headers } from "next/headers";
 

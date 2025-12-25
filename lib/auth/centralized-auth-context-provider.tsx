@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, ReactNode, useContext } from "react";
-import { authClient } from "./auth-client";
+import { authClient } from "../auth-client";
 
 type CentralizedAuthContextType = {
     sessionUser: ReturnType<typeof authClient.useSession>;

@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { CommentPermissions } from "@/lib/utils/comment/calculate-comment-permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";

@@ -15,7 +15,7 @@ import { UserSelectType } from "@/types/user";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { auth } from "../auth/auth";
+import { auth } from "../auth";
 import {
     canCreateStory,
     canDeleteStory,

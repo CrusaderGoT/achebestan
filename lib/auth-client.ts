@@ -11,7 +11,7 @@ import {
     owner,
     superAdmin,
     writer,
-} from "./permissions";
+} from "./auth/permissions";
 
 export const authClient = createAuthClient({
     plugins: [

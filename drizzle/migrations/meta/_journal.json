@@ -239,6 +239,13 @@
       "when": 1766042405122,
       "tag": "0033_red_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1766637775440,
+      "tag": "0034_colorful_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }

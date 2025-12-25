@@ -15,8 +15,8 @@ import {
     checkIfUserIsMember,
     createOrganization,
     getUserRole as getUserRoles,
-} from "../actions/auth";
-import { ORG_ROLES } from "../constants";
+} from "./actions/auth";
+import { ORG_ROLES } from "./constants";
 import {
     admin as adminRole,
     customAccessControl,
@@ -24,7 +24,7 @@ import {
     owner,
     superAdmin,
     writer,
-} from "./permissions";
+} from "./auth/permissions";
 
 import "dotenv/config";
 

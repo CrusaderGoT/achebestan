@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth-client";
 
 import { Button, Stack } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";

@@ -2,7 +2,7 @@
 // lib/auth/policies/base-policy.ts
 "use server";
 
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import {
     PermissionResource,
     PermissionsForResource,
