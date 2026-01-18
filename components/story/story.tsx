@@ -40,6 +40,7 @@ export function Story({
     isbn,
     id,
     bookId,
+    bookPart,
     blurb,
     permissions,
 }: StoryProps) {
@@ -55,6 +56,7 @@ export function Story({
         isbn: isbn,
         id: id,
         bookId: bookId,
+        bookPart: bookPart,
         authorId: author.id,
         blurb: blurb,
     });

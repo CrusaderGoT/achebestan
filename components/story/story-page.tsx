@@ -34,6 +34,7 @@ export function StoryPageClient({
                 authorId={story.authorId}
                 subtitle={story.subtitle}
                 bookId={story.bookId}
+                bookPart={story.bookPart}
                 blurb={story.blurb}
                 permissions={story.permissions}
             />
