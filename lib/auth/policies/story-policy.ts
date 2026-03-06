@@ -2,9 +2,10 @@
 // lib/auth/policies/story-policy.ts
 "use server";
 
-import { StorySelectType } from "@/types/story";
+import { StoryPermissionsType, StorySelectType } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { hasPermission } from "./base-policy";
+import { canCreateComment } from "./comment-policy";
 
 export type PartialStoryType = Partial<StorySelectType>;
 
@@ -74,4 +75,43 @@ export async function canUpdateStory(
  */
 export async function canSuspendStory(): Promise<boolean> {
     return hasPermission("story", ["suspend:all"]);
+}
+/**
+ * Calculate all permissions for a single story
+ */
+
+export async function calculateStoryPermissions(
+    user: UserSelectType | null | undefined,
+    story: { id: number; authorId: string; }
+): Promise<StoryPermissionsType> {
+    if (!user?.id) {
+        return {
+            canDelete: false,
+            canUpdate: false,
+            canCreate: false,
+            canSuspend: false,
+            canComment: false
+        };
+    }
+
+    const storyPermArgs = {
+        id: story.id,
+        authorId: story.authorId,
+    };
+
+    const [canDelete, canUpdate, canCreate, canSuspend, canComment] = await Promise.all([
+        await canDeleteStory(user, storyPermArgs),
+        await canUpdateStory(user, storyPermArgs),
+        await canCreateStory(),
+        await canSuspendStory(),
+        await canCreateComment()
+    ]);
+
+    return {
+        canDelete,
+        canUpdate,
+        canCreate,
+        canSuspend,
+        canComment
+    };
 }

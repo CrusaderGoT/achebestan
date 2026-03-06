@@ -13,7 +13,7 @@ const navigationState = {
     completeTimer: null as NodeJS.Timeout | null,
 };
 
-export function startNavigation() {
+function startNavigation() {
     // Clear any existing timers
     if (navigationState.progressTimer) {
         clearTimeout(navigationState.progressTimer);
@@ -35,7 +35,7 @@ export function startNavigation() {
     }, 200);
 }
 
-export function completeNavigation() {
+function completeNavigation() {
     const elapsed = Date.now() - navigationState.startTime;
     const minDuration = 300; // Minimum duration for smooth animation
 

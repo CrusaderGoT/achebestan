@@ -3,8 +3,9 @@
 import { CommentTreeProps } from "@/types/comment";
 import { StoryProps, StoryRatingProps } from "@/types/story";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
-import { Center, Divider, Stack, Text } from "@mantine/core";
-import { CommentTree } from "../comment/comment-tree";
+import { Stack } from "@mantine/core";
+import { CommentSection } from "../comment/comment-tree";
+import { BookPagination } from "./book-pagination";
 import { Story } from "./story";
 import { StoryActions } from "./story-actions";
 import { StoryRating } from "./story-rating";
@@ -45,19 +46,16 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
+            {story.bookId && story.bookPart && (
+                <BookPagination
+                    bookId={story.bookId}
+                    bookPart={story.bookPart}
+                />
+            )}
+
             <StoryActions permissions={story.permissions} {...story} />
 
-            <Divider
-                label={comments && comments.length > 0 ? "comments" : ""}
-            />
-
-            {comments && comments.length > 0 ? (
-                <CommentTree comments={comments} />
-            ) : (
-                <Center>
-                    <Text c={"dimmed"}>No Comments Yet...</Text>
-                </Center>
-            )}
+            <CommentSection comments={comments} />
         </Stack>
     );
 }

@@ -20,11 +20,11 @@ function HomeHero() {
                 <Title order={1}>Achebestan</Title>
                 <Text>Welcome to a world of Imagination.</Text>
                 <Text>
-                    Hi, I am Enemchukwu Chukwuemeka also known as{" "}
+                    Hi, I am{" "}
                     <Mark className={publicStyles.highlightText2}>
-                        Achebestan
-                    </Mark>
-                    . And you are currently at my Mind&apos;s Palace, this is a
+                        Achebestan.
+                    </Mark>{" "}
+                    And you are currently at my Mind&apos;s Palace, this is a
                     place where i post my fictional stories, concoctions of my
                     imagination, sensations of my life, and maybe a programming
                     standard or two.

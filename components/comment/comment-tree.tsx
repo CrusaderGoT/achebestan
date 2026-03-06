@@ -4,6 +4,8 @@ import publicStyles from "@/styles/public.module.css";
 
 import {
     ActionIcon,
+    Center,
+    Divider,
     Drawer,
     getTreeExpandedState,
     Group,
@@ -53,7 +55,7 @@ export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
 };
 
 // Main CommentTree component
-export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
+function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
     const mounted = useMounted();
     const { sessionUser } = useCentralizedAuth();
     const interactions = useCommentInteractions();
@@ -273,6 +275,30 @@ export function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     </Text>
                 )}
             </Drawer>
+        </>
+    );
+}
+
+export function CommentSection({
+    comments,
+}: {
+    comments?: CommentTreeProps[];
+}) {
+    if (!comments || comments.length < 1) {
+        return (
+            <Center>
+                <Text c={"dimmed"}>No Comments Yet...</Text>
+            </Center>
+        );
+    }
+
+    return (
+        <>
+            <Divider
+                label={comments && comments.length > 0 ? "comments" : ""}
+            />
+
+            <CommentTree comments={comments} />
         </>
     );
 }

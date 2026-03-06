@@ -16,7 +16,6 @@ import {
     createOrganization,
     getUserRole as getUserRoles,
 } from "./actions/auth";
-import { ORG_ROLES } from "./constants";
 import {
     admin as adminRole,
     customAccessControl,
@@ -25,6 +24,7 @@ import {
     superAdmin,
     writer,
 } from "./auth/permissions";
+import { ORG_ROLES } from "./constants";
 
 import "dotenv/config";
 
@@ -54,7 +54,6 @@ export const auth = betterAuth({
         enabled: true,
     },
     plugins: [
-        nextCookies(),
         admin({
             ac: customAccessControl,
             roles: {
@@ -127,6 +126,7 @@ export const auth = betterAuth({
                     .where(eq(user.id, anonymousUser.user.id));
             },
         }),
+        nextCookies(),
     ],
     databaseHooks: {
         user: {

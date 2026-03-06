@@ -34,22 +34,7 @@ export function HomePage({
                                 mt={{ base: 0, xs: index % 2 === 0 ? 0 : 100 }}
                                 key={index}
                             >
-                                <StoryBook
-                                    key={story.id}
-                                    id={story.id}
-                                    image={story.image}
-                                    title={story.title}
-                                    subtitle={story.subtitle}
-                                    alt={story.title}
-                                    authorName={story.author.name}
-                                    isbn={story.isbn}
-                                    content={story.content}
-                                    created={story.created}
-                                    edited={story.edited}
-                                    authorId={story.authorId}
-                                    bookId={story.bookId}
-                                    blurb={story.blurb}
-                                />
+                                <StoryBook {...story} />
                             </Grid.Col>
                         );
                     })}

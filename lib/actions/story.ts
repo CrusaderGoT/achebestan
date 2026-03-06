@@ -10,21 +10,20 @@ import { handleFileUpload } from "../utils/image-upload";
 
 import z from "zod/v4";
 
-import { SearchOptions, StoryPermissionsType } from "@/types/story";
+import { SearchOptions } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "../auth";
 import {
+    calculateStoryPermissions,
     canCreateStory,
     canDeleteStory,
-    canSuspendStory,
     canUpdateStory,
 } from "../auth/policies/story-policy";
 import { sendNotificationToAllSubscribers } from "../utils/pwa/send-to-subscriber";
 import { sanitizeHTML } from "../utils/sanitize-html";
-import { canCreateComment } from "../auth/policies";
 
 export const createStoryAction = authActionClient
     .inputSchema(storyInsertSchema, {
@@ -214,45 +213,6 @@ export const readStory = async (isbn: string) => {
     }
 };
 
-/**
- * Calculate all permissions for a single story
- */
-export async function calculateStoryPermissions(
-    user: UserSelectType | null | undefined,
-    story: { id: number; authorId: string }
-): Promise<StoryPermissionsType> {
-    if (!user?.id) {
-        return {
-            canDelete: false,
-            canUpdate: false,
-            canCreate: false,
-            canSuspend: false,
-            canComment: false
-        };
-    }
-
-    const storyPermArgs = {
-        id: story.id,
-        authorId: story.authorId,
-    };
-
-    const [canDelete, canUpdate, canCreate, canSuspend, canComment] = await Promise.all([
-        await canDeleteStory(user, storyPermArgs),
-        await canUpdateStory(user, storyPermArgs),
-        await canCreateStory(),
-        await canSuspendStory(),
-        await canCreateComment()
-    ]);
-
-    return {
-        canDelete,
-        canUpdate,
-        canCreate,
-        canSuspend,
-        canComment
-    };
-}
-
 export const readLatestStories = async (latest: number = 10) => {
     try {
         const latestStories = await db.query.story.findMany({
@@ -384,5 +344,33 @@ export async function searchStories(
     } catch (error) {
         console.error("Search error:", error);
         throw new Error("Failed to search stories");
+    }
+}
+
+export async function bookStories(
+    bookId: number,
+    offset: number,
+    limit: number = 10
+) {
+    try {
+        const bookStories = await db.query.story.findMany({
+            where(fields, operators) {
+                return operators.eq(fields.bookId, bookId);
+            },
+            limit: limit,
+            offset: (offset - 1) * limit,
+            orderBy(fields, operators) {
+                return operators.asc(fields.bookPart);
+            },
+            columns: {
+                isbn: true,
+                bookPart: true,
+            },
+        });
+
+        return bookStories;
+    } catch (error) {
+        console.error("Book stories error:", error);
+        throw new Error("Failed to get book stories");
     }
 }
