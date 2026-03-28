@@ -5,7 +5,7 @@ import { StoryProps, StoryRatingProps } from "@/types/story";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Stack } from "@mantine/core";
 import { CommentSection } from "../comment/comment-tree";
-import { BookPagination } from "./book-pagination";
+import { BookPagination } from "../book/book-pagination";
 import { Story } from "./story";
 import { StoryActions } from "./story-actions";
 import { StoryRating } from "./story-rating";

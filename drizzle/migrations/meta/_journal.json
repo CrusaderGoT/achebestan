@@ -253,6 +253,20 @@
       "when": 1772830116196,
       "tag": "0035_sticky_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1772838598740,
+      "tag": "0036_remarkable_aqueduct",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1772893671078,
+      "tag": "0037_natural_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

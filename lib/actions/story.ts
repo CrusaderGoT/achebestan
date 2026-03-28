@@ -346,31 +346,3 @@ export async function searchStories(
         throw new Error("Failed to search stories");
     }
 }
-
-export async function bookStories(
-    bookId: number,
-    offset: number,
-    limit: number = 10
-) {
-    try {
-        const bookStories = await db.query.story.findMany({
-            where(fields, operators) {
-                return operators.eq(fields.bookId, bookId);
-            },
-            limit: limit,
-            offset: (offset - 1) * limit,
-            orderBy(fields, operators) {
-                return operators.asc(fields.bookPart);
-            },
-            columns: {
-                isbn: true,
-                bookPart: true,
-            },
-        });
-
-        return bookStories;
-    } catch (error) {
-        console.error("Book stories error:", error);
-        throw new Error("Failed to get book stories");
-    }
-}

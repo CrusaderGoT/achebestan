@@ -1,6 +1,6 @@
 "use client";
 
-import { bookStories } from "@/lib/actions/story";
+import { getBookStories } from "@/lib/actions/book";
 import { Pagination } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -15,13 +15,13 @@ export function BookPagination({
     const router = useRouter();
 
     const [chapters, setChapters] = useState<
-        Awaited<ReturnType<typeof bookStories>>
+        Awaited<ReturnType<typeof getBookStories>>
     >([]);
 
     // fetch the book parts using the bookId
     useEffect(() => {
         async function getBookParts() {
-            const bookParts = await bookStories(bookId, bookPart);
+            const bookParts = await getBookStories(bookId, bookPart);
 
             if (bookParts) {
                 setChapters(bookParts);

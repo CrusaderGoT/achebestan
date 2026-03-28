@@ -1,10 +1,16 @@
 import { StoryInsertType } from "@/types/story";
-import { DBSchema, openDB, IDBPDatabase } from "idb";
+import { ComboboxItem } from "@mantine/core";
+import { DBSchema, IDBPDatabase, openDB } from "idb";
 
-export type StoryIndexDbSchemaType = StoryInsertType & {
+export type StoryIndexDbSchemaType = Omit<
+    StoryInsertType,
+    "bookId" | "bookPart"
+> & {
     id?: number;
     created: number;
     updated: number;
+    bookId?: ComboboxItem | null;
+    bookPart?: number | string;
 };
 
 export type StoryIndexDbSchema = DBSchema & {
@@ -63,7 +69,7 @@ export const saveDraft = async (
     if (draft.id) {
         // Updating existing draft
         const data: StoryIndexDbSchemaType = {
-            ...(draft as StoryInsertType),
+            ...(draft as StoryIndexDbSchemaType),
             id: draft.id,
             created: draft.created || now,
             updated: now,

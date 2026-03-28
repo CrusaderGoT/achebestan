@@ -12,6 +12,7 @@ import { storyInsertSchema } from "@/zod-schemas/story";
 import {
     Button,
     Checkbox,
+    type ComboboxItem,
     Group,
     Indicator,
     Loader,
@@ -22,7 +23,6 @@ import {
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
-import { createStoryAction } from "@/lib/actions/story";
 import {
     deleteDraft,
     getDraft,
@@ -30,22 +30,23 @@ import {
     storyIndexDB,
     StoryIndexDbSchemaType,
 } from "@/lib/index-db";
-import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import {
     useDisclosure,
     useThrottledCallback,
     useTimeout,
 } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
-import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { BooksSelect } from "@/components/book/books-select";
+import { useCreateStory } from "@/lib/hooks/story/create-story-hook";
+import {
+    toFormBookId,
+    toFormBookPart,
+} from "@/lib/utils/book/book-part-id-conversion";
 import { Drafts } from "./drafts";
 
 export function CreateStoryForm() {
-    const router = useRouter();
-
     const [synced, setSynced] = useState(false);
 
     const [drafts, setDrafts] = useState<StoryIndexDbSchemaType[]>([]);
@@ -58,73 +59,27 @@ export function CreateStoryForm() {
     const [openedDrafts, { toggle: toggleDrafts, close: closeDrafts }] =
         useDisclosure();
 
-    const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(false);
+    const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(true);
 
     const [savingDraft, setSavingDraft] = useState(false);
 
     const { start: stopSavingDraft, clear: clearOngoingStopSavingDraft } =
         useTimeout(() => setSavingDraft(false), 1000);
 
-    const { executeAsync, isPending, hasSucceeded } = useAction(
-        createStoryAction,
-        {
-            onSuccess(args) {
-                notifications.show({
-                    message: `Story '${args.data.title}' Has Been Published`,
-                });
+    const [bookId, setBookId] = useState<ComboboxItem | null>(null);
+    const [bookPart, setBookPart] = useState<string | number>("");
 
-                router.replace(`/story/${args.data.isbn}`);
-            },
-            onError(args) {
-                if (args.error.validationErrors) {
-                    console.log(args.error.validationErrors);
-                    Object.values(args.error.validationErrors).forEach(
-                        (errorList) => {
-                            errorList.forEach((errorMsg, index) =>
-                                notifications.show({
-                                    key: index,
-                                    message: `A Validation Error Occured -> ${errorMsg}`,
-                                })
-                            );
-                        }
-                    );
-                } else if (args.error.serverError) {
-                    console.log(args.error.serverError);
-                    notifications.show({
-                        message: args.error.serverError
-                            ? args.error.serverError
-                            : "A Server Error Ocured",
-                    });
-                } else if (args.error.thrownError) {
-                    if (isFeatureSupported(["serviceWorker", "SyncManager"])) {
-                        setSynced(true);
-
-                        notifications.show({
-                            title: "Story Has Been Queued.",
-                            message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
-                            autoClose: 7000,
-                        });
-
-                        router.replace("/");
-                    } else {
-                        notifications.show({
-                            message: "An Error Ocured",
-                        });
-                    }
-                } else {
-                    notifications.show({
-                        message: "An Unexpected Error Ocured",
-                    });
-                }
-            },
-        }
-    );
+    const {
+        executeAsync: executeAsyncCreateStory,
+        isPending: isPendingCreateStory,
+        hasSucceeded: hasSucceededCreateStory,
+    } = useCreateStory(setSynced);
 
     const form = useStoryForm({
         mode: "uncontrolled",
         validate: zod4Resolver(storyInsertSchema),
         enhanceGetInputProps: () => ({
-            disabled: hasSucceeded || isPending || synced,
+            disabled: hasSucceededCreateStory || isPendingCreateStory || synced,
         }),
     });
 
@@ -153,12 +108,27 @@ export function CreateStoryForm() {
             }
 
             try {
-                const draft = await getDraft(currentDraftId);
+                const draftData = await getDraft(currentDraftId);
 
-                if (draft) {
-                    form.reset(); // clear existing inputs first
+                if (draftData) {
+                    const {
+                        bookId: draftBookId,
+                        bookPart: draftBookPart,
+                        ...draft
+                    } = draftData;
+
+                    form.reset();
+                    setBookId(draftBookId ?? null); // UI state stays as ComboboxItem
+                    setBookPart(draftBookPart ?? ""); // UI state stays as string|number
                     setCurrentDraft(draft);
                     form.setValues(draft);
+                    // Single, explicit conversion for form values:
+                    form.setFieldValue("bookId", toFormBookId(draftBookId));
+                    form.setFieldValue(
+                        "bookPart",
+                        toFormBookPart(draftBookPart)
+                    );
+
                     if (openedDrafts) {
                         closeDrafts();
                     }
@@ -194,6 +164,8 @@ export function CreateStoryForm() {
                     id: currentDraft.id,
                     created: currentDraft.created,
                 }),
+                bookId, // store the full ComboboxItem so the label survives reload
+                bookPart, // store as-is (string|number) for the UI
             };
 
             const newDraftId = await saveDraft(draftData);
@@ -216,31 +188,6 @@ export function CreateStoryForm() {
             stopSavingDraft();
         }
     }, 1000);
-
-    const {
-        start: startSaveContentDraft,
-        clear: clearOngoingSaveContentDraft,
-    } = useTimeout(() => {
-        throttledSaveDraft();
-    }, 1000);
-
-    form.watch("content", ({ value, previousValue }) => {
-        if (previousValue !== value) {
-            clearOngoingSaveContentDraft(); // clear any ongoing timeout
-            startSaveContentDraft();
-        }
-    });
-
-    async function handleSubmit(data: StoryInsertType) {
-        await Promise.all([
-            await executeAsync({
-                ...data,
-            }),
-            currentDraftId &&
-                deleteDraftOnSubmit &&
-                (await handleDeleteDraft(currentDraftId)),
-        ]);
-    }
 
     async function handleDeleteDraft(draftId: number) {
         try {
@@ -269,6 +216,45 @@ export function CreateStoryForm() {
         }
     }
 
+    const {
+        start: startSaveContentDraft,
+        clear: clearOngoingSaveContentDraft,
+    } = useTimeout(() => {
+        throttledSaveDraft();
+    }, 1000);
+
+    form.watch("content", ({ value, previousValue }) => {
+        if (previousValue !== value) {
+            clearOngoingSaveContentDraft(); // clear any ongoing timeout
+            startSaveContentDraft();
+        }
+    });
+
+    // Effect for setting book part or Id when changed
+    useEffect(() => {
+        form.setFieldValue("bookId", toFormBookId(bookId));
+        form.setFieldValue("bookPart", toFormBookPart(bookPart));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bookId, bookPart]);
+
+    async function handleSubmit(data: StoryInsertType) {
+        if (bookId && !bookPart) {
+            notifications.show({
+                message: "A story in a book must have a chapter",
+                color: "yellow",
+            });
+            return;
+        }
+        await Promise.all([
+            await executeAsyncCreateStory({
+                ...data,
+            }),
+            currentDraftId &&
+                deleteDraftOnSubmit &&
+                (await handleDeleteDraft(currentDraftId)),
+        ]);
+    }
+
     return (
         <StoryFormProvider form={form}>
             <Paper withBorder p={"xs"}>
@@ -276,7 +262,11 @@ export function CreateStoryForm() {
                     <Indicator
                         color={currentDraft?.id ? "yellow" : "green"}
                         processing={!!currentDraft?.id}
-                        disabled={hasSucceeded || isPending || synced}
+                        disabled={
+                            hasSucceededCreateStory ||
+                            isPendingCreateStory ||
+                            synced
+                        }
                         zIndex={20}
                     />
 
@@ -333,7 +323,18 @@ export function CreateStoryForm() {
                     onChange={throttledSaveDraft}
                 >
                     <StoryFormFields
-                        isProcessing={isPending || hasSucceeded || synced}
+                        isProcessing={
+                            isPendingCreateStory ||
+                            hasSucceededCreateStory ||
+                            synced
+                        }
+                    />
+
+                    <BooksSelect
+                        bookId={bookId}
+                        setBookId={setBookId}
+                        bookPart={bookPart}
+                        setBookPart={setBookPart}
                     />
 
                     <Group mt="md">
@@ -341,7 +342,11 @@ export function CreateStoryForm() {
                             type="submit"
                             color="green"
                             mr={"auto"}
-                            loading={isPending || hasSucceeded || synced}
+                            loading={
+                                isPendingCreateStory ||
+                                hasSucceededCreateStory ||
+                                synced
+                            }
                         >
                             Submit
                         </Button>
