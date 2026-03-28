@@ -24,7 +24,7 @@ import { useCallback, useEffect, useState } from "react";
 
 // Define search options interface to match the improved function
 interface SearchState {
-    results: Omit<StorySelectType, "content">[];
+    results: Omit<StorySelectType, "content" | "bookPart">[];
     loading: boolean;
     hasSearched: boolean;
 }
