@@ -3,6 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { NavLink, UnstyledButton } from "@mantine/core";
 import {
+    Icon,
     IconBook,
     IconCoffee,
     IconMail,
@@ -18,7 +19,17 @@ import cx from "clsx";
 import { useEffect, useState } from "react";
 import { NavigationLink } from "../ui/route-navigation-progress";
 
-const baseNavlinkData = [
+type NavLinkData = {
+    icon: Icon;
+    label: string;
+    href: string;
+    description?: string;
+    rightSection?: React.JSX.Element;
+    requiresCheck?: string;
+    redirect?: boolean;
+};
+
+const baseNavlinkData: NavLinkData[] = [
     {
         icon: IconWriting,
         label: "New Story",
@@ -43,8 +54,9 @@ const baseNavlinkData = [
         icon: IconCoffee,
         label: "Buy Me Coffe",
         description: "Support me",
-        href: "/#",
+        href: "https://ko-fi.com/achebestan",
         rightSection: <IconMoneybagPlus size={16} stroke={1.5} />,
+        redirect: true,
     },
 ];
 
@@ -86,6 +98,7 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
                         closeNavbar();
                     }
                 }}
+                target={item.redirect ? "_blank" : ""}
             />
         );
     });
