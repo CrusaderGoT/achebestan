@@ -13,11 +13,8 @@ import z from "zod/v4";
 import { SearchOptions } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { auth } from "../auth";
 import {
-    calculateStoryPermissions,
     canCreateStory,
     canDeleteStory,
     canUpdateStory,
@@ -179,11 +176,6 @@ export const updateStoryAction = authActionClient
 
 export const readStory = async (isbn: string) => {
     try {
-        // Get session for permission calculation
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
-
         const storyDb = await db.query.story.findFirst({
             where(story, operators) {
                 return operators.eq(story.isbn, isbn);
@@ -196,17 +188,8 @@ export const readStory = async (isbn: string) => {
 
         if (!storyDb) throw notFound();
 
-        const storyPerms = await calculateStoryPermissions(
-            session?.user as UserSelectType,
-            {
-                id: storyDb.id,
-                authorId: storyDb.authorId,
-            }
-        );
-
         return {
             ...storyDb,
-            permissions: storyPerms,
         };
     } catch (e) {
         console.log(e);

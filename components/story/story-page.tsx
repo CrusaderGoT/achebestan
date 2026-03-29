@@ -1,11 +1,19 @@
 "use client";
 
+import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { calculateStoryPermissions } from "@/lib/auth/policies/story-policy";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryProps, StoryRatingProps } from "@/types/story";
+import {
+    StoryPermissionsType,
+    StoryProps,
+    StoryRatingProps,
+} from "@/types/story";
+import { UserSelectType } from "@/types/user";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Stack } from "@mantine/core";
-import { CommentSection } from "../comment/comment-tree";
+import { useEffect, useState } from "react";
 import { BookPagination } from "../book/book-pagination";
+import { CommentSection } from "../comment/comment-tree";
 import { Story } from "./story";
 import { StoryActions } from "./story-actions";
 import { StoryRating } from "./story-rating";
@@ -21,6 +29,29 @@ export function StoryPageClient({
     comments,
     userRating,
 }: StoryPageClientProps) {
+    const {
+        sessionUser: { data: session },
+    } = useCentralizedAuth();
+
+    const [permissions, setPermission] = useState<
+        StoryPermissionsType | undefined
+    >();
+
+    useEffect(() => {
+        const setStoryPerms = async () => {
+            const perms = await calculateStoryPermissions(
+                session?.user as UserSelectType,
+                {
+                    id: story.id,
+                    authorId: story.authorId,
+                }
+            );
+            setPermission(perms);
+        };
+        setStoryPerms();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session?.user?.id]);
+
     return (
         <Stack>
             <Story
@@ -37,7 +68,7 @@ export function StoryPageClient({
                 bookId={story.bookId}
                 bookPart={story.bookPart}
                 blurb={story.blurb}
-                permissions={story.permissions}
+                permissions={permissions}
             />
 
             <StoryRating
@@ -53,7 +84,7 @@ export function StoryPageClient({
                 />
             )}
 
-            <StoryActions permissions={story.permissions} {...story} />
+            <StoryActions permissions={permissions} {...story} />
 
             <CommentSection comments={comments} />
         </Stack>
