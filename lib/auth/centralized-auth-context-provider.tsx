@@ -15,14 +15,15 @@ const CentralizedAuthContext = createContext<CentralizedAuthContextType>({
         data: null,
         isPending: true,
         error: null,
-        refetch: () => null,
+        refetch: async () => {},
+        isRefetching: false,
     },
     currentOrganization: {
         data: null,
         isPending: true,
         isRefetching: false,
         error: null,
-        refetch: () => null,
+        refetch: async () => {},
     },
 });
 
