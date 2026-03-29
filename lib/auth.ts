@@ -1,19 +1,17 @@
 import { db } from "@/drizzle";
 
 import * as authSchemas from "@/drizzle/schemas/user";
-import { betterAuth } from "better-auth";
+import { betterAuth, generateId } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
 
 import { user } from "@/drizzle/schemas/user";
 import { nextCookies } from "better-auth/next-js";
 import { admin, anonymous, organization } from "better-auth/plugins";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
     addUserToOrganization,
-    checkIfOrganizationExist,
     checkIfUserIsMember,
-    createOrganization,
     getUserRole as getUserRoles,
 } from "./actions/auth";
 import {
@@ -28,22 +26,21 @@ import { ORG_ROLES } from "./constants";
 
 import "dotenv/config";
 
-const envadminIdList = process.env.ADMIN_IDS;
-
-let adminIdList: string[] = [];
-
-if (envadminIdList) {
+const adminIdList = (() => {
     try {
-        adminIdList = JSON.parse(envadminIdList);
-    } catch (e) {
-        console.log("Failed to parse ADMIN_IDS", e);
+        const ids = JSON.parse(process.env.ADMIN_IDS || "[]");
+        return Array.isArray(ids) ? ids : [];
+    } catch {
+        console.error("Invalid ADMIN_IDS format");
+        return [];
     }
-}
+})();
 
 export const orgName = "achebestan";
 export const orgSlug = "achebestan";
 
 export const auth = betterAuth({
+    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     database: drizzleAdapter(db, {
         provider: "pg", // or "mysql", "sqlite"
         schema: {
@@ -78,13 +75,13 @@ export const auth = betterAuth({
 
                 return roles.includes(ORG_ROLES.superAdmin);
             },
-            organizationCreation: {
-                beforeCreate: async ({ organization: org, user }) => {
-                    // check if name exists already
+            organizationHooks: {
+                beforeCreateOrganization: async ({ organization, user }) => {
                     const exists = await db.query.organization.findFirst({
-                        where(fields, operators) {
-                            return operators.eq(fields.name, org.name);
-                        },
+                        where: eq(
+                            authSchemas.organization.name,
+                            organization.name || ""
+                        ),
                     });
 
                     if (exists) {
@@ -92,38 +89,42 @@ export const auth = betterAuth({
                             message: "Organization Name Is Already Taken",
                         });
                     }
+
                     return {
                         data: {
-                            ...org,
-                            metadata: {
-                                createdBy: user,
-                            },
+                            ...organization,
+                            metadata: { createdBy: user },
                         },
                     };
                 },
             },
         }),
         anonymous({
-            disableDeleteAnonymousUser: true, // since the anon user is updated
+            disableDeleteAnonymousUser: true,
             onLinkAccount: async ({ anonymousUser, newUser }) => {
-                // delete new user to avoid conflicts, since we want just its details
-                const [deletedNewUser] = await db
-                    .delete(user)
-                    .where(eq(user.id, newUser.user.id))
-                    .returning();
+                await db.transaction(async (tx) => {
+                    // Delete new user
+                    const [deletedNewUser] = await tx
+                        .delete(user)
+                        .where(eq(user.id, newUser.user.id))
+                        .returning();
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { id, ...details } = deletedNewUser;
+                    if (!deletedNewUser)
+                        throw new Error("Failed to delete new user");
 
-                // update the anon user with deletedNewUser detail
-                await db
-                    .update(user)
-                    .set({
-                        ...details,
-                        role: "user",
-                        isAnonymous: false,
-                    })
-                    .where(eq(user.id, anonymousUser.user.id));
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { id, ...details } = deletedNewUser;
+
+                    // Update anonymous user
+                    await tx
+                        .update(user)
+                        .set({
+                            ...details,
+                            role: "user",
+                            isAnonymous: false,
+                        })
+                        .where(eq(user.id, anonymousUser.user.id));
+                });
             },
         }),
         nextCookies(),
@@ -133,39 +134,47 @@ export const auth = betterAuth({
             create: {
                 after: async (user) => {
                     try {
-                        // Check if organization exists
-                        let org = await checkIfOrganizationExist(orgSlug);
+                        // Use a transaction or unique constraint to prevent race conditions
+                        const org = await db.transaction(async (tx) => {
+                            // Check again inside transaction
+                            const existing =
+                                await tx.query.organization.findFirst({
+                                    where: eq(
+                                        authSchemas.organization.slug,
+                                        orgSlug
+                                    ),
+                                });
 
-                        // Create organization if it doesn't exist
-                        if (!org || org.length === 0) {
-                            const newOrg = await createOrganization(
-                                orgName,
-                                orgSlug
-                            );
+                            if (existing) return existing;
 
-                            org = [newOrg];
-                            console.log(`Created organization: ${orgName}`);
-                        }
+                            // Create if not exists
+                            const [newOrg] = await tx
+                                .insert(authSchemas.organization)
+                                .values({
+                                    id: generateId(),
+                                    name: orgName,
+                                    slug: orgSlug,
+                                    createdAt: new Date(),
+                                })
+                                .returning();
+                            return newOrg;
+                        });
 
-                        // Check if user is already a member
+                        // Check membership and add if needed
                         const existingMember = await checkIfUserIsMember(
                             user.id,
-                            org[0].id
+                            org.id
                         );
-
-                        // Add user to organization if not already a member
-                        if (!existingMember || existingMember.length === 0) {
-                            await addUserToOrganization(user.id, org[0].id);
-
-                            console.log(
-                                `Added user ${user.id} to organization ${orgName}`
-                            );
+                        if (!existingMember?.length) {
+                            await addUserToOrganization(user.id, org.id);
                         }
                     } catch (error) {
                         console.error(
-                            "Failed to add user to organization:",
+                            "Failed to setup user organization:",
                             error
                         );
+                        // Consider: should user creation fail if org setup fails?
+                        // throw error; // Uncomment if this is critical
                     }
                 },
             },
@@ -174,75 +183,27 @@ export const auth = betterAuth({
             create: {
                 before: async (session) => {
                     try {
-                        // Try to find the org where the user is already a member
-                        const [foundOrg] = await db
+                        // Just find existing membership - don't create here
+                        const [member] = await db
                             .select({
-                                id: authSchemas.organization.id,
-                                name: authSchemas.organization.name,
+                                orgId: authSchemas.member.organizationId,
                             })
-                            .from(authSchemas.organization)
-                            .innerJoin(
-                                authSchemas.member,
-                                eq(
-                                    authSchemas.organization.id,
-                                    authSchemas.member.organizationId
-                                )
-                            )
+                            .from(authSchemas.member)
                             .where(
-                                and(
-                                    eq(authSchemas.organization.slug, orgSlug),
-                                    eq(
-                                        authSchemas.member.userId,
-                                        session.userId
-                                    )
-                                )
+                                eq(authSchemas.member.userId, session.userId)
                             )
                             .limit(1);
-
-                        if (foundOrg) {
+                        if (member) {
                             return {
                                 data: {
                                     ...session,
-                                    activeOrganizationId: foundOrg.id,
+                                    activeOrganizationId: member.orgId,
                                 },
                             };
                         }
-
-                        // Ensure the organization exists (create if missing)
-                        let orgs = await checkIfOrganizationExist(orgSlug);
-                        if (!orgs || orgs.length === 0) {
-                            const newOrg = await createOrganization(
-                                orgName,
-                                orgSlug
-                            );
-                            orgs = [newOrg];
-                            console.log(`Created organization: ${orgName}`);
-                        }
-                        const orgId = orgs[0].id;
-
-                        // Ensure the user is a member (add if missing)
-                        const member = await checkIfUserIsMember(
-                            session.userId,
-                            orgId
-                        );
-                        if (!member || member.length === 0) {
-                            await addUserToOrganization(session.userId, orgId);
-                            console.log(
-                                `Added user ${session.userId} to organization ${orgName}`
-                            );
-                        }
-
-                        return {
-                            data: {
-                                ...session,
-                                activeOrganizationId: orgId,
-                            },
-                        };
+                        return { data: session };
                     } catch (error) {
-                        console.error(
-                            "Failed to set active organization:",
-                            error
-                        );
+                        console.error("Failed to set active org:", error);
                         return { data: session };
                     }
                 },
@@ -257,5 +218,9 @@ export const auth = betterAuth({
     rateLimit: {
         window: 60,
         max: 50,
+        customRules: {
+            "/sign-in/email": { window: 60 * 15, max: 5 }, // Stricter for login
+            "/sign-up/email": { window: 60 * 60, max: 3 }, // Very strict for signup
+        },
     },
 });

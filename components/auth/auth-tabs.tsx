@@ -17,9 +17,9 @@ import {
     ScrollArea,
     Stack,
     Tabs,
-    Text,
+    Text
 } from "@mantine/core";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
@@ -62,15 +62,12 @@ export function AuthTabs({
 }: AuthTabsProps) {
     const { sessionUser, currentOrganization } = useCentralizedAuth();
 
-    const noPermissions: SitePermissionsType = useMemo(
-        () => ({
-            canCreateOrganization: false,
-            canCreateSuperAdmin: false,
-            canManageOrganization: false,
-            canDeleteOrganization: false,
-        }),
-        []
-    );
+    const noPermissions: SitePermissionsType = {
+        canCreateOrganization: false,
+        canCreateSuperAdmin: false,
+        canManageOrganization: false,
+        canDeleteOrganization: false,
+    };
 
     const [permissions, setPermissions] =
         useState<SitePermissionsType>(noPermissions);
@@ -106,11 +103,10 @@ export function AuthTabs({
             };
         }
         getSitePermissions().then(setPermissions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         currentOrganization.data?.id,
-        currentOrganization.isPending,
         sessionUser.data?.user.id,
-        noPermissions,
     ]);
 
     if (sessionUser.isPending || currentOrganization.isPending) {
@@ -246,8 +242,7 @@ export function AuthTabs({
                 <Tabs.Panel value={AUTH_TABS.default} pt="sm">
                     <Text fw={700} ta="center">
                         This is the Authentication Drawer. Select a Tab to
-                        start. Current User:{" "}
-                        {sessionUser.data?.user.name}
+                        start. Current User: {sessionUser.data?.user.name} {JSON.stringify(currentOrganization.data)}
                     </Text>
                 </Tabs.Panel>
             </ScrollArea>

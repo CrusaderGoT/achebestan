@@ -18,32 +18,6 @@ export async function getUserRole(userId: string) {
     return role;
 }
 
-export async function checkIfOrganizationExist(orgSlug: string) {
-    const org = await db
-        .select()
-        .from(authSchemas.organization)
-        .where(eq(authSchemas.organization.slug, orgSlug))
-        .limit(1);
-    return org;
-}
-
-export async function createOrganization(orgName: string, orgSlug: string) {
-    const [newOrg] = await db
-        .insert(authSchemas.organization)
-        .values({
-            id: generateId(),
-            name: orgName,
-            slug: orgSlug,
-            createdAt: new Date(),
-            metadata: JSON.stringify({
-                defaultOrg: true,
-            }),
-        })
-        .returning();
-
-    return newOrg;
-}
-
 export async function checkIfUserIsMember(userId: string, orgId: string) {
     const existingMember = await db
         .select()

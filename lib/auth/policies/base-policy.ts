@@ -21,7 +21,7 @@ export async function hasPermission<R extends PermissionResource>(
         const result = await auth.api.userHasPermission({
             headers: await headers(),
             body: {
-                permission: {
+                permissions: {
                     [resource]: permissions,
                 },
             },
@@ -35,7 +35,7 @@ export async function hasPermission<R extends PermissionResource>(
         const orgResult = await auth.api.hasPermission({
             headers: await headers(),
             body: {
-                permission: {
+                permissions: {
                     [resource]: permissions,
                 },
             },

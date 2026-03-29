@@ -14,6 +14,10 @@ import {
 } from "./auth/permissions";
 
 export const authClient = createAuthClient({
+    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    fetchOptions: {
+        credentials: "include",
+    },
     plugins: [
         adminClient({
             ac: customAccessControl,
@@ -22,7 +26,6 @@ export const authClient = createAuthClient({
                 admin: adminRole,
             },
         }),
-        anonymousClient(),
         organizationClient({
             ac: customAccessControl,
             roles: {
@@ -32,5 +35,9 @@ export const authClient = createAuthClient({
                 member,
             },
         }),
+        anonymousClient(),
     ],
 });
+
+// Export types for convenience
+export type AuthClient = typeof authClient;
