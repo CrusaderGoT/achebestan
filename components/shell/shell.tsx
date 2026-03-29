@@ -41,7 +41,7 @@ export function Shell({
                 collapsed: { desktop: true, mobile: !openedNavBar },
             }}
         >
-            <AppShell.Header zIndex={300}>
+            <AppShell.Header>
                 <Group
                     className={shellStyles.headerGroup}
                     flex={1}

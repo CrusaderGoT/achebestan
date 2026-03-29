@@ -15,9 +15,11 @@ import { usePathname } from "next/navigation";
 
 import { canCreateStory } from "@/lib/auth/policies";
 import shellStyles from "@/styles/shell.module.css";
+import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { NavigationLink } from "../ui/route-navigation-progress";
+import { KofiIframe } from "./kofi-iframe";
 
 type NavLinkData = {
     icon: Icon;
@@ -54,7 +56,7 @@ const baseNavlinkData: NavLinkData[] = [
         icon: IconCoffee,
         label: "Buy Me Coffe",
         description: "Support me",
-        href: "https://ko-fi.com/achebestan",
+        href: "kofi",
         rightSection: <IconMoneybagPlus size={16} stroke={1.5} />,
         redirect: true,
     },
@@ -68,6 +70,8 @@ type NavLinkProps = {
 export function NavLinks({ session, closeNavbar }: NavLinkProps) {
     const pathname = usePathname();
     const [canCreate, setCanCreate] = useState<boolean | null>(null);
+    const [openedKofiIframe, { open: openKofiIframe, close: closeKofiIframe }] =
+        useDisclosure(false);
 
     useEffect(() => {
         const checkPermissions = async () => {
@@ -81,6 +85,33 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
         // Hide "New Story" if user cannot create stories
         if (item.requiresCheck === "canCreateStory" && !canCreate) {
             return null;
+        }
+
+        if (item.href === "kofi") {
+            return (
+                <Fragment key={`${item.label}-${index}`}>
+                    <NavLink
+                        href={"/#"}
+                        active={openedKofiIframe}
+                        label={item.label}
+                        description={item.description}
+                        rightSection={item.rightSection}
+                        leftSection={<item.icon size={16} stroke={1.5} />}
+                        onClick={() => {
+                            openKofiIframe();
+
+                            if (closeNavbar) {
+                                closeNavbar();
+                            }
+                        }}
+                    />
+
+                    <KofiIframe
+                        opened={openedKofiIframe}
+                        close={closeKofiIframe}
+                    />
+                </Fragment>
+            );
         }
 
         return (
@@ -110,6 +141,9 @@ export function AltNavLinks({ session }: NavLinkProps) {
     const pathname = usePathname();
     const [canCreate, setCanCreate] = useState<boolean | null>(null);
 
+    const [openedKofiIframe, { open: openKofiIframe, close: closeKofiIframe }] =
+        useDisclosure(false);
+
     useEffect(() => {
         const checkPermissions = async () => {
             const result = await canCreateStory();
@@ -122,6 +156,30 @@ export function AltNavLinks({ session }: NavLinkProps) {
         // Hide "New Story" if user cannot create stories
         if (item.requiresCheck === "canCreateStory" && !canCreate) {
             return null;
+        }
+
+        if (item.href === "kofi") {
+            return (
+                <Fragment key={`${item.label}-${index}`}>
+                    <UnstyledButton
+                        key={index}
+                        className={cx(
+                            shellStyles.mobileNavBar,
+                            openedKofiIframe && shellStyles.mobileNavBarActive
+                        )}
+                        onClick={() => {
+                            openKofiIframe();
+                        }}
+                    >
+                        {item.label}
+                    </UnstyledButton>
+
+                    <KofiIframe
+                        opened={openedKofiIframe}
+                        close={closeKofiIframe}
+                    />
+                </Fragment>
+            );
         }
 
         return (
