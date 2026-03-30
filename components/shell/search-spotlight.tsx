@@ -14,7 +14,11 @@ import {
     Text,
     TextInput,
 } from "@mantine/core";
-import { useDebouncedCallback, useIsFirstRender } from "@mantine/hooks";
+import {
+    useDebouncedCallback,
+    useIsFirstRender,
+    useMounted,
+} from "@mantine/hooks";
 import { nprogress } from "@mantine/nprogress";
 import { Spotlight, spotlight } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
@@ -30,6 +34,8 @@ interface SearchState {
 }
 
 export function SearchSpotlight() {
+    const mounted = useMounted();
+
     const router = useRouter();
 
     const pathname = usePathname();
@@ -67,7 +73,7 @@ export function SearchSpotlight() {
         }
 
         loadInitialStories();
-    }, [firstRendered, searchState.hasSearched]);
+    });
 
     // Handle search with improved function
     const performSearch = useCallback(async (query: string) => {
@@ -132,8 +138,9 @@ export function SearchSpotlight() {
 
     const [activeLink, setActiveLink] = useState<string | undefined>(undefined);
 
+    //effect for nav progress for seach menu
     useEffect(() => {
-        if (!activeLink) return;
+        if (!activeLink || !mounted) return;
 
         if (pathname === activeLink) {
             // Complete progress when we reach the target or if already there
@@ -143,6 +150,7 @@ export function SearchSpotlight() {
 
             return () => clearTimeout(timer);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, activeLink]);
 
     // Render spotlight actions

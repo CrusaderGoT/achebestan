@@ -2,7 +2,7 @@
 // utils/bookmark-renderer.ts - Fixed logic bugs and improved performance
 // ==============================================================================
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
-import { Bookmark } from "../../types/bookmark";
+import { Bookmark } from "../../../types/bookmark";
 
 let renderTimeout: NodeJS.Timeout | null = null;
 

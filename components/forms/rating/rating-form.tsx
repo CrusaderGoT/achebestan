@@ -32,7 +32,7 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconTrashFilled } from "@tabler/icons-react";
 import cx from "clsx";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 type RatingFormProps = {
     storyISBN: string;
     userId: string;
@@ -72,13 +72,8 @@ export function RatingForm({
         isPending: isPendingDeleteRating,
     } = useDeleteRating();
 
-    const [commentChanged, setCommentChanged] = useState(false);
-
-    useEffect(() => {
-        const currentComment = comment?.trim() || "";
-        const existingComment = userRating?.comment?.text?.trim() || "";
-        setCommentChanged(currentComment !== existingComment);
-    }, [comment, userRating?.comment?.text]);
+    const commentChanged =
+        (comment?.trim() || "") !== (userRating?.comment?.text?.trim() || "");
 
     async function saveRating(
         data: RatingSelectType,

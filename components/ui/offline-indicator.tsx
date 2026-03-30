@@ -1,5 +1,3 @@
-"use client";
-
 // components/OfflineIndicator.tsx
 "use client";
 
@@ -9,8 +7,6 @@ export function OfflineIndicator() {
     const [isOnline, setIsOnline] = useState(true);
 
     useEffect(() => {
-        setIsOnline(navigator.onLine);
-
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
 

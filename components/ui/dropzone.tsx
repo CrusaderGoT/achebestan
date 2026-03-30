@@ -145,7 +145,8 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
         if (!hiddenDropzone && form.values.image.length > 0) {
             form.setFieldValue(field, []);
         }
-    }, [hiddenDropzone, field, form.values.image?.length, form]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hiddenDropzone, field, form.values.image?.length]);
 
     form.watch(field, ({ value }) => {
         if (typeof value === "object" && value) {
@@ -240,7 +241,7 @@ function UploadImageDropZone({
 
         const timer = setTimeout(() => setError(null), 5000);
         return () => clearTimeout(timer);
-    }, [error, setError]);
+    }, [error]);
 
     async function upload(file: File) {
         setUploading(true);
@@ -387,7 +388,7 @@ export function UploadDropZone({
 
         const timer = setTimeout(() => setError(null), 5000);
         return () => clearTimeout(timer);
-    }, [error, setError]);
+    }, [error]);
 
     const upload = useCallback(
         async (file: File) => {
@@ -463,7 +464,8 @@ export function UploadDropZone({
         } else {
             return;
         }
-    }, [image, upload, uploadFromOutside]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [image, uploadFromOutside]);
 
     return (
         <>

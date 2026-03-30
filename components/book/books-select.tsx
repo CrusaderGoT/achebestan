@@ -38,8 +38,6 @@ export function BooksSelect({
     }, [sessionUser.data?.user.id]);
 
     useEffect(() => {
-        if (!userId) return;
-
         async function getUserBooksEffect() {
             if (!userId) return;
 

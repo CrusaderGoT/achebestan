@@ -26,7 +26,7 @@ export const useWebShare = () => {
 
         const timer = setTimeout(() => setError(null), 5000);
         return () => clearTimeout(timer);
-    }, [error, setError]);
+    }, [error]);
 
     const share = useCallback(async (data: ShareData) => {
         // try and share

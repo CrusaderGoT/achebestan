@@ -72,7 +72,7 @@ export function AuthTabs({
     const [permissions, setPermissions] =
         useState<SitePermissionsType>(noPermissions);
 
-    //useEffect for assigning permission
+    //useEffect for assigning site permission
     useEffect(() => {
         async function getSitePermissions(): Promise<SitePermissionsType> {
             if (

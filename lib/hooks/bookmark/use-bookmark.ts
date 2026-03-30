@@ -8,7 +8,7 @@ import {
     RenderResult,
     shouldReRenderBookmarks,
     shouldUpdateBookmarkContext,
-} from "@/lib/utils/bookmark-renderer";
+} from "@/lib/utils/bookmark/bookmark-renderer";
 import styles from "@/styles/bookmark/bookmark-indicator.module.css";
 import { Bookmark } from "@/types/bookmark";
 import { useLocalStorage } from "@mantine/hooks";

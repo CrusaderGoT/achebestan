@@ -48,7 +48,8 @@ export function ListOrganizations({
             });
         }
         handleSwitchActiveOrg();
-    }, [value, activeOrg?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value?.id]);
 
     if (!organizations || organizations.length === 0)
         return (

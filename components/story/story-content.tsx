@@ -5,7 +5,7 @@ import { useContextMenuBookmark } from "@/lib/hooks/bookmark/use-context-menu-bo
 import {
     forceRenderBookmarkIndicators,
     shouldReRenderBookmarks,
-} from "@/lib/utils/bookmark-renderer";
+} from "@/lib/utils/bookmark/bookmark-renderer";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import {
     estimateReadingTime,

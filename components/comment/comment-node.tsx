@@ -58,7 +58,8 @@ export function CommentNode({
         if (expanded && showDrawerButton) {
             tree.collapse(node.value);
         }
-    }, [expanded, showDrawerButton, tree, node.value]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [expanded, showDrawerButton]);
 
     if (!comment) return null;
 
@@ -115,6 +116,10 @@ export function CommentNode({
 
                         {!comment.hasBeenDeleted && (
                             <LikeDislikeButton
+                                key={
+                                    userReaction?.id ??
+                                    `${comment.id}-no-reaction`
+                                }
                                 commentId={comment.id}
                                 likes={likes}
                                 dislikes={dislikes}

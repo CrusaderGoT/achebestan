@@ -20,12 +20,7 @@ export function FavouriteStory({
 
     // Fetch initial favourite status
     useEffect(() => {
-        if (!userId) {
-            setIsInitializing(false);
-            return;
-        }
-
-        setIsInitializing(true);
+        if (!userId) return;
 
         const fetchFavouriteStatus = async () => {
             const curFav = await getfavouriteUserStory(userId, storyId);

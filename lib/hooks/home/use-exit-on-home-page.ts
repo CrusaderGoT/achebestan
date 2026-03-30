@@ -71,5 +71,5 @@ export function useExitOnHomePage() {
         return () => {
             window.removeEventListener("popstate", handlePopState);
         };
-    }, []); // Empty dependency array - only run once on mount
+    }, []);
 }

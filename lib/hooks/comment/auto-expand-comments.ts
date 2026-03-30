@@ -44,7 +44,8 @@ export function useAutoExpandNewComments({
         } catch (error) {
             console.error("Error auto-expanding comments:", error);
         }
-    }, [commentsNodeData, tree]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [commentsNodeData]);
 
     const reset = () => {
         autoExpandedRef.current.clear();

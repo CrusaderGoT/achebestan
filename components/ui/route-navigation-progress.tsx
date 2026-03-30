@@ -94,7 +94,8 @@ export function RouteNavigationProgress() {
             // Complete the navigation
             completeNavigation();
         }
-    }, [pathname, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname]);
 
     // Cleanup on unmount
     useEffect(() => {

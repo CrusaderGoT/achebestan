@@ -14,7 +14,7 @@ import {
     IconThumbUp,
     IconThumbUpFilled,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type LikeDislikeButtonProps = {
     commentId: number;
@@ -56,11 +56,6 @@ export function LikeDislikeButton({
     const [dislikeReaction, setDislikeReaction] = useState<boolean | undefined>(
         userReaction?.disliked ?? undefined
     );
-
-    useEffect(() => {
-        setDislikeReaction(userReaction?.disliked ?? undefined);
-        setLikeReaction(userReaction?.liked ?? undefined);
-    }, [userReaction, sessionUser.data?.user.id]);
 
     return (
         <ActionIcon.Group>
