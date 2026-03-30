@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import { NavLink, UnstyledButton } from "@mantine/core";
 import {
     Icon,
@@ -13,11 +12,10 @@ import {
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 
-import { canCreateStory } from "@/lib/auth/policies";
 import shellStyles from "@/styles/shell.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { NavigationLink } from "../ui/route-navigation-progress";
 import { KofiIframe } from "./kofi-iframe";
 
@@ -63,27 +61,18 @@ const baseNavlinkData: NavLinkData[] = [
 ];
 
 type NavLinkProps = {
-    session: ReturnType<typeof authClient.useSession>["data"];
+    canCreateStory: boolean;
     closeNavbar?: () => void;
 };
 
-export function NavLinks({ session, closeNavbar }: NavLinkProps) {
+export function NavLinks({ canCreateStory, closeNavbar }: NavLinkProps) {
     const pathname = usePathname();
-    const [canCreate, setCanCreate] = useState<boolean | null>(null);
     const [openedKofiIframe, { open: openKofiIframe, close: closeKofiIframe }] =
         useDisclosure(false);
 
-    useEffect(() => {
-        const checkPermissions = async () => {
-            const result = await canCreateStory();
-            setCanCreate(result);
-        };
-        checkPermissions();
-    }, [session?.user?.id]);
-
     const items = baseNavlinkData.map((item, index) => {
         // Hide "New Story" if user cannot create stories
-        if (item.requiresCheck === "canCreateStory" && !canCreate) {
+        if (item.requiresCheck === "canCreateStory" && !canCreateStory) {
             return null;
         }
 
@@ -137,24 +126,15 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
     return <>{items}</>;
 }
 
-export function AltNavLinks({ session }: NavLinkProps) {
+export function AltNavLinks({ canCreateStory }: NavLinkProps) {
     const pathname = usePathname();
-    const [canCreate, setCanCreate] = useState<boolean | null>(null);
 
     const [openedKofiIframe, { open: openKofiIframe, close: closeKofiIframe }] =
         useDisclosure(false);
 
-    useEffect(() => {
-        const checkPermissions = async () => {
-            const result = await canCreateStory();
-            setCanCreate(result);
-        };
-        checkPermissions();
-    }, [session?.user?.id]);
-
     const items = baseNavlinkData.map((item, index) => {
         // Hide "New Story" if user cannot create stories
-        if (item.requiresCheck === "canCreateStory" && !canCreate) {
+        if (item.requiresCheck === "canCreateStory" && !canCreateStory) {
             return null;
         }
 

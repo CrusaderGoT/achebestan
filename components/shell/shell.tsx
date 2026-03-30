@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { canCreateStory } from "@/lib/auth/policies/story-policy";
+import { useEffect, useState } from "react";
 import { OfflineIndicator } from "./offline-indicator";
 
 export function Shell({
@@ -31,6 +33,16 @@ export function Shell({
 
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
+
+    const [canCreate, setCanCreate] = useState<boolean>(false);
+
+    useEffect(() => {
+        const checkPermissions = async () => {
+            const result = await canCreateStory();
+            setCanCreate(result);
+        };
+        checkPermissions();
+    }, [sessionUser.data?.user.id]);
 
     return (
         <AppShell
@@ -67,7 +79,7 @@ export function Shell({
                         visibleFrom="lg"
                     >
                         {!sessionUser.isPending && (
-                            <AltNavLinks session={sessionUser.data} />
+                            <AltNavLinks canCreateStory={canCreate} />
                         )}
                     </Group>
 
@@ -102,7 +114,7 @@ export function Shell({
                 {!sessionUser.isPending && (
                     <NavLinks
                         closeNavbar={closeNavbar}
-                        session={sessionUser.data}
+                        canCreateStory={canCreate}
                     />
                 )}
 

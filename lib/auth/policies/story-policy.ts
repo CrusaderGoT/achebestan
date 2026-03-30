@@ -83,12 +83,11 @@ export async function canSuspendStory(): Promise<boolean> {
 export async function calculateStoryPermissions(
     user: UserSelectType | null | undefined,
     story: { id: number; authorId: string }
-): Promise<StoryPermissionsType> {
+): Promise<Omit<StoryPermissionsType, "canCreate">> {
     if (!user?.id) {
         return {
             canDelete: false,
             canUpdate: false,
-            canCreate: false,
             canSuspend: false,
             canComment: false,
         };
@@ -99,19 +98,16 @@ export async function calculateStoryPermissions(
         authorId: story.authorId,
     };
 
-    const [canDelete, canUpdate, canCreate, canSuspend, canComment] =
-        await Promise.all([
-            await canDeleteStory(user, storyPermArgs),
-            await canUpdateStory(user, storyPermArgs),
-            await canCreateStory(),
-            await canSuspendStory(),
-            await canCreateComment(),
-        ]);
+    const [canDelete, canUpdate, canSuspend, canComment] = await Promise.all([
+        await canDeleteStory(user, storyPermArgs),
+        await canUpdateStory(user, storyPermArgs),
+        await canSuspendStory(),
+        await canCreateComment(),
+    ]);
 
     return {
         canDelete,
         canUpdate,
-        canCreate,
         canSuspend,
         canComment,
     };

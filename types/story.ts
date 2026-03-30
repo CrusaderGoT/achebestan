@@ -52,7 +52,7 @@ export interface StoryProps extends StorySelectType {
 }
 
 export type StoryPermissionsType = {
-    canCreate: boolean;
+    canCreate?: boolean; // this can be optional; since it use case is currently called seperating
     canUpdate: boolean;
     canDelete: boolean;
     canSuspend: boolean;
