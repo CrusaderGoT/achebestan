@@ -50,7 +50,7 @@ const baseNavlinkData: NavLinkData[] = [
         icon: IconMail,
         label: "Contact",
         description: "Business inquiries or fan mail welcome",
-        href: "/#",
+        href: "#",
     },
     {
         icon: IconCoffee,
@@ -91,7 +91,7 @@ export function NavLinks({ session, closeNavbar }: NavLinkProps) {
             return (
                 <Fragment key={`${item.label}-${index}`}>
                     <NavLink
-                        href={"/#"}
+                        href={"#"}
                         active={openedKofiIframe}
                         label={item.label}
                         description={item.description}

@@ -9,9 +9,13 @@ export function KofiIframe({
 }) {
     if (opened) {
         return (
-            <Modal opened={opened} onClose={close} title="Buy me KoFi">
+            <Modal
+                opened={opened}
+                onClose={close}
+                keepMounted
+                title="Buy me KoFi"
+            >
                 <iframe
-                    id="kofiframe"
                     src="https://ko-fi.com/achebestan/?hidefeed=true&widget=true&embed=true&preview=true"
                     style={{
                         border: "none",
