@@ -113,13 +113,11 @@ export default function RootLayout({
 
                     <Notifications limit={5} zIndex={9999} />
 
-                    <SerwistProvider
-                        swUrl="/serwist/sw.js"
-                    >
-                        <CentralizedAuthContextProvider>
+                    <CentralizedAuthContextProvider>
+                        <SerwistProvider swUrl="/serwist/sw.js">
                             <Shell>{children}</Shell>
-                        </CentralizedAuthContextProvider>
-                    </SerwistProvider>
+                        </SerwistProvider>
+                    </CentralizedAuthContextProvider>
                 </MantineProvider>
             </body>
         </html>

@@ -1,3 +1,7 @@
+/// <reference no-default-lib="true" />
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
+
 import { StorySelectType } from "@/types/story";
 import { defaultCache } from "@serwist/turbopack/worker";
 import type {
@@ -6,18 +10,16 @@ import type {
     SerwistGlobalConfig,
 } from "serwist";
 import {
-    addEventListeners,
     BackgroundSyncQueue,
     CacheableResponsePlugin,
     CacheFirst,
-    createSerwist,
     ExpirationPlugin,
     NetworkFirst,
-    RuntimeCache,
+    Serwist,
     StaleWhileRevalidate,
 } from "serwist";
 
-// Declare the value of `injectionPoint` to TypeScript
+// Declare the value of `injectionPoint` to TypeScript.
 declare global {
     interface WorkerGlobalScope extends SerwistGlobalConfig {
         __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
@@ -26,259 +28,255 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-// Constants for better maintainability
+// ---------------------------------------------------------------------------
+// Cache name constants — increment the suffix to force a full cache refresh
+// ---------------------------------------------------------------------------
 const CACHE_NAMES = {
     IMAGES: "images-v2",
     API: "api-cache-v2",
-    STATIC: "static-resources-v2",
     STORY: "story-page-v2",
     STORIES_LIST: "stories-list-v2",
     RUNTIME: "runtime-v2",
 } as const;
 
-const CACHE_VERSION = "v2"; // Increment when you need to force cache refresh
-
-// Initialize Serwist
-const serwist = createSerwist({
-    precache: {
-        entries: [
-            ...(self.__SW_MANIFEST ?? []),
-            { url: "/", revision: CACHE_VERSION },
-            { url: "/story/new", revision: CACHE_VERSION },
-        ],
+// ---------------------------------------------------------------------------
+// Serwist instance — v9.x uses `new Serwist()` + `serwist.addEventListeners()`
+// `createSerwist`, `RuntimeCache`, and the standalone `addEventListeners`
+// export were removed in v9. All runtime-caching config lives here.
+// ---------------------------------------------------------------------------
+const serwist = new Serwist({
+    // Precache entries injected at build time by @serwist/turbopack.
+    // Additional URLs (e.g. /~offline) should be added via
+    // `additionalPrecacheEntries` in app/serwist/[path]/route.ts, NOT here,
+    // so that Serwist can version them properly.
+    precacheEntries: self.__SW_MANIFEST,
+    precacheOptions: {
         concurrency: 10,
         cleanupOutdatedCaches: true,
     },
+
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
     disableDevLogs: true,
-    extensions: [
-        new RuntimeCache(
-            [
-                ...defaultCache,
-                // Story pages - StaleWhileRevalidate for fast loading with updates
-                {
-                    matcher: ({ url }) =>
-                        url.pathname.startsWith("/story/") &&
-                        !url.pathname.includes("new"),
-                    handler: new StaleWhileRevalidate({
-                        cacheName: CACHE_NAMES.STORY,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 50,
-                                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-                                purgeOnQuotaError: true,
-                            }),
-                        ],
+
+    // -------------------------------------------------------------------------
+    // Runtime caching — evaluated top-to-bottom; first match wins.
+    // defaultCache entries from @serwist/turbopack/worker are spread at the
+    // END so that our specific rules take precedence.
+    // -------------------------------------------------------------------------
+    runtimeCaching: [
+        // Story pages — fast load from cache, refresh in background
+        {
+            matcher: ({ url }) =>
+                url.pathname.startsWith("/story/") &&
+                !url.pathname.includes("new"),
+            handler: new StaleWhileRevalidate({
+                cacheName: CACHE_NAMES.STORY,
+                plugins: [
+                    new CacheableResponsePlugin({ statuses: [0, 200] }),
+                    new ExpirationPlugin({
+                        maxEntries: 50,
+                        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                        purgeOnQuotaError: true,
                     }),
-                },
-                // API stories list - NetworkFirst for fresh data, fallback to cache
-                {
-                    matcher: ({ url }) => url.pathname === "/api/stories",
-                    handler: new NetworkFirst({
-                        cacheName: CACHE_NAMES.STORIES_LIST,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 1,
-                                maxAgeSeconds: 24 * 60 * 60, // 1 day
-                            }),
-                        ],
-                        networkTimeoutSeconds: 5, // Fallback to cache after 5s
+                ],
+            }),
+        },
+
+        // Stories list API — network-first, fall back to cache after 5 s
+        {
+            matcher: ({ url }) => url.pathname === "/api/stories",
+            handler: new NetworkFirst({
+                cacheName: CACHE_NAMES.STORIES_LIST,
+                plugins: [
+                    new CacheableResponsePlugin({ statuses: [0, 200] }),
+                    new ExpirationPlugin({
+                        maxEntries: 1,
+                        maxAgeSeconds: 24 * 60 * 60, // 1 day
                     }),
-                },
-                // Images - CacheFirst for performance
-                {
-                    matcher: ({ request }) => request.destination === "image",
-                    handler: new CacheFirst({
-                        cacheName: CACHE_NAMES.IMAGES,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 100,
-                                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-                                purgeOnQuotaError: true,
-                            }),
-                        ],
+                ],
+                networkTimeoutSeconds: 5,
+            }),
+        },
+
+        // Images — cache-first for maximum performance
+        {
+            matcher: ({ request }) => request.destination === "image",
+            handler: new CacheFirst({
+                cacheName: CACHE_NAMES.IMAGES,
+                plugins: [
+                    new CacheableResponsePlugin({ statuses: [0, 200] }),
+                    new ExpirationPlugin({
+                        maxEntries: 100,
+                        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+                        purgeOnQuotaError: true,
                     }),
-                },
-                // API routes - NetworkFirst with short timeout
-                {
-                    matcher: ({ url }) =>
-                        url.pathname.startsWith("/api/") &&
-                        url.pathname !== "/api/stories" &&
-                        !url.pathname.includes("/api/notifications"),
-                    handler: new NetworkFirst({
-                        cacheName: CACHE_NAMES.API,
-                        plugins: [
-                            new CacheableResponsePlugin({
-                                statuses: [0, 200],
-                            }),
-                            new ExpirationPlugin({
-                                maxEntries: 50,
-                                maxAgeSeconds: 5 * 60, // 5 minutes
-                            }),
-                        ],
-                        networkTimeoutSeconds: 3,
+                ],
+            }),
+        },
+
+        // All other API routes (excluding notifications — those are handled
+        // below via BackgroundSync, so they must not be cached here)
+        {
+            matcher: ({ url }) =>
+                url.pathname.startsWith("/api/") &&
+                url.pathname !== "/api/stories" &&
+                !url.pathname.includes("/api/notifications"),
+            handler: new NetworkFirst({
+                cacheName: CACHE_NAMES.API,
+                plugins: [
+                    new CacheableResponsePlugin({ statuses: [0, 200] }),
+                    new ExpirationPlugin({
+                        maxEntries: 50,
+                        maxAgeSeconds: 5 * 60, // 5 minutes
                     }),
-                },
-            ],
-            {
-                warmEntries: ["/~offline"],
-                fallbacks: {
-                    entries: [
-                        {
-                            url: "/~offline",
-                            matcher({ request }) {
-                                return request.destination === "document";
-                            },
-                        },
-                    ],
-                },
-            }
-        ),
+                ],
+                networkTimeoutSeconds: 3,
+            }),
+        },
+
+        // Framework defaults (fonts, _next/static, etc.) come last
+        ...defaultCache,
     ],
+
+    // Navigation fallback — served when the network is offline and no cached
+    // version of the page exists. Serwist's own fallback system handles this;
+    // no need for a duplicate manual navigate handler in the fetch listener.
+    fallbacks: {
+        entries: [
+            {
+                url: "/~offline",
+                matcher({ request }) {
+                    return request.destination === "document";
+                },
+            },
+        ],
+    },
 });
 
-// Add core pages to precache
+// ---------------------------------------------------------------------------
+// Wire Serwist's standard event listeners explicitly so we can layer our own
+// without conflicts. Using the individual handler refs avoids the
+// double-respondWith bug that occurs when both serwist.addEventListeners()
+// AND manual fetch/activate listeners are registered simultaneously.
+// ---------------------------------------------------------------------------
+self.addEventListener("install", serwist.handleInstall);
+self.addEventListener("activate", serwist.handleActivate);
 
-// Install event - Keep it simple and fast
-self.addEventListener("install", (event) => {
-    console.log("[SW] Installing service worker");
+// IMPORTANT: Only one listener may call event.respondWith() per fetch event.
+// serwist.handleFetch manages all GET caching and the /~offline fallback.
+// Our custom listener below handles non-GET offline queuing only and never
+// calls event.respondWith() for GET requests, so there is no conflict.
+self.addEventListener("fetch", serwist.handleFetch);
+
+// Serwist's handleCache responds to CACHE_URLS messages used internally by
+// SerwistProvider. Our custom message handler (below) handles a separate set
+// of message types, so both can co-exist safely.
+self.addEventListener("message", serwist.handleCache);
+
+// ---------------------------------------------------------------------------
+// Custom install: pre-warm the stories list and story pages.
+// Stacking a second event.waitUntil() is safe and does not conflict with
+// Serwist's install handler (which runs the precache logic).
+// ---------------------------------------------------------------------------
+self.addEventListener("install", (event: ExtendableEvent) => {
+    console.log("[SW] Custom install: pre-warming story caches");
 
     event.waitUntil(
         (async () => {
+            // Pre-cache the offline page in the runtime cache as a safety net
+            // (it will also be precached by Serwist via additionalPrecacheEntries)
             try {
-                // Pre-cache the offline page immediately
-                const cache = await caches.open(CACHE_NAMES.RUNTIME);
-                await cache.add("/~offline");
+                const runtimeCache = await caches.open(CACHE_NAMES.RUNTIME);
+                await runtimeCache.add("/~offline");
+            } catch (err) {
+                console.warn("[SW] Could not cache /~offline:", err);
+            }
 
-                // Try to fetch and cache stories list, but don't block installation
-                try {
-                    const response = await fetch("/api/stories");
-                    if (response.ok) {
-                        const storiesCache = await caches.open(
-                            CACHE_NAMES.STORIES_LIST
-                        );
-                        await storiesCache.put(
-                            "/api/stories",
-                            response.clone()
-                        );
+            // Fetch and cache the stories list + individual story pages.
+            // Failures here must not block installation.
+            try {
+                const response = await fetch("/api/stories");
+                if (!response.ok) return;
 
-                        // Cache story pages in the background (non-blocking)
-                        const stories: StorySelectType[] =
-                            await response.json();
-                        cacheStoryPages(stories).catch((err) =>
-                            console.error(
-                                "[SW] Failed to cache story pages:",
-                                err
-                            )
-                        );
-                    }
-                } catch (error) {
-                    console.warn(
-                        "[SW] Could not fetch stories during install:",
-                        error
-                    );
-                    // Don't fail installation if this fails
-                }
-            } catch (error) {
-                console.error("[SW] Installation error:", error);
+                const storiesCache = await caches.open(
+                    CACHE_NAMES.STORIES_LIST
+                );
+                // Store the response in the stories cache using a clone so the
+                // body stream is still readable when we call .json() below.
+                await storiesCache.put("/api/stories", response.clone());
+
+                const stories: StorySelectType[] = await response.json();
+                // Non-blocking: cache individual story pages in the background
+                cacheStoryPages(stories).catch((err) =>
+                    console.error("[SW] Failed to cache story pages:", err)
+                );
+            } catch (err) {
+                console.warn(
+                    "[SW] Could not pre-warm stories during install:",
+                    err
+                );
             }
         })()
     );
 });
 
-// Helper function to cache story pages (non-blocking)
-async function cacheStoryPages(stories: StorySelectType[]) {
+// ---------------------------------------------------------------------------
+// Helper — cache individual story pages in small batches
+// ---------------------------------------------------------------------------
+async function cacheStoryPages(stories: StorySelectType[]): Promise<void> {
     const cache = await caches.open(CACHE_NAMES.STORY);
     const urls = stories.map((story) => `/story/${story.isbn}`);
 
-    // Cache in batches to avoid overwhelming the browser
-    const batchSize = 5;
-    for (let i = 0; i < urls.length; i += batchSize) {
-        const batch = urls.slice(i, i + batchSize);
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+        const batch = urls.slice(i, i + BATCH_SIZE);
         await Promise.allSettled(
             batch.map(async (url) => {
                 try {
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        await cache.put(url, response);
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        await cache.put(url, res);
                     }
-                } catch (error) {
-                    console.warn(`[SW] Failed to cache ${url}:`, error);
+                } catch (err) {
+                    console.warn(
+                        `[SW] Failed to cache story page ${url}:`,
+                        err
+                    );
                 }
             })
         );
-        // Small delay between batches
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Small breathing room between batches
+        await new Promise<void>((resolve) => setTimeout(resolve, 100));
     }
 }
 
-// Activate event - Clean up old caches
-self.addEventListener("activate", (event) => {
-    console.log("[SW] Activating service worker");
-
-    event.waitUntil(
-        (async () => {
-            try {
-                const cacheNames = await caches.keys();
-                const validCacheNames = new Set<string>(
-                    Object.values(CACHE_NAMES)
-                );
-
-                // Delete old caches
-                await Promise.all(
-                    cacheNames.map(async (cacheName) => {
-                        if (
-                            !validCacheNames.has(cacheName) &&
-                            !cacheName.startsWith("serwist-precache-")
-                        ) {
-                            console.log("[SW] Deleting old cache:", cacheName);
-                            await caches.delete(cacheName);
-                        }
-                    })
-                );
-
-                // Claim all clients immediately
-                await self.clients.claim();
-
-                console.log("[SW] Service worker activated");
-            } catch (error) {
-                console.error("[SW] Activation error:", error);
-            }
-        })()
-    );
-});
-
-// Background sync queues
+// ---------------------------------------------------------------------------
+// Background sync queues — offline mutation support
+// ---------------------------------------------------------------------------
 const notificationQueue = new BackgroundSyncQueue("notification-queue", {
-    maxRetentionTime: 24 * 60, // 24 hours
+    maxRetentionTime: 24 * 60, // 24 hours in minutes
     onSync: async ({ queue }) => {
-        let entry;
+        let entry: BackgroundSyncQueueEntry | undefined;
         while ((entry = await queue.shiftRequest())) {
             try {
                 await fetch(entry.request.clone());
                 console.log("[SW] Replayed notification request");
-            } catch (error) {
-                console.error("[SW] Replay failed, re-queuing:", error);
+            } catch (err) {
+                console.error(
+                    "[SW] Notification replay failed, re-queuing:",
+                    err
+                );
                 await queue.unshiftRequest(entry);
-                throw error; // Re-throw to trigger retry
+                throw err; // Re-throw so the browser retries the sync
             }
         }
     },
 });
 
 const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
-    maxRetentionTime: 72 * 60, // 72 hours
+    maxRetentionTime: 72 * 60, // 72 hours in minutes
     onSync: async ({ queue }) => {
         let entry: BackgroundSyncQueueEntry | undefined;
         while ((entry = await queue.shiftRequest())) {
@@ -289,7 +287,7 @@ const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
                 }
                 console.log("[SW] Replayed story request");
 
-                // Notify the client of successful sync
+                // Notify all open clients that their story was synced
                 const clients = await self.clients.matchAll();
                 clients.forEach((client) => {
                     client.postMessage({
@@ -297,127 +295,86 @@ const newStoryQueue = new BackgroundSyncQueue("new-story-queue", {
                         url: entry?.request.url,
                     });
                 });
-            } catch (error) {
-                console.error("[SW] Story replay failed, re-queuing:", error);
+            } catch (err) {
+                console.error("[SW] Story replay failed, re-queuing:", err);
                 await queue.unshiftRequest(entry);
-                throw error;
+                throw err;
             }
         }
     },
 });
 
-// Enhanced fetch handler
-self.addEventListener("fetch", (event) => {
+// ---------------------------------------------------------------------------
+// Custom fetch handler — non-GET offline queuing only.
+//
+// serwist.handleFetch (registered above) handles all GET caching and the
+// offline navigation fallback. This listener intercepts non-GET requests for
+// specific endpoints when the network is unavailable and queues them for
+// background sync. It returns early (does nothing) for GET requests so there
+// is no risk of a double event.respondWith() error.
+// ---------------------------------------------------------------------------
+self.addEventListener("fetch", (event: FetchEvent) => {
     const { request } = event;
+
+    // Let serwist.handleFetch deal with all GET requests
+    if (request.method === "GET") return;
+
     const url = new URL(request.url);
 
-    // Skip non-GET requests for notification and story endpoints
-    // Handle them separately below
-    if (request.method !== "GET") {
-        // Queue notification API requests when offline
-        if (url.pathname.includes("/api/notifications")) {
-            event.respondWith(
-                (async () => {
-                    try {
-                        const response = await fetch(request.clone());
-                        return response;
-                    } catch (error) {
-                        console.log(
-                            "[SW] Queuing notification for background sync",
-                            error
-                        );
-                        await notificationQueue.pushRequest({
-                            request: request.clone(),
-                        });
-
-                        return new Response(
-                            JSON.stringify({
-                                queued: true,
-                                message: "Request queued for background sync",
-                            }),
-                            {
-                                headers: { "Content-Type": "application/json" },
-                                status: 202,
-                            }
-                        );
-                    }
-                })()
-            );
-            return;
-        }
-
-        // Queue new story POST requests when offline
-        if (url.pathname.startsWith("/story/") && request.method === "POST") {
-            event.respondWith(
-                (async () => {
-                    try {
-                        const response = await fetch(request.clone());
-                        return response;
-                    } catch (error) {
-                        console.log(
-                            "[SW] Queuing story for background sync",
-                            error
-                        );
-                        await newStoryQueue.pushRequest({
-                            request: request.clone(),
-                        });
-
-                        // Return a more informative error response
-                        return new Response(
-                            JSON.stringify({
-                                queued: true,
-                                offline: true,
-                                message:
-                                    "Your changes will be saved when you're back online",
-                            }),
-                            {
-                                headers: { "Content-Type": "application/json" },
-                                status: 202,
-                            }
-                        );
-                    }
-                })()
-            );
-            return;
-        }
-    }
-
-    // For navigation requests, ensure we serve cached content when offline
-    if (request.mode === "navigate") {
+    // Queue offline notification mutations
+    if (url.pathname.includes("/api/notifications")) {
         event.respondWith(
             (async () => {
                 try {
-                    // Try network first
-                    const response = await fetch(request.clone());
-
-                    // Cache successful responses
-                    if (response.ok && url.pathname.startsWith("/story/")) {
-                        const cache = await caches.open(CACHE_NAMES.STORY);
-                        cache.put(request, response.clone());
-                    }
-
-                    return response;
-                } catch (error) {
-                    // Network failed, try cache
-                    console.log("[SW] Network failed, trying cache", error);
-                    const cachedResponse = await caches.match(request);
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
-                    // No cache, return offline page
-                    const offlineResponse = await caches.match("/~offline");
-                    if (offlineResponse) {
-                        return offlineResponse;
-                    }
-
-                    // Last resort fallback
+                    return await fetch(request.clone());
+                } catch (err) {
+                    console.log(
+                        "[SW] Queuing notification for background sync:",
+                        err
+                    );
+                    await notificationQueue.pushRequest({
+                        request: request.clone(),
+                    });
                     return new Response(
-                        "Offline - No cached version available",
+                        JSON.stringify({
+                            queued: true,
+                            message: "Request queued for background sync",
+                        }),
                         {
-                            status: 503,
-                            statusText: "Service Unavailable",
-                            headers: { "Content-Type": "text/plain" },
+                            headers: { "Content-Type": "application/json" },
+                            status: 202,
+                        }
+                    );
+                }
+            })()
+        );
+        return;
+    }
+
+    // Queue offline story POST/PATCH/DELETE mutations
+    if (url.pathname.startsWith("/story/")) {
+        event.respondWith(
+            (async () => {
+                try {
+                    return await fetch(request.clone());
+                } catch (err) {
+                    console.log(
+                        "[SW] Queuing story mutation for background sync:",
+                        err
+                    );
+                    await newStoryQueue.pushRequest({
+                        request: request.clone(),
+                    });
+                    return new Response(
+                        JSON.stringify({
+                            queued: true,
+                            offline: true,
+                            message:
+                                "Your changes will be saved when you're back online",
+                        }),
+                        {
+                            headers: { "Content-Type": "application/json" },
+                            status: 202,
                         }
                     );
                 }
@@ -427,8 +384,10 @@ self.addEventListener("fetch", (event) => {
     }
 });
 
-// Handle sync events
-self.addEventListener("sync", (event) => {
+// ---------------------------------------------------------------------------
+// Background sync replay (triggered by the browser when connectivity returns)
+// ---------------------------------------------------------------------------
+self.addEventListener("sync", (event: SyncEvent) => {
     console.log("[SW] Background sync event:", event.tag);
 
     if (event.tag === "notification-queue") {
@@ -438,7 +397,9 @@ self.addEventListener("sync", (event) => {
     }
 });
 
-// Enhanced push notification handler
+// ---------------------------------------------------------------------------
+// Push notification handler
+// ---------------------------------------------------------------------------
 self.addEventListener("push", (event: PushEvent) => {
     if (!event.data) {
         console.warn("[SW] Push event received without data");
@@ -449,38 +410,43 @@ self.addEventListener("push", (event: PushEvent) => {
         const data = event.data.json();
 
         if (!data.title) {
-            console.error("[SW] Push notification missing title");
+            console.error(
+                "[SW] Push notification missing required `title` field"
+            );
             return;
         }
 
+        // Build notification options with the correct types.
+        // `actions` must be NotificationAction[], not string[].
         const options: NotificationOptions & {
             vibrate: number[];
-            actions: string[];
-            timestamp: number;
+            actions: []; //NotificationAction[];
             renotify: boolean;
+            timestamp: number;
         } = {
-            body: data.body || "",
-            icon: data.icon || "/web-app-manifest-512x512.png",
-            badge: data.badge || "/web-app-manifest-192x192.png",
+            body: data.body ?? "",
+            icon: data.icon ?? "/web-app-manifest-512x512.png",
+            badge: data.badge ?? "/web-app-manifest-192x192.png",
             vibrate: [200, 100, 200],
-            tag: data.tag || `notification-${Date.now()}`,
+            tag: data.tag ?? `notification-${Date.now()}`,
             data: {
-                url: data.url || "/",
+                url: data.url ?? "/",
                 ...data.data,
             },
-            actions: data.actions || [],
+            actions: data.actions ?? [], //as NotificationAction[],
             requireInteraction: data.requireInteraction ?? false,
-            timestamp: Date.now(),
             silent: data.silent ?? false,
             renotify: data.renotify ?? false,
+            timestamp: Date.now(),
         };
 
         event.waitUntil(
             self.registration.showNotification(data.title, options)
         );
-    } catch (error) {
-        console.error("[SW] Error processing push notification:", error);
+    } catch (err) {
+        console.error("[SW] Error processing push notification:", err);
 
+        // Fallback notification so the user is never silently dropped
         event.waitUntil(
             self.registration.showNotification("New Notification", {
                 body: "You have a new notification",
@@ -490,16 +456,16 @@ self.addEventListener("push", (event: PushEvent) => {
     }
 });
 
-// Enhanced notification click handler
+// ---------------------------------------------------------------------------
+// Notification click handler
+// ---------------------------------------------------------------------------
 self.addEventListener("notificationclick", (event: NotificationEvent) => {
     event.notification.close();
 
-    if (event.action === "close") {
-        return;
-    }
+    if (event.action === "close") return;
 
     const urlToOpen = new URL(
-        event.notification.data?.url || "/",
+        event.notification.data?.url ?? "/",
         self.location.origin
     ).href;
 
@@ -511,14 +477,14 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
                     includeUncontrolled: true,
                 });
 
-                // Try to find and focus existing window with same URL
+                // Reuse an existing tab that is already on this URL
                 for (const client of clientList) {
                     if (client.url === urlToOpen && "focus" in client) {
-                        return await client.focus();
+                        return await (client as WindowClient).focus();
                     }
                 }
 
-                // Try to navigate an existing window
+                // Navigate an existing (unrelated) tab rather than opening a new one
                 if (clientList.length > 0) {
                     const client = clientList[0] as WindowClient;
                     if ("focus" in client && "navigate" in client) {
@@ -527,43 +493,39 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
                     }
                 }
 
-                // Open new window
+                // Last resort: open a brand-new tab
                 if (self.clients.openWindow) {
                     return await self.clients.openWindow(urlToOpen);
                 }
-            } catch (error) {
-                console.error("[SW] Error handling notification click:", error);
+            } catch (err) {
+                console.error("[SW] Error handling notification click:", err);
             }
         })()
     );
 });
 
-// Handle notification close events
+// ---------------------------------------------------------------------------
+// Notification close handler
+// ---------------------------------------------------------------------------
 self.addEventListener("notificationclose", (event: NotificationEvent) => {
-    console.log("[SW] Notification closed:", event.notification.tag);
+    console.log("[SW] Notification dismissed:", event.notification.tag);
 });
 
-// Message handler for client communication
-self.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "SKIP_WAITING") {
-        self.skipWaiting();
+// ---------------------------------------------------------------------------
+// Custom message handler — handles our own message types.
+// serwist.handleCache (registered above) already responds to CACHE_URLS
+// messages used by SerwistProvider, so we only deal with our own here.
+// ---------------------------------------------------------------------------
+self.addEventListener("message", (event: ExtendableMessageEvent) => {
+    if (!event.data) return;
+
+    // Manually trigger skip-waiting (useful for update prompts in the UI)
+    if (event.data.type === "SKIP_WAITING") {
+        void self.skipWaiting();
     }
 
-    if (event.data && event.data.type === "CLAIM_CLIENTS") {
-        self.clients.claim();
-    }
-
-    if (event.data && event.data.type === "CACHE_URLS") {
-        const urls = event.data.urls || [];
-        event.waitUntil(
-            (async () => {
-                const cache = await caches.open(CACHE_NAMES.RUNTIME);
-                await Promise.allSettled(
-                    urls.map((url: string) => cache.add(url))
-                );
-            })()
-        );
+    // Manually claim all clients (rarely needed since clientsClaim: true is set)
+    if (event.data.type === "CLAIM_CLIENTS") {
+        void self.clients.claim();
     }
 });
-
-addEventListeners(serwist);
