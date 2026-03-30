@@ -1,0 +1,5 @@
+{
+    "typescript.tsdk": "node_modules/typescript/lib",
+    // tells the TS language server which tsconfig to use for sw.ts
+    "typescript.preferences.includePackageJsonAutoImports": "on"
+}

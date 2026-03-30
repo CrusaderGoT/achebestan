@@ -358,7 +358,7 @@ export function CreateStoryForm() {
                                 size="sm"
                                 checked={deleteDraftOnSubmit}
                                 onChange={(e) =>
-                                    setDeleteDraftOnSubmit(e.target.checked)
+                                    setDeleteDraftOnSubmit(e.currentTarget.checked)
                                 }
                                 color={"red"}
                                 icon={IconTrash}

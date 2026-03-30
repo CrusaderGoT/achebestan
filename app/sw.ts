@@ -2,7 +2,6 @@
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
 
-import { StorySelectType } from "@/types/story";
 import { defaultCache } from "@serwist/turbopack/worker";
 import type {
     BackgroundSyncQueueEntry,
@@ -18,6 +17,7 @@ import {
     Serwist,
     StaleWhileRevalidate,
 } from "serwist";
+import type { StorySelectType } from "../types/story";
 
 // Declare the value of `injectionPoint` to TypeScript.
 declare global {
