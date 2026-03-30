@@ -37,6 +37,7 @@ export function StoryPageClient({
         StoryPermissionsType | undefined
     >();
 
+    // effect for set story perms
     useEffect(() => {
         if (isPending) return;
 

@@ -83,6 +83,12 @@ export function CreateStoryForm() {
         }),
     });
 
+    // function for clearing book part/id
+    const clearBookDetails = () => {
+        setBookId(null);
+        setBookPart("");
+    };
+
     // Load all drafts on mount
     useEffect(() => {
         async function loadDrafts() {
@@ -98,12 +104,13 @@ export function CreateStoryForm() {
         loadDrafts();
     }, []);
 
-    // Load selected draft when currentDraftId changes
+    // Load selected draft when currentDraftId changes or clear it
     useEffect(() => {
         async function loadCurrentDraft() {
             if (!currentDraftId) {
                 setCurrentDraft(null);
                 form.reset();
+                clearBookDetails()
                 return;
             }
 
@@ -358,7 +365,9 @@ export function CreateStoryForm() {
                                 size="sm"
                                 checked={deleteDraftOnSubmit}
                                 onChange={(e) =>
-                                    setDeleteDraftOnSubmit(e.currentTarget.checked)
+                                    setDeleteDraftOnSubmit(
+                                        e.currentTarget.checked
+                                    )
                                 }
                                 color={"red"}
                                 icon={IconTrash}
