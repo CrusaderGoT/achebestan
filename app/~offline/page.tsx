@@ -16,9 +16,9 @@ export default function OfflinePage() {
 
             <Text c={"dimmed"}>Please check your internet connection</Text>
 
-            <Button c={"white"} onClick={() => window.location.reload()}>
+            <Button c={"white"} onClick={() => {}}>
                 Retry
             </Button>
-        </Stack>
+        </Stack> 
     );
 }
