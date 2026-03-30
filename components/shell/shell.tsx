@@ -37,11 +37,14 @@ export function Shell({
     const [canCreate, setCanCreate] = useState<boolean>(false);
 
     useEffect(() => {
+        if (sessionUser.isPending) return;
+
         const checkPermissions = async () => {
             const result = await canCreateStory();
             setCanCreate(result);
         };
         checkPermissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sessionUser.data?.user.id]);
 
     return (

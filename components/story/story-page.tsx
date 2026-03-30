@@ -30,7 +30,7 @@ export function StoryPageClient({
     userRating,
 }: StoryPageClientProps) {
     const {
-        sessionUser: { data: session },
+        sessionUser: { data: session, isPending },
     } = useCentralizedAuth();
 
     const [permissions, setPermission] = useState<
@@ -38,6 +38,8 @@ export function StoryPageClient({
     >();
 
     useEffect(() => {
+        if (isPending) return;
+
         const setStoryPerms = async () => {
             const perms = await calculateStoryPermissions(
                 session?.user as UserSelectType,
