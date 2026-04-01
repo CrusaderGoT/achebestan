@@ -110,7 +110,7 @@ export function CreateStoryForm() {
             if (!currentDraftId) {
                 setCurrentDraft(null);
                 form.reset();
-                clearBookDetails()
+                clearBookDetails();
                 return;
             }
 
@@ -255,6 +255,8 @@ export function CreateStoryForm() {
         await Promise.all([
             await executeAsyncCreateStory({
                 ...data,
+                bookId: bookId?.value ? Number(bookId?.value) : undefined,
+                bookPart: bookPart ? Number(bookPart) : undefined,
             }),
             currentDraftId &&
                 deleteDraftOnSubmit &&
