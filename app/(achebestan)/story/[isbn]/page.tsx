@@ -1,4 +1,5 @@
 import { StoryPageClient } from "@/components/story/story-page";
+import { getBookStories } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
 import { readStory } from "@/lib/actions/story";
@@ -45,7 +46,10 @@ export default async function StoryPage({
 
     if (!story) notFound();
 
-    const userRating = await getUserRating(session?.user.id, story.isbn);
+    const [userRating, book] = await Promise.all([
+        getUserRating(session?.user.id, story.isbn),
+        getBookStories(story.bookId),
+    ]);
 
     const structuredData = storyJsonLdData(story, comments);
 
@@ -75,6 +79,7 @@ export default async function StoryPage({
                 story={story}
                 comments={comments}
                 userRating={userRating}
+                book={book}
             />
         </>
     );

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
 import { calculateStoryPermissions } from "@/lib/auth/policies/story-policy";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
+import { BookStoriesType } from "@/types/books";
 import { CommentTreeProps } from "@/types/comment";
 import {
     StoryPermissionsType,
@@ -22,12 +23,14 @@ export type StoryPageClientProps = {
     story: StoryProps & StoryRatingProps;
     comments?: CommentTreeProps[];
     userRating?: UserRatingWithComment;
+    book: BookStoriesType;
 };
 
 export function StoryPageClient({
     story,
     comments,
     userRating,
+    book,
 }: StoryPageClientProps) {
     const {
         sessionUser: { data: session, isPending },
@@ -80,12 +83,7 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            {story.bookId && story.bookPart && (
-                <BookPagination
-                    bookId={story.bookId}
-                    bookPart={story.bookPart}
-                />
-            )}
+            {book?.length && <BookPagination chapters={book} />}
 
             <StoryActions permissions={permissions} {...story} />
 

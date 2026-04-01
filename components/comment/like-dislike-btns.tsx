@@ -1,6 +1,6 @@
 "use client";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import {
     useDislikeComment,
     useLikeComment,

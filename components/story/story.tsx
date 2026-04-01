@@ -26,7 +26,7 @@ import {
     useUpdateStoryForm,
 } from "@/components/forms/story/update-story-form-context";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useState } from "react";
 
 export function Story({

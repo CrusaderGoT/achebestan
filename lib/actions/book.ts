@@ -3,34 +3,48 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
+import { unstable_cache } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
-    bookId: number,
-    offset: number,
+    bookId?: number | null,
+    offset: number = 1,
     limit: number = 10
 ) {
-    try {
-        const bookStories = await db.query.story.findMany({
-            where(fields, operators) {
-                return operators.eq(fields.bookId, bookId);
-            },
-            limit: limit,
-            offset: (offset - 1) * limit,
-            orderBy(fields, operators) {
-                return operators.asc(fields.bookPart);
-            },
-            columns: {
-                isbn: true,
-                bookPart: true,
-            },
-        });
+    if (!bookId) return [];
 
-        return bookStories;
-    } catch (error) {
-        console.error("Book stories error:", error);
-        throw new Error("Failed to get book stories");
-    }
+    const fetchStories = unstable_cache(
+        async () => {
+            try {
+                const bookStories = await db.query.story.findMany({
+                    where(fields, operators) {
+                        return operators.eq(fields.bookId, bookId);
+                    },
+                    limit,
+                    offset: (offset - 1) * limit,
+                    orderBy(fields, operators) {
+                        return operators.asc(fields.bookPart);
+                    },
+                    columns: {
+                        isbn: true,
+                        bookPart: true,
+                    },
+                });
+
+                return bookStories;
+            } catch (error) {
+                console.error("Book stories error:", error);
+                throw new Error("Failed to get book stories");
+            }
+        },
+        [`book-${bookId}`],
+        {
+            revalidate: 60 * 10,
+            tags: [`book-${bookId}`],
+        }
+    );
+
+    return fetchStories();
 }
 
 export const createBookAction = authActionClient

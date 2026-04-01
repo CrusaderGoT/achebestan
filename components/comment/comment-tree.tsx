@@ -42,7 +42,7 @@ import {
 } from "@/lib/hooks/comment/comment-tree-hooks";
 import { CommentNode } from "./comment-node";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useAutoExpandNewComments } from "@/lib/hooks/comment/auto-expand-comments";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 

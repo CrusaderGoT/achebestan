@@ -14,7 +14,7 @@ import cx from "clsx";
 import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { canCreateStory } from "@/lib/auth/policies/story-policy";
 import { useEffect, useState } from "react";
 import { OfflineIndicator } from "./offline-indicator";

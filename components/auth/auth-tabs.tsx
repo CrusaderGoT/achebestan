@@ -2,7 +2,7 @@
 "use client";
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import {
     canCreateOrganization,
     canCreateSuperAdmin,

@@ -2,7 +2,7 @@
 
 import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { calculateRatingsAverage } from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
 import { useDisclosure, useMounted } from "@mantine/hooks";

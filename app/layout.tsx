@@ -20,7 +20,7 @@ import { Notifications } from "@mantine/notifications";
 
 import { Shell } from "@/components/shell/shell";
 import { RouteNavigationProgress } from "@/components/ui/route-navigation-progress";
-import { CentralizedAuthContextProvider } from "@/lib/auth/centralized-auth-context-provider";
+import { CentralizedAuthContextProvider } from "@/lib/contexts/centralized-auth-context-provider";
 import { SerwistProvider } from "@/lib/serwist-client";
 import { NavigationProgress } from "@mantine/nprogress";
 

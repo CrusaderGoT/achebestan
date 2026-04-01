@@ -16,7 +16,7 @@ import {
     IconMessage2Off,
 } from "@tabler/icons-react";
 
-import { useCentralizedAuth } from "@/lib/auth/centralized-auth-context-provider";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
 import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
