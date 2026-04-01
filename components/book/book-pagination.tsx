@@ -14,7 +14,6 @@ export function BookPagination({
 }) {
     const router = useRouter();
 
-    // Ensure active page follows the incoming prop
     const [activePage, setActivePage] = useState(() => Math.max(1, part ?? 1));
     useEffect(() => {
         if (typeof part === "number" && part !== activePage) {
@@ -26,7 +25,7 @@ export function BookPagination({
     const total = useMemo(() => Math.max(1, chapters.length), [chapters]);
 
     const handleNextBookPage = useCallback(
-        async (page: number) => {
+        (page: number) => {
             setActivePage(page);
 
             // prefer finding by bookPart, fallback to index-based lookup
