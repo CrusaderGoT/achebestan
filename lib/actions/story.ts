@@ -43,6 +43,8 @@ export const createStoryAction = authActionClient
                 subtitle: inputData.subtitle,
                 content: sanitizeHTML(inputData.content),
                 created: new Date(),
+bookId: inputData.bookId,
+bookPart: inputData.bookPart,
             })
             .returning({
                 isbn: story.isbn,
