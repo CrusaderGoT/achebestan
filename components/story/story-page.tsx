@@ -83,7 +83,9 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            {book?.length && <BookPagination chapters={book} />}
+            {book?.length && story.bookPart && (
+                <BookPagination chapters={book} part={story.bookPart} />
+            )}
 
             <StoryActions permissions={permissions} {...story} />
 

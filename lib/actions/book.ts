@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
-import { unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
@@ -58,6 +58,10 @@ export const createBookAction = authActionClient
                 created: new Date(),
             })
             .returning();
+
+        if (newBook) {
+            revalidatePath("/story/new");
+        }
 
         return newBook;
     });
