@@ -2,15 +2,12 @@ import { BASE_URL } from "@/lib/constants";
 import { StoryProps } from "@/types/story";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { Metadata } from "next";
 import {
     calculateRatingsAverage,
     estimateReadingTime,
     truncateText,
 } from "./story-utils";
-
-dayjs.extend(relativeTime);
 
 export async function generateStoryMetadata(
     story: (StoryProps & { ratings: RatingSelectType[] }) | undefined
@@ -147,10 +144,10 @@ export async function generateStoryMetadata(
             ],
 
             // Article-specific metadata
-            publishedTime: dayjs(story.created).fromNow(true),
+            publishedTime: dayjs(story.created).toISOString(),
             modifiedTime: story.edited
-                ? dayjs(story.edited).fromNow(true)
-                : dayjs(story.created).fromNow(true),
+                ? dayjs(story.edited).toISOString()
+                : dayjs(story.created).toISOString(),
             authors: [story.author.name],
             section: "Original Stories",
             tags: [
@@ -183,10 +180,10 @@ export async function generateStoryMetadata(
         other: {
             // Article metadata
             "article:author": story.author.name,
-            "article:published_time": dayjs(story.created).fromNow(true),
+            "article:published_time": dayjs(story.created).toISOString(),
             "article:modified_time": story.edited
-                ? dayjs(story.edited).fromNow(true)
-                : dayjs(story.created).fromNow(true),
+                ? dayjs(story.edited).toISOString()
+                : dayjs(story.created).toISOString(),
             "article:section": "Original Stories",
             "article:tag": "original story, literature, fiction",
 
