@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { cacheTag, revalidatePath, updateTag } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
@@ -11,38 +11,34 @@ export async function getBookStories(
     offset: number = 0,
     limit: number = 10
 ) {
+    "use cache";
+    cacheTag(`book-${bookId}`);
+
     if (!bookId) return [];
 
-    const fetchStories = unstable_cache(
-        async () => {
-            try {
-                const bookStories = await db.query.story.findMany({
-                    where(fields, operators) {
-                        return operators.eq(fields.bookId, bookId);
-                    },
-                    limit: limit,
-                    offset: offset,
-                    orderBy(fields, operators) {
-                        return operators.asc(fields.bookPart);
-                    },
-                    columns: {
-                        isbn: true,
-                        bookPart: true,
-                    },
-                });
+    const fetchStories = async () => {
+        try {
+            const bookStories = await db.query.story.findMany({
+                where(fields, operators) {
+                    return operators.eq(fields.bookId, bookId);
+                },
+                limit: limit,
+                offset: offset,
+                orderBy(fields, operators) {
+                    return operators.asc(fields.bookPart);
+                },
+                columns: {
+                    isbn: true,
+                    bookPart: true,
+                },
+            });
 
-                return bookStories;
-            } catch (error) {
-                console.error("Book stories error:", error);
-                throw new Error("Failed to get book stories");
-            }
-        },
-        [`book-${bookId}`],
-        {
-            revalidate: 60 * 10,
-            tags: [`book-${bookId}`],
+            return bookStories;
+        } catch (error) {
+            console.error("Book stories error:", error);
+            throw new Error("Failed to get book stories");
         }
-    );
+    };
 
     return fetchStories();
 }
@@ -57,9 +53,10 @@ export const createBookAction = authActionClient
                 name: parsedInput.name,
                 created: new Date(),
             })
-            .returning();
+            .returning({ authorId: book.authorId, name: book.name });
 
         if (newBook) {
+            updateTag(`getUserBooks-${newBook.authorId}`);
             revalidatePath("/story/new");
         }
 
@@ -71,6 +68,8 @@ export async function getUserBooks(
     offset: number,
     limit: number = 10
 ) {
+    "use cache";
+    cacheTag(`getUserBooks-${userId}`);
     try {
         const userBooks = await db.query.book.findMany({
             where(fields, operators) {

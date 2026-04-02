@@ -4,6 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     reactStrictMode: true,
     trailingSlash: false,
+    cacheComponents: true,
     experimental: {
         optimizePackageImports: [
             "@mantine/core",

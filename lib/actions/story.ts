@@ -12,7 +12,7 @@ import z from "zod/v4";
 
 import { SearchOptions } from "@/types/story";
 import { UserSelectType } from "@/types/user";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { cacheTag, revalidatePath, updateTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import {
     canCreateStory,
@@ -68,7 +68,16 @@ export const createStoryAction = authActionClient
                 isbn: story.isbn,
                 title: story.title,
                 image: story.image,
+                bookId: story.bookId,
             });
+
+        // revalidate tags/paths once story is created
+        updateTag("readLatestStories");
+        revalidatePath(`/`);
+
+        if (createdStory.bookId) {
+            updateTag(`book-${createdStory.bookId}`);
+        }
 
         // upload image using isbn as public id
         let imageUrl: string | undefined = undefined;
@@ -96,8 +105,6 @@ export const createStoryAction = authActionClient
         if (imageUrl) {
             createdStory.image = imageUrl;
         }
-
-        revalidatePath(`/`);
 
         // Send push notification to all subscribers
         await sendNotificationToAllSubscribers({
@@ -185,16 +192,19 @@ export const updateStoryAction = authActionClient
                     edited: new Date(),
                 })
                 .where(eq(story.isbn, isbn))
-                .returning();
+                .returning({ isbn: story.isbn, title: story.title });
 
+            updateTag(`readStory-${updatedStory.isbn}`);
             revalidatePath(`/story/${updatedStory.isbn}`);
-            revalidatePath("/");
 
             return updatedStory;
         }
     );
 
 export const readStory = async (isbn: string) => {
+    "use cache";
+    cacheTag(`readStory-${isbn}`);
+
     try {
         const storyDb = await db.query.story.findFirst({
             where(story, operators) {
@@ -217,6 +227,9 @@ export const readStory = async (isbn: string) => {
 };
 
 export const readLatestStories = async (latest: number = 10) => {
+    "use cache";
+    cacheTag("readLatestStories");
+
     try {
         const latestStories = await db.query.story.findMany({
             limit: latest,
@@ -269,8 +282,9 @@ export const deleteStoryAction = authActionClient
                 throw redirect("/");
             }
 
-            revalidatePath(`/story`, "layout");
-            revalidatePath("/");
+            // revalidate tags/paths once story is created
+            updateTag("readLatestStories");
+            revalidatePath(`/`);
 
             // shift all subsequent story chapters down by 1 if deleted story belong to a book
             if (deletedStory.bookId && deletedStory.bookPart) {
@@ -284,7 +298,7 @@ export const deleteStoryAction = authActionClient
                         )
                     );
 
-                revalidateTag(`book-${deletedStory.bookId}`, "max");
+                updateTag(`book-${deletedStory.bookId}`);
             }
 
             return deletedStory;

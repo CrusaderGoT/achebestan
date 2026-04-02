@@ -1,6 +1,7 @@
 // ============================================================
 // lib/auth/policies/comment-policy.ts
 "use server";
+"use cache";
 
 import { CommentPartialType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";

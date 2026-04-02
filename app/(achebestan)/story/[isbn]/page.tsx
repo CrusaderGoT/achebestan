@@ -2,7 +2,7 @@ import { StoryPageClient } from "@/components/story/story-page";
 import { getBookStories } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
-import { readStory } from "@/lib/actions/story";
+import { readLatestStories, readStory } from "@/lib/actions/story";
 import { auth } from "@/lib/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
@@ -14,6 +14,16 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 dayjs.extend(relativeTime);
+
+export async function generateStaticParams() {
+    const stories = await readLatestStories(10);
+    // params to prefetch latest stories
+    return (
+        stories?.map((story) => ({
+            isbn: story.isbn,
+        })) || []
+    );
+}
 
 // Generate metadata for the story page
 export async function generateMetadata({

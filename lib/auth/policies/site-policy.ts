@@ -1,6 +1,7 @@
 // ============================================================
 // lib/auth/policies/organization-policy.ts
 "use server";
+"use cache";
 
 import { hasPermission } from "./base-policy";
 
