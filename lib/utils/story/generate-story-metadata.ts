@@ -1,11 +1,16 @@
-import { StoryProps } from "@/types/story";
 import { BASE_URL } from "@/lib/constants";
+import { StoryProps } from "@/types/story";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { Metadata } from "next";
-import { estimateReadingTime } from "./story-utils";
-import { truncateText } from "./story-utils";
-import { calculateRatingsAverage } from "./story-utils";
+import {
+    calculateRatingsAverage,
+    estimateReadingTime,
+    truncateText,
+} from "./story-utils";
+
+dayjs.extend(relativeTime);
 
 export async function generateStoryMetadata(
     story: (StoryProps & { ratings: RatingSelectType[] }) | undefined

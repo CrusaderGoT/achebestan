@@ -7,13 +7,9 @@ import { auth } from "@/lib/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-
-dayjs.extend(relativeTime);
 
 export async function generateStaticParams() {
     const stories = await readLatestStories(10);
