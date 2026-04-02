@@ -16,6 +16,7 @@ export const storyUpdateSchema = createUpdateSchema(story, {
     edited: true,
     authorId: true,
     isbn: true,
+    bookPart: true,
 });
 
 export const storyInsertSchema = createInsertSchema(story, {
