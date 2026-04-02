@@ -57,7 +57,7 @@ export const createStoryAction = authActionClient
                 subtitle: inputData.subtitle,
                 content: sanitizeHTML(inputData.content),
                 created: new Date(),
-                ...(inputData.bookId && !!chapter // avoid falsy when 0
+                ...(inputData.bookId && chapter != undefined // avoid falsy when 0
                     ? {
                           bookId: inputData.bookId,
                           bookPart: chapter + 1,
