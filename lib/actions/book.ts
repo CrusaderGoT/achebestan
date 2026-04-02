@@ -53,7 +53,11 @@ export const createBookAction = authActionClient
                 name: parsedInput.name,
                 created: new Date(),
             })
-            .returning({ authorId: book.authorId, name: book.name });
+            .returning({
+                authorId: book.authorId,
+                name: book.name,
+                id: book.id,
+            });
 
         if (newBook) {
             updateTag(`getUserBooks-${newBook.authorId}`);
