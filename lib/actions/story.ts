@@ -192,7 +192,7 @@ export const updateStoryAction = authActionClient
                     edited: new Date(),
                 })
                 .where(eq(story.isbn, isbn))
-                .returning({ isbn: story.isbn, title: story.title });
+                .returning();
 
             updateTag(`readStory-${updatedStory.isbn}`);
             revalidatePath(`/story/${updatedStory.isbn}`);
