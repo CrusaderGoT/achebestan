@@ -78,7 +78,7 @@ export default async function StoryPage({
 
             <meta
                 name="copyright"
-                content={`© ${new Date().getFullYear()} ${
+                content={`© ${new Date(story.created).getFullYear()} ${
                     story.author.name
                 } (Achebestan)`}
             />
