@@ -1,7 +1,6 @@
 // ============================================================
 // lib/auth/policies/story-policy.ts
 "use server";
-"use cache";
 
 import { StoryPermissionsType, StorySelectType } from "@/types/story";
 import { UserSelectType } from "@/types/user";

@@ -104,7 +104,7 @@ export const deleteCommentAction = authActionClient
     .action(async ({ parsedInput, ctx }) => {
         const [canDeleteOwn, canDeleteAll] = await Promise.all([
             await canDeleteOwnComment(ctx.user as UserSelectType, parsedInput),
-            await canDeleteAllComment(ctx.user as UserSelectType, parsedInput),
+            await canDeleteAllComment(parsedInput),
         ]);
 
         if (!canDeleteOwn && !canDeleteAll) {
@@ -326,11 +326,8 @@ export const deleteCommentThreadAction = authActionClient
             storyISBN: z.string(),
         })
     )
-    .action(async ({ parsedInput, ctx }) => {
-        const canDelete = await canDeleteAllComment(
-            ctx.user as UserSelectType,
-            parsedInput
-        );
+    .action(async ({ parsedInput }) => {
+        const canDelete = await canDeleteAllComment(parsedInput);
 
         if (!canDelete) {
             throw new Error("You Are Not Authorized To Delete This Comment!");

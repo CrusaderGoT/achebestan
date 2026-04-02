@@ -1,7 +1,6 @@
 // ============================================================
 // lib/auth/policies/comment-policy.ts
 "use server";
-"use cache";
 
 import { CommentPartialType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
@@ -10,7 +9,10 @@ import { hasPermission } from "./base-policy";
 /**
  * Check if the current user owns the comment
  */
-function isCommentOwner(user: UserSelectType, comment: CommentPartialType): boolean {
+function isCommentOwner(
+    user: UserSelectType,
+    comment: CommentPartialType
+): boolean {
     if (!comment.userId) {
         return false;
     }
@@ -30,7 +32,6 @@ export async function canCreateComment(): Promise<boolean> {
  * - delete:all permission
  */
 export async function canDeleteAllComment(
-    user: UserSelectType,
     comment: CommentPartialType
 ): Promise<boolean> {
     if (!comment) {

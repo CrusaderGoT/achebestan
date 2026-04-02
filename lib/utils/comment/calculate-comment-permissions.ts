@@ -40,7 +40,7 @@ export async function calculateCommentPermissions(
 
     const [canDeleteAll, canDeleteOwn, canUpdate, canCreate] =
         await Promise.all([
-            canDeleteAllComment(user, commentForPolicy),
+            canDeleteAllComment(commentForPolicy),
             canDeleteOwnComment(user, commentForPolicy),
             canUpdateComment(user, commentForPolicy),
             canCreateComment(),
