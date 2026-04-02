@@ -67,7 +67,6 @@ export function CreateStoryForm() {
         useTimeout(() => setSavingDraft(false), 1000);
 
     const [bookId, setBookId] = useState<ComboboxItem | null>(null);
-    const [bookPart, setBookPart] = useState<string | number>("");
 
     const {
         executeAsync: executeAsyncCreateStory,
@@ -82,12 +81,6 @@ export function CreateStoryForm() {
             disabled: hasSucceededCreateStory || isPendingCreateStory || synced,
         }),
     });
-
-    // function for clearing book part/id
-    const clearBookDetails = () => {
-        setBookId(null);
-        setBookPart("");
-    };
 
     // Load all drafts on mount
     useEffect(() => {
@@ -110,7 +103,7 @@ export function CreateStoryForm() {
             if (!currentDraftId) {
                 setCurrentDraft(null);
                 form.reset();
-                clearBookDetails();
+                setBookId(null);
                 return;
             }
 
@@ -126,7 +119,6 @@ export function CreateStoryForm() {
 
                     form.reset();
                     setBookId(draftBookId ?? null); // UI state stays as ComboboxItem
-                    setBookPart(draftBookPart ?? ""); // UI state stays as string|number
                     setCurrentDraft(draft);
                     form.setValues(draft);
                     // Single, explicit conversion for form values:
@@ -172,7 +164,6 @@ export function CreateStoryForm() {
                     created: currentDraft.created,
                 }),
                 bookId, // store the full ComboboxItem so the label survives reload
-                bookPart, // store as-is (string|number) for the UI
             };
 
             const newDraftId = await saveDraft(draftData);
@@ -237,26 +228,11 @@ export function CreateStoryForm() {
         }
     });
 
-    // Effect for setting book part or Id when changed
-    useEffect(() => {
-        form.setFieldValue("bookId", toFormBookId(bookId));
-        form.setFieldValue("bookPart", toFormBookPart(bookPart));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bookId, bookPart]);
-
     async function handleSubmit(data: StoryInsertType) {
-        if (bookId && !bookPart) {
-            notifications.show({
-                message: "A story in a book must have a chapter",
-                color: "yellow",
-            });
-            return;
-        }
         await Promise.all([
             await executeAsyncCreateStory({
                 ...data,
-                bookId: bookId?.value ? Number(bookId?.value) : undefined,
-                bookPart: bookPart ? Number(bookPart) : undefined,
+                bookId: toFormBookId(bookId),
             }),
             currentDraftId &&
                 deleteDraftOnSubmit &&
@@ -339,12 +315,7 @@ export function CreateStoryForm() {
                         }
                     />
 
-                    <BooksSelect
-                        bookId={bookId}
-                        setBookId={setBookId}
-                        bookPart={bookPart}
-                        setBookPart={setBookPart}
-                    />
+                    <BooksSelect bookId={bookId} setBookId={setBookId} />
 
                     <Group mt="md">
                         <Button

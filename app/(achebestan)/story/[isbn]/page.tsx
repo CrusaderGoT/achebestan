@@ -48,7 +48,9 @@ export default async function StoryPage({
 
     const [userRating, book] = await Promise.all([
         getUserRating(session?.user.id, story.isbn),
-        getBookStories(story.bookId),
+        story.bookPart && story.bookId
+            ? getBookStories(story.bookId, 0, story.bookPart * 5)
+            : [],
     ]);
 
     const structuredData = storyJsonLdData(story, comments);

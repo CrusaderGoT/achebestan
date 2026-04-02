@@ -7,8 +7,8 @@ import { revalidatePath, unstable_cache } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
-    bookId?: number | null,
-    offset: number = 1,
+    bookId: number,
+    offset: number = 0,
     limit: number = 10
 ) {
     if (!bookId) return [];
@@ -20,8 +20,8 @@ export async function getBookStories(
                     where(fields, operators) {
                         return operators.eq(fields.bookId, bookId);
                     },
-                    limit,
-                    offset: (offset - 1) * limit,
+                    limit: limit,
+                    offset: offset,
                     orderBy(fields, operators) {
                         return operators.asc(fields.bookPart);
                     },

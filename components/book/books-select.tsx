@@ -9,7 +9,6 @@ import {
     ComboboxItem,
     Group,
     Modal,
-    NumberInput,
     Select,
     Stack,
     TextInput,
@@ -21,13 +20,9 @@ import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 export function BooksSelect({
     bookId,
     setBookId,
-    bookPart,
-    setBookPart,
 }: {
     bookId: ComboboxItem | null;
     setBookId: Dispatch<SetStateAction<ComboboxItem | null>>;
-    bookPart: number | string;
-    setBookPart: Dispatch<SetStateAction<number | string>>;
 }) {
     const [userBooks, setUserBooks] = useState<ComboboxData>([]);
 
@@ -67,27 +62,15 @@ export function BooksSelect({
                     <Select
                         data={userBooks}
                         value={bookId ? bookId.value : null}
-                        onChange={(_value, option) => setBookId(option)}
+                        onChange={(_value, option) => {
+                            setBookId(option);
+                        }}
                         label="Choose a Book to add this story"
                         placeholder="Pick Book"
                         description="pick a book or create a new one"
                         searchable
                         size="xs"
                     />
-
-                    {bookId && (
-                        <NumberInput
-                            value={bookPart}
-                            onChange={setBookPart}
-                            min={1}
-                            max={1000}
-                            clampBehavior="strict"
-                            label="Chapter Number"
-                            description="Enter a chapter number, entering an existing chapter number will result in an error."
-                            placeholder="enter a number between 1 and 100"
-                            size="xs"
-                        />
-                    )}
                 </Group>
             )}
 

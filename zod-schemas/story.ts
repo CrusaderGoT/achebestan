@@ -32,6 +32,7 @@ export const storyInsertSchema = createInsertSchema(story, {
     edited: true,
     authorId: true,
     isbn: true,
+    bookPart: true,
 });
 
 export const favouriteInserSchema = createInsertSchema(favouriteUserStories);

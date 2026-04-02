@@ -34,8 +34,8 @@ export const story = table(
         t.index("stories_author_id_idx").on(table.authorId),
         t.index("stories_created_idx").on(table.created),
         t.index("stories_edited_idx").on(table.edited),
+        t.index("stories_book_id_idx").on(table.bookId),
         t.uniqueIndex("stories_isbn_uidx").on(table.isbn),
-        t.uniqueIndex("stories_book_id_uidx").on(table.bookId),
         t
             .foreignKey({
                 name: "stories_book_id_book_id_fk",
@@ -48,6 +48,7 @@ export const story = table(
             sql`(${table.bookId} IS NULL AND ${table.bookPart} IS NULL) OR 
             (${table.bookId} IS NOT NULL AND ${table.bookPart} IS NOT NULL)`
         ),
+        t.unique().on(table.isbn, table.bookPart),
     ]
 );
 

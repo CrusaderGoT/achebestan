@@ -274,6 +274,20 @@
       "when": 1774911541930,
       "tag": "0038_faulty_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1775140231289,
+      "tag": "0039_charming_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1775145743995,
+      "tag": "0040_tearful_romulus",
+      "breakpoints": true
     }
   ]
 }

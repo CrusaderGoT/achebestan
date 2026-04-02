@@ -87,7 +87,7 @@ export function StoryPageClient({
                 <BookPagination chapters={book} part={story.bookPart} />
             )}
 
-            {JSON.stringify([book, story.bookPart, story.bookId])}
+            {JSON.stringify([book.length, story.bookPart, story.bookId])}
 
             <StoryActions permissions={permissions} {...story} />
 

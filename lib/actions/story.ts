@@ -3,7 +3,7 @@
 import { db } from "@/drizzle";
 import { story } from "@/drizzle/schemas/story";
 import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
-import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, ilike, or, sql } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
 import { handleFileUpload } from "../utils/image-upload";
@@ -12,7 +12,7 @@ import z from "zod/v4";
 
 import { SearchOptions } from "@/types/story";
 import { UserSelectType } from "@/types/user";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import {
     canCreateStory,
@@ -34,6 +34,20 @@ export const createStoryAction = authActionClient
             throw new Error("You Are Not Authorized To Create Stories!");
         }
 
+        // get the current max chapter for this story
+        let chapter: undefined | number = undefined;
+
+        if (inputData.bookId) {
+            const [{ max }] = await db
+                .select({
+                    max: sql<number>`coalesce(max(${story.bookPart}), 0)`,
+                })
+                .from(story)
+                .where(eq(story.bookId, inputData.bookId));
+
+            chapter = max;
+        }
+
         // insert new story
         const [createdStory] = await db
             .insert(story)
@@ -43,8 +57,12 @@ export const createStoryAction = authActionClient
                 subtitle: inputData.subtitle,
                 content: sanitizeHTML(inputData.content),
                 created: new Date(),
-bookId: inputData.bookId,
-bookPart: inputData.bookPart,
+                ...(inputData.bookId && !!chapter // avoid falsy when 0
+                    ? {
+                          bookId: inputData.bookId,
+                          bookPart: chapter + 1,
+                      }
+                    : {}),
             })
             .returning({
                 isbn: story.isbn,
@@ -240,7 +258,11 @@ export const deleteStoryAction = authActionClient
                 .where(
                     and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id))
                 )
-                .returning({ title: story.title });
+                .returning({
+                    title: story.title,
+                    bookPart: story.bookPart,
+                    bookId: story.bookId,
+                });
 
             if (!deletedStory?.title) {
                 revalidatePath("/");
@@ -249,6 +271,21 @@ export const deleteStoryAction = authActionClient
 
             revalidatePath(`/story`, "layout");
             revalidatePath("/");
+
+            // shift all subsequent story chapters down by 1 if deleted story belong to a book
+            if (deletedStory.bookId && deletedStory.bookPart) {
+                await db
+                    .update(story)
+                    .set({ bookPart: sql`${story.bookPart} - 1` })
+                    .where(
+                        and(
+                            eq(story.bookId, deletedStory.bookId),
+                            gt(story.bookPart, deletedStory.bookPart)
+                        )
+                    );
+
+                revalidateTag(`book-${deletedStory.bookId}`, "max");
+            }
 
             return deletedStory;
         }

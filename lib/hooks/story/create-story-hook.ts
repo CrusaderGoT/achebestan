@@ -2,12 +2,14 @@ import { createStoryAction } from "@/lib/actions/story";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
 export const useCreateStory = (
     setSynced: Dispatch<SetStateAction<boolean>>
 ) => {
+    const router = useRouter();
+
     const action = useAction(createStoryAction, {
         onSuccess(args) {
             notifications.show({
@@ -18,7 +20,7 @@ export const useCreateStory = (
         },
         onError(args) {
             if (args.error.validationErrors) {
-                console.log(args.error.validationErrors);
+                console.error(args.error.validationErrors);
                 Object.values(args.error.validationErrors).forEach(
                     (errorList) => {
                         errorList.forEach((errorMsg, index) =>
@@ -30,11 +32,9 @@ export const useCreateStory = (
                     }
                 );
             } else if (args.error.serverError) {
-                console.log(args.error.serverError);
+                console.error(args.error.serverError);
                 notifications.show({
-                    message: args.error.serverError
-                        ? args.error.serverError
-                        : "A Server Error Ocured",
+                    message: "A Server Error Occured",
                 });
             } else if (args.error.thrownError) {
                 if (isFeatureSupported(["serviceWorker", "SyncManager"])) {
