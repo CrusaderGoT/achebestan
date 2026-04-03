@@ -78,7 +78,7 @@ export const createStoryAction = authActionClient
 
         if (createdStory.bookId) {
             updateTag(`getBookStories-${createdStory.bookId}`);
-            revalidatePath("/story/", "layout");
+            updateTag(`readStoryBook-${createdStory.bookId}`);
         }
 
         // upload image using isbn as public id
@@ -218,11 +218,13 @@ export const readStory = async (isbn: string) => {
             },
         });
 
-        if (!storyDb) throw notFound();
+        if (!storyDb) notFound();
 
-        return {
-            ...storyDb,
-        };
+        if (storyDb.bookId) {
+            cacheTag(`readStoryBook-${storyDb.bookId}`);
+        }
+
+        return storyDb;
     } catch (e) {
         console.log(e);
     }
@@ -230,6 +232,7 @@ export const readStory = async (isbn: string) => {
 
 export const readLatestStories = async (latest: number = 10) => {
     "use cache";
+
     cacheTag("readLatestStories");
 
     try {
@@ -302,7 +305,7 @@ export const deleteStoryAction = authActionClient
                     );
 
                 updateTag(`getBookStories-${story.bookId}`);
-                revalidatePath("/story/", "layout");
+                updateTag(`readStoryBook-${story.bookId}`);
             }
 
             return deletedStory;

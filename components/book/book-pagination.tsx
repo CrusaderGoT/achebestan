@@ -54,6 +54,9 @@ export function BookPagination({
             onChange={handleNextBookPage}
             total={total}
             aria-label="Book pagination"
+            boundaries={3}
+            siblings={3}
+            color="yellow"
         />
     );
 }
