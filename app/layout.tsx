@@ -115,7 +115,9 @@ export default function RootLayout({
 
                     <SerwistProvider swUrl="/serwist/sw.js">
                         <CentralizedAuthContextProvider>
-                            <Shell>{children}</Shell>
+                            <Shell>
+                                <Suspense fallback={null}>{children}</Suspense>
+                            </Shell>
                         </CentralizedAuthContextProvider>
                     </SerwistProvider>
                 </MantineProvider>
