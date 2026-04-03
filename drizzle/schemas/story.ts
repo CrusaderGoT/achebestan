@@ -23,7 +23,7 @@ export const story = table(
         isbn: t.uuid().defaultRandom().notNull(),
         content: t.text().notNull(),
         bookId: t.integer(),
-        bookPart: t.integer().unique(),
+        bookPart: t.integer(),
         ...timestamps,
         ...image,
         blurb: t.text(),
@@ -47,8 +47,7 @@ export const story = table(
             "book_fields_together",
             sql`(${table.bookId} IS NULL AND ${table.bookPart} IS NULL) OR 
             (${table.bookId} IS NOT NULL AND ${table.bookPart} IS NOT NULL)`
-        ),
-        t.unique().on(table.isbn, table.bookPart),
+        ),     t.unique("stories_book_id_book_part_uidx").on(table.bookId, table.bookPart),
     ]
 );
 
