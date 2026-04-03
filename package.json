@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint .",
-    "upgrade": "npx drizzle-kit generate && npx drizzle-kit migrate",
+    "upgrade": "npx drizzle-kit generate && npx drizzle-kit migrate"
   },
   "dependencies": {
     "@mantine/core": "^8.3.18",
