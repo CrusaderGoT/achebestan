@@ -69,6 +69,7 @@ export const createStoryAction = authActionClient
                 title: story.title,
                 image: story.image,
                 bookId: story.bookId,
+                authorId: story.authorId,
             });
 
         // revalidate tags/paths once story is created
@@ -76,7 +77,8 @@ export const createStoryAction = authActionClient
         revalidatePath(`/`);
 
         if (createdStory.bookId) {
-            updateTag(`book-${createdStory.bookId}`);
+            updateTag(`getBookStories-${createdStory.bookId}`);
+            revalidatePath("/story/", "layout");
         }
 
         // upload image using isbn as public id
@@ -283,6 +285,7 @@ export const deleteStoryAction = authActionClient
             }
 
             // revalidate tags/paths once story is created
+            updateTag(`readStory-${isbn}`);
             updateTag("readLatestStories");
             revalidatePath(`/`);
 
@@ -298,7 +301,8 @@ export const deleteStoryAction = authActionClient
                         )
                     );
 
-                updateTag(`book-${deletedStory.bookId}`);
+                updateTag(`getBookStories-${story.bookId}`);
+                revalidatePath("/story/", "layout");
             }
 
             return deletedStory;

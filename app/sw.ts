@@ -14,8 +14,7 @@ import {
     CacheFirst,
     ExpirationPlugin,
     NetworkFirst,
-    Serwist,
-    StaleWhileRevalidate,
+    Serwist
 } from "serwist";
 import type { StorySelectType } from "../types/story";
 
@@ -71,7 +70,7 @@ const serwist = new Serwist({
             matcher: ({ url }) =>
                 url.pathname.startsWith("/story/") &&
                 !url.pathname.includes("new"),
-            handler: new StaleWhileRevalidate({
+            handler: new NetworkFirst({
                 cacheName: CACHE_NAMES.STORY,
                 plugins: [
                     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -81,6 +80,7 @@ const serwist = new Serwist({
                         purgeOnQuotaError: true,
                     }),
                 ],
+                networkTimeoutSeconds: 3,
             }),
         },
 
@@ -352,7 +352,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
     }
 
     // Queue offline story POST/PATCH/DELETE mutations
-    if (url.pathname.startsWith("/story/")) {
+    if (url.pathname.startsWith("/story/new")) {
         event.respondWith(
             (async () => {
                 try {

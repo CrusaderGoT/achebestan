@@ -12,9 +12,10 @@ export async function getBookStories(
     limit: number = 10
 ) {
     "use cache";
-    cacheTag(`book-${bookId}`);
 
     if (!bookId) return [];
+
+    cacheTag(`getBookStories-${bookId}`);
 
     const fetchStories = async () => {
         try {
