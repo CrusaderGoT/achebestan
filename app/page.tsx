@@ -17,7 +17,7 @@ export default async function Home() {
     const stories = await readLatestStories(10);
 
     // Generate structured data
-    const structuredData = homeJsonLdData(stories);
+    const structuredData = await homeJsonLdData(stories);
 
     return (
         <>

@@ -8,7 +8,7 @@ export default async function AchebestanLayout({
 }>) {
     return (
         <Container p={"xs"}>
-            <Suspense fallback={null}>{children}</Suspense>{" "}
+            <Suspense fallback={null}>{children}</Suspense>
         </Container>
     );
 }
