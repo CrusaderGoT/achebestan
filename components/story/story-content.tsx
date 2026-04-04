@@ -35,8 +35,6 @@ export function StoryContent({
     openedContentField,
     content,
     form,
-    session,
-    storyAuthorId,
     storyISBN,
     permissions,
 }: StoryContentType) {
@@ -208,8 +206,7 @@ export function StoryContent({
                     className={cx(storypageStyles.storyContentBtns)}
                 >
                     <StoryContentButtons
-                        storyAuthorId={storyAuthorId}
-                        sessionUserId={session.data?.user.id}
+                        permissions={permissions}
                         isFormSubmiting={form.submitting}
                         openedContentField={openedContentField}
                         dirty={dirty}

@@ -10,29 +10,28 @@ import {
 } from "@tabler/icons-react";
 
 import publicStyles from "@/styles/public.module.css";
+import { StoryPermissionsType } from "@/types/story";
 import { useMounted } from "@mantine/hooks";
 import cx from "clsx";
 
 type StoryContentButtonsProps = {
-    storyAuthorId: string;
-    sessionUserId: string | undefined;
     isFormSubmiting: boolean;
     openedContentField: boolean;
     dirty: boolean;
     toggleContentField: () => void;
     toggleFullscreen: () => Promise<void>;
     fullscreen: boolean;
+    permissions?: StoryPermissionsType;
 };
 
 export function StoryContentButtons({
-    storyAuthorId,
-    sessionUserId,
     isFormSubmiting,
     openedContentField,
     dirty,
     toggleContentField,
     toggleFullscreen,
     fullscreen,
+    permissions,
 }: StoryContentButtonsProps) {
     const mounted = useMounted();
 
@@ -40,40 +39,39 @@ export function StoryContentButtons({
 
     return (
         <Group gap={"xl"}>
-            {storyAuthorId === sessionUserId && (
-                <>
-                    <ActionIcon
-                        onClick={() => {
-                            toggleContentField();
-                        }}
-                        title="Update Story Content"
-                        variant="light"
-                        color="yellow"
-                        size="sm"
-                        disabled={isFormSubmiting}
-                    >
-                        {!openedContentField ? (
-                            <IconEdit size={16} />
-                        ) : (
-                            <IconEditOff size={16} />
-                        )}
-                    </ActionIcon>
+            <>
+                <ActionIcon
+                    onClick={() => {
+                        toggleContentField();
+                    }}
+                    title="Update Story Content"
+                    variant="light"
+                    color="yellow"
+                    size="sm"
+                    disabled={isFormSubmiting}
+                    className={cx(!permissions?.canUpdate && publicStyles.hide)}
+                >
+                    {!openedContentField ? (
+                        <IconEdit size={16} />
+                    ) : (
+                        <IconEditOff size={16} />
+                    )}
+                </ActionIcon>
 
-                    <ActionIcon
-                        loading={isFormSubmiting}
-                        title="Submit Update"
-                        variant="light"
-                        size={"sm"}
-                        type="submit"
-                        color="green"
-                        className={cx(
-                            (!openedContentField || !dirty) && publicStyles.hide
-                        )}
-                    >
-                        <IconCheck size={16} />
-                    </ActionIcon>
-                </>
-            )}
+                <ActionIcon
+                    loading={isFormSubmiting}
+                    title="Submit Update"
+                    variant="light"
+                    size={"sm"}
+                    type="submit"
+                    color="green"
+                    className={cx(
+                        (!openedContentField || !dirty) && publicStyles.hide
+                    )}
+                >
+                    <IconCheck size={16} />
+                </ActionIcon>
+            </>
 
             <ActionIcon
                 onClick={toggleFullscreen}

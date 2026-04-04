@@ -229,8 +229,6 @@ export function Story({
                             toggleContentField={toggleContentField}
                             openedContentField={openedContentField}
                             form={form}
-                            session={sessionUser}
-                            storyAuthorId={story.authorId}
                             storyISBN={story.isbn}
                             permissions={permissions}
                         />

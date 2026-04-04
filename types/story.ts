@@ -1,4 +1,3 @@
-import { authClient } from "@/lib/auth-client";
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     favouriteInserSchema,
@@ -40,8 +39,6 @@ export type StoryContentType = {
     openedContentField: boolean;
     content: string;
     form: UseFormReturnType<StoryUpdateType>;
-    session: ReturnType<typeof authClient.useSession>;
-    storyAuthorId: string;
     storyISBN: string;
     permissions?: StoryPermissionsType;
 };
