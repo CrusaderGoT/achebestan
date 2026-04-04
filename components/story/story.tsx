@@ -3,7 +3,16 @@
 import { StoryProps, StorySelectType, StoryUpdateType } from "@/types/story";
 import { storyUpdateSchema } from "@/zod-schemas/story";
 
-import { ActionIcon, Box, Card, Stack } from "@mantine/core";
+import {
+    ActionIcon,
+    Box,
+    Button,
+    Card,
+    ComboboxItem,
+    Group,
+    Stack,
+    Text,
+} from "@mantine/core";
 
 import publicStyles from "@/styles/public.module.css";
 import storypageStyles from "@/styles/story-page.module.css";
@@ -26,8 +35,10 @@ import {
     useUpdateStoryForm,
 } from "@/components/forms/story/update-story-form-context";
 
+import { getStoryBook } from "@/lib/actions/book";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BooksSelect } from "../book/books-select";
 
 export function Story({
     image,
@@ -60,6 +71,26 @@ export function Story({
         authorId: author.id,
         blurb: blurb,
     });
+
+    const [bookIdState, setBookIdState] = useState<ComboboxItem | null>(null);
+
+    const [book, setBook] =
+        useState<Awaited<ReturnType<typeof getStoryBook>>>();
+
+    // effect for getting the story's book if bookId
+    useEffect(() => {
+        async function fetchStorysBook() {
+            if (!bookId) return;
+
+            const theBook = await getStoryBook(bookId, story.isbn);
+
+            if (theBook) {
+                setBook(theBook);
+            }
+        }
+        fetchStorysBook();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bookId]);
 
     const [
         openedImageField,
@@ -160,6 +191,10 @@ export function Story({
         closeContentField();
     }
 
+    const sameBook =
+        bookId ===
+        (bookIdState?.value ? Number(bookIdState?.value) : "noBookIdState");
+
     return (
         <UpdateStoryFormProvider form={form}>
             <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -204,25 +239,48 @@ export function Story({
                     </Card.Section>
 
                     <Stack mt="md">
-                        <Box>
-                            <StoryTitle
-                                title={story.title}
-                                toggleTitleField={toggleTitleField}
-                                openedTitleField={openedTitleField}
-                                isPending={isPending}
-                                form={form}
-                                permissions={permissions}
-                            />
+                        <Group>
+                            <Box>
+                                <StoryTitle
+                                    title={story.title}
+                                    toggleTitleField={toggleTitleField}
+                                    openedTitleField={openedTitleField}
+                                    isPending={isPending}
+                                    form={form}
+                                    permissions={permissions}
+                                />
 
-                            <StorySubtitle
-                                subtitle={story.subtitle}
-                                toggleSubtitleField={toggleSubtitleField}
-                                openedSubtitleField={openedSubtitleField}
-                                isPending={isPending}
-                                form={form}
-                                permissions={permissions}
-                            />
-                        </Box>
+                                <StorySubtitle
+                                    subtitle={story.subtitle}
+                                    toggleSubtitleField={toggleSubtitleField}
+                                    openedSubtitleField={openedSubtitleField}
+                                    isPending={isPending}
+                                    form={form}
+                                    permissions={permissions}
+                                />
+                            </Box>
+
+                            <Stack>
+                                {book && (
+                                    <Text size="xs">
+                                        part of book: {book.name}
+                                    </Text>
+                                )}
+
+                                <Box>
+                                    <BooksSelect
+                                        bookId={bookIdState}
+                                        setBookId={setBookIdState}
+                                    />
+
+                                    {!sameBook && (
+                                        <Button type="submit">
+                                            move to book
+                                        </Button>
+                                    )}
+                                </Box>
+                            </Stack>
+                        </Group>
 
                         <StoryContent
                             content={story.content}

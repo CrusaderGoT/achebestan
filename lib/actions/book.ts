@@ -75,7 +75,7 @@ export async function getUserBooks(
 ) {
     "use cache";
     cacheTag(`getUserBooks-${userId}`);
-    
+
     try {
         const userBooks = await db.query.book.findMany({
             where(fields, operators) {
@@ -96,5 +96,29 @@ export async function getUserBooks(
     } catch (error) {
         console.error("User books error:", error);
         throw new Error("Failed to get user books");
+    }
+}
+
+export async function getStoryBook(bookId: number, storyIsbn: string) {
+    "use cache";
+    cacheTag(`getStoryBook-${storyIsbn}`);
+
+    try {
+        const storyBook = await db.query.book.findFirst({
+            where(fields, operators) {
+                return operators.and(operators.eq(fields.id, bookId));
+            },
+            columns: {
+                id: true,
+                name: true,
+                created: true,
+                edited: true,
+            },
+        });
+
+        return storyBook;
+    } catch (error) {
+        console.error("story's book error:", error);
+        throw new Error("Failed to get story's book");
     }
 }

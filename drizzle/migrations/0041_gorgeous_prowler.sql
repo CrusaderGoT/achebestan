@@ -1,5 +1,5 @@
-ALTER TABLE "stories" DROP CONSTRAINT IF EXISTS "stories_bookPart_unique";--> statement-breakpoint
-ALTER TABLE "stories" DROP CONSTRAINT IF EXISTS "stories_isbn_bookPart_unique";--> statement-breakpoint
+ALTER TABLE "stories" DROP CONSTRAINT "stories_bookPart_unique";--> statement-breakpoint
+ALTER TABLE "stories" DROP CONSTRAINT "stories_isbn_bookPart_unique";--> statement-breakpoint
 DO $$
 BEGIN
     IF NO EXISTS (
