@@ -2,8 +2,8 @@
 "use client";
 
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Link, { LinkProps } from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     AnchorHTMLAttributes,
     MouseEvent,
@@ -288,7 +288,8 @@ export function NavigationLink({
         startNavProgress();
 
         startTrans(() => {
-            const opts = scroll === false ? { scroll: false as const } : undefined;
+            const opts =
+                scroll === false ? { scroll: false as const } : undefined;
             if (replace) {
                 router.replace(hrefStr, opts);
             } else {

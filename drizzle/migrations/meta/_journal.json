@@ -288,6 +288,13 @@
       "when": 1775145743995,
       "tag": "0040_tearful_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1775263601337,
+      "tag": "0041_gorgeous_prowler",
+      "breakpoints": true
     }
   ]
 }
