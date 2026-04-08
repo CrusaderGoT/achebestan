@@ -6,10 +6,20 @@ import cx from "clsx";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { Flex, Mark, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { useMounted } from "@mantine/hooks";
 import { HomeImageBox } from "./home-image";
 
 function HomeHero() {
     const { sessionUser } = useCentralizedAuth();
+
+    const mounted = useMounted();
+
+    const showSkeleton = !mounted || sessionUser.isPending;
+
+    const displayName =
+        mounted && sessionUser.data?.user && !sessionUser.data.user.isAnonymous
+            ? sessionUser.data.user.name
+            : "Achebestan";
 
     return (
         <Flex gap={0} direction={{ base: "column", md: "row" }}>
@@ -25,7 +35,7 @@ function HomeHero() {
                         Achebestan.
                     </Mark>{" "}
                     And you are currently at my Mind&apos;s Palace, this is a
-                    place where i post my fictional stories, concoctions of my
+                    place where I post my fictional stories, concoctions of my
                     imagination, sensations of my life, and maybe a programming
                     standard or two.
                 </Text>
@@ -38,19 +48,13 @@ function HomeHero() {
                 gap={0}
                 className={cx(styles.heroSection, styles.heroImageSection)}
             >
-                {sessionUser.isPending ? (
+                {showSkeleton ? (
                     <Skeleton animate width={300} height={200} />
                 ) : (
                     <HomeImageBox session={sessionUser.data} />
                 )}
 
-                <Text className={styles.heroSignature}>
-                    {sessionUser.isPending ||
-                    !sessionUser.data?.user ||
-                    sessionUser.data.user.isAnonymous
-                        ? "Achebestan"
-                        : sessionUser.data.user.name}
-                </Text>
+                <Text className={styles.heroSignature}>{displayName}</Text>
             </Stack>
         </Flex>
     );

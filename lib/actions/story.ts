@@ -34,19 +34,7 @@ export const createStoryAction = authActionClient
             throw new Error("You Are Not Authorized To Create Stories!");
         }
 
-        // get the current max chapter for this story
-        let chapter: undefined | number = undefined;
-
-        if (inputData.bookId) {
-            const [{ max }] = await db
-                .select({
-                    max: sql<number>`coalesce(max(${story.bookPart}), 0)`,
-                })
-                .from(story)
-                .where(eq(story.bookId, inputData.bookId));
-
-            chapter = max;
-        }
+        const chapter = await makeStoryChapter(inputData.bookId);
 
         // insert new story
         const [createdStory] = await db
@@ -90,7 +78,7 @@ export const createStoryAction = authActionClient
                 createdStory.isbn,
                 {
                     throwOnError: true,
-                }
+                },
             );
             imageUrl = uploadResponse?.secure_url;
 
@@ -169,10 +157,12 @@ export const updateStoryAction = authActionClient
                     isbn, // overwrite this publicId
                     {
                         throwOnError: true,
-                    }
+                    },
                 );
                 imageUrl = uploadResponse?.secure_url;
             }
+
+            const chapter = await makeStoryChapter(updateData.bookId);
 
             const [updatedStory] = await db
                 .update(story)
@@ -189,7 +179,16 @@ export const updateStoryAction = authActionClient
 
                     ...(!!imageUrl && { image: imageUrl }),
 
-                    subtitle: updateData.subtitle,
+                    ...(!!updateData.subtitle?.trim() && {
+                        subtitle: updateData.subtitle,
+                    }),
+
+                    ...(updateData.bookId && chapter != undefined // avoid falsy when 0
+                        ? {
+                              bookId: updateData.bookId,
+                              bookPart: chapter + 1,
+                          }
+                        : {}),
 
                     edited: new Date(),
                 })
@@ -200,7 +199,7 @@ export const updateStoryAction = authActionClient
             revalidatePath(`/story/${updatedStory.isbn}`);
 
             return updatedStory;
-        }
+        },
     );
 
 export const readStory = async (isbn: string) => {
@@ -253,7 +252,7 @@ export const deleteStoryAction = authActionClient
     .inputSchema(
         z.object({
             isbn: z.uuid(),
-        })
+        }),
     )
     .bindArgsSchemas<[authorId: z.ZodString]>([z.string()])
     .action(
@@ -274,7 +273,7 @@ export const deleteStoryAction = authActionClient
             const [deletedStory] = await db
                 .delete(story)
                 .where(
-                    and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id))
+                    and(eq(story.isbn, isbn), eq(story.authorId, ctx.user.id)),
                 )
                 .returning({
                     title: story.title,
@@ -300,8 +299,8 @@ export const deleteStoryAction = authActionClient
                     .where(
                         and(
                             eq(story.bookId, deletedStory.bookId),
-                            gt(story.bookPart, deletedStory.bookPart)
-                        )
+                            gt(story.bookPart, deletedStory.bookPart),
+                        ),
                     );
 
                 updateTag(`getBookStories-${story.bookId}`);
@@ -309,12 +308,12 @@ export const deleteStoryAction = authActionClient
             }
 
             return deletedStory;
-        }
+        },
     );
 
 export async function searchStories(
     searchText: string,
-    options: SearchOptions = {}
+    options: SearchOptions = {},
 ) {
     // Input validation
     if (!searchText?.trim()) {
@@ -388,4 +387,22 @@ export async function searchStories(
         console.error("Search error:", error);
         throw new Error("Failed to search stories");
     }
+}
+
+export async function makeStoryChapter(bookId: number | null | undefined) {
+    // get the current max chapter for this story
+    let chapter: undefined | number = undefined;
+
+    if (bookId) {
+        const [{ max }] = await db
+            .select({
+                max: sql<number>`coalesce(max(${story.bookPart}), 0)`,
+            })
+            .from(story)
+            .where(eq(story.bookId, bookId));
+
+        chapter = max;
+    }
+
+    return chapter;
 }

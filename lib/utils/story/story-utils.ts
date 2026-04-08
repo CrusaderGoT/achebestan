@@ -3,7 +3,7 @@ import { RatingSelectType } from "@/zod-schemas/rating";
 
 export function calculateRatingsAverage(
     ratings: RatingSelectType[],
-    updateUserRating?: RatingSelectType
+    updateUserRating?: RatingSelectType,
 ) {
     if (ratings.length < 1 && !updateUserRating) return 0;
 
@@ -13,7 +13,7 @@ export function calculateRatingsAverage(
     // Handle user rating update/addition
     if (updateUserRating?.userId) {
         const existingIndex = workingRatings.findIndex(
-            (r) => r.userId === updateUserRating.userId
+            (r) => r.userId === updateUserRating.userId,
         );
 
         if (existingIndex >= 0) {
@@ -41,7 +41,7 @@ export function calculateRatingsAverage(
     // Calculate average from unique ratings
     const totalStars = uniqueRatingsArray.reduce(
         (sum, rating) => sum + rating.stars,
-        0
+        0,
     );
     return totalStars / uniqueRatingsArray.length;
 }

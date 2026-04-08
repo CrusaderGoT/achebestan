@@ -59,7 +59,7 @@ export function CreateStoryForm() {
     const [openedDrafts, { toggle: toggleDrafts, close: closeDrafts }] =
         useDisclosure();
 
-    const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(true);
+    const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(false);
 
     const [savingDraft, setSavingDraft] = useState(false);
 

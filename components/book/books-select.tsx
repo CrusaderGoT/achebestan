@@ -7,7 +7,6 @@ import {
     Button,
     ComboboxData,
     ComboboxItem,
-    Group,
     Modal,
     Select,
     Stack,
@@ -25,6 +24,8 @@ export function BooksSelect({
     setBookId: Dispatch<SetStateAction<ComboboxItem | null>>;
 }) {
     const [userBooks, setUserBooks] = useState<ComboboxData>([]);
+
+    const [loadingUserBooks, setLoadingUserBooks] = useState(true);
 
     const { sessionUser } = useCentralizedAuth();
 
@@ -52,29 +53,31 @@ export function BooksSelect({
         }
 
         getUserBooksEffect();
+
+        setLoadingUserBooks(false);
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId]);
 
     return (
         <>
             {userBooks.length > 0 && (
-                <Group>
-                    <Select
-                        data={userBooks}
-                        value={bookId ? bookId.value : null}
-                        onChange={(_value, option) => {
-                            setBookId(option);
-                        }}
-                        label="Choose a Book to add this story"
-                        placeholder="Pick Book"
-                        description="pick a book or create a new one"
-                        searchable
-                        size="xs"
-                    />
-                </Group>
+                <Select
+                    data={userBooks}
+                    value={bookId ? bookId.value : null}
+                    onChange={(_value, option) => {
+                        setBookId(option);
+                    }}
+                    label="Choose a Book to add this story to"
+                    placeholder="Pick Book"
+                    description="pick a book or create a new one"
+                    searchable
+                    size="xs"
+                    w={"300"}
+                />
             )}
 
-            <CreateBookModal setNewBook={setUserBooks} />
+            {!loadingUserBooks && <CreateBookModal setNewBook={setUserBooks} />}
         </>
     );
 }

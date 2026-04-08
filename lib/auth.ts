@@ -80,7 +80,7 @@ export const auth = betterAuth({
                     const exists = await db.query.organization.findFirst({
                         where: eq(
                             authSchemas.organization.name,
-                            organization.name || ""
+                            organization.name || "",
                         ),
                     });
 
@@ -141,7 +141,7 @@ export const auth = betterAuth({
                                 await tx.query.organization.findFirst({
                                     where: eq(
                                         authSchemas.organization.slug,
-                                        orgSlug
+                                        orgSlug,
                                     ),
                                 });
 
@@ -163,7 +163,7 @@ export const auth = betterAuth({
                         // Check membership and add if needed
                         const existingMember = await checkIfUserIsMember(
                             user.id,
-                            org.id
+                            org.id,
                         );
                         if (!existingMember?.length) {
                             await addUserToOrganization(user.id, org.id);
@@ -171,7 +171,7 @@ export const auth = betterAuth({
                     } catch (error) {
                         console.error(
                             "Failed to setup user organization:",
-                            error
+                            error,
                         );
                         // Consider: should user creation fail if org setup fails?
                         // throw error; // Uncomment if this is critical
@@ -190,7 +190,7 @@ export const auth = betterAuth({
                             })
                             .from(authSchemas.member)
                             .where(
-                                eq(authSchemas.member.userId, session.userId)
+                                eq(authSchemas.member.userId, session.userId),
                             )
                             .limit(1);
                         if (member) {

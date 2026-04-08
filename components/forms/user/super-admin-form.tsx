@@ -46,7 +46,7 @@ export function SuperAdminForm({
 
         if (!valid) {
             notifications.show({
-                message: `An Error Occured`,
+                message: `You Are Not Authorized To Create A Super Admin!`,
             });
             return;
         }

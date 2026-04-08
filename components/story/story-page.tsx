@@ -50,7 +50,7 @@ export function StoryPageClient({
                 {
                     id: story.id,
                     authorId: story.authorId,
-                }
+                },
             );
             setPermission(perms);
         };

@@ -12,7 +12,7 @@ export const useUpdateStory = (isbn: string, authorId: string) => {
 
     const boundUpdateStoryAction = useMemo(
         () => updateStoryAction.bind(null, isbn, authorId),
-        [isbn, authorId]
+        [isbn, authorId],
     );
 
     const action = useAction(boundUpdateStoryAction, {
@@ -41,7 +41,7 @@ export const useUpdateStory = (isbn: string, authorId: string) => {
                                 color: "red",
                             });
                         });
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({

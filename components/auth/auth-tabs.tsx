@@ -17,7 +17,7 @@ import {
     ScrollArea,
     Stack,
     Tabs,
-    Text
+    Text,
 } from "@mantine/core";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
@@ -104,10 +104,7 @@ export function AuthTabs({
         }
         getSitePermissions().then(setPermissions);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        currentOrganization.data?.id,
-        sessionUser.data?.user.id,
-    ]);
+    }, [currentOrganization.data?.id, sessionUser.data?.user.id]);
 
     if (sessionUser.isPending || currentOrganization.isPending) {
         return (
@@ -242,7 +239,9 @@ export function AuthTabs({
                 <Tabs.Panel value={AUTH_TABS.default} pt="sm">
                     <Text fw={700} ta="center">
                         This is the Authentication Drawer. Select a Tab to
-                        start. Current User: {sessionUser.data?.user.name} {JSON.stringify(currentOrganization.data)}
+                        start.{" "}
+                        {sessionUser.data?.user.name &&
+                            `Current User: ${sessionUser.data.user.id}`}
                     </Text>
                 </Tabs.Panel>
             </ScrollArea>

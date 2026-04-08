@@ -9,7 +9,7 @@ import {
     Button,
     Card,
     ComboboxItem,
-    Group,
+    Flex,
     Stack,
     Text,
 } from "@mantine/core";
@@ -27,7 +27,7 @@ import { StoryTitle } from "@/components/story/story-title";
 import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
 import { useDisclosure } from "@mantine/hooks";
-import { IconPhotoEdit } from "@tabler/icons-react";
+import { IconBookUpload, IconPhotoEdit } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import {
@@ -37,6 +37,7 @@ import {
 
 import { getStoryBook } from "@/lib/actions/book";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
+import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import { BooksSelect } from "../book/books-select";
 
@@ -191,9 +192,12 @@ export function Story({
         closeContentField();
     }
 
-    const sameBook =
-        bookId ===
-        (bookIdState?.value ? Number(bookIdState?.value) : "noBookIdState");
+    const selectedBookId =
+        bookIdState != null ? Number(bookIdState.value) : null;
+
+    const showMoveToBookButton =
+        selectedBookId !== null &&
+        (bookId == null || Number(bookId) !== selectedBookId);
 
     return (
         <UpdateStoryFormProvider form={form}>
@@ -228,7 +232,7 @@ export function Story({
                             title="Update Story Image"
                             className={cx(
                                 storypageStyles.storyImageFieldToggle,
-                                !permissions?.canUpdate && publicStyles.hide
+                                !permissions?.canUpdate && publicStyles.hide,
                             )}
                             color="yellow"
                             variant="light"
@@ -239,7 +243,10 @@ export function Story({
                     </Card.Section>
 
                     <Stack mt="md">
-                        <Group>
+                        <Flex
+                            direction={{ base: "column", lg: "row" }}
+                            justify={"space-between"}
+                        >
                             <Box>
                                 <StoryTitle
                                     title={story.title}
@@ -260,10 +267,10 @@ export function Story({
                                 />
                             </Box>
 
-                            <Stack>
+                            <Stack mt={"xs"}>
                                 {book && (
                                     <Text size="xs">
-                                        part of book: {book.name}
+                                        A chapter of {book.name}
                                     </Text>
                                 )}
 
@@ -273,14 +280,52 @@ export function Story({
                                         setBookId={setBookIdState}
                                     />
 
-                                    {!sameBook && (
-                                        <Button type="submit">
-                                            move to book
+                                    {showMoveToBookButton && (
+                                        <Button
+                                            variant="transparent"
+                                            leftSection={
+                                                <IconBookUpload size={15} />
+                                            }
+                                            size="xs"
+                                            onClick={async () => {
+                                                if (!bookIdState) {
+                                                    notifications.show({
+                                                        message:
+                                                            "Please select a book to move the story to",
+                                                        color: "red",
+                                                    });
+                                                    return;
+                                                }
+
+                                                const updatedStory =
+                                                    await executeAsync({
+                                                        bookId: Number(
+                                                            bookIdState.value,
+                                                        ),
+                                                        image: [],
+                                                    });
+
+                                                if (updatedStory.data) {
+                                                    notifications.show({
+                                                        message: `Story moved to book '${bookIdState.label}'`,
+                                                        color: "green",
+                                                    });
+
+                                                    setBookIdState(null);
+                                                } else {
+                                                    notifications.show({
+                                                        message: `Failed to move story to book '${bookIdState.label}'`,
+                                                        color: "red",
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            Move to book
                                         </Button>
                                     )}
                                 </Box>
                             </Stack>
-                        </Group>
+                        </Flex>
 
                         <StoryContent
                             content={story.content}
