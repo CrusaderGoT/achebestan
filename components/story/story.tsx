@@ -5,6 +5,7 @@ import { storyUpdateSchema } from "@/zod-schemas/story";
 
 import {
     ActionIcon,
+    Anchor,
     Box,
     Button,
     Card,
@@ -247,7 +248,7 @@ export function Story({
                             direction={{ base: "column", lg: "row" }}
                             justify={"space-between"}
                         >
-                            <Box>
+                            <Stack gap={1}>
                                 <StoryTitle
                                     title={story.title}
                                     toggleTitleField={toggleTitleField}
@@ -265,15 +266,29 @@ export function Story({
                                     form={form}
                                     permissions={permissions}
                                 />
-                            </Box>
 
-                            <Stack mt={"xs"}>
                                 {book && (
-                                    <Text size="xs">
-                                        A chapter of {book.name}
+                                    <Text size="xs" c="dimmed">
+                                        a chapter of{" "}
+                                        <Anchor
+                                            href="/"
+                                            className={
+                                                publicStyles.highlightText
+                                            }
+                                        >
+                                            {book.name}
+                                        </Anchor>
                                     </Text>
                                 )}
+                            </Stack>
 
+                            <Stack
+                                mt={"xs"}
+                                className={cx(
+                                    !permissions?.canUpdate &&
+                                        publicStyles.hide,
+                                )}
+                            >
                                 <Box>
                                     <BooksSelect
                                         bookId={bookIdState}

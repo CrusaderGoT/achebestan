@@ -94,7 +94,7 @@ export function StoryContent({
 
             setPendingBookmarkData(null);
         },
-        [pendingBookmarkData, addBookmark]
+        [pendingBookmarkData, addBookmark],
     );
 
     const handleBookmarkRemove = useCallback(
@@ -108,12 +108,12 @@ export function StoryContent({
                 setTimeout(() => {
                     forceRenderBookmarkIndicators(
                         remainingBookmarks,
-                        handleFailedBookmarks
+                        handleFailedBookmarks,
                     );
                 }, 50);
             });
         },
-        [bookmarks, removeBookmark, handleFailedBookmarks]
+        [bookmarks, removeBookmark, handleFailedBookmarks],
     );
 
     const handleContextMenuClose = useCallback(() => {
@@ -133,7 +133,7 @@ export function StoryContent({
     // Memoize expensive calculations
     const timeToRead = useMemo(
         () => formatEstimatedReadingTime(estimateReadingTime(content)),
-        [content]
+        [content],
     );
 
     const sanitizedContent = useMemo(() => sanitizeHTML(content), [content]);
@@ -148,12 +148,12 @@ export function StoryContent({
     const scrollAreaTocRef = useRef<HTMLDivElement>(null);
     const scrollAreaMergeRef = useMergedRef(
         scrollAreaSizeRef,
-        scrollAreaTocRef
+        scrollAreaTocRef,
     );
 
     const shouldShowEditContent = useMemo(
         () => openedContentField && permissions?.canUpdate,
-        [openedContentField, permissions]
+        [openedContentField, permissions],
     );
 
     return (
@@ -236,7 +236,9 @@ export function StoryContent({
                     className={cx(storypageStyles.storyContentScrollArea)}
                     offsetScrollbars={!fullscreen ? "present" : false}
                     style={{
-                        ...(fullscreen ? { height: "100%" } : {}),
+                        ...(fullscreen
+                            ? { height: "100%" }
+                            : { height: "100dvh" }),
                     }}
                 >
                     <Box
@@ -245,7 +247,7 @@ export function StoryContent({
                         }}
                         className={cx(
                             storypageStyles.storyContent,
-                            openedContentField && publicStyles.hide
+                            openedContentField && publicStyles.hide,
                         )}
                         data-story-content="true"
                         style={{
@@ -258,7 +260,7 @@ export function StoryContent({
                     <UpdateStoryContent
                         className={cx(
                             storypageStyles.storyContent,
-                            !shouldShowEditContent && publicStyles.hide
+                            !shouldShowEditContent && publicStyles.hide,
                         )}
                     />
                 </ScrollArea>

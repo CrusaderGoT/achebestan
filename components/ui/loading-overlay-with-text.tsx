@@ -10,13 +10,14 @@ export function LoadingOverlayWithText({
 }: LoadingOverlayWithTextProps) {
     return (
         <>
-            <LoadingOverlay {...props} zIndex={600} />
+            <LoadingOverlay {...props} zIndex={10} />
             <LoadingOverlay
                 {...props}
                 loaderProps={{
                     children: <Text ta={"center"}>{text}</Text>,
                     mt: 100,
                 }}
+                zIndex={11}
             />
         </>
     );

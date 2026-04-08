@@ -40,18 +40,18 @@ export function StorySubtitle({
 
     return (
         <Group
-            mt={5}
             className={cx(
-                !subtitle && !permissions?.canUpdate && publicStyles.hide
+                !subtitle && !permissions?.canUpdate && publicStyles.hide,
             )}
         >
             <Box>
                 <Text
                     className={cx(
                         storypageStyles.storySubtitle,
-                        openedSubtitleField && publicStyles.hide
+                        openedSubtitleField && publicStyles.hide,
                     )}
-                    c={"dimmed"}
+                    fs={"italic"}
+                    c="gray"
                 >
                     {subtitle}
                 </Text>
@@ -60,7 +60,7 @@ export function StorySubtitle({
                     className={cx(
                         openedSubtitleField || !subtitle
                             ? publicStyles.show
-                            : publicStyles.hide
+                            : publicStyles.hide,
                     )}
                     label=""
                     disabled={isPending || !openedSubtitleField}
