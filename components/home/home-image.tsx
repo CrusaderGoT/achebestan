@@ -12,6 +12,7 @@ import cx from "clsx";
 
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
+import dayjs from "dayjs";
 
 export function HomeImageUpload({ ...props }: UploadImageDropZoneProps) {
     return <ImageDropzone action="uploadImage" {...props} />;
@@ -21,10 +22,12 @@ export function HomeImage({ userImage }: { userImage?: string | null }) {
     return (
         <figure>
             <MantineImage
-                src={userImage ? userImage : "/images/demo.jpg"}
+                src={userImage ? userImage : "/images/iq_detailed.png"}
                 alt="image"
             />
-            <figcaption>A Mad Man, circa 2025</figcaption>
+            <figcaption>
+                Put the pen to the brain, {dayjs().year()} AC
+            </figcaption>
         </figure>
     );
 }
@@ -59,7 +62,7 @@ export function HomeImageBox({
                 className={cx(
                     homeStyles.imageFieldToggle,
                     (!session?.user || session.user.isAnonymous) &&
-                        publicStyles.hide
+                        publicStyles.hide,
                 )}
                 color="yellow"
                 variant="light"

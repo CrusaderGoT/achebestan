@@ -32,7 +32,7 @@ export default async function Home() {
             />
 
             {/* Preload hero image for better performance */}
-            <link rel="preload" href="/images/demo.jpg" as="image" />
+            <link rel="preload" href="/images/iq_detailed.png" as="image" />
 
             <HomePage stories={stories} />
         </>

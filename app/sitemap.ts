@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 1.0,
-            images: [`${BASE_URL}/images/demo.jpg`],
+            images: [`${BASE_URL}/images/iq_detailed.png`],
         },
     ];
 

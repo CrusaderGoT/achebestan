@@ -48,7 +48,8 @@ const baseNavlinkData: NavLinkData[] = [
         icon: IconMail,
         label: "Contact",
         description: "Business inquiries or fan mail welcome",
-        href: "#",
+        href: "mailto:enememeka44@gmail.com",
+        redirect: true,
     },
     {
         icon: IconCoffee,
@@ -56,7 +57,6 @@ const baseNavlinkData: NavLinkData[] = [
         description: "Support me",
         href: "kofi",
         rightSection: <IconMoneybagPlus size={16} stroke={1.5} />,
-        redirect: true,
     },
 ];
 
@@ -145,7 +145,7 @@ export function AltNavLinks({ canCreateStory }: NavLinkProps) {
                         key={index}
                         className={cx(
                             shellStyles.mobileNavBar,
-                            openedKofiIframe && shellStyles.mobileNavBarActive
+                            openedKofiIframe && shellStyles.mobileNavBarActive,
                         )}
                         onClick={() => {
                             openKofiIframe();
@@ -168,7 +168,7 @@ export function AltNavLinks({ canCreateStory }: NavLinkProps) {
                 href={item.href}
                 className={cx(
                     shellStyles.mobileNavBar,
-                    pathname === item.href && shellStyles.mobileNavBarActive
+                    pathname === item.href && shellStyles.mobileNavBarActive,
                 )}
                 component={NavigationLink}
             >

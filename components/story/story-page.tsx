@@ -12,6 +12,7 @@ import {
 import { UserSelectType } from "@/types/user";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Stack } from "@mantine/core";
+import { useMounted } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
@@ -32,6 +33,8 @@ export function StoryPageClient({
     userRating,
     book,
 }: StoryPageClientProps) {
+    const mounted = useMounted();
+
     const {
         sessionUser: { data: session, isPending },
     } = useCentralizedAuth();
@@ -83,7 +86,7 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            {(book?.length ?? 0) > 1 && story.bookPart != null && (
+            {mounted && (book?.length ?? 0) > 1 && story.bookPart != null && (
                 <BookPagination chapters={book} part={story.bookPart} />
             )}
 

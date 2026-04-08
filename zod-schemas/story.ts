@@ -1,5 +1,5 @@
-import { story } from "@/drizzle/schemas/story";
 import { favouriteUserStories } from "@/drizzle/schemas/favourite";
+import { story } from "@/drizzle/schemas/story";
 import {
     createInsertSchema,
     createSelectSchema,
@@ -10,7 +10,7 @@ import { z } from "zod/v4";
 export const storySelectSchema = createSelectSchema(story);
 
 export const storyUpdateSchema = createUpdateSchema(story, {
-    image: z.file().array(),
+    image: z.file().optional(),
 }).omit({
     created: true,
     edited: true,
@@ -27,7 +27,7 @@ export const storyInsertSchema = createInsertSchema(story, {
             error: "story content must be at least 100 characters",
         }),
     authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
-    image: z.file().array().optional(),
+    image: z.file().optional(),
 }).omit({
     created: true,
     edited: true,

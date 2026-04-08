@@ -1,6 +1,6 @@
 "use client";
 
-import { StoryIndexDbSchemaType } from "@/lib/index-db";
+import { StoryIndexDbSchemaType } from "@/types/story";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import formStyles from "@/styles/story/radio-card.module.css";
 import { ActionIcon, Box, Group, Radio, Stack, Text } from "@mantine/core";

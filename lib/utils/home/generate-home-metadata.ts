@@ -92,7 +92,7 @@ export function generateHomeMetadata(
                 },
                 // Author image for personal branding
                 {
-                    url: `${BASE_URL}/images/demo.jpg`,
+                    url: `${BASE_URL}/images/iq_detailed.png`,
                     width: 998,
                     height: 998,
                     alt: "Enemchukwu Chukwuemeka (Achebestan) - Nigerian Author",

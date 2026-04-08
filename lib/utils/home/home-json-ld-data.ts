@@ -67,7 +67,7 @@ export async function homeJsonLdData(
                 givenName: "Enemchukwu",
                 familyName: "Chukwuemeka",
                 url: baseUrl,
-                image: `${baseUrl}/images/demo.jpg`,
+                image: `${baseUrl}/images/iq_detailed.png`,
                 description:
                     "Nigerian author and storyteller, creator of dark fiction, poetry, and adventure tales. Known for intricate world-building and imaginative narratives.",
                 jobTitle: "Author",

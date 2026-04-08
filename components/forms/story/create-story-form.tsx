@@ -26,10 +26,11 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import {
     deleteDraft,
     getDraft,
+    getDraftsByDate,
     saveDraft,
     storyIndexDB,
-    StoryIndexDbSchemaType,
 } from "@/lib/index-db";
+import { StoryIndexDbSchemaType } from "@/types/story";
 import {
     useDisclosure,
     useThrottledCallback,
@@ -40,10 +41,7 @@ import { useEffect, useState } from "react";
 
 import { BooksSelect } from "@/components/book/books-select";
 import { useCreateStory } from "@/lib/hooks/story/create-story-hook";
-import {
-    toFormBookId,
-    toFormBookPart,
-} from "@/lib/utils/book/book-part-id-conversion";
+import { toFormBookId } from "@/lib/utils/book/book-part-id-conversion";
 import { Drafts } from "./drafts";
 
 export function CreateStoryForm() {
@@ -86,7 +84,7 @@ export function CreateStoryForm() {
     useEffect(() => {
         async function loadDrafts() {
             try {
-                const { drafts } = await storyIndexDB();
+                const drafts = await getDraftsByDate();
                 if (drafts.length > 0) {
                     setDrafts(drafts);
                 }
@@ -111,11 +109,7 @@ export function CreateStoryForm() {
                 const draftData = await getDraft(currentDraftId);
 
                 if (draftData) {
-                    const {
-                        bookId: draftBookId,
-                        bookPart: draftBookPart,
-                        ...draft
-                    } = draftData;
+                    const { bookId: draftBookId, ...draft } = draftData;
 
                     form.reset();
                     setBookId(draftBookId ?? null); // UI state stays as ComboboxItem
@@ -123,10 +117,6 @@ export function CreateStoryForm() {
                     form.setValues(draft);
                     // Single, explicit conversion for form values:
                     form.setFieldValue("bookId", toFormBookId(draftBookId));
-                    form.setFieldValue(
-                        "bookPart",
-                        toFormBookPart(draftBookPart)
-                    );
 
                     if (openedDrafts) {
                         closeDrafts();
@@ -339,7 +329,7 @@ export function CreateStoryForm() {
                                 checked={deleteDraftOnSubmit}
                                 onChange={(e) =>
                                     setDeleteDraftOnSubmit(
-                                        e.currentTarget.checked
+                                        e.currentTarget.checked,
                                     )
                                 }
                                 color={"red"}

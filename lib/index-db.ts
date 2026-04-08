@@ -1,25 +1,9 @@
-import { StoryInsertType } from "@/types/story";
-import { ComboboxItem } from "@mantine/core";
-import { DBSchema, IDBPDatabase, openDB } from "idb";
-
-export type StoryIndexDbSchemaType = Omit<
+import {
+    StoryIndexDbSchema,
+    StoryIndexDbSchemaType,
     StoryInsertType,
-    "bookId" | "bookPart"
-> & {
-    id?: number;
-    created: number;
-    updated: number;
-    bookId?: ComboboxItem | null;
-    bookPart?: number | string;
-};
-
-export type StoryIndexDbSchema = DBSchema & {
-    stories: {
-        value: StoryIndexDbSchemaType;
-        key: number; // Changed from string to number since autoIncrement generates numbers
-        indexes: { "book-id": number; created: number }; // Replaced draft-id with created for better indexing
-    };
-};
+} from "@/types/story";
+import { IDBPDatabase, openDB } from "idb";
 
 let dbInstance: IDBPDatabase<StoryIndexDbSchema> | null = null;
 
@@ -60,7 +44,7 @@ export const getDraft = async (id: number) => {
 };
 
 export const saveDraft = async (
-    draft: Partial<StoryIndexDbSchemaType>
+    draft: Partial<StoryIndexDbSchemaType>,
 ): Promise<number> => {
     const db = await getStoryIndexDB();
     const now = Date.now();

@@ -33,23 +33,22 @@ import { UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import cx from "clsx";
 
-type ImageDropzoneType =
-    | Partial<DropzoneProps> &
-          (
-              | {
-                    action: "createStory";
-                    form: UseFormReturnType<StoryInsertType>;
-                    field: keyof StoryInsertType | keyof StoryUpdateType;
-                }
-              | {
-                    action: "updateStory";
-                    form: UseFormReturnType<StoryUpdateType>;
-                    field: keyof StoryInsertType | keyof StoryUpdateType;
-                }
-              | ({
-                    action: "uploadImage";
-                } & UploadImageDropZoneProps)
-          );
+type ImageDropzoneType = Partial<DropzoneProps> &
+    (
+        | {
+              action: "createStory";
+              form: UseFormReturnType<StoryInsertType>;
+              field: keyof StoryInsertType | keyof StoryUpdateType;
+          }
+        | {
+              action: "updateStory";
+              form: UseFormReturnType<StoryUpdateType>;
+              field: keyof StoryInsertType | keyof StoryUpdateType;
+          }
+        | ({
+              action: "uploadImage";
+          } & UploadImageDropZoneProps)
+    );
 
 export function ImageDropzone({ action, ...props }: ImageDropzoneType) {
     return (
@@ -134,7 +133,7 @@ type FormDropZoneType = {
 } & Partial<DropzoneProps>;
 
 function FormDropZone({ form, field, ...props }: FormDropZoneType) {
-    const [image, setImage] = useState<File[]>([]);
+    const [image, setImage] = useState<File | undefined>();
 
     const [hiddenDropzone, setHiddenDropzone] = useState(false);
 
@@ -142,11 +141,11 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
     useEffect(() => {
         if (!form.values.image) return;
 
-        if (!hiddenDropzone && form.values.image.length > 0) {
-            form.setFieldValue(field, []);
+        if (!hiddenDropzone && form.values.image) {
+            form.setFieldValue(field, undefined);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [hiddenDropzone, field, form.values.image?.length]);
+    }, [hiddenDropzone, field, form.values.image]);
 
     form.watch(field, ({ value }) => {
         if (typeof value === "object" && value) {
@@ -159,16 +158,14 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
             <Dropzone
                 onDrop={(files) => {
                     setHiddenDropzone(true);
-                    form.setFieldValue(field, files);
+                    form.setFieldValue(field, files[0]);
                 }}
                 onReject={() => {
                     form.setFieldError(field, "Select images only");
                 }}
                 maxSize={5 * 1024 ** 2}
                 accept={IMAGE_MIME_TYPE}
-                className={cx(
-                    hiddenDropzone && image.length > 0 && stylesPublic.hide
-                )}
+                className={cx(hiddenDropzone && !!image && stylesPublic.hide)}
                 key={form.key(field)}
                 {...form.getInputProps(field)}
                 {...props}
@@ -179,16 +176,16 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
             <Stack
                 className={cx(
                     stylesPublic.fullWidth,
-                    hiddenDropzone && image.length > 0
+                    hiddenDropzone && !!image
                         ? stylesPublic.show
-                        : stylesPublic.hide
+                        : stylesPublic.hide,
                 )}
                 gap={5}
             >
                 <ActionIcon
                     onClick={() => {
                         setHiddenDropzone(false);
-                        form.setFieldValue(field, []);
+                        form.setFieldValue(field, undefined);
                     }}
                     className={cx(stylesPublic.fullWidth)}
                     variant="light"
@@ -199,8 +196,8 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
                 </ActionIcon>
 
                 <SimpleGrid cols={{ base: 1 }}>
-                    {image.length > 0 ? (
-                        <PreviewImage file={image[0]} />
+                    {!!image ? (
+                        <PreviewImage file={image} />
                     ) : (
                         <Title order={3} ta={"center"}>
                             Tap X To Show Dropzone
@@ -303,7 +300,7 @@ function UploadImageDropZone({
                     stylesPublic.fullWidth,
                     hiddenDropzone && image
                         ? stylesPublic.show
-                        : stylesPublic.hide
+                        : stylesPublic.hide,
                 )}
                 gap={5}
             >
@@ -320,7 +317,7 @@ function UploadImageDropZone({
                 </ActionIcon>
 
                 <SimpleGrid cols={{ base: 1 }}>
-                    {image ? (
+                    {!!image ? (
                         <PreviewImage file={image} />
                     ) : (
                         <Title order={3} ta={"center"}>
@@ -399,7 +396,7 @@ export function UploadDropZone({
                     imageUniqueId,
                     {
                         throwOnError: false,
-                    }
+                    },
                 );
 
                 if (!newUserImage) {
@@ -438,7 +435,7 @@ export function UploadDropZone({
                 setUploading(false);
             }
         },
-        [errorHandler, execute, executeAsync, imageUniqueId, onSetttled]
+        [errorHandler, execute, executeAsync, imageUniqueId, onSetttled],
     );
 
     // effect for auto upload from outside dropzone
@@ -490,7 +487,7 @@ export function UploadDropZone({
                     stylesPublic.fullWidth,
                     hiddenDropzone && image
                         ? stylesPublic.show
-                        : stylesPublic.hide
+                        : stylesPublic.hide,
                 )}
                 gap={5}
             >
@@ -568,7 +565,7 @@ function DropZoneDetails() {
 
             <div>
                 <Text size="xl" inline>
-                    Drag images here or click to select files
+                    Drag image here or click to select file
                 </Text>
                 <Text size="sm" c="dimmed" inline mt={7}>
                     Attach one image file, should not exceed 5mb

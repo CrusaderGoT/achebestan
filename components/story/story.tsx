@@ -6,8 +6,6 @@ import { storyUpdateSchema } from "@/zod-schemas/story";
 import {
     ActionIcon,
     Anchor,
-    Box,
-    Button,
     Card,
     ComboboxItem,
     Flex,
@@ -28,7 +26,7 @@ import { StoryTitle } from "@/components/story/story-title";
 import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
 
 import { useDisclosure } from "@mantine/hooks";
-import { IconBookUpload, IconPhotoEdit } from "@tabler/icons-react";
+import { IconPhotoEdit } from "@tabler/icons-react";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 import {
@@ -38,9 +36,8 @@ import {
 
 import { getStoryBook } from "@/lib/actions/book";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
-import { BooksSelect } from "../book/books-select";
+import { AddStoryToBook } from "./story-add-to-book";
 
 export function Story({
     image,
@@ -119,7 +116,7 @@ export function Story({
             title: title,
             subtitle: subtitle,
             content: content,
-            image: [],
+            image: undefined,
         },
         mode: "uncontrolled",
         cascadeUpdates: true,
@@ -130,8 +127,8 @@ export function Story({
 
     async function handleSubmit(data: StoryUpdateType) {
         // check if changed values or if image is present
-        if (form.isDirty() || form.values.image.length > 0) {
-            const submitData: StoryUpdateType = { image: [] };
+        if (form.isDirty() || form.values.image) {
+            const submitData: StoryUpdateType = { image: undefined };
 
             if (form.isDirty("bookId")) submitData.bookId = data.bookId;
 
@@ -142,7 +139,7 @@ export function Story({
             if (form.isDirty("subtitle")) submitData.subtitle = data.subtitle;
 
             // if image exists in form submission
-            if (form.values.image.length > 0) submitData.image = data.image;
+            if (form.values.image) submitData.image = data.image;
 
             // make sure non empty tag; tag with space will submit
             if (form.isDirty("content") && !!form.getValues().content?.trim())
@@ -160,7 +157,7 @@ export function Story({
                 if (excludedFields.includes(key)) {
                     return true;
                 } else if (key === "image") {
-                    return submitData[key].length > 0;
+                    return !!submitData[key];
                 } else {
                     return Boolean(submitData[key]);
                 }
@@ -178,7 +175,7 @@ export function Story({
                     form.resetDirty();
 
                     // clear and close dropzone
-                    form.setFieldValue("image", []);
+                    form.setFieldValue("image", undefined);
                     closeImageField();
 
                     // set story reactively
@@ -271,7 +268,7 @@ export function Story({
                                     <Text size="xs" c="dimmed">
                                         a chapter of{" "}
                                         <Anchor
-                                            href="/"
+                                            href={`/books/${book.id}`}
                                             className={
                                                 publicStyles.highlightText
                                             }
@@ -282,64 +279,13 @@ export function Story({
                                 )}
                             </Stack>
 
-                            <Stack
-                                mt={"xs"}
-                                className={cx(
-                                    !permissions?.canUpdate &&
-                                        publicStyles.hide,
-                                )}
-                            >
-                                <Box>
-                                    <BooksSelect
-                                        bookId={bookIdState}
-                                        setBookId={setBookIdState}
-                                    />
-
-                                    {showMoveToBookButton && (
-                                        <Button
-                                            variant="transparent"
-                                            leftSection={
-                                                <IconBookUpload size={15} />
-                                            }
-                                            size="xs"
-                                            onClick={async () => {
-                                                if (!bookIdState) {
-                                                    notifications.show({
-                                                        message:
-                                                            "Please select a book to move the story to",
-                                                        color: "red",
-                                                    });
-                                                    return;
-                                                }
-
-                                                const updatedStory =
-                                                    await executeAsync({
-                                                        bookId: Number(
-                                                            bookIdState.value,
-                                                        ),
-                                                        image: [],
-                                                    });
-
-                                                if (updatedStory.data) {
-                                                    notifications.show({
-                                                        message: `Story moved to book '${bookIdState.label}'`,
-                                                        color: "green",
-                                                    });
-
-                                                    setBookIdState(null);
-                                                } else {
-                                                    notifications.show({
-                                                        message: `Failed to move story to book '${bookIdState.label}'`,
-                                                        color: "red",
-                                                    });
-                                                }
-                                            }}
-                                        >
-                                            Move to book
-                                        </Button>
-                                    )}
-                                </Box>
-                            </Stack>
+                            <AddStoryToBook
+                                showMoveToBookButton={showMoveToBookButton}
+                                canUpdate={permissions?.canUpdate}
+                                bookIdState={bookIdState}
+                                setBookIdState={setBookIdState}
+                                executeAsync={executeAsync}
+                            />
                         </Flex>
 
                         <StoryContent

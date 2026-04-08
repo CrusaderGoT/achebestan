@@ -4,7 +4,7 @@ import { BookStoriesType } from "@/types/books";
 import { Pagination } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function BookPagination({
     chapters,
@@ -17,14 +17,21 @@ export function BookPagination({
 
     const [activePage, setActivePage] = useState(part);
 
+    const [loading, setLoading] = useState(false);
+
+    // effect for clearing loading on mount, incase state persisted or reruned after navigation
+    useEffect(() => {
+        if (!loading) return;
+        setLoading(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     useEffect(() => {
         if (typeof part === "number" && part !== activePage) {
             setActivePage(part);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [part]);
-
-    const total = useMemo(() => chapters.length, [chapters]);
 
     const handleNextBookPage = useCallback(
         (page: number) => {
@@ -42,21 +49,25 @@ export function BookPagination({
                 return;
             }
 
+            setLoading(true);
             router.replace(`/story/${chapter.isbn}`);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [chapters]
+        [chapters],
     );
 
     return (
         <Pagination
             value={activePage}
             onChange={handleNextBookPage}
-            total={total}
+            total={chapters.length}
             aria-label="Book pagination"
-            boundaries={3}
-            siblings={3}
+            boundaries={1}
+            siblings={1}
             color="yellow"
+            disabled={loading}
+            hideWithOnePage
+            withEdges
         />
     );
 }

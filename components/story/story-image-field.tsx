@@ -29,7 +29,7 @@ export function StoryImageField({
     const [image, setImage] = useState(false);
 
     form.watch("image", ({ value }) => {
-        setImage(value.length > 0);
+        setImage(!!value);
     });
 
     return (
@@ -37,7 +37,7 @@ export function StoryImageField({
             className={cx(
                 storypageStyles.storyImageFieldBox,
                 storypageStyles.storyImage,
-                openedImageField ? publicStyles.show : publicStyles.hide
+                openedImageField ? publicStyles.show : publicStyles.hide,
             )}
             hidden={storyAuthorId !== session.data?.user.id}
         >

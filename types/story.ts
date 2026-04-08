@@ -5,7 +5,9 @@ import {
     storySelectSchema,
     storyUpdateSchema,
 } from "@/zod-schemas/story";
+import { ComboboxItem } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
+import { DBSchema } from "idb";
 import { z } from "zod/v4";
 import { UserSelectType } from "./user";
 
@@ -60,4 +62,19 @@ export type StoryRatingProps = {
     ratings: RatingSelectType[];
     isbn: string;
     userRating?: UserRatingWithComment;
+};
+
+export type StoryIndexDbSchemaType = Omit<StoryInsertType, "bookId"> & {
+    id?: number;
+    created: number;
+    updated: number;
+    bookId?: ComboboxItem | null;
+};
+
+export type StoryIndexDbSchema = DBSchema & {
+    stories: {
+        value: StoryIndexDbSchemaType;
+        key: number;
+        indexes: { "book-id": number; created: number }; // Replaced draft-id with created for better indexing
+    };
 };

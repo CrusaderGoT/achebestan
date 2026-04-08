@@ -72,9 +72,9 @@ export const createStoryAction = authActionClient
         // upload image using isbn as public id
         let imageUrl: string | undefined = undefined;
 
-        if (inputData.image && inputData.image.length > 0) {
+        if (inputData.image && inputData.image) {
             const uploadResponse = await handleFileUpload(
-                inputData.image[0],
+                inputData.image,
                 createdStory.isbn,
                 {
                     throwOnError: true,
@@ -151,9 +151,9 @@ export const updateStoryAction = authActionClient
 
             let imageUrl: string | undefined = undefined;
 
-            if (updateData.image.length > 0) {
+            if (updateData.image) {
                 const uploadResponse = await handleFileUpload(
-                    updateData.image[0], //upload the last image
+                    updateData.image, //upload the last image
                     isbn, // overwrite this publicId
                     {
                         throwOnError: true,
