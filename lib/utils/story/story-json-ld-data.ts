@@ -112,7 +112,7 @@ export function storyJsonLdData(
             // Book schema for enhanced book discovery
             {
                 "@type": "Book",
-                "@id": `${baseUrl}/book/${story.isbn}#book`,
+                "@id": `${baseUrl}/books/${story.isbn}#book`,
                 name: story.title,
                 alternateName: story.subtitle || undefined,
                 author: {

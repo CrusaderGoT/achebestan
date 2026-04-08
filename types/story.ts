@@ -45,8 +45,7 @@ export type StoryContentType = {
     permissions?: StoryPermissionsType;
 };
 
-export interface StoryProps extends StorySelectType {
-    author: UserSelectType;
+export interface StoryProps extends StoryBookProps {
     permissions?: StoryPermissionsType;
 }
 

@@ -1,13 +1,10 @@
 import { BASE_URL } from "@/lib/constants";
 import { StoryBookProps } from "@/types/story";
-import { connection } from "next/server";
 import { Graph } from "schema-dts";
 
 export async function homeJsonLdData(
-    stories: StoryBookProps[] | undefined
+    stories: StoryBookProps[] | undefined,
 ): Promise<Graph> {
-    await connection(); // this is a fix to accessing new Date
-
     const baseUrl = `${BASE_URL}`;
 
     return {
@@ -21,7 +18,7 @@ export async function homeJsonLdData(
                 name: "Achebestan - Mind's Palace",
                 alternateName: "Achebestan Stories",
                 description:
-                    "Personal writing platform of Nigerian author Enemchukwu Chukwuemeka (Achebestan). A world of intriguing, dark poetry and adventure stories.",
+                    "Personal writing platform of author Achebestan. A world of intriguing, dark poetry and adventure stories.",
                 author: {
                     "@type": "Person",
                     "@id": `${baseUrl}#author`,
@@ -55,21 +52,19 @@ export async function homeJsonLdData(
                     audienceType: "Young Adult Readers",
                 },
                 keywords:
-                    "dark fiction, poetry, adventure stories, nigerian author, african storytelling, world building",
+                    "dark fiction, poetry, adventure stories, author, african storytelling, world building",
             },
 
-            // Author Person schema (Enemchukwu Chukwuemeka / Achebestan)
+            // Author Person schema Achebestan
             {
                 "@type": "Person",
                 "@id": `${baseUrl}#author`,
-                name: "Enemchukwu Chukwuemeka",
+                name: "Achebestan",
                 alternateName: "Achebestan",
-                givenName: "Enemchukwu",
-                familyName: "Chukwuemeka",
                 url: baseUrl,
                 image: `${baseUrl}/images/iq_detailed.png`,
                 description:
-                    "Nigerian author and storyteller, creator of dark fiction, poetry, and adventure tales. Known for intricate world-building and imaginative narratives.",
+                    "Author and storyteller, creator of dark fiction, poetry, and adventure tales. Known for intricate world-building and imaginative narratives.",
                 jobTitle: "Author",
                 hasOccupation: {
                     "@type": "Occupation",
@@ -99,7 +94,7 @@ export async function homeJsonLdData(
                 ],
                 alumniOf: {
                     "@type": "EducationalOrganization",
-                    name: "Nigerian Educational Institution",
+                    name: "Educational Institution",
                 },
                 owns: {
                     "@type": "ProductCollection",
@@ -118,7 +113,7 @@ export async function homeJsonLdData(
                 url: baseUrl,
                 name: "Achebestan's Mind Palace",
                 description:
-                    "Personal blog and story collection featuring dark fiction, poetry, and adventure tales by Nigerian author Enemchukwu Chukwuemeka.",
+                    "Personal blog and story collection featuring dark fiction, poetry, and adventure tales by author Achebestan.",
                 author: {
                     "@type": "Person",
                     "@id": `${baseUrl}#author`,
@@ -140,7 +135,7 @@ export async function homeJsonLdData(
                 "@type": "ItemList",
                 "@id": `${baseUrl}#latest-stories`,
                 name: "Latest Stories by Achebestan",
-                description: `Recent fictional stories and tales from Enemchukwu Chukwuemeka's imagination`,
+                description: `Recent fictional stories and tales from Achebestan's imagination`,
                 numberOfItems: stories?.length,
                 itemListElement: stories?.slice(0, 6).map((story, index) => ({
                     "@type": "ListItem",
@@ -156,7 +151,7 @@ export async function homeJsonLdData(
                         author: {
                             "@type": "Person",
                             "@id": `${baseUrl}#author`,
-                            name: "Enemchukwu Chukwuemeka",
+                            name: "Achebestan",
                             alternateName: "Achebestan",
                         },
                         datePublished: story.created,
@@ -173,7 +168,7 @@ export async function homeJsonLdData(
                             "@type": "Blog",
                             "@id": `${baseUrl}#blog`,
                         },
-                        keywords: `${story.title}, achebestan, dark fiction, nigerian author`,
+                        keywords: `${story.title}, achebestan, dark fiction, author`,
                     },
                 })),
             },
@@ -184,7 +179,7 @@ export async function homeJsonLdData(
                 "@id": `${baseUrl}#creative-works`,
                 name: "Achebestan's Literary Works",
                 description:
-                    "A collection of dark fiction, poetry, and adventure stories from the mind of Nigerian author Enemchukwu Chukwuemeka.",
+                    "A collection of dark fiction, poetry, and adventure stories from the mind of author Achebestan.",
                 author: {
                     "@type": "Person",
                     "@id": `${baseUrl}#author`,

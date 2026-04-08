@@ -3,7 +3,7 @@ import { StoryBookProps } from "@/types/story";
 import { Metadata } from "next";
 
 export function generateHomeMetadata(
-    stories: StoryBookProps[] | undefined
+    stories: StoryBookProps[] | undefined,
 ): Metadata {
     const dynamicDescription = generateDynamicDescription(stories);
     const storyThemes = extractStoryThemes(stories);
@@ -11,17 +11,16 @@ export function generateHomeMetadata(
     // Create compelling social sharing description
     const socialDescription =
         stories && stories.length > 0
-            ? `Enter Achebestan's Mind Palace - where dark fiction meets adventure. Nigerian author Enemchukwu Chukwuemeka shares ${
+            ? `Enter Achebestan's Mind Palace - where dark fiction meets adventure. Nigerian author Achebestan shares ${
                   stories.length
               } ${
                   stories.length === 1 ? "story" : "stories"
               } from his imagination. Consume responsibly...`
-            : `Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and adventure stories by Nigerian author Enemchukwu Chukwuemeka. Consume responsibly...`;
+            : `Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and adventure stories by Nigerian author Achebestan. Consume responsibly...`;
 
     // Generate comprehensive keywords
     const comprehensiveKeywords = [
         "achebestan",
-        "enemchukwu chukwuemeka",
         "nigerian author",
         "dark fiction",
         "poetry",
@@ -47,8 +46,8 @@ export function generateHomeMetadata(
 
         // Enhanced meta tags
         keywords: comprehensiveKeywords.join(", "),
-        authors: [{ name: "Enemchukwu Chukwuemeka", url: BASE_URL }],
-        creator: "Enemchukwu Chukwuemeka (Achebestan)",
+        authors: [{ name: "Achebestan", url: BASE_URL }],
+        creator: "Achebestan",
         publisher: "Achebestan",
         category: "Literature",
 
@@ -87,7 +86,7 @@ export function generateHomeMetadata(
                     url: `${BASE_URL}/web-app-manifest-512x512.png`,
                     width: 512,
                     height: 512,
-                    alt: "Achebestan's Mind Palace - Dark Fiction and Adventure Stories by Nigerian Author Enemchukwu Chukwuemeka",
+                    alt: "Achebestan's Mind Palace - Dark Fiction and Adventure Stories",
                     type: "image/jpeg",
                 },
                 // Author image for personal branding
@@ -95,7 +94,7 @@ export function generateHomeMetadata(
                     url: `${BASE_URL}/images/iq_detailed.png`,
                     width: 998,
                     height: 998,
-                    alt: "Enemchukwu Chukwuemeka (Achebestan) - Nigerian Author",
+                    alt: "Achebestan - Nigerian Author",
                     type: "image/jpeg",
                 },
             ],
@@ -119,10 +118,10 @@ export function generateHomeMetadata(
         // Additional meta tags for enhanced SEO
         other: {
             // Personal brand metadata
-            author: "Enemchukwu Chukwuemeka",
+            author: "Achebestan",
             "pen-name": "Achebestan",
             nationality: "Nigerian",
-            "content:creator": "Enemchukwu Chukwuemeka",
+            "content:creator": "Achebestan",
 
             // Platform metadata
             "application-name": "Achebestan's Mind Palace",
@@ -179,7 +178,7 @@ export function generateHomeMetadata(
             // Pinterest (good for story/book discovery)
             "pinterest-rich-pin": "true",
             "pinterest:description":
-                "Dark fiction and adventure stories from Nigerian author Enemchukwu Chukwuemeka",
+                "Dark fiction and adventure stories from Nigerian author Achebestan",
 
             // Reading and engagement hints
             "reading-time":
@@ -206,10 +205,10 @@ export function generateHomeMetadata(
 
 // Helper function to generate dynamic description based on latest stories
 export function generateDynamicDescription(
-    stories: StoryBookProps[] | undefined
+    stories: StoryBookProps[] | undefined,
 ): string {
     const baseDescription =
-        "Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and stories. Explore adventure tales and world-building from the imagination of Nigerian author Enemchukwu Chukwuemeka.";
+        "Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and stories. Explore adventure tales and world-building from the imagination of Nigerian author Achebestan.";
 
     if (!stories || stories.length === 0) {
         return `${baseDescription} Dive into fictional stories, concoctions of imagination, and sensations of life.`;
@@ -227,7 +226,7 @@ export function generateDynamicDescription(
 
 // Helper function to extract story themes for keywords
 export function extractStoryThemes(
-    stories: StoryBookProps[] | undefined
+    stories: StoryBookProps[] | undefined,
 ): string[] {
     const baseThemes = [
         "dark fiction",
@@ -247,7 +246,7 @@ export function extractStoryThemes(
         story.title
             .toLowerCase()
             .replace(/[^a-z0-9\s]/g, "")
-            .trim()
+            .trim(),
     );
 
     return [...baseThemes, ...storyKeywords];

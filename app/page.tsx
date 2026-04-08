@@ -26,7 +26,7 @@ export default async function Home() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: sanitizeHTML(
-                        JSON.stringify(structuredData, null, 2)
+                        JSON.stringify(structuredData, null, 2),
                     ),
                 }}
             />

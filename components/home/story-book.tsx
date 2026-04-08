@@ -3,7 +3,7 @@
 import storybookStyles from "@/styles/story-book.module.css";
 import cx from "clsx";
 
-import { StorySelectType } from "@/types/story";
+import { StoryBookProps } from "@/types/story";
 import {
     Box,
     Button,
@@ -16,20 +16,12 @@ import {
 import { useElementSize } from "@mantine/hooks";
 import { NavigationLink } from "../ui/route-navigation-progress";
 
-interface StoryBookProps extends StorySelectType {
-    alt?: string;
-    authorName?: string;
-    navigate?: boolean;
-}
-
 export function StoryBook({
     image,
     title,
     subtitle,
-    alt,
-    authorName,
+    author,
     isbn,
-    navigate = true,
     blurb,
 }: StoryBookProps) {
     const { ref, width } = useElementSize();
@@ -42,7 +34,7 @@ export function StoryBook({
                     <Box className={storybookStyles.storybookCover}>
                         <MantineImage
                             src={image}
-                            alt={alt || title}
+                            alt={title}
                             className={storybookStyles.storybookImage}
                         />
                         <Stack className={storybookStyles.storybookText}>
@@ -54,7 +46,7 @@ export function StoryBook({
                             </Text>
 
                             <Text className={storybookStyles.storybookAuthor}>
-                                {authorName}
+                                {author.name}
                             </Text>
 
                             <Text className={storybookStyles.isbn}>
@@ -63,20 +55,21 @@ export function StoryBook({
                         </Stack>
                     </Box>
                 </Box>
-                {navigate && (
-                    <Center className={storybookStyles.storybookFooter}>
-                        <Text className={storybookStyles.title}>{title}</Text>
 
-                        <Button
-                            variant="outline"
-                            className={storybookStyles.navigate}
-                            href={`/story/${isbn}`}
-                            component={NavigationLink}
-                        >
-                            Read
-                        </Button>
-                    </Center>
-                )}
+                <Center className={storybookStyles.storybookFooter}>
+                    <Text className={storybookStyles.title} truncate="end">
+                        {title}
+                    </Text>
+
+                    <Button
+                        variant="outline"
+                        className={storybookStyles.navigate}
+                        href={`/story/${isbn}`}
+                        component={NavigationLink}
+                    >
+                        Read
+                    </Button>
+                </Center>
             </Stack>
 
             {blurb && (
@@ -85,7 +78,7 @@ export function StoryBook({
                     className={cx(
                         width < 120
                             ? storybookStyles.hideParagraph
-                            : storybookStyles.showParagraph
+                            : storybookStyles.showParagraph,
                     )}
                 >
                     <Text

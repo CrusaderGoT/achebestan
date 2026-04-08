@@ -48,7 +48,7 @@ export async function generateStoryMetadata(
     // Construct URLs
     const baseUrl = `${BASE_URL}`;
     const canonicalUrl = `${baseUrl}/story/${story.isbn}`;
-    const imageUrl = story.image || `${baseUrl}/images/story-placeholder.jpg`;
+    const imageUrl = story.image || `${baseUrl}/images/iq_detailed.png`;
     const authorUrl = `${baseUrl}/author/${story.authorId}`;
 
     // Create rich description for social sharing
