@@ -26,6 +26,7 @@ import { NavigationProgress } from "@mantine/nprogress";
 
 import { BASE_URL } from "@/lib/constants";
 
+import { QueryProvider } from "@/components/ui/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
@@ -116,7 +117,9 @@ export default function RootLayout({
                     <SerwistProvider swUrl="/serwist/sw.js">
                         <CentralizedAuthContextProvider>
                             <Shell>
-                                <Suspense fallback={null}>{children}</Suspense>
+                                <Suspense fallback={null}>
+                                    <QueryProvider>{children}</QueryProvider>
+                                </Suspense>
                             </Shell>
                         </CentralizedAuthContextProvider>
                     </SerwistProvider>
