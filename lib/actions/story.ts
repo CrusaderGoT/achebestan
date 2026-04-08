@@ -248,6 +248,17 @@ export const readLatestStories = async (latest: number = 10) => {
     }
 };
 
+export const readLatestStoryISBNs = async (latest: number = 10) => {
+    "use cache";
+    cacheTag("readLatestStories"); // same tag since they share cache invalidation
+
+    return await db
+        .select({ isbn: story.isbn, created: story.created })
+        .from(story)
+        .limit(latest)
+        .orderBy((stories) => desc(stories.created));
+};
+
 export const deleteStoryAction = authActionClient
     .inputSchema(
         z.object({

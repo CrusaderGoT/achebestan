@@ -5,17 +5,15 @@ import { homeJsonLdData } from "@/lib/utils/home/home-json-ld-data";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import type { Metadata } from "next";
 
+// Fetch latest stories for dynamic content
+const stories = await readLatestStories(10);
+
 // Generate metadata for homepage
 export async function generateMetadata(): Promise<Metadata> {
-    // Fetch latest stories for dynamic content
-    const stories = await readLatestStories(10);
-
     return generateHomeMetadata(stories);
 }
 
 export default async function Home() {
-    const stories = await readLatestStories(10);
-
     // Generate structured data
     const structuredData = await homeJsonLdData(stories);
 

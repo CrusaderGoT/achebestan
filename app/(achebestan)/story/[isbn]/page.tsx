@@ -2,7 +2,7 @@ import { StoryPageClient } from "@/components/story/story-page";
 import { getBookStories } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
 import { getUserRating } from "@/lib/actions/rating";
-import { readLatestStories, readStory } from "@/lib/actions/story";
+import { readLatestStoryISBNs, readStory } from "@/lib/actions/story";
 import { auth } from "@/lib/auth";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
@@ -12,7 +12,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
-    const stories = await readLatestStories(10);
+    const stories = await readLatestStoryISBNs();
     // params to prefetch latest stories
     return (
         stories?.map((story) => ({
@@ -68,7 +68,7 @@ export default async function StoryPage({
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: sanitizeHTML(
-                        JSON.stringify(structuredData, null, 2)
+                        JSON.stringify(structuredData, null, 2),
                     ),
                 }}
             />
