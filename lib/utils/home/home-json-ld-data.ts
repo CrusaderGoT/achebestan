@@ -1,10 +1,13 @@
 import { BASE_URL } from "@/lib/constants";
 import { StoryBookProps } from "@/types/story";
+import { connection } from "next/server";
 import { Graph } from "schema-dts";
 
 export async function homeJsonLdData(
     stories: StoryBookProps[] | undefined,
 ): Promise<Graph> {
+    await connection(); // this is a fix to accessing new Date
+
     const baseUrl = `${BASE_URL}`;
 
     return {
