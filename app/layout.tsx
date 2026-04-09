@@ -106,24 +106,26 @@ export default function RootLayout({
                 <link rel="apple-touch-icon" href="/apple-icon.png" />
             </head>
             <body>
-                <MantineProvider>
-                    {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
-                    <Suspense fallback={<NavigationProgress />}>
-                        <RouteNavigationProgress />
-                    </Suspense>
+                <QueryProvider>
+                    <MantineProvider>
+                        {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
+                        <Suspense fallback={<NavigationProgress />}>
+                            <RouteNavigationProgress />
+                        </Suspense>
 
-                    <Notifications limit={5} zIndex={9999} />
+                        <Notifications limit={5} zIndex={9999} />
 
-                    <SerwistProvider swUrl="/serwist/sw.js">
-                        <CentralizedAuthContextProvider>
-                            <Shell>
-                                <Suspense fallback={null}>
-                                    <QueryProvider>{children}</QueryProvider>
-                                </Suspense>
-                            </Shell>
-                        </CentralizedAuthContextProvider>
-                    </SerwistProvider>
-                </MantineProvider>
+                        <SerwistProvider swUrl="/serwist/sw.js">
+                            <CentralizedAuthContextProvider>
+                                <Shell>
+                                    <Suspense fallback={null}>
+                                        {children}
+                                    </Suspense>
+                                </Shell>
+                            </CentralizedAuthContextProvider>
+                        </SerwistProvider>
+                    </MantineProvider>
+                </QueryProvider>
             </body>
         </html>
     );

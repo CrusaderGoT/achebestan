@@ -3,12 +3,7 @@
 
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import {
-    canCreateOrganization,
-    canCreateSuperAdmin,
-    canDeleteOrganization,
-    canManageOrganization,
-} from "@/lib/auth/policies";
+import { useSitePermissions } from "@/lib/hooks/auth/site-permissions";
 import { LoginFormState } from "@/types/user";
 import {
     Center,
@@ -19,7 +14,7 @@ import {
     Tabs,
     Text,
 } from "@mantine/core";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { OrganizationCreateForm } from "../forms/organization/create-organization-form";
 import { LoginForm } from "../forms/user/login-form";
 import { SignupForm } from "../forms/user/signup-form";
@@ -36,7 +31,7 @@ type AuthTabsProps = {
     setSignupFormState: Dispatch<SetStateAction<LoginFormState>>;
 };
 
-const AUTH_TABS = {
+export const AUTH_TABS = {
     default: "default",
     login: "first",
     signup: "second",
@@ -44,13 +39,6 @@ const AUTH_TABS = {
     superadmin: "fourth",
     listOrganizations: "fifth",
     manageMembers: "sixth",
-};
-
-type SitePermissionsType = {
-    canCreateOrganization: boolean;
-    canDeleteOrganization: boolean;
-    canManageOrganization: boolean;
-    canCreateSuperAdmin: boolean;
 };
 
 export function AuthTabs({
@@ -62,53 +50,14 @@ export function AuthTabs({
 }: AuthTabsProps) {
     const { sessionUser, currentOrganization } = useCentralizedAuth();
 
-    const noPermissions: SitePermissionsType = {
-        canCreateOrganization: false,
-        canCreateSuperAdmin: false,
-        canManageOrganization: false,
-        canDeleteOrganization: false,
-    };
-
-    const [permissions, setPermissions] =
-        useState<SitePermissionsType>(noPermissions);
-
-    //useEffect for assigning site permission
-    useEffect(() => {
-        async function getSitePermissions(): Promise<SitePermissionsType> {
-            if (
-                !currentOrganization.data?.id ||
-                currentOrganization.isPending ||
-                !sessionUser.data?.user.id
-            ) {
-                return noPermissions;
-            }
-
-            const [
-                createOrganization,
-                manageOrganization,
-                deleteOrganization,
-                createSuperAdmin,
-            ] = await Promise.all([
-                await canCreateOrganization(),
-                await canManageOrganization(),
-                await canDeleteOrganization(),
-                await canCreateSuperAdmin(),
-            ]);
-
-            return {
-                canCreateOrganization: createOrganization,
-                canManageOrganization: manageOrganization,
-                canDeleteOrganization: deleteOrganization,
-                canCreateSuperAdmin: createSuperAdmin,
-            };
-        }
-        getSitePermissions().then(setPermissions);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentOrganization.data?.id, sessionUser.data?.user.id]);
+    const { data: permissions } = useSitePermissions({
+        currentOrganizationId: currentOrganization.data?.id,
+        userId: sessionUser.data?.user.id,
+    });
 
     if (sessionUser.isPending || currentOrganization.isPending) {
         return (
-            <Center>
+            <Center my={"auto"}>
                 <Loader size={"lg"} />
             </Center>
         );
@@ -132,7 +81,7 @@ export function AuthTabs({
 
                 {sessionUser.data && (
                     <>
-                        {permissions.canCreateOrganization && (
+                        {permissions?.canCreateOrganization && (
                             <Tabs.Tab
                                 value={AUTH_TABS.organization}
                                 color="white"
@@ -141,7 +90,7 @@ export function AuthTabs({
                             </Tabs.Tab>
                         )}
 
-                        {permissions.canCreateSuperAdmin && (
+                        {permissions?.canCreateSuperAdmin && (
                             <Tabs.Tab value={AUTH_TABS.superadmin} color="red">
                                 Create Super Admin
                             </Tabs.Tab>
@@ -191,21 +140,19 @@ export function AuthTabs({
 
                 {sessionUser.data && (
                     <>
-                        {/** only show organization tabs to superadmin*/}
-                        {permissions.canCreateOrganization && (
+                        {/** only show create organization tabs to superadmin*/}
+                        {permissions?.canCreateOrganization && (
                             <Tabs.Panel value={AUTH_TABS.organization} pt="xs">
-                                <Stack gap={"xs"}>
-                                    <OrganizationCreateForm
-                                        closeModal={closeModal}
-                                        redirectAfterSuccess={false}
-                                        formState={signupFormState}
-                                        setFormState={setSignupFormState}
-                                    />
-                                </Stack>
+                                <OrganizationCreateForm
+                                    closeModal={closeModal}
+                                    redirectAfterSuccess={false}
+                                    formState={signupFormState}
+                                    setFormState={setSignupFormState}
+                                />
                             </Tabs.Panel>
                         )}
 
-                        {permissions.canCreateSuperAdmin && (
+                        {permissions?.canCreateSuperAdmin && (
                             <Tabs.Panel value={AUTH_TABS.superadmin}>
                                 <SuperAdminForm session={sessionUser.data} />
                             </Tabs.Panel>
@@ -213,23 +160,16 @@ export function AuthTabs({
 
                         <Tabs.Panel value={AUTH_TABS.listOrganizations}>
                             <ListOrganizations
-                                activeOrg={
-                                    currentOrganization.data
-                                        ? {
-                                              id: currentOrganization.data.id,
-                                              slug: currentOrganization.data
-                                                  .slug,
-                                          }
-                                        : null
+                                canDeleteOrg={
+                                    permissions?.canDeleteOrganization
                                 }
-                                canDeleteOrg={permissions.canDeleteOrganization}
                             />
                         </Tabs.Panel>
 
                         <Tabs.Panel value={AUTH_TABS.manageMembers}>
                             <MembersTable
                                 canUpdateMembers={
-                                    permissions.canManageOrganization
+                                    permissions?.canManageOrganization
                                 }
                             />
                         </Tabs.Panel>

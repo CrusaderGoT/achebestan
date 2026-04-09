@@ -38,3 +38,48 @@ export async function canCreateSuperAdmin(): Promise<boolean> {
 export async function canMakeOwner(): Promise<boolean> {
     return hasPermission("site", ["update:role"]);
 }
+
+export async function getSitePermissions({
+    currentOrganizationId,
+    userId,
+}: {
+    currentOrganizationId: string | undefined;
+    userId: string | undefined;
+}): Promise<SitePermissionsType> {
+    const noPermissions: SitePermissionsType = {
+        canCreateOrganization: false,
+        canCreateSuperAdmin: false,
+        canManageOrganization: false,
+        canDeleteOrganization: false,
+    };
+
+    if (!currentOrganizationId || !userId) {
+        return noPermissions;
+    }
+
+    const [
+        createOrganization,
+        manageOrganization,
+        deleteOrganization,
+        createSuperAdmin,
+    ] = await Promise.all([
+        await canCreateOrganization(),
+        await canManageOrganization(),
+        await canDeleteOrganization(),
+        await canCreateSuperAdmin(),
+    ]);
+
+    return {
+        canCreateOrganization: createOrganization,
+        canManageOrganization: manageOrganization,
+        canDeleteOrganization: deleteOrganization,
+        canCreateSuperAdmin: createSuperAdmin,
+    };
+}
+
+export type SitePermissionsType = {
+    canCreateOrganization: boolean;
+    canDeleteOrganization: boolean;
+    canManageOrganization: boolean;
+    canCreateSuperAdmin: boolean;
+};

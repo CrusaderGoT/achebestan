@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import publicStyles from "@/styles/public.module.css";
 import {
     ActionIcon,
@@ -18,12 +19,19 @@ import { useEffect, useState } from "react";
 type ListOrganizationsProps = { id: string; slug: string } | null;
 
 export function ListOrganizations({
-    activeOrg,
     canDeleteOrg,
 }: {
-    activeOrg: ListOrganizationsProps;
-    canDeleteOrg: boolean;
+    canDeleteOrg: boolean | undefined;
 }) {
+    const orgData = useCentralizedAuth().currentOrganization;
+
+    const activeOrg = orgData.data
+        ? {
+              id: orgData.data.id,
+              slug: orgData.data.slug,
+          }
+        : null;
+
     const { data: organizations } = authClient.useListOrganizations();
 
     const [value, setValue] = useState<ListOrganizationsProps>(activeOrg);
@@ -48,7 +56,7 @@ export function ListOrganizations({
             });
         }
         handleSwitchActiveOrg();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value?.id]);
 
     if (!organizations || organizations.length === 0)

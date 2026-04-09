@@ -3,7 +3,15 @@
 import { makeUserOwnerOfOrganizationIfNonExist } from "@/lib/actions/auth";
 import { authClient } from "@/lib/auth-client";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { ActionIcon, Avatar, Menu, Table, Text } from "@mantine/core";
+import {
+    ActionIcon,
+    Avatar,
+    Center,
+    Loader,
+    Menu,
+    Table,
+    Text,
+} from "@mantine/core";
 import { randomId } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconDots } from "@tabler/icons-react";
@@ -13,13 +21,23 @@ import { useMemo } from "react";
 export function MembersTable({
     canUpdateMembers,
 }: {
-    canUpdateMembers: boolean;
+    canUpdateMembers: boolean | undefined;
 }) {
-    const orgData = useCentralizedAuth().currentOrganization.data;
+    const orgData = useCentralizedAuth().currentOrganization;
 
-    if (!orgData || orgData.members.length === 0) return null;
+    if (orgData.isPending) {
+        return (
+            <Center>
+                <Loader />
+            </Center>
+        );
+    }
 
-    const rows = orgData.members.map((m) => (
+    if (!orgData.data || orgData.data.members.length === 0) {
+        return <Text>No Members Yet...</Text>;
+    }
+
+    const rows = orgData.data.members.map((m) => (
         <Table.Tr key={m.id}>
             <Table.Td>
                 <Avatar size={"sm"} src={m.user.image} />
@@ -48,7 +66,7 @@ export function MembersTable({
                 highlightOnHover
             >
                 <Table.Caption>
-                    Memebers of the organization: {orgData.name}
+                    Memebers of the organization: {orgData.data.name}
                 </Table.Caption>
                 <Table.Thead>
                     <Table.Tr>
@@ -84,11 +102,11 @@ export function ManageMembers({ ...member }: ManageMemberProps["member"]) {
             const memberRoles = member.role.split(",") as OrgRole[];
 
             const availableToAdd = allRoles.filter(
-                (r) => !memberRoles.includes(r)
+                (r) => !memberRoles.includes(r),
             );
 
             const availableToRemove = allRoles.filter((r) =>
-                memberRoles.includes(r)
+                memberRoles.includes(r),
             );
 
             return [availableToAdd, availableToRemove, memberRoles];
@@ -167,8 +185,8 @@ function AssignOrRemoveOrganizationRole({
             action === "remove"
                 ? existingMemberRoles.filter((ur) => ur !== r)
                 : existingMemberRoles.includes(r)
-                ? existingMemberRoles
-                : [...existingMemberRoles, r];
+                  ? existingMemberRoles
+                  : [...existingMemberRoles, r];
 
         return (
             <Menu.Item
@@ -216,7 +234,7 @@ export function MakeMemberOwner({ ...member }: ManageMemberProps["member"]) {
             onClick={async () => {
                 const data = await makeUserOwnerOfOrganizationIfNonExist(
                     member.id,
-                    member.organizationId
+                    member.organizationId,
                 );
 
                 if (data.sucess) {
