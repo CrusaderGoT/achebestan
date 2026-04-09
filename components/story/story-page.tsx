@@ -1,19 +1,14 @@
 "use client";
 
-import { calculateStoryPermissions } from "@/lib/auth/policies/story-policy";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
+import { useStoryPermissions } from "@/lib/hooks/story/use-story-permissions";
 import { BookStoriesType } from "@/types/books";
 import { CommentTreeProps } from "@/types/comment";
-import {
-    StoryPermissionsType,
-    StoryProps,
-    StoryRatingProps,
-} from "@/types/story";
+import { StoryProps, StoryRatingProps } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Stack } from "@mantine/core";
 import { useMounted } from "@mantine/hooks";
-import { useEffect, useState } from "react";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
 import { Story } from "./story";
@@ -36,30 +31,14 @@ export function StoryPageClient({
     const mounted = useMounted();
 
     const {
-        sessionUser: { data: session, isPending },
+        sessionUser: { data: session },
     } = useCentralizedAuth();
 
-    const [permissions, setPermission] = useState<
-        StoryPermissionsType | undefined
-    >();
-
-    // effect for set story perms
-    useEffect(() => {
-        if (isPending) return;
-
-        const setStoryPerms = async () => {
-            const perms = await calculateStoryPermissions(
-                session?.user as UserSelectType,
-                {
-                    id: story.id,
-                    authorId: story.authorId,
-                },
-            );
-            setPermission(perms);
-        };
-        setStoryPerms();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session?.user?.id]);
+    const { data: permissions } = useStoryPermissions({
+        user: session?.user as UserSelectType,
+        storyId: story.id,
+        authorId: story.authorId,
+    });
 
     return (
         <Stack>
