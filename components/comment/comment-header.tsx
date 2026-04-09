@@ -11,10 +11,13 @@ import dayjs from "dayjs";
 
 import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { AuthorIcon } from "../ui/misc";
 
 dayjs.extend(relativeTime);
 
-function CommentHeader({ ...props }: CommentTreeProps) {
+function CommentHeader({
+    ...props
+}: CommentTreeProps & { storyAuthorId?: string }) {
     return (
         <>
             <Text size="xs" c="dimmed">
@@ -25,9 +28,11 @@ function CommentHeader({ ...props }: CommentTreeProps) {
                 {props.edited
                     ? `edited ${dayjs(props.edited).fromNow()}`
                     : props.created
-                    ? `${dayjs(props.created).fromNow()}`
-                    : ""}
+                      ? `${dayjs(props.created).fromNow()}`
+                      : ""}
             </Text>
+
+            {props.userId === props.storyAuthorId && <AuthorIcon />}
         </>
     );
 }
@@ -40,6 +45,7 @@ export function CommentNodeHeader({
     level,
     onToggleExpand,
     onOpenDrawer,
+    storyAuthorId,
 }: {
     comment: CommentTreeProps;
     hasChildren: boolean;
@@ -48,10 +54,11 @@ export function CommentNodeHeader({
     isInDrawer: boolean;
     onToggleExpand: () => void;
     onOpenDrawer: () => void;
+    storyAuthorId?: string;
 }) {
     const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
         level,
-        hasChildren
+        hasChildren,
     );
 
     return (
@@ -72,7 +79,7 @@ export function CommentNodeHeader({
             </Avatar>
 
             {!comment.hasBeenDeleted ? (
-                <CommentHeader {...comment} />
+                <CommentHeader {...comment} storyAuthorId={storyAuthorId} />
             ) : (
                 <>
                     <Text size="xs" c="dimmed">

@@ -71,7 +71,10 @@ export function StoryPageClient({
 
             <StoryActions permissions={permissions} {...story} />
 
-            <CommentSection comments={comments} />
+            <CommentSection
+                comments={comments}
+                storyAuthorId={story.authorId}
+            />
         </Stack>
     );
 }

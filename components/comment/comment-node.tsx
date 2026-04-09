@@ -27,11 +27,13 @@ export function CommentNode({
     context,
     interactions,
     session,
+    storyAuthorId,
 }: {
     nodeProps: CommentNodeProps;
     context: CommentRenderContext;
     interactions: CommentInteractionHandlers;
     session: ReturnType<typeof authClient.useSession>["data"];
+    storyAuthorId?: string;
 }) {
     const { node, expanded, hasChildren, elementProps, level } = nodeProps;
     const { isInDrawer, tree, commentMap, onOpenDrawer } = context;
@@ -50,7 +52,7 @@ export function CommentNode({
 
     const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
         level,
-        hasChildren
+        hasChildren,
     );
 
     // effect for keeping the inner thread comment parent collapsed in the main thread
@@ -91,7 +93,7 @@ export function CommentNode({
                 commentTreeStyles.comment,
                 level === 1 && commentTreeStyles.topLevel,
                 level === DRAWER_CONFIG.drawerLevel &&
-                    commentTreeStyles.drawerLevel
+                    commentTreeStyles.drawerLevel,
             )}
         >
             <CommentNodeHeader
@@ -102,6 +104,7 @@ export function CommentNode({
                 isInDrawer={isInDrawer}
                 onToggleExpand={handleToggleExpand}
                 onOpenDrawer={() => onOpenDrawer(comment)}
+                storyAuthorId={storyAuthorId}
             />
 
             {!showDrawerButton && (

@@ -55,7 +55,13 @@ export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
 };
 
 // Main CommentTree component
-function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
+function CommentTree({
+    comments,
+    storyAuthorId,
+}: {
+    comments: CommentTreeProps[];
+    storyAuthorId?: string;
+}) {
     const mounted = useMounted();
     const { sessionUser } = useCentralizedAuth();
     const interactions = useCommentInteractions();
@@ -81,14 +87,14 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
         // Helper function to recursively add comment and all its descendants
         const addCommentAndDescendants = (
-            comment: CommentsToTreeNodeDataType[number]
+            comment: CommentsToTreeNodeDataType[number],
         ) => {
             values.push(comment.value);
 
             if (comment.children?.length && comment.children.length > 0) {
                 comment.children.forEach((child) => {
                     addCommentAndDescendants(
-                        child as CommentsToTreeNodeDataType[number]
+                        child as CommentsToTreeNodeDataType[number],
                     );
                 });
             }
@@ -109,7 +115,7 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
         multiple: false,
         initialExpandedState: getTreeExpandedState(
             commentsNodeData,
-            initialCommentsToExpand
+            initialCommentsToExpand,
         ),
     });
 
@@ -137,6 +143,7 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                     context={context}
                     interactions={interactions}
                     session={sessionUser.data}
+                    storyAuthorId={storyAuthorId}
                 />
             );
         },
@@ -147,7 +154,7 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             drawer.handleOpenDrawer,
             interactions,
             sessionUser.data,
-        ]
+        ],
     );
 
     const renderDrawerNode = useCallback(
@@ -177,7 +184,7 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
             drawer.handleOpenDrawer,
             interactions,
             sessionUser.data,
-        ]
+        ],
     );
 
     return (
@@ -231,7 +238,7 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
                                                 // IMPROVEMENT: Add delay to ensure state update
                                                 setTimeout(() => {
                                                     drawer.drawerTree.expand(
-                                                        previousCommentId
+                                                        previousCommentId,
                                                     );
                                                 }, 50);
                                             }
@@ -281,8 +288,10 @@ function CommentTree({ comments }: { comments: CommentTreeProps[] }) {
 
 export function CommentSection({
     comments,
+    storyAuthorId,
 }: {
     comments?: CommentTreeProps[];
+    storyAuthorId?: string;
 }) {
     if (!comments || comments.length < 1) {
         return (
@@ -298,7 +307,7 @@ export function CommentSection({
                 label={comments && comments.length > 0 ? "comments" : ""}
             />
 
-            <CommentTree comments={comments} />
+            <CommentTree comments={comments} storyAuthorId={storyAuthorId} />
         </>
     );
 }
