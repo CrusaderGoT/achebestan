@@ -3,12 +3,10 @@ import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { updateStoryAction } from "../../actions/story";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useUpdateStory = (isbn: string, authorId: string) => {
-    const router = useRouter();
-
-    const pathname = usePathname();
+    const queryClient = useQueryClient();
 
     const boundUpdateStoryAction = useMemo(
         () => updateStoryAction.bind(null, isbn, authorId),
@@ -17,17 +15,18 @@ export const useUpdateStory = (isbn: string, authorId: string) => {
 
     const action = useAction(boundUpdateStoryAction, {
         onSuccess(args) {
-            const storyTitle = args.data.title;
+            const story = args.data;
 
             notifications.show({
-                message: `Story '${storyTitle.toUpperCase()}' Has Been Updated`,
+                message: `Story '${story.title}' has been updated`,
                 color: "green",
             });
 
-            if (pathname === `/story/${args.data.isbn}`) {
-                router.refresh();
-            } else {
-                router.push(`/story/${args.data.isbn}`);
+            // manually invalidate if book change
+            if (story.bookId) {
+                queryClient.invalidateQueries({
+                    queryKey: ["story-book", { bookId: story.bookId }],
+                });
             }
         },
         onError(args) {

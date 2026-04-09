@@ -27,7 +27,7 @@ export function AddStoryToBook({
     canUpdate,
     executeAsync,
 }: AddStoryToBookProps) {
-    const [opened, { toggle }] = useDisclosure(false);
+    const [opened, { toggle, close }] = useDisclosure(false);
 
     return (
         <Box mt={"xs"} className={cx(!canUpdate && publicStyles.hide)}>
@@ -50,6 +50,7 @@ export function AddStoryToBook({
                                 variant="transparent"
                                 leftSection={<IconBookUpload size={15} />}
                                 size="xs"
+                                color="yellow"
                                 onClick={async () => {
                                     if (!bookIdState) {
                                         notifications.show({
@@ -62,7 +63,6 @@ export function AddStoryToBook({
 
                                     const updatedStory = await executeAsync({
                                         bookId: Number(bookIdState.value),
-                                        image: undefined,
                                     });
 
                                     if (updatedStory.data) {
@@ -72,6 +72,7 @@ export function AddStoryToBook({
                                         });
 
                                         setBookIdState(null);
+                                        close();
                                     } else {
                                         notifications.show({
                                             message: `Failed to move story to book '${bookIdState.label}'`,
@@ -89,11 +90,11 @@ export function AddStoryToBook({
 
             <Button
                 onClick={toggle}
-                size="xs"
+                size="compact-xs"
                 variant="subtle"
                 color={opened ? "red" : "green"}
             >
-                {opened ? "Cancel" : "Add story to book?"}
+                {opened ? "Cancel" : "Move story to a book?"}
             </Button>
         </Box>
     );

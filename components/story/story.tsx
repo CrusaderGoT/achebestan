@@ -34,9 +34,9 @@ import {
     useUpdateStoryForm,
 } from "@/components/forms/story/update-story-form-context";
 
-import { getStoryBook } from "@/lib/actions/book";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useEffect, useState } from "react";
+import { useGetStoryBook } from "@/lib/hooks/book/get-story-book";
+import { useState } from "react";
 import { AddStoryToBook } from "./story-add-to-book";
 
 export function Story({
@@ -73,23 +73,7 @@ export function Story({
 
     const [bookIdState, setBookIdState] = useState<ComboboxItem | null>(null);
 
-    const [book, setBook] =
-        useState<Awaited<ReturnType<typeof getStoryBook>>>();
-
-    // effect for getting the story's book if bookId
-    useEffect(() => {
-        async function fetchStorysBook() {
-            if (!bookId) return;
-
-            const theBook = await getStoryBook(bookId, story.isbn);
-
-            if (theBook) {
-                setBook(theBook);
-            }
-        }
-        fetchStorysBook();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bookId]);
+    const { data: book } = useGetStoryBook({ bookId });
 
     const [
         openedImageField,

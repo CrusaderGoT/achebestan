@@ -1,11 +1,10 @@
 "use client";
 
-import { getUserBooks } from "@/lib/actions/book";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useCreateBook } from "@/lib/hooks/book/create-book-hook";
+import { useUserBooks } from "@/lib/hooks/book/get-user-books";
 import {
     Button,
-    ComboboxData,
     ComboboxItem,
     Modal,
     Select,
@@ -14,7 +13,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus } from "@tabler/icons-react";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export function BooksSelect({
     bookId,
@@ -23,45 +23,24 @@ export function BooksSelect({
     bookId: ComboboxItem | null;
     setBookId: Dispatch<SetStateAction<ComboboxItem | null>>;
 }) {
-    const [userBooks, setUserBooks] = useState<ComboboxData>([]);
-
-    const [loadingUserBooks, setLoadingUserBooks] = useState(true);
-
     const { sessionUser } = useCentralizedAuth();
 
-    const userId = useMemo(() => {
-        return sessionUser.data?.user.id;
-    }, [sessionUser.data?.user.id]);
+    const userId = sessionUser.data?.user.id;
 
-    useEffect(() => {
-        async function getUserBooksEffect() {
-            if (!userId) return;
-
-            const books = await getUserBooks(userId, userBooks.length || 1);
-            if (books) {
-                setUserBooks(() => {
-                    const normalizedData: ComboboxData = books.map((d) => {
-                        return {
-                            value: `${d.id}`,
-                            label: d.name,
-                        };
-                    });
-
-                    return [...normalizedData];
-                });
-            }
-        }
-
-        getUserBooksEffect();
-
-        setLoadingUserBooks(false);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userId]);
+    const {
+        data: userBooks,
+        error,
+        isLoading,
+    } = useUserBooks({
+        userId: userId,
+        offset: 1,
+        limit: 10,
+    });
+    // TO DO, ADD PAGINATION OR USE DELAYED SEARCH IF NONE
 
     return (
         <>
-            {userBooks.length > 0 && (
+            {!error && userBooks && (
                 <Select
                     data={userBooks}
                     value={bookId ? bookId.value : null}
@@ -77,21 +56,19 @@ export function BooksSelect({
                 />
             )}
 
-            {!loadingUserBooks && <CreateBookModal setNewBook={setUserBooks} />}
+            {!isLoading && !!userId && <CreateBookModal />}
         </>
     );
 }
 
-function CreateBookModal({
-    setNewBook,
-}: {
-    setNewBook: Dispatch<SetStateAction<ComboboxData>>;
-}) {
+function CreateBookModal() {
     const [opened, { open, close }] = useDisclosure(false);
 
     const [value, setValue] = useState("");
 
     const { executeAsync, isPending } = useCreateBook();
+
+    const queryClient = useQueryClient();
 
     return (
         <>
@@ -117,13 +94,14 @@ function CreateBookModal({
                         onClick={async () => {
                             const newBook = await executeAsync({ name: value });
                             if (newBook.data) {
-                                const normalizedData: ComboboxItem = {
-                                    value: `${newBook.data.id}`,
-                                    label: newBook.data.name,
-                                };
-                                setNewBook((prev) => {
-                                    return [...prev, normalizedData];
+                                // invalidate user books query
+                                queryClient.invalidateQueries({
+                                    queryKey: [
+                                        "user-books",
+                                        { userId: newBook.data.authorId },
+                                    ],
                                 });
+
                                 setValue("");
                                 close();
                             }
@@ -140,6 +118,7 @@ function CreateBookModal({
                 variant="transparent"
                 leftSection={<IconPlus size={15} />}
                 size="xs"
+                color="green"
             >
                 Create New Book
             </Button>

@@ -12,18 +12,21 @@ export const useStoryPermissions = ({
     authorId: string;
 }) => {
     return useQuery({
-        queryKey: ["storyPermissions", { userId: user?.id, storyId, authorId }],
+        queryKey: [
+            "story-permissions",
+            { userId: user?.id, storyId, authorId },
+        ],
         queryFn: async () => {
-            try {
-                const data = await calculateStoryPermissions(user, {
-                    id: storyId,
-                    authorId,
-                });
+            const data = await calculateStoryPermissions(user, {
+                id: storyId,
+                authorId,
+            });
 
-                return data;
-            } catch {
+            if (!data) {
                 throw new Error("Failed to get permissions for this story");
             }
+
+            return data;
         },
         staleTime: 1000 * 60 * 60, // 1 hour fresh
         gcTime: 1000 * 60 * 60 * 24, // keep in cache 24h

@@ -9,7 +9,7 @@ import { authActionClient } from "../safe-action";
 export async function getBookStories(
     bookId: number,
     offset: number = 0,
-    limit: number = 10
+    limit: number = 10,
 ) {
     "use cache";
 
@@ -68,14 +68,15 @@ export const createBookAction = authActionClient
         return newBook;
     });
 
-export async function getUserBooks(
-    userId: string,
-    offset: number,
-    limit: number = 10
-) {
-    "use cache";
-    cacheTag(`getUserBooks-${userId}`);
-
+export async function getUserBooks({
+    userId,
+    offset,
+    limit,
+}: {
+    userId: string;
+    offset: number;
+    limit: number;
+}) {
     try {
         const userBooks = await db.query.book.findMany({
             where(fields, operators) {
@@ -99,10 +100,7 @@ export async function getUserBooks(
     }
 }
 
-export async function getStoryBook(bookId: number, storyIsbn: string) {
-    "use cache";
-    cacheTag(`getStoryBook-${storyIsbn}`);
-
+export async function getStoryBook(bookId: number) {
     try {
         const storyBook = await db.query.book.findFirst({
             where(fields, operators) {
