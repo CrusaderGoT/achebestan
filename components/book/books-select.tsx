@@ -1,7 +1,7 @@
 "use client";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useCreateBook } from "@/lib/hooks/book/create-book-hook";
+import { useCreateBook } from "@/lib/hooks/book/create-book";
 import { useUserBooks } from "@/lib/hooks/book/user-books";
 import {
     Button,

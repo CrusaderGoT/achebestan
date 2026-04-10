@@ -1,20 +1,32 @@
 import { createStoryAction } from "@/lib/actions/story";
 import { isFeatureSupported } from "@/lib/utils/pwa/is-feature-supported";
 import { notifications } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
 
 export const useCreateStory = (
-    setSynced: Dispatch<SetStateAction<boolean>>
+    setSynced: Dispatch<SetStateAction<boolean>>,
 ) => {
     const router = useRouter();
 
+    const queryClient = useQueryClient();
+
     const action = useAction(createStoryAction, {
         onSuccess(args) {
+            const newStory = args.data;
+
             notifications.show({
-                message: `Story '${args.data.title}' Has Been Published`,
+                message: `Story '${newStory.title}' Has Been Published`,
             });
+
+            if (newStory.bookId) {
+                // add new story to this book client data
+                queryClient.invalidateQueries({
+                    queryKey: ["book-stories", { bookId: newStory.bookId }],
+                });
+            }
 
             router.replace(`/story/${args.data.isbn}`);
         },
@@ -27,9 +39,9 @@ export const useCreateStory = (
                             notifications.show({
                                 key: index,
                                 message: `A Validation Error Occured -> ${errorMsg}`,
-                            })
+                            }),
                         );
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 console.error(args.error.serverError);

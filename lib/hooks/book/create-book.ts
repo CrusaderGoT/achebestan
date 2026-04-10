@@ -2,13 +2,20 @@ import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 
 import { createBookAction } from "@/lib/actions/book";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useCreateBook = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(createBookAction, {
         onSuccess(args) {
             notifications.show({
-                message: `Book '${args.data.name.toUpperCase()}' Has Been Created`,
+                message: `Book '${args.data.name}' has been created`,
                 color: "green",
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["user-books", { userId: args.data.authorId }],
             });
         },
         onError(args) {
@@ -17,12 +24,12 @@ export const useCreateBook = () => {
                     ([field, errorList]) => {
                         // Normalize the errorList to a string[] before iterating.
                         const normalizedErrors: string[] = Array.isArray(
-                            errorList
+                            errorList,
                         )
                             ? errorList
                             : Array.isArray(errorList?._errors)
-                            ? errorList._errors
-                            : [];
+                              ? errorList._errors
+                              : [];
 
                         normalizedErrors.forEach((errorMsg, index) => {
                             notifications.show({
@@ -31,13 +38,13 @@ export const useCreateBook = () => {
                                 color: "red",
                             });
                         });
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({
                     message: `A server error occurred -> ${args.error.serverError.substring(
                         0,
-                        10
+                        10,
                     )}...`,
                     color: "red",
                 });

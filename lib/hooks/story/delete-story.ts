@@ -1,4 +1,5 @@
 import { notifications } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { deleteStoryAction } from "../../actions/story";
@@ -6,17 +7,28 @@ import { deleteStoryAction } from "../../actions/story";
 export const useDeleteStory = (authorId: string) => {
     const boundDeleteStoryAction = useMemo(
         () => deleteStoryAction.bind(null, authorId),
-        [authorId]
+        [authorId],
     );
+    const queryClient = useQueryClient();
 
     const action = useAction(boundDeleteStoryAction, {
         onSuccess(args) {
-            const storyTitle = args.data.title;
+            const deletedStory = args.data;
 
             notifications.show({
-                message: `Story '${storyTitle}' Has Been Deleted`,
+                message: `Story '${deletedStory.title}' has been deleted`,
                 color: "green",
             });
+
+            if (deletedStory.bookId && deletedStory.bookPart) {
+                // invalidate queries related to the book's stories and story book to reflect the deletion
+                queryClient.invalidateQueries({
+                    queryKey: ["book-stories", { bookId: deletedStory.bookId }],
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ["story-book", { bookId: deletedStory.bookId }],
+                });
+            }
         },
         onError(args) {
             if (args.error.serverError) {

@@ -3,7 +3,6 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
-import { revalidatePath, updateTag } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
@@ -53,11 +52,6 @@ export const createBookAction = authActionClient
                 name: book.name,
                 id: book.id,
             });
-
-        if (newBook) {
-            updateTag(`getUserBooks-${newBook.authorId}`);
-            revalidatePath("/story/new");
-        }
 
         return newBook;
     });

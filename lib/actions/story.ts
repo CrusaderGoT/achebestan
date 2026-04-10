@@ -60,14 +60,9 @@ export const createStoryAction = authActionClient
                 authorId: story.authorId,
             });
 
-        // revalidate tags/paths once story is created
+        // revalidate tags/paths once story is created / for Next.js cache
         updateTag("readLatestStories");
         revalidatePath(`/`);
-
-        if (createdStory.bookId) {
-            updateTag(`getBookStories-${createdStory.bookId}`);
-            updateTag(`readStoryBook-${createdStory.bookId}`);
-        }
 
         // upload image using isbn as public id
         let imageUrl: string | undefined = undefined;
@@ -308,9 +303,6 @@ export const deleteStoryAction = authActionClient
                             gt(story.bookPart, deletedStory.bookPart),
                         ),
                     );
-
-                updateTag(`getBookStories-${story.bookId}`);
-                updateTag(`readStoryBook-${story.bookId}`);
             }
 
             return deletedStory;

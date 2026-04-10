@@ -33,8 +33,8 @@ export const useUserBooks = ({
 
             return normalizedData;
         },
-        staleTime: 1000 * 60 * 60 * 12, // 12 hours
-        gcTime: 1000 * 60 * 60 * 24, // 1 day before hard reset
+        staleTime: 1000 * 60 * 60 * 6, // 6 hours
+        gcTime: 1000 * 60 * 60 * 24, // 12 hrs before hard reset
         enabled: !!userId,
     });
 };
