@@ -55,7 +55,7 @@ export const useCreateStory = (
                     notifications.show({
                         title: "Story Has Been Queued.",
                         message: `Your Story ${args.input.title} Will be Published When You Come Online.`,
-                        autoClose: 7000,
+                        autoClose: 30000,
                     });
 
                     router.replace("/");

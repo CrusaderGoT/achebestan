@@ -370,7 +370,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
                             queued: true,
                             offline: true,
                             message:
-                                "Your changes will be saved when you're back online",
+                                "Your story will be published when you're back online",
                         }),
                         {
                             headers: { "Content-Type": "application/json" },

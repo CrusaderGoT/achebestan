@@ -95,8 +95,8 @@ export const createStoryAction = authActionClient
         await sendNotificationToAllSubscribers({
             title: `${ctx.user.name} Published A New Story📝`,
             body: createdStory.title,
-            icon: "/web-app-manifest-192x192.png",
-            badge: "/icon1.png",
+            icon: imageUrl || "/images/iq_detailed.png",
+            badge: "/web-app-manifest-96x96.png",
             tag: `story-${createdStory.title}`,
             data: {
                 url: `/story/${createdStory.isbn}`,
