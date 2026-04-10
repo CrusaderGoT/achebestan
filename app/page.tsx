@@ -4,6 +4,7 @@ import { generateHomeMetadata } from "@/lib/utils/home/generate-home-metadata";
 import { homeJsonLdData } from "@/lib/utils/home/home-json-ld-data";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
 // Generate metadata for homepage
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,6 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
+    await connection();
+
     // Fetch latest stories for dynamic content
     const stories = await readLatestStories(10);
 

@@ -39,7 +39,7 @@ export const comment = table(
         t.index("comment_story_idx").on(table.storyISBN),
         t.index("comment_user_idx").on(table.userId),
         t.index("comment_parent_idx").on(table.parentCommentId),
-    ]
+    ],
 );
 
 export const commentRelations = relations(comment, ({ one, many }) => ({
@@ -63,5 +63,5 @@ export const commentRelations = relations(comment, ({ one, many }) => ({
     childComments: many(comment, {
         relationName: "parentChild",
     }),
-    reactions: many(reaction),
+    reactions: many(reaction, { relationName: "commentReactions" }),
 }));

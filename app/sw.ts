@@ -14,7 +14,7 @@ import {
     CacheFirst,
     ExpirationPlugin,
     NetworkFirst,
-    Serwist
+    Serwist,
 } from "serwist";
 import type { StorySelectType } from "../types/story";
 
@@ -116,13 +116,12 @@ const serwist = new Serwist({
             }),
         },
 
-        // All other API routes (excluding notifications — those are handled
+        // All other API routes (excluding stories — those are handled
         // below via BackgroundSync, so they must not be cached here)
         {
             matcher: ({ url }) =>
                 url.pathname.startsWith("/api/") &&
-                url.pathname !== "/api/stories" &&
-                !url.pathname.includes("/api/notifications"),
+                url.pathname !== "/api/stories",
             handler: new NetworkFirst({
                 cacheName: CACHE_NAMES.API,
                 plugins: [
@@ -201,7 +200,7 @@ self.addEventListener("install", (event: ExtendableEvent) => {
                 if (!response.ok) return;
 
                 const storiesCache = await caches.open(
-                    CACHE_NAMES.STORIES_LIST
+                    CACHE_NAMES.STORIES_LIST,
                 );
                 // Store the response in the stories cache using a clone so the
                 // body stream is still readable when we call .json() below.
@@ -210,15 +209,15 @@ self.addEventListener("install", (event: ExtendableEvent) => {
                 const stories: StorySelectType[] = await response.json();
                 // Non-blocking: cache individual story pages in the background
                 cacheStoryPages(stories).catch((err) =>
-                    console.error("[SW] Failed to cache story pages:", err)
+                    console.error("[SW] Failed to cache story pages:", err),
                 );
             } catch (err) {
                 console.warn(
                     "[SW] Could not pre-warm stories during install:",
-                    err
+                    err,
                 );
             }
-        })()
+        })(),
     );
 });
 
@@ -242,10 +241,10 @@ async function cacheStoryPages(stories: StorySelectType[]): Promise<void> {
                 } catch (err) {
                     console.warn(
                         `[SW] Failed to cache story page ${url}:`,
-                        err
+                        err,
                     );
                 }
-            })
+            }),
         );
         // Small breathing room between batches
         await new Promise<void>((resolve) => setTimeout(resolve, 100));
@@ -266,7 +265,7 @@ const notificationQueue = new BackgroundSyncQueue("notification-queue", {
             } catch (err) {
                 console.error(
                     "[SW] Notification replay failed, re-queuing:",
-                    err
+                    err,
                 );
                 await queue.unshiftRequest(entry);
                 throw err; // Re-throw so the browser retries the sync
@@ -321,36 +320,6 @@ self.addEventListener("fetch", (event: FetchEvent) => {
 
     const url = new URL(request.url);
 
-    // Queue offline notification mutations
-    if (url.pathname.includes("/api/notifications")) {
-        event.respondWith(
-            (async () => {
-                try {
-                    return await fetch(request.clone());
-                } catch (err) {
-                    console.log(
-                        "[SW] Queuing notification for background sync:",
-                        err
-                    );
-                    await notificationQueue.pushRequest({
-                        request: request.clone(),
-                    });
-                    return new Response(
-                        JSON.stringify({
-                            queued: true,
-                            message: "Request queued for background sync",
-                        }),
-                        {
-                            headers: { "Content-Type": "application/json" },
-                            status: 202,
-                        }
-                    );
-                }
-            })()
-        );
-        return;
-    }
-
     // Queue offline story POST/PATCH/DELETE mutations
     if (url.pathname.startsWith("/story/new")) {
         event.respondWith(
@@ -360,7 +329,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
                 } catch (err) {
                     console.log(
                         "[SW] Queuing story mutation for background sync:",
-                        err
+                        err,
                     );
                     await newStoryQueue.pushRequest({
                         request: request.clone(),
@@ -375,10 +344,10 @@ self.addEventListener("fetch", (event: FetchEvent) => {
                         {
                             headers: { "Content-Type": "application/json" },
                             status: 202,
-                        }
+                        },
                     );
                 }
-            })()
+            })(),
         );
         return;
     }
@@ -411,7 +380,7 @@ self.addEventListener("push", (event: PushEvent) => {
 
         if (!data.title) {
             console.error(
-                "[SW] Push notification missing required `title` field"
+                "[SW] Push notification missing required `title` field",
             );
             return;
         }
@@ -441,7 +410,7 @@ self.addEventListener("push", (event: PushEvent) => {
         };
 
         event.waitUntil(
-            self.registration.showNotification(data.title, options)
+            self.registration.showNotification(data.title, options),
         );
     } catch (err) {
         console.error("[SW] Error processing push notification:", err);
@@ -451,7 +420,7 @@ self.addEventListener("push", (event: PushEvent) => {
             self.registration.showNotification("New Notification", {
                 body: "You have a new notification",
                 icon: "/web-app-manifest-192x192.png",
-            })
+            }),
         );
     }
 });
@@ -466,7 +435,7 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
 
     const urlToOpen = new URL(
         event.notification.data?.url ?? "/",
-        self.location.origin
+        self.location.origin,
     ).href;
 
     event.waitUntil(
@@ -500,7 +469,7 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
             } catch (err) {
                 console.error("[SW] Error handling notification click:", err);
             }
-        })()
+        })(),
     );
 });
 

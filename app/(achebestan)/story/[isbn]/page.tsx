@@ -1,9 +1,8 @@
 import { StoryPageClient } from "@/components/story/story-page";
+import { MetaTags } from "@/components/ui/meta-tags";
 import { getBookStories } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
-import { getUserRating } from "@/lib/actions/rating";
 import { readLatestStoryISBNs, readStory } from "@/lib/actions/story";
-import { auth } from "@/lib/auth";
 import { getQueryClient } from "@/lib/get-query-client";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
@@ -12,7 +11,7 @@ import { CommentTreeProps } from "@/types/comment";
 import { StoryProps, StoryRatingProps } from "@/types/story";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { connection } from "next/server";
 
 export async function generateStaticParams() {
     const stories = await readLatestStoryISBNs();
@@ -35,12 +34,12 @@ export default async function StoryPage({
 }: {
     params: Promise<{ isbn: string }>;
 }) {
+    await connection();
+
     const { isbn } = await params;
     const queryClient = getQueryClient();
-    const reqHeaders = await headers();
 
-    const [session] = await Promise.all([
-        auth.api.getSession({ headers: reqHeaders }),
+    await Promise.all([
         queryClient.prefetchQuery({
             queryKey: ["read-story", { isbn }],
             queryFn: () => readStory(isbn),
@@ -56,7 +55,7 @@ export default async function StoryPage({
         "read-story",
         { isbn },
     ]);
-    
+
     const comments = queryClient.getQueryData<CommentTreeProps[]>([
         "read-story-comments",
         { isbn },
@@ -66,17 +65,6 @@ export default async function StoryPage({
         await queryClient.prefetchQuery({
             queryKey: ["book-stories", { bookId: story.bookId }],
             queryFn: () => getBookStories(story.bookId!),
-        });
-    }
-
-    if (session?.user.id) {
-        await queryClient.prefetchQuery({
-            queryKey: ["user-rating", { userId: session.user.id, isbn }],
-            queryFn: async () => {
-                const data = await getUserRating(session.user.id, isbn);
-                if (!data) throw new Error("No user rating");
-                return data;
-            },
         });
     }
 
@@ -97,10 +85,7 @@ export default async function StoryPage({
             )}
 
             <meta name="author" content={`${story?.author.name}`} />
-            <meta
-                name="copyright"
-                content={`© ${new Date().getFullYear()} ${story?.author.name} (Achebestan)`}
-            />
+            <MetaTags authorName={story?.author.name || ""} />
 
             <HydrationBoundary state={dehydrate(queryClient)}>
                 <StoryPageClient isbn={isbn} />

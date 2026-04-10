@@ -3,6 +3,7 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
+import { cacheTag } from "next/cache";
 import { authActionClient } from "../safe-action";
 
 export async function getBookStories(
@@ -10,6 +11,9 @@ export async function getBookStories(
     offset: number = 0,
     limit: number = 10,
 ) {
+    "use cache";
+    cacheTag(`getBookStories-${bookId}`);
+
     const fetchStories = async () => {
         try {
             const bookStories = await db.query.story.findMany({

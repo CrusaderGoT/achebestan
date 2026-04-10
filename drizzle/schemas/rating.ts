@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
-import { story } from "./story";
 import { comment } from "./comment";
+import { story } from "./story";
 import { user } from "./user";
 
 export const rating = table(
@@ -23,7 +23,7 @@ export const rating = table(
         t.index("ratings_stars_idx").on(table.stars),
         t.index("ratings_user_id_idx").on(table.userId),
         t.index("ratings_story_isbn_idx").on(table.storyISBN),
-    ]
+    ],
 );
 
 export const ratingRelations = relations(rating, ({ one }) => ({

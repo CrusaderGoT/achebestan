@@ -193,8 +193,8 @@ export const updateStoryAction = authActionClient
             updateTag(`readStory-${updatedStory.isbn}`);
             revalidatePath(`/story/${updatedStory.isbn}`);
 
-        updateTag("readLatestStories");
-        revalidatePath(`/`);
+            updateTag("readLatestStories");
+            revalidatePath(`/`);
 
             return updatedStory;
         },

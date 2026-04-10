@@ -95,7 +95,6 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="Achebestan" />
 
                 {/* Preload critical resources */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="dns-prefetch" href={`${BASE_URL}`} />
 
                 {/* PWA manifest */}
@@ -106,7 +105,7 @@ export default function RootLayout({
                 <link rel="apple-touch-icon" href="/apple-icon.png" />
             </head>
             <body>
-                <SerwistProvider swUrl="/serwist/sw.js">
+                <SerwistProvider swUrl="/serwist/sw.js" reloadOnOnline={false}>
                     <QueryProvider>
                         <MantineProvider>
                             {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
@@ -117,7 +116,9 @@ export default function RootLayout({
                             <Notifications limit={5} zIndex={9999} />
 
                             <CentralizedAuthContextProvider>
-                                <Shell>{children}</Shell>
+                                <Shell>
+                                    <Suspense>{children}</Suspense>
+                                </Shell>
                             </CentralizedAuthContextProvider>
                         </MantineProvider>
                     </QueryProvider>
