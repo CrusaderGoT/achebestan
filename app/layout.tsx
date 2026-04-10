@@ -106,26 +106,22 @@ export default function RootLayout({
                 <link rel="apple-touch-icon" href="/apple-icon.png" />
             </head>
             <body>
-                <QueryProvider>
-                    <MantineProvider>
-                        {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
-                        <Suspense fallback={<NavigationProgress />}>
-                            <RouteNavigationProgress />
-                        </Suspense>
+                <SerwistProvider swUrl="/serwist/sw.js">
+                    <QueryProvider>
+                        <MantineProvider>
+                            {/** wrap in suspense to prevent build error (because useSearchParams is used in it) */}
+                            <Suspense fallback={<NavigationProgress />}>
+                                <RouteNavigationProgress />
+                            </Suspense>
 
-                        <Notifications limit={5} zIndex={9999} />
+                            <Notifications limit={5} zIndex={9999} />
 
-                        <SerwistProvider swUrl="/serwist/sw.js">
                             <CentralizedAuthContextProvider>
-                                <Shell>
-                                    <Suspense fallback={null}>
-                                        {children}
-                                    </Suspense>
-                                </Shell>
+                                <Shell>{children}</Shell>
                             </CentralizedAuthContextProvider>
-                        </SerwistProvider>
-                    </MantineProvider>
-                </QueryProvider>
+                        </MantineProvider>
+                    </QueryProvider>
+                </SerwistProvider>
             </body>
         </html>
     );
