@@ -9,7 +9,7 @@ import { IconBookUpload } from "@tabler/icons-react";
 import { Dispatch, SetStateAction } from "react";
 import { BooksSelect } from "../book/books-select";
 
-import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
+import { useUpdateStory } from "@/lib/hooks/story/update-story";
 import { useDisclosure } from "@mantine/hooks";
 
 export type AddStoryToBookProps = {

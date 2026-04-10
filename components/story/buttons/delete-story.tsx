@@ -11,7 +11,7 @@ import {
     Text,
 } from "@mantine/core";
 
-import { useDeleteStory } from "@/lib/hooks/story/delete-story-hook";
+import { useDeleteStory } from "@/lib/hooks/story/delete-story";
 import { useDisclosure } from "@mantine/hooks";
 import { IconTrashX } from "@tabler/icons-react";
 

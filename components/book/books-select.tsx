@@ -2,7 +2,7 @@
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useCreateBook } from "@/lib/hooks/book/create-book-hook";
-import { useUserBooks } from "@/lib/hooks/book/get-user-books";
+import { useUserBooks } from "@/lib/hooks/book/user-books";
 import {
     Button,
     ComboboxItem,

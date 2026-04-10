@@ -1,14 +1,13 @@
 "use client";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useStoryPermissions } from "@/lib/hooks/story/use-story-permissions";
-import { BookStoriesType } from "@/types/books";
-import { CommentTreeProps } from "@/types/comment";
-import { StoryProps, StoryRatingProps } from "@/types/story";
+import { useReadStoryComments } from "@/lib/hooks/comment/read-story-comments";
+import { useUserRating } from "@/lib/hooks/rating/user-rating";
+import { useReadStory } from "@/lib/hooks/story/read-story";
+import { useStoryPermissions } from "@/lib/hooks/story/story-permissions";
 import { UserSelectType } from "@/types/user";
-import { UserRatingWithComment } from "@/zod-schemas/rating";
 import { Stack } from "@mantine/core";
-import { useMounted } from "@mantine/hooks";
+import { notFound } from "next/navigation";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
 import { Story } from "./story";
@@ -16,23 +15,24 @@ import { StoryActions } from "./story-actions";
 import { StoryRating } from "./story-rating";
 
 export type StoryPageClientProps = {
-    story: StoryProps & StoryRatingProps;
-    comments?: CommentTreeProps[];
-    userRating?: UserRatingWithComment;
-    book: BookStoriesType;
+    isbn: string;
 };
 
-export function StoryPageClient({
-    story,
-    comments,
-    userRating,
-    book,
-}: StoryPageClientProps) {
-    const mounted = useMounted();
-
+export function StoryPageClient({ isbn }: StoryPageClientProps) {
     const {
         sessionUser: { data: session },
     } = useCentralizedAuth();
+
+    const { data: story } = useReadStory({ isbn });
+
+    const { data: comments } = useReadStoryComments({ isbn });
+
+    const { data: userRating } = useUserRating({
+        isbn,
+        userId: session?.user.id,
+    });
+
+    if (!story) notFound();
 
     const { data: permissions } = useStoryPermissions({
         user: session?.user as UserSelectType,
@@ -65,8 +65,11 @@ export function StoryPageClient({
                 userRating={userRating}
             />
 
-            {mounted && (book?.length ?? 0) > 1 && story.bookPart != null && (
-                <BookPagination chapters={book} part={story.bookPart} />
+            {story.bookId && story.bookPart && (
+                <BookPagination
+                    storyPart={story.bookPart}
+                    bookId={story.bookId}
+                />
             )}
 
             <StoryActions permissions={permissions} {...story} />

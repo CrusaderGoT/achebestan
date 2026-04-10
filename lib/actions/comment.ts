@@ -59,12 +59,12 @@ export const updateCommentAction = authActionClient
         z.object({
             commentId: z.number(),
             ...commentUpdateSchema.shape,
-        })
+        }),
     )
     .action(async ({ parsedInput, ctx }) => {
         const canUpdate = await canUpdateComment(
             ctx.user as UserSelectType,
-            parsedInput
+            parsedInput,
         );
 
         if (!canUpdate) {
@@ -83,8 +83,8 @@ export const updateCommentAction = authActionClient
                 and(
                     eq(comment.id, parsedInput.commentId),
                     eq(comment.storyISBN, parsedInput.storyISBN),
-                    eq(comment.userId, parsedInput.userId)
-                )
+                    eq(comment.userId, parsedInput.userId),
+                ),
             )
             .returning();
 
@@ -99,7 +99,7 @@ export const deleteCommentAction = authActionClient
             commentId: z.number(),
             userId: z.string(),
             storyISBN: z.string(),
-        })
+        }),
     )
     .action(async ({ parsedInput, ctx }) => {
         const [canDeleteOwn, canDeleteAll] = await Promise.all([
@@ -120,8 +120,8 @@ export const deleteCommentAction = authActionClient
             .where(
                 and(
                     eq(comment.id, parsedInput.commentId),
-                    eq(comment.userId, parsedInput.userId)
-                )
+                    eq(comment.userId, parsedInput.userId),
+                ),
             )
             .returning({ text: comment.text });
 
@@ -161,7 +161,7 @@ export const readStoryComments = async (isbn: string) => {
                 where: (users, { inArray }) =>
                     inArray(
                         users.id,
-                        comments.map((c) => c.userId)
+                        comments.map((c) => c.userId),
                     ),
             }),
         ]);
@@ -172,7 +172,7 @@ export const readStoryComments = async (isbn: string) => {
         // Calculate permissions for ALL comments in one batch
         const permissionsMap = await batchCalculateCommentPermissions(
             session?.user as UserSelectType,
-            allComments.map((c) => ({ id: c.id, userId: c.userId }))
+            allComments.map((c) => ({ id: c.id, userId: c.userId })),
         );
 
         // Combine the data with permissions
@@ -191,6 +191,7 @@ export const readStoryComments = async (isbn: string) => {
         }));
     } catch (e) {
         console.log(e);
+        throw new Error("Failed to load comments");
     }
 };
 
@@ -201,7 +202,7 @@ export const likeCommentAction = authActionClient
             where(fields, operators) {
                 return operators.and(
                     operators.eq(fields.commentId, parsedInput.commentId),
-                    operators.eq(fields.userId, parsedInput.userId)
+                    operators.eq(fields.userId, parsedInput.userId),
                 );
             },
         });
@@ -230,8 +231,8 @@ export const likeCommentAction = authActionClient
                     and(
                         eq(reaction.commentId, existingReaction.commentId),
                         eq(reaction.userId, existingReaction.userId),
-                        eq(reaction.id, existingReaction.id)
-                    )
+                        eq(reaction.id, existingReaction.id),
+                    ),
                 );
 
             return { deleted: true };
@@ -249,8 +250,8 @@ export const likeCommentAction = authActionClient
                 and(
                     eq(reaction.commentId, existingReaction.commentId),
                     eq(reaction.userId, existingReaction.userId),
-                    eq(reaction.id, existingReaction.id)
-                )
+                    eq(reaction.id, existingReaction.id),
+                ),
             );
 
         return { liked: true };
@@ -263,7 +264,7 @@ export const dislikeCommentAction = authActionClient
             where(fields, operators) {
                 return operators.and(
                     operators.eq(fields.commentId, parsedInput.commentId),
-                    operators.eq(fields.userId, parsedInput.userId)
+                    operators.eq(fields.userId, parsedInput.userId),
                 );
             },
         });
@@ -292,8 +293,8 @@ export const dislikeCommentAction = authActionClient
                     and(
                         eq(reaction.commentId, existingReaction.commentId),
                         eq(reaction.userId, existingReaction.userId),
-                        eq(reaction.id, existingReaction.id)
-                    )
+                        eq(reaction.id, existingReaction.id),
+                    ),
                 );
 
             return { deleted: true };
@@ -311,8 +312,8 @@ export const dislikeCommentAction = authActionClient
                 and(
                     eq(reaction.commentId, existingReaction.commentId),
                     eq(reaction.userId, existingReaction.userId),
-                    eq(reaction.id, existingReaction.id)
-                )
+                    eq(reaction.id, existingReaction.id),
+                ),
             );
 
         return { disliked: true };
@@ -324,7 +325,7 @@ export const deleteCommentThreadAction = authActionClient
             commentId: z.number(),
             userId: z.string(),
             storyISBN: z.string(),
-        })
+        }),
     )
     .action(async ({ parsedInput }) => {
         const canDelete = await canDeleteAllComment(parsedInput);
@@ -339,8 +340,8 @@ export const deleteCommentThreadAction = authActionClient
             .where(
                 and(
                     eq(comment.id, parsedInput.commentId),
-                    eq(comment.userId, parsedInput.userId)
-                )
+                    eq(comment.userId, parsedInput.userId),
+                ),
             )
             .returning({ text: comment.text });
 

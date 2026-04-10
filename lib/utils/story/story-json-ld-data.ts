@@ -1,17 +1,22 @@
 import { BASE_URL } from "@/lib/constants";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryProps } from "@/types/story";
-import { RatingSelectType } from "@/zod-schemas/rating";
+import { StoryProps, StoryRatingProps } from "@/types/story";
 import dayjs from "dayjs";
 import { Graph } from "schema-dts";
-import { calculateRatingsAverage, estimateReadingTime, highestRating, lowestRating, truncateText } from "./story-utils";
+import {
+    calculateRatingsAverage,
+    estimateReadingTime,
+    highestRating,
+    lowestRating,
+    truncateText,
+} from "./story-utils";
 
 export function storyJsonLdData(
-    story: StoryProps & {
-        ratings: RatingSelectType[];
-    },
-    comments: CommentTreeProps[] | undefined
+    story: StoryProps & StoryRatingProps,
+    comments: CommentTreeProps[],
 ) {
+    if (!story) return null;
+
     // Calculate metrics for structured data
     const averageRating = calculateRatingsAverage(story.ratings);
     const totalRatings = story.ratings?.length || 0;

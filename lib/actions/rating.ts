@@ -38,8 +38,8 @@ export const rateStoryAction = authActionClient
                 .where(
                     and(
                         eq(rating.storyISBN, parsedInput.storyISBN),
-                        eq(rating.userId, ctx.user.id)
-                    )
+                        eq(rating.userId, ctx.user.id),
+                    ),
                 )
                 .returning();
 
@@ -54,7 +54,7 @@ export const deleteStoryRating = authActionClient
         z.object({
             storyISBN: z.string(),
             userId: z.string(),
-        })
+        }),
     )
     .action(async ({ parsedInput, ctx }) => {
         if (ctx.user.id !== parsedInput.userId) {
@@ -65,8 +65,8 @@ export const deleteStoryRating = authActionClient
             .where(
                 and(
                     eq(rating.userId, ctx.user.id),
-                    eq(rating.storyISBN, parsedInput.storyISBN)
-                )
+                    eq(rating.storyISBN, parsedInput.storyISBN),
+                ),
             )
             .returning();
 
@@ -75,18 +75,13 @@ export const deleteStoryRating = authActionClient
         return deletedRating;
     });
 
-export const getUserRating = async (
-    userId: string | undefined,
-    storyISBN: string
-) => {
-    if (!userId) return;
-
+export const getUserRating = async (userId: string, storyISBN: string) => {
     try {
         const userRating = await db.query.rating.findFirst({
             where(fields, operators) {
                 return operators.and(
                     operators.eq(fields.storyISBN, storyISBN),
-                    operators.eq(fields.userId, userId)
+                    operators.eq(fields.userId, userId),
                 );
             },
             with: {
@@ -97,5 +92,6 @@ export const getUserRating = async (
         return userRating;
     } catch (e) {
         console.log(e);
+        throw new Error("Failed to fetch user rating");
     }
 };

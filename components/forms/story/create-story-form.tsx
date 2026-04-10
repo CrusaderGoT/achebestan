@@ -40,7 +40,7 @@ import { IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 import { BooksSelect } from "@/components/book/books-select";
-import { useCreateStory } from "@/lib/hooks/story/create-story-hook";
+import { useCreateStory } from "@/lib/hooks/story/create-story";
 import { toFormBookId } from "@/lib/utils/book/book-part-id-conversion";
 import { Drafts } from "./drafts";
 

@@ -13,7 +13,7 @@ import z from "zod/v4";
 import { SearchOptions } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { cacheTag, revalidatePath, updateTag } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import {
     canCreateStory,
     canDeleteStory,
@@ -204,6 +204,7 @@ export const updateStoryAction = authActionClient
 
 export const readStory = async (isbn: string) => {
     "use cache";
+
     cacheTag(`readStory-${isbn}`);
 
     try {
@@ -217,15 +218,10 @@ export const readStory = async (isbn: string) => {
             },
         });
 
-        if (!storyDb) notFound();
-
-        if (storyDb.bookId) {
-            cacheTag(`readStoryBook-${storyDb.bookId}`);
-        }
-
         return storyDb;
     } catch (e) {
         console.log(e);
+        throw new Error("Story not found");
     }
 };
 
@@ -250,7 +246,7 @@ export const readLatestStories = async (latest: number = 10) => {
 
 export const readLatestStoryISBNs = async (latest: number = 10) => {
     "use cache";
-    cacheTag("readLatestStories"); // same tag since they share cache invalidation
+    cacheTag("readLatestStories"); // same tag as readLatestStories since they share cache invalidation
 
     return await db
         .select({ isbn: story.isbn, created: story.created })
@@ -298,7 +294,6 @@ export const deleteStoryAction = authActionClient
             }
 
             // revalidate tags/paths once story is created
-            updateTag(`readStory-${isbn}`);
             updateTag("readLatestStories");
             revalidatePath(`/`);
 

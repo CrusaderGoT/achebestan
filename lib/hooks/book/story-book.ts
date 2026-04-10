@@ -1,7 +1,7 @@
 import { getStoryBook } from "@/lib/actions/book";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetStoryBook = ({ bookId }: { bookId: number | null }) => {
+export const useStoryBook = ({ bookId }: { bookId: number | null }) => {
     return useQuery({
         queryKey: ["story-book", { bookId }],
         queryFn: async () => {

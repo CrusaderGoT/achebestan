@@ -23,7 +23,7 @@ import { StoryImageField } from "@/components/story/story-image-field";
 import { StorySubtitle } from "@/components/story/story-subtitle";
 import { StoryTitle } from "@/components/story/story-title";
 
-import { useUpdateStory } from "@/lib/hooks/story/update-story-hook";
+import { useUpdateStory } from "@/lib/hooks/story/update-story";
 
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
@@ -35,7 +35,7 @@ import {
 } from "@/components/forms/story/update-story-form-context";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useGetStoryBook } from "@/lib/hooks/book/get-story-book";
+import { useStoryBook } from "@/lib/hooks/book/story-book";
 import { useState } from "react";
 import { AddStoryToBook } from "./story-add-to-book";
 
@@ -73,7 +73,7 @@ export function Story({
 
     const [bookIdState, setBookIdState] = useState<ComboboxItem | null>(null);
 
-    const { data: book } = useGetStoryBook({ bookId });
+    const { data: book } = useStoryBook({ bookId });
 
     const [
         openedImageField,
