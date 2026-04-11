@@ -11,7 +11,7 @@ import { DBSchema } from "idb";
 import { z } from "zod/v4";
 import { UserSelectType } from "./user";
 
-export interface StoryBookProps extends StorySelectType {
+export interface StoryAuthorProps extends StorySelectType {
     author: UserSelectType;
 }
 
@@ -45,7 +45,7 @@ export type StoryContentType = {
     permissions?: StoryPermissionsType;
 };
 
-export interface StoryProps extends StoryBookProps {
+export interface StoryPermAuthorProps extends StoryAuthorProps {
     permissions?: StoryPermissionsType;
 }
 

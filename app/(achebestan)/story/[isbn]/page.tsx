@@ -8,7 +8,7 @@ import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryProps, StoryRatingProps } from "@/types/story";
+import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import type { Metadata } from "next";
 import { connection } from "next/server";
@@ -51,10 +51,9 @@ export default async function StoryPage({
     ]);
 
     // Read prefetched data synchronously
-    const story = queryClient.getQueryData<StoryProps & StoryRatingProps>([
-        "read-story",
-        { isbn },
-    ]);
+    const story = queryClient.getQueryData<
+        StoryPermAuthorProps & StoryRatingProps
+    >(["read-story", { isbn }]);
 
     const comments = queryClient.getQueryData<CommentTreeProps[]>([
         "read-story-comments",
@@ -88,7 +87,11 @@ export default async function StoryPage({
             <MetaTags authorName={story?.author.name || ""} />
 
             <HydrationBoundary state={dehydrate(queryClient)}>
-                <StoryPageClient isbn={isbn} />
+                <StoryPageClient
+                    isbn={isbn}
+                    storyPrefetched={story}
+                    commentsPrefetched={comments}
+                />
             </HydrationBoundary>
         </>
     );

@@ -3,6 +3,7 @@
 import { db } from "@/drizzle";
 import { comment } from "@/drizzle/schemas/comment";
 import { reaction } from "@/drizzle/schemas/reaction";
+import { FlattenedCommentIdsType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
 import {
     commentInsertSchema,
@@ -10,7 +11,7 @@ import {
 } from "@/zod-schemas/comment";
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
 import { and, eq } from "drizzle-orm";
-import { cacheTag, revalidatePath } from "next/cache";
+import { cacheTag, revalidatePath, updateTag } from "next/cache";
 import z from "zod/v4";
 import {
     canCreateComment,
@@ -19,6 +20,7 @@ import {
     canUpdateComment,
 } from "../auth/policies";
 import { authActionClient } from "../safe-action";
+import { batchCalculateCommentPermissions } from "../utils/comment/calculate-comment-permissions";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
@@ -45,6 +47,7 @@ export const createCommentAction = authActionClient
             })
             .returning();
 
+        updateTag(`readStoryComments-${parsedInput.storyISBN}`);
         revalidatePath(`/story/${parsedInput.storyISBN}`);
 
         return newComment;
@@ -306,3 +309,19 @@ export const deleteCommentThreadAction = authActionClient
 
         return deletedComment;
     });
+
+export const getCommentsPermmissions = async ({
+    comments,
+    user,
+}: {
+    comments: FlattenedCommentIdsType[];
+    user: UserSelectType | undefined;
+}) => {
+    // Calculate permissions for ALL comments in one batch
+    const permissionsMap = await batchCalculateCommentPermissions(
+        user,
+        comments,
+    );
+
+    return permissionsMap;
+};

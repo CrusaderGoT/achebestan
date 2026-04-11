@@ -3,7 +3,7 @@
 import storybookStyles from "@/styles/story-book.module.css";
 import cx from "clsx";
 
-import { StoryBookProps } from "@/types/story";
+import { StoryAuthorProps } from "@/types/story";
 import {
     Box,
     Button,
@@ -23,7 +23,7 @@ export function StoryBook({
     author,
     isbn,
     blurb,
-}: StoryBookProps) {
+}: StoryAuthorProps) {
     const { ref, width } = useElementSize();
 
     return (

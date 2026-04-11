@@ -1,9 +1,9 @@
 import { BASE_URL } from "@/lib/constants";
-import { StoryBookProps } from "@/types/story";
+import { StoryAuthorProps } from "@/types/story";
 import { Graph } from "schema-dts";
 
 export async function homeJsonLdData(
-    stories: StoryBookProps[] | undefined,
+    stories: StoryAuthorProps[] | undefined,
 ): Promise<Graph> {
     const baseUrl = `${BASE_URL}`;
 

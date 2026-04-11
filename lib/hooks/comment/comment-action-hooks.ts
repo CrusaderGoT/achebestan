@@ -1,6 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { useAction } from "next-safe-action/hooks";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
     createCommentAction,
     deleteCommentAction,
@@ -9,10 +10,20 @@ import {
 } from "../../actions/comment";
 
 export const useCreateComment = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(createCommentAction, {
-        onSuccess() {
+        onSuccess(args) {
             notifications.show({
                 message: "Your Comment Has Been Added",
+            });
+
+            // Invalidate the comments query to refetch the updated comments from cache
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "read-story-comments",
+                    { isbn: args.data.storyISBN },
+                ],
             });
         },
         onError(args) {
@@ -24,17 +35,17 @@ export const useCreateComment = () => {
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         } else if (typeof errorMsg === "object") {
                             errorMsg._errors?.forEach((err) =>
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         }
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({
@@ -78,17 +89,17 @@ export const useUpdateComment = () => {
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         } else if (typeof errorMsg === "object") {
                             errorMsg._errors?.forEach((err) =>
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         }
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({
@@ -132,17 +143,17 @@ export const useDeleteComment = () => {
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         } else if (typeof errorMsg === "object") {
                             errorMsg._errors?.forEach((err) =>
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         }
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({
@@ -186,17 +197,17 @@ export const useDeleteCommentThread = () => {
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         } else if (typeof errorMsg === "object") {
                             errorMsg._errors?.forEach((err) =>
                                 notifications.show({
                                     message: `A Validation Error Occured -> ${err}`,
                                     color: "red",
-                                })
+                                }),
                             );
                         }
-                    }
+                    },
                 );
             } else if (args.error.serverError) {
                 notifications.show({

@@ -20,6 +20,10 @@ export const useDeleteStory = (authorId: string) => {
                 color: "green",
             });
 
+            queryClient.invalidateQueries({
+                queryKey: ["read-story", { isbn: deletedStory.isbn }],
+            });
+
             if (deletedStory.bookId && deletedStory.bookPart) {
                 // invalidate queries related to the book's stories and story book to reflect the deletion
                 queryClient.invalidateQueries({

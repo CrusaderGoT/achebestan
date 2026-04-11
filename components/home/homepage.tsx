@@ -5,12 +5,12 @@ import { Container, Grid, Stack } from "@mantine/core";
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
 import { useExitOnHomePage } from "@/lib/hooks/home/use-exit-on-home-page";
-import { StoryBookProps } from "@/types/story";
+import { StoryAuthorProps } from "@/types/story";
 
 export function HomePage({
     stories,
 }: {
-    stories: StoryBookProps[] | undefined;
+    stories: StoryAuthorProps[] | undefined;
 }) {
     // hook for app like exit on standalone
     useExitOnHomePage();

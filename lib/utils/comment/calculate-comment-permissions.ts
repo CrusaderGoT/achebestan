@@ -7,23 +7,20 @@ import {
     canDeleteOwnComment,
     canUpdateComment,
 } from "@/lib/auth/policies";
-import { CommentPartialType } from "@/types/comment";
+import {
+    CommentPartialType,
+    CommentPermissionsType,
+    FlattenedCommentIdsType,
+} from "@/types/comment";
 import { UserSelectType } from "@/types/user";
-
-export type CommentPermissions = {
-    canDeleteOwn: boolean;
-    canDeleteAll: boolean;
-    canUpdate: boolean;
-    canCreate: boolean;
-};
 
 /**
  * Calculate all permissions for a single comment
  */
 export async function calculateCommentPermissions(
     user: UserSelectType | null | undefined,
-    comment: { id: number; userId: string }
-): Promise<CommentPermissions> {
+    comment: { id: number; userId: string },
+): Promise<CommentPermissionsType> {
     if (!user?.id) {
         return {
             canDeleteOwn: false,
@@ -59,9 +56,9 @@ export async function calculateCommentPermissions(
  */
 export async function batchCalculateCommentPermissions(
     user: UserSelectType | null | undefined,
-    comments: Array<{ id: number; userId: string }>
-): Promise<Map<number, CommentPermissions>> {
-    const permissionsMap = new Map<number, CommentPermissions>();
+    comments: FlattenedCommentIdsType[],
+): Promise<Map<number, CommentPermissionsType>> {
+    const permissionsMap = new Map<number, CommentPermissionsType>();
 
     if (!user?.id) {
         comments.forEach((comment) => {
@@ -77,7 +74,7 @@ export async function batchCalculateCommentPermissions(
 
     // Calculate all permissions in parallel
     const permissionsPromises = comments.map((comment) =>
-        calculateCommentPermissions(user, comment)
+        calculateCommentPermissions(user, comment),
     );
 
     const permissionsResults = await Promise.all(permissionsPromises);

@@ -22,8 +22,17 @@ export const useUpdateStory = (isbn: string, authorId: string) => {
                 color: "green",
             });
 
+            // Invalidate the specific story query to refetch the updated story from cache
+            queryClient.invalidateQueries({
+                queryKey: ["read-story", { isbn: story.isbn }],
+            });
+
             // manually invalidate if book change
             if (story.bookId) {
+                queryClient.invalidateQueries({
+                    queryKey: ["book-stories", { bookId: story.bookId }],
+                });
+
                 queryClient.invalidateQueries({
                     queryKey: ["story-book", { bookId: story.bookId }],
                 });

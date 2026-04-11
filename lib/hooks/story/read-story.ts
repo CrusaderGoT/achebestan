@@ -13,7 +13,6 @@ export const useReadStory = ({ isbn }: { isbn: string }) => {
 
             return data;
         },
-        staleTime: Infinity,
-        gcTime: 1000 * 60 * 60 * 24,
+        staleTime: Infinity, // Data is considered fresh indefinitely, freshness is managed by updateTag in actions
     });
 };

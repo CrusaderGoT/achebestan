@@ -1,6 +1,6 @@
 "use client";
 
-import { StoryProps, StorySelectType, StoryUpdateType } from "@/types/story";
+import { StoryPermAuthorProps, StorySelectType, StoryUpdateType } from "@/types/story";
 import { storyUpdateSchema } from "@/zod-schemas/story";
 
 import {
@@ -53,7 +53,7 @@ export function Story({
     bookPart,
     blurb,
     permissions,
-}: StoryProps) {
+}: StoryPermAuthorProps) {
     const { sessionUser } = useCentralizedAuth();
 
     const [story, setStory] = useState<StorySelectType>({

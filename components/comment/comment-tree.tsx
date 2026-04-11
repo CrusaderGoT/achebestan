@@ -44,7 +44,10 @@ import { CommentNode } from "./comment-node";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useAutoExpandNewComments } from "@/lib/hooks/comment/auto-expand-comments";
+import { useGetCommentsPermissions } from "@/lib/hooks/comment/get-comments-permissions";
+import { flattenCommentsIds } from "@/lib/utils/comment/flatten-comments-ids";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
+import { UserSelectType } from "@/types/user";
 
 export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
     drawerLevel: 4,
@@ -77,6 +80,17 @@ function CommentTree({
         flattenComments(commentsNodeData, map);
         return map;
     }, [commentsNodeData]);
+
+    // Flatten all comments (including nested childComments) for permission calculation
+    const commentIdsMap = useMemo(() => {
+        return flattenCommentsIds(comments);
+    }, [comments?.length]);
+
+    const { data: commentsPermissionsMap } = useGetCommentsPermissions({
+        comments: commentIdsMap,
+        user: sessionUser.data?.user as UserSelectType,
+        isbn: comments[0].storyISBN,
+    });
 
     // Initialize drawer state
     const drawer = useDrawerState(commentsNodeData);
@@ -134,6 +148,7 @@ function CommentTree({
                 isInDrawer: false,
                 tree,
                 commentMap,
+                commentsPermissionsMap,
                 onOpenDrawer: drawer.handleOpenDrawer,
             };
 
@@ -166,6 +181,7 @@ function CommentTree({
                 tree: drawer.drawerTree,
                 commentMap: drawer.drawerCommentMap,
                 onOpenDrawer: drawer.handleOpenDrawer,
+                commentsPermissionsMap: commentsPermissionsMap,
             };
 
             return (

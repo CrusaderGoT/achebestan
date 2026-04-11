@@ -1,5 +1,5 @@
+import { getCommentsPermmissions } from "@/lib/actions/comment";
 import { authClient } from "@/lib/auth-client";
-import { CommentPermissions } from "@/lib/utils/comment/calculate-comment-permissions";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
@@ -17,10 +17,13 @@ export type CommentTreeProps = CommentSelectType & {
     rating?: RatingSelectType | null;
     user?: UserSelectType | null;
     reactions?: ReactionSelectType[] | null;
-    permissions?: CommentPermissions | undefined;
 };
 
 export type CommentsToTreeNodeDataType = (TreeNodeData & CommentTreeProps)[]; // Hook for drawer management
+
+export type CommentsPermmissionsMapType = Awaited<
+    ReturnType<typeof getCommentsPermmissions>
+>;
 
 export interface CommentDrawerState {
     drawerOpened: boolean;
@@ -50,6 +53,7 @@ export interface CommentRenderContext {
     isInDrawer: boolean;
     tree: ReturnType<typeof useTree>;
     commentMap: Map<string, CommentTreeProps>;
+    commentsPermissionsMap: CommentsPermmissionsMapType | undefined;
     onOpenDrawer: (comment: CommentTreeProps) => void;
 }
 
@@ -90,12 +94,7 @@ export type CommentActionsProps = {
     permissions?: CommentPermissionsType;
 };
 
-/**
- * Type for flattening - represents a comment with potential nested children
- */
-export type FlattenableComment = {
+export type FlattenedCommentIdsType = {
     id: number;
     userId: string;
-    childComments?: FlattenableComment[];
-    [key: string]: unknown; // Allow other properties
 };

@@ -48,6 +48,7 @@ export function CommentNode({
     } = interactions;
 
     const comment = commentMap.get(node.value);
+
     const { isPending: isPendingUpdateComment } = useUpdateComment();
 
     const showDrawerButton = CommentTreeUtils.shouldShowDrawerButton(
@@ -83,6 +84,10 @@ export function CommentNode({
                 .forEach((c) => tree.expand(c.id.toString()));
         }
     };
+
+    console.error(
+        JSON.stringify(context.commentsPermissionsMap?.get(comment?.id)),
+    );
 
     return (
         <Stack
@@ -144,7 +149,9 @@ export function CommentNode({
                                 storyISBN={comment.storyISBN}
                                 session={session}
                                 hasBeenDeleted={comment.hasBeenDeleted}
-                                permissions={comment.permissions}
+                                permissions={context.commentsPermissionsMap?.get(
+                                    comment.id,
+                                )}
                             />
                         )}
 

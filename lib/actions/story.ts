@@ -64,6 +64,11 @@ export const createStoryAction = authActionClient
         updateTag("readLatestStories");
         revalidatePath(`/`);
 
+        if (createdStory.bookId) {
+            // revalidate book stories list if this story belong to a book
+            updateTag(`getBookStories-${createdStory.bookId}`);
+        }
+
         // upload image using isbn as public id
         let imageUrl: string | undefined = undefined;
 
@@ -190,9 +195,12 @@ export const updateStoryAction = authActionClient
                 .where(eq(story.isbn, isbn))
                 .returning();
 
-            updateTag(`readStory-${updatedStory.isbn}`);
-            revalidatePath(`/story/${updatedStory.isbn}`);
+            if (updatedStory.bookId) {
+                // revalidate book stories list if this story belong to a book
+                updateTag(`getBookStories-${updatedStory.bookId}`);
+            }
 
+            updateTag(`readStory-${updatedStory.isbn}`);
             updateTag("readLatestStories");
             revalidatePath(`/`);
 
@@ -284,6 +292,7 @@ export const deleteStoryAction = authActionClient
                     title: story.title,
                     bookPart: story.bookPart,
                     bookId: story.bookId,
+                    isbn: story.isbn,
                 });
 
             if (!deletedStory?.title) {
@@ -294,6 +303,7 @@ export const deleteStoryAction = authActionClient
             // revalidate tags/paths once story is created
             updateTag("readLatestStories");
             revalidatePath(`/`);
+            updateTag(`readStory-${deletedStory.isbn}`);
 
             // shift all subsequent story chapters down by 1 if deleted story belong to a book
             if (deletedStory.bookId && deletedStory.bookPart) {
@@ -306,6 +316,9 @@ export const deleteStoryAction = authActionClient
                             gt(story.bookPart, deletedStory.bookPart),
                         ),
                     );
+
+                // revalidate book stories list if this story belong to a book
+                updateTag(`getBookStories-${deletedStory.bookId}`);
             }
 
             return deletedStory;

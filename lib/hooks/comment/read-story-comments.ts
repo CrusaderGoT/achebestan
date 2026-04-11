@@ -12,7 +12,6 @@ export function useReadStoryComments({ isbn }: { isbn: string }) {
             }
             return data;
         },
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        gcTime: 1000 * 60 * 60, // 1 hour before hard reset
+        staleTime: Infinity, // Data is considered fresh indefinitely
     });
 }

@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/lib/constants";
-import { StoryProps } from "@/types/story";
+import { StoryPermAuthorProps } from "@/types/story";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import dayjs from "dayjs";
 import { Metadata } from "next";
@@ -10,7 +10,7 @@ import {
 } from "./story-utils";
 
 export async function generateStoryMetadata(
-    story: (StoryProps & { ratings: RatingSelectType[] }) | undefined
+    story: (StoryPermAuthorProps & { ratings: RatingSelectType[] }) | undefined
 ): Promise<Metadata> {
     if (!story) {
         return {

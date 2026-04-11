@@ -1,9 +1,9 @@
 import { BASE_URL } from "@/lib/constants";
-import { StoryBookProps } from "@/types/story";
+import { StoryAuthorProps } from "@/types/story";
 import { Metadata } from "next";
 
 export function generateHomeMetadata(
-    stories: StoryBookProps[] | undefined,
+    stories: StoryAuthorProps[] | undefined,
 ): Metadata {
     const dynamicDescription = generateDynamicDescription(stories);
     const storyThemes = extractStoryThemes(stories);
@@ -205,7 +205,7 @@ export function generateHomeMetadata(
 
 // Helper function to generate dynamic description based on latest stories
 export function generateDynamicDescription(
-    stories: StoryBookProps[] | undefined,
+    stories: StoryAuthorProps[] | undefined,
 ): string {
     const baseDescription =
         "Welcome to Achebestan's Mind Palace - A world of intriguing, dark poetry and stories. Explore adventure tales and world-building from the imagination of Nigerian author Achebestan.";
@@ -226,7 +226,7 @@ export function generateDynamicDescription(
 
 // Helper function to extract story themes for keywords
 export function extractStoryThemes(
-    stories: StoryBookProps[] | undefined,
+    stories: StoryAuthorProps[] | undefined,
 ): string[] {
     const baseThemes = [
         "dark fiction",

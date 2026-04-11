@@ -5,6 +5,8 @@ import { useReadStoryComments } from "@/lib/hooks/comment/read-story-comments";
 import { useUserRating } from "@/lib/hooks/rating/user-rating";
 import { useReadStory } from "@/lib/hooks/story/read-story";
 import { useStoryPermissions } from "@/lib/hooks/story/story-permissions";
+import { CommentTreeProps } from "@/types/comment";
+import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { Stack } from "@mantine/core";
 import { notFound } from "next/navigation";
@@ -16,16 +18,24 @@ import { StoryRating } from "./story-rating";
 
 export type StoryPageClientProps = {
     isbn: string;
+    storyPrefetched?: StoryPermAuthorProps & StoryRatingProps;
+    commentsPrefetched?: CommentTreeProps[];
 };
 
-export function StoryPageClient({ isbn }: StoryPageClientProps) {
+export function StoryPageClient({
+    isbn,
+    storyPrefetched,
+    commentsPrefetched,
+}: StoryPageClientProps) {
     const {
         sessionUser: { data: session },
     } = useCentralizedAuth();
 
-    const { data: story } = useReadStory({ isbn });
+    const { data: story = storyPrefetched } = useReadStory({ isbn });
 
-    const { data: comments } = useReadStoryComments({ isbn });
+    const { data: comments = commentsPrefetched ?? [] } = useReadStoryComments({
+        isbn,
+    });
 
     const { data: userRating } = useUserRating({
         isbn,

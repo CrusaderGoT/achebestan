@@ -1,6 +1,6 @@
 import { BASE_URL } from "@/lib/constants";
 import { CommentTreeProps } from "@/types/comment";
-import { StoryProps, StoryRatingProps } from "@/types/story";
+import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import dayjs from "dayjs";
 import { Graph } from "schema-dts";
 import {
@@ -12,7 +12,7 @@ import {
 } from "./story-utils";
 
 export function storyJsonLdData(
-    story: StoryProps & StoryRatingProps,
+    story: StoryPermAuthorProps & StoryRatingProps,
     comments: CommentTreeProps[],
 ) {
     if (!story) return null;

@@ -15,7 +15,7 @@ import postgres from "postgres";
 
 const connectionString =
     process.env.NODE_ENV === "production"
-        ? process.env.LOCAL_DATABASE_URL // Use Neon in production
+        ? process.env.NEON_DATABASE_URL // Use Neon in production
         : process.env.LOCAL_DATABASE_URL; // Your local connection
 
 if (!connectionString) {

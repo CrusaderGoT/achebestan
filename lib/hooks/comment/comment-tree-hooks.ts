@@ -1,10 +1,12 @@
-import { flattenComments } from "@/lib/utils/comment/comments-tree-utils";
-import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 import {
+    CommentTreeUtils,
+    flattenComments,
+} from "@/lib/utils/comment/comments-tree-utils";
+import {
+    CommentDrawerState,
     CommentInteractionHandlers,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
-    CommentDrawerState,
 } from "@/types/comment";
 import { useTree } from "@mantine/core";
 import { useFocusTrap, useStateHistory } from "@mantine/hooks";
@@ -18,13 +20,13 @@ export function useCommentInteractions(): CommentInteractionHandlers {
 
     const handleReplyToggle = useCallback((commentId: number) => {
         setActiveReplyId((current) =>
-            current === commentId ? null : commentId
+            current === commentId ? null : commentId,
         );
     }, []);
 
     const handleEditToggle = useCallback((commentId: number) => {
         setActiveEditId((current) =>
-            current === commentId ? null : commentId
+            current === commentId ? null : commentId,
         );
     }, []);
 
@@ -43,7 +45,7 @@ export function useCommentInteractions(): CommentInteractionHandlers {
 }
 
 export function useDrawerState(
-    commentsNodeData: CommentsToTreeNodeDataType
+    commentsNodeData: CommentsToTreeNodeDataType,
 ): CommentDrawerState {
     const [drawerOpened, setDrawerOpened] = useState(false);
 
@@ -67,12 +69,12 @@ export function useDrawerState(
         try {
             const commentWithChildren = CommentTreeUtils.getCommentWithChildren(
                 activeDrawerCommentId,
-                commentsNodeData
+                commentsNodeData,
             );
 
             if (!commentWithChildren || commentWithChildren.length === 0) {
                 console.warn(
-                    `Comment with ID ${activeDrawerCommentId} not found`
+                    `Comment with ID ${activeDrawerCommentId} not found`,
                 );
                 return {
                     drawerCommentData: [],
@@ -89,7 +91,7 @@ export function useDrawerState(
 
             // IMPROVEMENT: Better title formatting with truncation and escaping
             const getDrawerTitle = (
-                comment: CommentTreeProps | undefined
+                comment: CommentTreeProps | undefined,
             ): string => {
                 if (!comment) return "Comment Thread";
 
@@ -147,7 +149,7 @@ export function useDrawerState(
                     });
             }
         },
-        [drawerTree, activeDrawerHandlers]
+        [drawerTree, activeDrawerHandlers],
     );
 
     const closeDrawer = useCallback(() => {
