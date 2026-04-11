@@ -32,6 +32,6 @@ export function useGetCommentsPermissions({
         },
         staleTime: 1000 * 60 * 60 * 30,
         refetchInterval: 1000 * 60 * 60 * 15,
-        enabled: comments.length > 0,
+        enabled: comments.length > 0 && !!user,
     });
 }

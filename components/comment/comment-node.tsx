@@ -85,10 +85,6 @@ export function CommentNode({
         }
     };
 
-    console.error(
-        JSON.stringify(context.commentsPermissionsMap?.get(comment?.id)),
-    );
-
     return (
         <Stack
             gap={2}
