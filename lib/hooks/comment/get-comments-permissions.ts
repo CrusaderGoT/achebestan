@@ -13,7 +13,10 @@ export function useGetCommentsPermissions({
     user: UserSelectType | undefined;
 }) {
     return useQuery({
-        queryKey: ["comments-permissions", { isbn, userId: user?.id }],
+        queryKey: [
+            "comments-permissions",
+            { isbn, userId: user?.id, comments },
+        ],
         queryFn: async () => {
             if (comments.length < 1) {
                 throw new Error(

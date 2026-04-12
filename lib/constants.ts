@@ -1,4 +1,4 @@
-export const BASE_URL = "https://achebestan.vercel.app/";
+export const BASE_URL = "https://achebestan.vercel.app";
 
 export const ORG_ROLES = {
     writer: "writer",

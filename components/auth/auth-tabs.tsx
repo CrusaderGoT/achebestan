@@ -8,7 +8,9 @@ import { LoginFormState } from "@/types/user";
 import {
     Center,
     Divider,
+    Group,
     Loader,
+    Mark,
     ScrollArea,
     Stack,
     Tabs,
@@ -21,6 +23,8 @@ import { SignupForm } from "../forms/user/signup-form";
 import { SuperAdminForm } from "../forms/user/super-admin-form";
 import { ListOrganizations } from "../organization/list-organizations";
 import { MembersTable } from "../organization/manage-members";
+import { LogoutButton } from "./logout-btn";
+import publicStyles from "@/styles/public.module.css"
 
 type AuthTabsProps = {
     closeDrawer?: () => void;
@@ -177,12 +181,20 @@ export function AuthTabs({
                 )}
 
                 <Tabs.Panel value={AUTH_TABS.default} pt="sm">
-                    <Text fw={700} ta="center">
-                        This is the Authentication Drawer. Select a Tab to
-                        start.{" "}
-                        {sessionUser.data?.user.name &&
-                            `Current User: ${sessionUser.data.user.id}`}
-                    </Text>
+                    <Stack>
+                        <Text fw={700} ta="center">
+                            This is the Authentication Drawer. Select a Tab to
+                            start.
+                        </Text>
+                        {sessionUser.data?.user && (
+                            <Group justify="space-around">
+                                <Mark className={publicStyles.highlight}>
+                                    current user: {sessionUser.data.user.name}
+                                </Mark>
+                                <LogoutButton session={sessionUser} />
+                            </Group>
+                        )}
+                    </Stack>
                 </Tabs.Panel>
             </ScrollArea>
         </Tabs>
