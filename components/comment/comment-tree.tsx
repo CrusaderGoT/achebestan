@@ -84,7 +84,7 @@ function CommentTree({
     // Flatten all comments (including nested childComments) for permission calculation
     const commentIdsMap = useMemo(() => {
         return flattenCommentsIds(comments);
-    }, [comments?.length]);
+    }, [commentMap.keys()]);
 
     const { data: commentsPermissionsMap } = useGetCommentsPermissions({
         comments: commentIdsMap,

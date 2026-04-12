@@ -11,7 +11,7 @@ import {
 } from "@/zod-schemas/comment";
 import { reactionInsertSchema } from "@/zod-schemas/reaction";
 import { and, eq } from "drizzle-orm";
-import { cacheTag, revalidatePath, updateTag } from "next/cache";
+import { cacheTag, updateTag } from "next/cache";
 import z from "zod/v4";
 import {
     canCreateComment,
@@ -48,7 +48,6 @@ export const createCommentAction = authActionClient
             .returning();
 
         updateTag(`readStoryComments-${parsedInput.storyISBN}`);
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
 
         return newComment;
     });
@@ -87,7 +86,7 @@ export const updateCommentAction = authActionClient
             )
             .returning();
 
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
+        updateTag(`readStoryComments-${parsedInput.storyISBN}`);
 
         return updatedComment;
     });
@@ -122,9 +121,9 @@ export const deleteCommentAction = authActionClient
                     eq(comment.userId, parsedInput.userId),
                 ),
             )
-            .returning({ text: comment.text });
+            .returning({ text: comment.text, storyISBN: comment.storyISBN });
 
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
+        updateTag(`readStoryComments-${deletedComment.storyISBN}`);
 
         return deletedComment;
     });
@@ -303,9 +302,9 @@ export const deleteCommentThreadAction = authActionClient
                     eq(comment.userId, parsedInput.userId),
                 ),
             )
-            .returning({ text: comment.text });
+            .returning({ text: comment.text, storyISBN: comment.storyISBN });
 
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
+        updateTag(`readStoryComments-${deletedComment.storyISBN}`);
 
         return deletedComment;
     });

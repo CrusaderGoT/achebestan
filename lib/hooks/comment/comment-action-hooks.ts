@@ -25,6 +25,14 @@ export const useCreateComment = () => {
                     { isbn: args.data.storyISBN },
                 ],
             });
+
+            // invalidate comment permission
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "comments-permissions",
+                    { isbn: args.data.storyISBN },
+                ],
+            });
         },
         onError(args) {
             if (args.error.validationErrors) {
@@ -127,11 +135,21 @@ export const useUpdateComment = () => {
 };
 
 export const useDeleteComment = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(deleteCommentAction, {
-        onSuccess() {
+        onSuccess(args) {
             notifications.show({
                 message: "Comment Has Been Deleted",
                 color: "green",
+            });
+
+            // Invalidate the comments query to refetch the updated comments from cache
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "read-story-comments",
+                    { isbn: args.data.storyISBN },
+                ],
             });
         },
         onError(args) {
@@ -181,11 +199,21 @@ export const useDeleteComment = () => {
 };
 
 export const useDeleteCommentThread = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(deleteCommentThreadAction, {
-        onSuccess() {
+        onSuccess(args) {
             notifications.show({
                 message: "Comment Thread Has Been Deleted",
                 color: "green",
+            });
+
+            // Invalidate the comments query to refetch the updated comments from cache
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "read-story-comments",
+                    { isbn: args.data.storyISBN },
+                ],
             });
         },
         onError(args) {
