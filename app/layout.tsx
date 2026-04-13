@@ -26,7 +26,7 @@ import { NavigationProgress } from "@mantine/nprogress";
 
 import { BASE_URL } from "@/lib/constants";
 
-import { QueryProvider } from "@/components/ui/query-provider";
+import { QueryProvider } from "@/lib/contexts/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 
