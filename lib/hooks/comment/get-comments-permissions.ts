@@ -48,7 +48,10 @@ export function useSingleCommentsPermissions({
     user: UserSelectType | undefined;
 }) {
     return useQuery({
-        queryKey: ["single-comment-permissions", { isbn, userId: user?.id }],
+        queryKey: [
+            "single-comment-permissions",
+            { isbn, userId: user?.id, commentId: comment?.id },
+        ],
         queryFn: async () => {
             if (!comment) {
                 throw new Error(
