@@ -1,4 +1,4 @@
-import { getCommentsPermmissions } from "@/lib/actions/comment";
+import { getBulkCommentsPermmissions } from "@/lib/actions/comment";
 import { authClient } from "@/lib/auth-client";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
@@ -22,7 +22,7 @@ export type CommentTreeProps = CommentSelectType & {
 export type CommentsToTreeNodeDataType = (TreeNodeData & CommentTreeProps)[]; // Hook for drawer management
 
 export type CommentsPermmissionsMapType = Awaited<
-    ReturnType<typeof getCommentsPermmissions>
+    ReturnType<typeof getBulkCommentsPermmissions>
 >;
 
 export interface CommentDrawerState {
@@ -53,8 +53,9 @@ export interface CommentRenderContext {
     isInDrawer: boolean;
     tree: ReturnType<typeof useTree>;
     commentMap: Map<string, CommentTreeProps>;
-    commentsPermissionsMap: CommentsPermmissionsMapType | undefined;
+    commentsPermissionsMap: CommentsPermmissionsMapType;
     onOpenDrawer: (comment: CommentTreeProps) => void;
+    storyAuthorId: string | undefined;
 }
 
 export interface CommentInteractionHandlers {
@@ -97,4 +98,11 @@ export type CommentActionsProps = {
 export type FlattenedCommentIdsType = {
     id: number;
     userId: string;
+};
+
+export const noCommentPermissions = {
+    canDeleteOwn: false,
+    canDeleteAll: false,
+    canUpdate: false,
+    canCreate: false,
 };

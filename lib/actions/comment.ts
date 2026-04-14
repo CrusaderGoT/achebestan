@@ -20,7 +20,10 @@ import {
     canUpdateComment,
 } from "../auth/policies";
 import { authActionClient } from "../safe-action";
-import { batchCalculateCommentPermissions } from "../utils/comment/calculate-comment-permissions";
+import {
+    batchCalculateCommentPermissions,
+    calculateCommentPermissions,
+} from "../utils/comment/calculate-comment-permissions";
 
 export const createCommentAction = authActionClient
     .inputSchema(commentInsertSchema)
@@ -309,18 +312,41 @@ export const deleteCommentThreadAction = authActionClient
         return deletedComment;
     });
 
-export const getCommentsPermmissions = async ({
+export const getBulkCommentsPermmissions = async ({
     comments,
     user,
 }: {
     comments: FlattenedCommentIdsType[];
     user: UserSelectType | undefined;
 }) => {
-    // Calculate permissions for ALL comments in one batch
-    const permissionsMap = await batchCalculateCommentPermissions(
-        user,
-        comments,
-    );
+    try {
+        // Calculate permissions for ALL comments in one batch
+        const permissionsMap = await batchCalculateCommentPermissions(
+            user,
+            comments,
+        );
 
-    return permissionsMap;
+        return permissionsMap;
+    } catch (e) {
+        console.error("Failed to get bulk comments permmissions", e);
+        throw new Error("Failed to get bulk comments permmissions.");
+    }
+};
+
+export const getSingleCommentsPermmissions = async ({
+    comment,
+    user,
+}: {
+    comment: FlattenedCommentIdsType;
+    user: UserSelectType | undefined;
+}) => {
+    try {
+        // Calculate permissions for ALL comments in one batch
+        const permissions = await calculateCommentPermissions(user, comment);
+
+        return permissions;
+    } catch (e) {
+        console.error("Failed to get single comments permmissions", e);
+        throw new Error("Failed to get single comments permmissions.");
+    }
 };

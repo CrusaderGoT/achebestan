@@ -6,9 +6,10 @@ import {
     CommentInteractionHandlers,
     CommentNodeProps,
     CommentRenderContext,
+    FlattenedCommentIdsType,
 } from "@/types/comment";
 import { Box, Collapse, Stack } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -17,7 +18,10 @@ import { LikeDislikeButton } from "./like-dislike-btns";
 
 import { CommentTreeUtils } from "@/lib/utils/comment/comments-tree-utils";
 
+import { useSingleCommentsPermissions } from "@/lib/hooks/comment/get-comments-permissions";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
+import { UserSelectType } from "@/types/user";
+import { CommentSelectType } from "@/zod-schemas/comment";
 import cx from "clsx";
 import { DRAWER_CONFIG } from "./comment-tree";
 
@@ -27,16 +31,21 @@ export function CommentNode({
     context,
     interactions,
     session,
-    storyAuthorId,
 }: {
     nodeProps: CommentNodeProps;
     context: CommentRenderContext;
     interactions: CommentInteractionHandlers;
     session: ReturnType<typeof authClient.useSession>["data"];
-    storyAuthorId?: string;
 }) {
     const { node, expanded, hasChildren, elementProps, level } = nodeProps;
-    const { isInDrawer, tree, commentMap, onOpenDrawer } = context;
+    const {
+        isInDrawer,
+        tree,
+        commentMap,
+        onOpenDrawer,
+        storyAuthorId,
+        commentsPermissionsMap,
+    } = context;
     const {
         activeReplyId,
         activeEditId,
@@ -84,6 +93,29 @@ export function CommentNode({
                 .forEach((c) => tree.expand(c.id.toString()));
         }
     };
+
+    const [newComment, setNewComment] =
+        useState<FlattenedCommentIdsType | null>(null);
+
+    const { data: newCommentPermissions } = useSingleCommentsPermissions({
+        comment: newComment,
+        user: session?.user as UserSelectType | undefined,
+        isbn: comment.storyISBN,
+    });
+
+    const onNewComment = async (newComment: CommentSelectType) => {
+        setNewComment(newComment);
+        tree.expand(newComment.id.toString());
+    };
+
+    useEffect(() => {
+        if (!newCommentPermissions) return;
+
+        commentsPermissionsMap.set(
+            newCommentPermissions.id,
+            newCommentPermissions.data,
+        );
+    }, [newCommentPermissions]);
 
     return (
         <Stack
@@ -145,7 +177,7 @@ export function CommentNode({
                                 storyISBN={comment.storyISBN}
                                 session={session}
                                 hasBeenDeleted={comment.hasBeenDeleted}
-                                permissions={context.commentsPermissionsMap?.get(
+                                permissions={commentsPermissionsMap.get(
                                     comment.id,
                                 )}
                             />
@@ -161,7 +193,7 @@ export function CommentNode({
                                         comment.user?.name || ""
                                     }`}
                                     closeCommentForm={handleCloseReply}
-                                    onNewCommentAdded={tree.expand}
+                                    onNewCommentAdded={onNewComment}
                                 />
                             </Box>
                         )}

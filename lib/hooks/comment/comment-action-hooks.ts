@@ -29,7 +29,7 @@ export const useCreateComment = () => {
             // invalidate comment permission
             queryClient.invalidateQueries({
                 queryKey: [
-                    "comments-permissions",
+                    "bulk-comments-permissions",
                     { isbn: args.data.storyISBN },
                 ],
             });

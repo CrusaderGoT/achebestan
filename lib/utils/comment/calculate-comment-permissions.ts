@@ -19,7 +19,7 @@ import { UserSelectType } from "@/types/user";
  */
 export async function calculateCommentPermissions(
     user: UserSelectType | null | undefined,
-    comment: { id: number; userId: string },
+    comment: FlattenedCommentIdsType,
 ): Promise<CommentPermissionsType> {
     if (!user?.id) {
         return {

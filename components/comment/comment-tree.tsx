@@ -27,6 +27,7 @@ import {
     CommentRenderContext,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
+    noCommentPermissions,
 } from "@/types/comment";
 
 import {
@@ -44,7 +45,7 @@ import { CommentNode } from "./comment-node";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useAutoExpandNewComments } from "@/lib/hooks/comment/auto-expand-comments";
-import { useGetCommentsPermissions } from "@/lib/hooks/comment/get-comments-permissions";
+import { useBulkCommentsPermissions } from "@/lib/hooks/comment/get-comments-permissions";
 import { flattenCommentsIds } from "@/lib/utils/comment/flatten-comments-ids";
 import commentTreeStyles from "@/styles/comment-tree.module.css";
 import { UserSelectType } from "@/types/user";
@@ -86,11 +87,16 @@ function CommentTree({
         return flattenCommentsIds(comments);
     }, [commentMap.keys()]);
 
-    const { data: commentsPermissionsMap } = useGetCommentsPermissions({
-        comments: commentIdsMap,
-        user: sessionUser.data?.user as UserSelectType,
-        isbn: comments[0].storyISBN,
-    });
+    const initialDataForCommentsPermissions = new Map([
+        [0, noCommentPermissions],
+    ]);
+
+    const { data: commentsPermissionsMap = initialDataForCommentsPermissions } =
+        useBulkCommentsPermissions({
+            comments: commentIdsMap,
+            user: sessionUser.data?.user as UserSelectType,
+            isbn: comments[0].storyISBN,
+        });
 
     // Initialize drawer state
     const drawer = useDrawerState(commentsNodeData);
@@ -150,6 +156,7 @@ function CommentTree({
                 commentMap,
                 commentsPermissionsMap,
                 onOpenDrawer: drawer.handleOpenDrawer,
+                storyAuthorId: storyAuthorId,
             };
 
             return (
@@ -158,7 +165,6 @@ function CommentTree({
                     context={context}
                     interactions={interactions}
                     session={sessionUser.data}
-                    storyAuthorId={storyAuthorId}
                 />
             );
         },
@@ -166,9 +172,11 @@ function CommentTree({
             mounted,
             tree,
             commentMap,
+            commentsPermissionsMap,
             drawer.handleOpenDrawer,
             interactions,
             sessionUser.data,
+            storyAuthorId,
         ],
     );
 
@@ -182,6 +190,7 @@ function CommentTree({
                 commentMap: drawer.drawerCommentMap,
                 onOpenDrawer: drawer.handleOpenDrawer,
                 commentsPermissionsMap: commentsPermissionsMap,
+                storyAuthorId: storyAuthorId,
             };
 
             return (
@@ -197,9 +206,11 @@ function CommentTree({
             mounted,
             drawer.drawerTree,
             drawer.drawerCommentMap,
+            commentsPermissionsMap,
             drawer.handleOpenDrawer,
             interactions,
             sessionUser.data,
+            storyAuthorId,
         ],
     );
 

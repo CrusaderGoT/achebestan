@@ -6,14 +6,18 @@ import {
     useCreateCommentForm,
 } from "@/components/forms/comment/create-comment-form-context";
 import { useCreateComment } from "@/lib/hooks/comment/comment-action-hooks";
-import { commentInsertSchema, CommentInsertType } from "@/zod-schemas/comment";
+import {
+    commentInsertSchema,
+    CommentInsertType,
+    CommentSelectType,
+} from "@/zod-schemas/comment";
 import { Button, Stack, TextareaProps } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
 type CommentFormProps = CommentInsertType &
     TextareaProps & {
         closeCommentForm?: () => void;
-        onNewCommentAdded?: (newCommentId: string) => void;
+        onNewCommentAdded?: (newComment: CommentSelectType) => Promise<void>;
     };
 
 export function CreateCommentForm({
@@ -48,7 +52,7 @@ export function CreateCommentForm({
             }
 
             if (onNewCommentAdded) {
-                onNewCommentAdded(`${newComment.id}`);
+                await onNewCommentAdded(newComment);
             }
         }
     }

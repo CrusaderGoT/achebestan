@@ -1,9 +1,12 @@
-import { getCommentsPermmissions } from "@/lib/actions/comment";
+import {
+    getBulkCommentsPermmissions,
+    getSingleCommentsPermmissions,
+} from "@/lib/actions/comment";
 import { FlattenedCommentIdsType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 
-export function useGetCommentsPermissions({
+export function useBulkCommentsPermissions({
     comments,
     isbn,
     user,
@@ -13,10 +16,7 @@ export function useGetCommentsPermissions({
     user: UserSelectType | undefined;
 }) {
     return useQuery({
-        queryKey: [
-            "comments-permissions",
-            { isbn, userId: user?.id, comments },
-        ],
+        queryKey: ["bulk-comments-permissions", { isbn, userId: user?.id }],
         queryFn: async () => {
             if (comments.length < 1) {
                 throw new Error(
@@ -24,7 +24,7 @@ export function useGetCommentsPermissions({
                 );
             }
 
-            const data = await getCommentsPermmissions({ comments, user });
+            const data = await getBulkCommentsPermmissions({ comments, user });
 
             if (!data) {
                 throw new Error(
@@ -33,8 +33,40 @@ export function useGetCommentsPermissions({
             }
             return data;
         },
-        staleTime: 1000 * 60 * 60 * 30,
-        refetchInterval: 1000 * 60 * 60 * 15,
+        refetchInterval: 1000 * 60 * 60 * 5,
         enabled: comments.length > 0 && !!user,
+    });
+}
+
+export function useSingleCommentsPermissions({
+    comment,
+    isbn,
+    user,
+}: {
+    comment: FlattenedCommentIdsType | null;
+    isbn: string;
+    user: UserSelectType | undefined;
+}) {
+    return useQuery({
+        queryKey: ["single-comment-permissions", { isbn, userId: user?.id }],
+        queryFn: async () => {
+            if (!comment) {
+                throw new Error(
+                    "Comments to check permissions cannot be empty",
+                );
+            }
+
+            const data = await getSingleCommentsPermmissions({ comment, user });
+
+            if (!data) {
+                throw new Error(
+                    "Failed to get permission for this batch of comments",
+                );
+            }
+
+            return { id: comment.id, data };
+        },
+        refetchInterval: 1000 * 60 * 60 * 5,
+        enabled: !!comment && !!user,
     });
 }
