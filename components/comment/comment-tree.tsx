@@ -90,18 +90,19 @@ function CommentTree({
     // Flatten all comments (including nested childComments) for permission calculation
     const commentIdsMap = useMemo(() => {
         return flattenCommentsIds(comments);
-    }, [commentMap.keys()]);
+    }, [comments]);
 
     const initialDataForCommentsPermissions = new Map([
         [0, noCommentPermissions],
     ]); // default init data, so map is never undefined
 
-    const { data: commentsPermissionsMap = initialDataForCommentsPermissions } =
-        useBulkCommentsPermissions({
-            comments: commentIdsMap,
-            user: sessionUser.data?.user as UserSelectType | undefined,
-            isbn: storyISBN,
-        });
+    const {
+        data: initCommentsPermissionsMap = initialDataForCommentsPermissions,
+    } = useBulkCommentsPermissions({
+        comments: commentIdsMap,
+        user: sessionUser.data?.user as UserSelectType | undefined,
+        isbn: storyISBN,
+    });
 
     // Initialize main tree
     const initialCommentsToExpand = useMemo<string[]>(() => {
@@ -156,17 +157,28 @@ function CommentTree({
             setNewComment(newComment);
             tree.expand(newComment.id.toString());
         },
-        [sessionUser.data?.user, newComment],
+        [sessionUser.data?.user],
     );
+
+    const [extraPermissionsMap, setExtraPermissionsMap] = useState<
+        typeof initCommentsPermissionsMap
+    >(new Map());
 
     useEffect(() => {
         if (!newCommentPermissions) return;
-
-        commentsPermissionsMap.set(
-            newCommentPermissions.id,
-            newCommentPermissions.data,
+        setExtraPermissionsMap(
+            (prev) =>
+                new Map([
+                    ...prev,
+                    [newCommentPermissions.id, newCommentPermissions.data],
+                ]),
         );
     }, [newCommentPermissions]);
+
+    const mergedPermissionsMap = useMemo(
+        () => new Map([...initCommentsPermissionsMap, ...extraPermissionsMap]),
+        [initCommentsPermissionsMap, extraPermissionsMap],
+    );
 
     const drawer = useDrawerState(commentsNodeData);
 
@@ -179,7 +191,7 @@ function CommentTree({
                 isInDrawer: false,
                 tree,
                 commentMap,
-                commentsPermissionsMap,
+                commentsPermissionsMap: mergedPermissionsMap,
                 onOpenDrawer: drawer.handleOpenDrawer,
                 storyAuthorId: storyAuthorId,
             };
@@ -200,7 +212,7 @@ function CommentTree({
             mounted,
             tree,
             commentMap,
-            commentsPermissionsMap,
+            mergedPermissionsMap,
             drawer.handleOpenDrawer,
             interactions,
             sessionUser.data,
@@ -234,7 +246,7 @@ function CommentTree({
             <CommentDrawer
                 drawer={drawer}
                 interactions={interactions}
-                commentsPermissionsMap={commentsPermissionsMap}
+                commentsPermissionsMap={mergedPermissionsMap}
                 sessionUser={
                     sessionUser.data?.user as UserSelectType | undefined
                 }

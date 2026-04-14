@@ -25,14 +25,6 @@ export const useCreateComment = () => {
                     { isbn: args.data.storyISBN },
                 ],
             });
-
-            // invalidate comment permission
-            queryClient.invalidateQueries({
-                queryKey: [
-                    "bulk-comments-permissions",
-                    { isbn: args.data.storyISBN },
-                ],
-            });
         },
         onError(args) {
             if (args.error.validationErrors) {
