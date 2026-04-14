@@ -9,6 +9,7 @@ import { CommentTreeProps } from "@/types/comment";
 import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { Stack } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { notFound } from "next/navigation";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
@@ -42,13 +43,15 @@ export function StoryPageClient({
         userId: session?.user.id,
     });
 
-    if (!story) notFound();
+    const commentBoxDisclosure = useDisclosure(false);
 
     const { data: permissions } = useStoryPermissions({
-        user: session?.user as UserSelectType,
-        storyId: story.id,
-        authorId: story.authorId,
+        user: session?.user as UserSelectType | undefined,
+        storyId: story?.id,
+        authorId: story?.authorId,
     });
+
+    if (!story) notFound();
 
     return (
         <Stack>
@@ -82,11 +85,18 @@ export function StoryPageClient({
                 />
             )}
 
-            <StoryActions permissions={permissions} {...story} />
+            <StoryActions
+                permissions={permissions}
+                commentBoxDisclosure={commentBoxDisclosure}
+                {...story}
+            />
 
             <CommentSection
                 comments={comments}
                 storyAuthorId={story.authorId}
+                storyISBN={story.isbn}
+                commentBoxDisclosure={commentBoxDisclosure}
+                canComment={permissions?.canComment}
             />
         </Stack>
     );

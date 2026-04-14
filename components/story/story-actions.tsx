@@ -1,14 +1,6 @@
 "use client";
 
-import {
-    ActionIcon,
-    Box,
-    Divider,
-    Group,
-    Stack,
-    Text,
-    Transition,
-} from "@mantine/core";
+import { ActionIcon, Box, Group, Stack, Text, Transition } from "@mantine/core";
 
 import {
     IconCurrencyDollar,
@@ -18,7 +10,13 @@ import {
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
-import { useDisclosure, useIsomorphicEffect, useMounted } from "@mantine/hooks";
+import { CommentSelectType } from "@/zod-schemas/comment";
+import {
+    useDisclosure,
+    UseDisclosureReturnValue,
+    useIsomorphicEffect,
+    useMounted,
+} from "@mantine/hooks";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
@@ -29,7 +27,10 @@ import { ShareStoryDrawer } from "./buttons/share-story-drawer";
 export function StoryActions({
     permissions,
     ...props
-}: PickedStoryProps & { permissions?: StoryPermissionsType }) {
+}: PickedStoryProps & {
+    permissions?: StoryPermissionsType;
+    commentBoxDisclosure: UseDisclosureReturnValue;
+}) {
     const { sessionUser } = useCentralizedAuth();
 
     const [openedStoryShare, { open: openStoryShare, close: closeStoryShare }] =
@@ -38,14 +39,9 @@ export function StoryActions({
     const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
         useDisclosure(false);
 
-    const [
-        openedCommentForm,
-        { toggle: toggleCommentForm, open: openCommentForm },
-    ] = useDisclosure(false);
-
     useIsomorphicEffect(() => {
         if (!!sessionUser.data?.user && permissions?.canComment) {
-            openCommentForm();
+            props.commentBoxDisclosure[1].open();
         }
     }, [sessionUser.data?.user, permissions?.canComment]);
 
@@ -56,6 +52,8 @@ export function StoryActions({
     return (
         <>
             <Stack>
+                <PushNotificationToggle userExists={!!sessionUser.data?.user} />
+
                 <Group justify="space-between" grow>
                     {!sessionUser.isPending && (
                         <FavouriteStory
@@ -71,7 +69,7 @@ export function StoryActions({
                                 if (!sessionUser.data?.user.id) {
                                     openAuthModal();
                                 } else {
-                                    toggleCommentForm();
+                                    props.commentBoxDisclosure[1].toggle();
                                 }
                             }}
                             color="gray"
@@ -79,10 +77,12 @@ export function StoryActions({
                         >
                             <Group gap={"xs"} wrap="nowrap">
                                 <Text visibleFrom="sm" fw={500}>
-                                    {openedCommentForm ? "Close" : "Comment"}
+                                    {props.commentBoxDisclosure[0]
+                                        ? "Close"
+                                        : "Comment"}
                                 </Text>
 
-                                {openedCommentForm ? (
+                                {props.commentBoxDisclosure[0] ? (
                                     <IconMessage2Off />
                                 ) : (
                                     <IconMessage2 />
@@ -104,34 +104,47 @@ export function StoryActions({
                         <DeleteStory {...props} />
                     )}
                 </Group>
-
-                <Transition
-                    mounted={openedCommentForm && !!permissions?.canComment}
-                    transition="scale-y"
-                    duration={400}
-                    timingFunction="ease-in-out"
-                >
-                    {(styles) => (
-                        <>
-                            <Divider />
-
-                            <Box style={styles}>
-                                <CreateCommentForm
-                                    storyISBN={props.isbn}
-                                    text=""
-                                />
-                            </Box>
-                        </>
-                    )}
-                </Transition>
             </Stack>
-
-            <PushNotificationToggle userExists={!!sessionUser.data?.user} />
 
             <AuthenticationDrawer
                 opened={openedAuthModal}
                 close={closeAuthModal}
             />
         </>
+    );
+}
+
+export type NewCommentBoxProps = {
+    commentBoxDisclosure: UseDisclosureReturnValue;
+    canComment: boolean | undefined;
+    storyISBN: string;
+};
+
+export function NewCommentBox({
+    commentBoxDisclosure,
+    canComment,
+    storyISBN,
+    onNewComment,
+}: NewCommentBoxProps & {
+    onNewComment: (newComment: CommentSelectType) => Promise<void>;
+}) {
+    return (
+        <Transition
+            mounted={commentBoxDisclosure[0] && !!canComment}
+            transition="scale-y"
+            duration={400}
+            timingFunction="ease-in-out"
+            keepMounted
+        >
+            {(styles) => (
+                <Box style={styles}>
+                    <CreateCommentForm
+                        onNewCommentAdded={onNewComment}
+                        storyISBN={storyISBN}
+                        text=""
+                    />
+                </Box>
+            )}
+        </Transition>
     );
 }

@@ -33,7 +33,6 @@ export function useBulkCommentsPermissions({
             }
             return data;
         },
-        refetchInterval: 1000 * 60 * 60 * 5,
         enabled: comments.length > 0 && !!user,
     });
 }
@@ -43,7 +42,7 @@ export function useSingleCommentsPermissions({
     isbn,
     user,
 }: {
-    comment: FlattenedCommentIdsType | null;
+    comment: FlattenedCommentIdsType | undefined;
     isbn: string;
     user: UserSelectType | undefined;
 }) {
@@ -55,21 +54,18 @@ export function useSingleCommentsPermissions({
         queryFn: async () => {
             if (!comment) {
                 throw new Error(
-                    "Comments to check permissions cannot be empty",
+                    "Comment to check permissions cannot be undefined",
                 );
             }
 
             const data = await getSingleCommentsPermmissions({ comment, user });
 
             if (!data) {
-                throw new Error(
-                    "Failed to get permission for this batch of comments",
-                );
+                throw new Error("Failed to get permission for this comment");
             }
 
             return { id: comment.id, data };
         },
-        refetchInterval: 1000 * 60 * 60 * 5,
         enabled: !!comment && !!user,
     });
 }

@@ -8,8 +8,8 @@ export const useStoryPermissions = ({
     authorId,
 }: {
     user: UserSelectType | undefined;
-    storyId: number;
-    authorId: string;
+    storyId: number | undefined;
+    authorId: string | undefined;
 }) => {
     return useQuery({
         queryKey: [
@@ -17,6 +17,12 @@ export const useStoryPermissions = ({
             { userId: user?.id, storyId, authorId },
         ],
         queryFn: async () => {
+            if (!storyId || !authorId) {
+                throw new Error(
+                    "story-id and author-id must exist before you can check story permissions",
+                );
+            }
+
             const data = await calculateStoryPermissions(user, {
                 id: storyId,
                 authorId,
@@ -30,6 +36,6 @@ export const useStoryPermissions = ({
         },
         staleTime: 1000 * 60 * 60, // 1 hour fresh
         gcTime: 1000 * 60 * 60 * 24, // keep in cache 24h
-        enabled: !!user && !!storyId,
+        enabled: !!user && !!storyId && !!authorId,
     });
 };

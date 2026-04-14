@@ -34,7 +34,7 @@ export async function canCreateStory(): Promise<boolean> {
  */
 export async function canDeleteStory(
     user: UserSelectType,
-    story: PartialStoryType
+    story: PartialStoryType,
 ): Promise<boolean> {
     if (!story) {
         return false;
@@ -60,7 +60,7 @@ export async function canDeleteStory(
  */
 export async function canUpdateStory(
     user: UserSelectType,
-    story: PartialStoryType
+    story: PartialStoryType,
 ): Promise<boolean> {
     if (!isStoryOwner(user, story)) {
         return false;
@@ -76,13 +76,14 @@ export async function canUpdateStory(
 export async function canSuspendStory(): Promise<boolean> {
     return hasPermission("story", ["suspend:all"]);
 }
+
 /**
  * Calculate all permissions for a single story
  */
 
 export async function calculateStoryPermissions(
     user: UserSelectType | null | undefined,
-    story: { id: number; authorId: string }
+    story: { id: number; authorId: string },
 ): Promise<Omit<StoryPermissionsType, "canCreate">> {
     if (!user?.id) {
         return {

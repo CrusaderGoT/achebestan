@@ -5,6 +5,8 @@
 import { CommentPartialType } from "@/types/comment";
 import { UserSelectType } from "@/types/user";
 import { hasPermission } from "./base-policy";
+import { StoryPermissionsType } from "@/types/story";
+import { canDeleteStory, canUpdateStory, canSuspendStory } from "./story-policy";
 
 /**
  * Check if the current user owns the comment
@@ -79,3 +81,41 @@ export async function canUpdateComment(
 
     return hasPermission("comment", ["update:owner"]);
 }
+
+/**
+ * Calculate all permissions a user can perform concerning comments
+ */
+
+export async function calculateStoryPermissions(
+    user: UserSelectType | null | undefined,
+    story: { id: number; authorId: string },
+): Promise<Omit<StoryPermissionsType, "canCreate">> {
+    if (!user?.id) {
+        return {
+            canDelete: false,
+            canUpdate: false,
+            canSuspend: false,
+            canComment: false,
+        };
+    }
+
+    const storyPermArgs = {
+        id: story.id,
+        authorId: story.authorId,
+    };
+
+    const [canDelete, canUpdate, canSuspend, canComment] = await Promise.all([
+        await canDeleteStory(user, storyPermArgs),
+        await canUpdateStory(user, storyPermArgs),
+        await canSuspendStory(),
+        await canCreateComment(),
+    ]);
+
+    return {
+        canDelete,
+        canUpdate,
+        canSuspend,
+        canComment,
+    };
+}
+

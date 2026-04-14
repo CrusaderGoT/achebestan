@@ -1,5 +1,4 @@
 import { getBulkCommentsPermmissions } from "@/lib/actions/comment";
-import { authClient } from "@/lib/auth-client";
 import { CommentSelectType, CommentUpdateType } from "@/zod-schemas/comment";
 import { RatingSelectType } from "@/zod-schemas/rating";
 import { ReactionSelectType } from "@/zod-schemas/reaction";
@@ -10,6 +9,7 @@ import {
     useTree,
 } from "@mantine/core";
 import { UseStateHistoryHandlers, UseStateHistoryValue } from "@mantine/hooks";
+
 import { UserSelectType } from "./user";
 
 export type CommentTreeProps = CommentSelectType & {
@@ -90,7 +90,6 @@ export type CommentActionsProps = {
     isPendingUpdateComment: boolean;
     storyISBN: string;
     isEditOpen: boolean;
-    session: ReturnType<typeof authClient.useSession>["data"];
     hasBeenDeleted: boolean | null;
     permissions?: CommentPermissionsType;
 };
@@ -105,4 +104,13 @@ export const noCommentPermissions = {
     canDeleteAll: false,
     canUpdate: false,
     canCreate: false,
+};
+
+export type CommentDrawerProps = {
+    drawer: CommentDrawerState;
+    storyAuthorId?: string;
+    interactions: CommentInteractionHandlers;
+    sessionUser: UserSelectType | undefined;
+    commentsPermissionsMap: Map<number, CommentPermissionsType>;
+    onNewComment: (newComment: CommentSelectType) => Promise<void>;
 };

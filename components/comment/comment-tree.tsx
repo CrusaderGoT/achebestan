@@ -1,23 +1,19 @@
 "use client";
 
+import commentTreeStyles from "@/styles/comment-tree.module.css";
 import publicStyles from "@/styles/public.module.css";
 
 import {
-    ActionIcon,
     Center,
     Divider,
-    Drawer,
     getTreeExpandedState,
-    Group,
     MantineSize,
     Text,
     Tree,
     useTree,
 } from "@mantine/core";
 
-import { IconArrowBack } from "@tabler/icons-react";
-
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useMounted } from "@mantine/hooks";
 
@@ -27,6 +23,7 @@ import {
     CommentRenderContext,
     CommentsToTreeNodeDataType,
     CommentTreeProps,
+    FlattenedCommentIdsType,
     noCommentPermissions,
 } from "@/types/comment";
 
@@ -44,11 +41,16 @@ import {
 import { CommentNode } from "./comment-node";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useAutoExpandNewComments } from "@/lib/hooks/comment/auto-expand-comments";
-import { useBulkCommentsPermissions } from "@/lib/hooks/comment/get-comments-permissions";
+import {
+    useBulkCommentsPermissions,
+    useSingleCommentsPermissions,
+} from "@/lib/hooks/comment/get-comments-permissions";
 import { flattenCommentsIds } from "@/lib/utils/comment/flatten-comments-ids";
-import commentTreeStyles from "@/styles/comment-tree.module.css";
+
 import { UserSelectType } from "@/types/user";
+import { CommentSelectType } from "@/zod-schemas/comment";
+import { NewCommentBox, NewCommentBoxProps } from "../story/story-actions";
+import { CommentDrawer } from "./comment-drawer";
 
 export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
     drawerLevel: 4,
@@ -62,10 +64,13 @@ export const DRAWER_CONFIG: COMMENT_DRAWER_CONFIG_TYPE = {
 function CommentTree({
     comments,
     storyAuthorId,
+    storyISBN,
+    commentBoxDisclosure,
+    canComment,
 }: {
     comments: CommentTreeProps[];
-    storyAuthorId?: string;
-}) {
+    storyAuthorId: string | undefined;
+} & NewCommentBoxProps) {
     const mounted = useMounted();
     const { sessionUser } = useCentralizedAuth();
     const interactions = useCommentInteractions();
@@ -89,17 +94,14 @@ function CommentTree({
 
     const initialDataForCommentsPermissions = new Map([
         [0, noCommentPermissions],
-    ]);
+    ]); // default init data, so map is never undefined
 
     const { data: commentsPermissionsMap = initialDataForCommentsPermissions } =
         useBulkCommentsPermissions({
             comments: commentIdsMap,
-            user: sessionUser.data?.user as UserSelectType,
-            isbn: comments[0].storyISBN,
+            user: sessionUser.data?.user as UserSelectType | undefined,
+            isbn: storyISBN,
         });
-
-    // Initialize drawer state
-    const drawer = useDrawerState(commentsNodeData);
 
     // Initialize main tree
     const initialCommentsToExpand = useMemo<string[]>(() => {
@@ -139,11 +141,34 @@ function CommentTree({
         ),
     });
 
-    // Auto-expansion logic
-    useAutoExpandNewComments({
-        commentsNodeData,
-        tree,
+    const [newComment, setNewComment] = useState<
+        FlattenedCommentIdsType | undefined
+    >();
+
+    const { data: newCommentPermissions } = useSingleCommentsPermissions({
+        comment: newComment,
+        user: sessionUser.data?.user as UserSelectType | undefined,
+        isbn: storyISBN,
     });
+
+    const onNewComment = useCallback(
+        async (newComment: CommentSelectType) => {
+            setNewComment(newComment);
+            tree.expand(newComment.id.toString());
+        },
+        [sessionUser.data?.user, newComment],
+    );
+
+    useEffect(() => {
+        if (!newCommentPermissions) return;
+
+        commentsPermissionsMap.set(
+            newCommentPermissions.id,
+            newCommentPermissions.data,
+        );
+    }, [newCommentPermissions]);
+
+    const drawer = useDrawerState(commentsNodeData);
 
     // Render functions
     const renderMainNode = useCallback(
@@ -164,7 +189,10 @@ function CommentTree({
                     nodeProps={props}
                     context={context}
                     interactions={interactions}
-                    session={sessionUser.data}
+                    sessionUser={
+                        sessionUser.data?.user as UserSelectType | undefined
+                    }
+                    onNewComment={onNewComment}
                 />
             );
         },
@@ -180,42 +208,15 @@ function CommentTree({
         ],
     );
 
-    const renderDrawerNode = useCallback(
-        (props: CommentNodeProps) => {
-            if (!mounted) return null;
-
-            const context: CommentRenderContext = {
-                isInDrawer: true,
-                tree: drawer.drawerTree,
-                commentMap: drawer.drawerCommentMap,
-                onOpenDrawer: drawer.handleOpenDrawer,
-                commentsPermissionsMap: commentsPermissionsMap,
-                storyAuthorId: storyAuthorId,
-            };
-
-            return (
-                <CommentNode
-                    nodeProps={props}
-                    context={context}
-                    interactions={interactions}
-                    session={sessionUser.data}
-                />
-            );
-        },
-        [
-            mounted,
-            drawer.drawerTree,
-            drawer.drawerCommentMap,
-            commentsPermissionsMap,
-            drawer.handleOpenDrawer,
-            interactions,
-            sessionUser.data,
-            storyAuthorId,
-        ],
-    );
-
     return (
         <>
+            <NewCommentBox
+                commentBoxDisclosure={commentBoxDisclosure}
+                storyISBN={storyISBN}
+                canComment={canComment}
+                onNewComment={onNewComment}
+            />
+
             <Tree
                 data={commentsNodeData}
                 tree={tree}
@@ -230,85 +231,16 @@ function CommentTree({
                 }}
             />
 
-            <Drawer
-                opened={drawer.drawerOpened}
-                onClose={drawer.closeDrawer}
-                title={
-                    <Group>
-                        {/**
-                         * check drawer is not in it first element (nothing to go back to)
-                         * check drawer has something to go back to (prev is not null)
-                         */}
-                        {drawer.drawerHistory.current > 0 &&
-                            drawer.drawerHistory.history[
-                                drawer.drawerHistory.current - 1
-                            ] && (
-                                <ActionIcon
-                                    onClick={() => {
-                                        const previousIndex =
-                                            drawer.drawerHistory.current - 1;
-
-                                        // IMPROVEMENT: Add bounds checking
-                                        if (
-                                            previousIndex >= 0 &&
-                                            previousIndex <
-                                                drawer.drawerHistory.history
-                                                    .length
-                                        ) {
-                                            const previousCommentId =
-                                                drawer.drawerHistory.history[
-                                                    previousIndex
-                                                ];
-
-                                            if (previousCommentId) {
-                                                drawer.activeDrawerHandlers.back();
-                                                // IMPROVEMENT: Add delay to ensure state update
-                                                setTimeout(() => {
-                                                    drawer.drawerTree.expand(
-                                                        previousCommentId,
-                                                    );
-                                                }, 50);
-                                            }
-                                        }
-                                    }}
-                                    variant="subtle"
-                                    color="gray"
-                                >
-                                    <IconArrowBack size={14} />
-                                </ActionIcon>
-                            )}
-
-                        <Text truncate="end" maw={200} c="dimmed" size="xs">
-                            {drawer.drawerTitle}
-                        </Text>
-                    </Group>
+            <CommentDrawer
+                drawer={drawer}
+                interactions={interactions}
+                commentsPermissionsMap={commentsPermissionsMap}
+                sessionUser={
+                    sessionUser.data?.user as UserSelectType | undefined
                 }
-                size={DRAWER_CONFIG.drawerSize}
-                position={DRAWER_CONFIG.drawerPosition}
-            >
-                {/* IMPROVEMENT: Add loading state */}
-                {drawer.drawerCommentData.length > 0 ? (
-                    <Tree
-                        data={drawer.drawerCommentData}
-                        tree={drawer.drawerTree}
-                        levelOffset={"xl"}
-                        expandOnClick={false}
-                        expandOnSpace={false}
-                        renderNode={renderDrawerNode}
-                        classNames={{
-                            root: publicStyles.noTapHighlight,
-                            node: commentTreeStyles.parentComment,
-                            subtree: commentTreeStyles.childComment,
-                        }}
-                    />
-                ) : (
-                    <Text size="sm" c="dimmed" ta="center" py="xl">
-                        {drawer.drawerOpened && !drawer.activeDrawerCommentId
-                            ? "Loading comment thread..."
-                            : "No comments to display"}
-                    </Text>
-                )}
-            </Drawer>
+                onNewComment={onNewComment}
+                storyAuthorId={storyAuthorId}
+            />
         </>
     );
 }
@@ -316,10 +248,13 @@ function CommentTree({
 export function CommentSection({
     comments,
     storyAuthorId,
+    storyISBN,
+    commentBoxDisclosure,
+    canComment,
 }: {
     comments?: CommentTreeProps[];
     storyAuthorId?: string;
-}) {
+} & NewCommentBoxProps) {
     if (!comments || comments.length < 1) {
         return (
             <Center>
@@ -334,7 +269,13 @@ export function CommentSection({
                 label={comments && comments.length > 0 ? "comments" : ""}
             />
 
-            <CommentTree comments={comments} storyAuthorId={storyAuthorId} />
+            <CommentTree
+                comments={comments}
+                storyAuthorId={storyAuthorId}
+                storyISBN={storyISBN}
+                commentBoxDisclosure={commentBoxDisclosure}
+                canComment={canComment}
+            />
         </>
     );
 }

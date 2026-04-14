@@ -25,7 +25,6 @@ export function CommentActions({
     isPendingUpdateComment,
     storyISBN,
     isEditOpen,
-    session,
     hasBeenDeleted,
     permissions,
 }: CommentActionsProps) {
@@ -82,7 +81,6 @@ export function CommentActions({
                 storyISBN={storyISBN}
                 canDeleteOwn={perms.canDeleteOwn}
                 canDeleteAll={perms.canDeleteAll}
-                session={session}
                 hasBeenDeleted={hasBeenDeleted}
             />
         </Group>
@@ -91,7 +89,7 @@ export function CommentActions({
 
 type DeleteCommentProps = Pick<
     CommentActionsProps,
-    "commentId" | "commentUserId" | "storyISBN" | "session" | "hasBeenDeleted"
+    "commentId" | "commentUserId" | "storyISBN" | "hasBeenDeleted"
 > & { canDeleteOwn: boolean; canDeleteAll: boolean };
 
 export function DeleteComment({ ...props }: DeleteCommentProps) {
