@@ -1,9 +1,10 @@
 // components/OfflineIndicator.tsx
 "use client";
 
+import { Dialog } from "@mantine/core";
 import { useEffect, useState } from "react";
 
-export function OfflineIndicator() {
+export function OfflineIndicators() {
     const [isOnline, setIsOnline] = useState(true);
 
     useEffect(() => {
@@ -22,8 +23,8 @@ export function OfflineIndicator() {
     if (isOnline) return null;
 
     return (
-        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-black text-center py-2 z-50">
+        <Dialog opened={!isOnline} size={"xs"}>
             ⚠️ You&apos;re currently offline. Some features may be limited.
-        </div>
+        </Dialog>
     );
 }

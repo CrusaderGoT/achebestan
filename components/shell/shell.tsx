@@ -14,10 +14,10 @@ import cx from "clsx";
 import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
-import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { canCreateStory } from "@/lib/auth/policies/story-policy";
+import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useEffect, useState } from "react";
-import { OfflineIndicator } from "./offline-indicator";
+import { OfflineIndicators } from "../ui/offline-indicator";
 
 export function Shell({
     children,
@@ -44,7 +44,7 @@ export function Shell({
             setCanCreate(result);
         };
         checkPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sessionUser.data?.user.id]);
 
     return (
@@ -69,7 +69,7 @@ export function Shell({
                         onClick={() => router.replace("/")}
                         className={cx(
                             shellStyles.websiteName,
-                            publicStyles.noTapHighlight
+                            publicStyles.noTapHighlight,
                         )}
                     >
                         <Title order={3}>Achebestan</Title>
@@ -133,7 +133,7 @@ export function Shell({
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
-                <OfflineIndicator />
+                <OfflineIndicators />
                 {children}
                 <AuthenticationDrawer
                     opened={openedAuthModal}

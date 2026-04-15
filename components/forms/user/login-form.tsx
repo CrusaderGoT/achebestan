@@ -43,7 +43,7 @@ export function LoginForm({
                 onRequest: () => setFormState("pending"),
                 onError(errCtx) {
                     notifications.show({
-                        message: `Error Logging In`,
+                        message: `Error Logging In -> ${errCtx.error.message}`,
                         color: "red",
                     });
                     setFormState("error");
@@ -67,7 +67,7 @@ export function LoginForm({
                         setFormState("idle");
                     }
                 },
-            }
+            },
         );
     }
 
@@ -100,8 +100,8 @@ export function LoginForm({
                         formState === "pending"
                             ? "Logging You In. Write A New Story Today"
                             : formState === "success" && redirectAfterSuccess
-                            ? "Redirecting To Home Page"
-                            : ""
+                              ? "Redirecting To Home Page"
+                              : ""
                     }
                     visible={formState === "pending" || formState === "success"}
                 />
