@@ -4,6 +4,7 @@ import { db } from "@/drizzle";
 import { rating } from "@/drizzle/schemas/rating";
 import { ratingSelectSchema } from "@/zod-schemas/rating";
 import { and, eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
 import { authActionClient } from "../safe-action";
@@ -67,6 +68,8 @@ export const deleteStoryRating = authActionClient
                 ),
             )
             .returning();
+
+        updateTag(`readStoryComments-${parsedInput.storyISBN}`); // change to only when a comment is sure
 
         return deletedRating;
     });
