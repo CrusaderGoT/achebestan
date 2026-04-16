@@ -2,6 +2,7 @@
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useReadStoryComments } from "@/lib/hooks/comment/read-story-comments";
+import { useStoryRating } from "@/lib/hooks/rating/story-rating";
 import { useUserRating } from "@/lib/hooks/rating/user-rating";
 import { useReadStory } from "@/lib/hooks/story/read-story";
 import { useStoryPermissions } from "@/lib/hooks/story/story-permissions";
@@ -43,6 +44,10 @@ export function StoryPageClient({
         userId: session?.user.id,
     });
 
+    const { data: storyRatings = story?.ratings || [] } = useStoryRating({
+        isbn,
+    });
+
     const commentBoxDisclosure = useDisclosure(false);
 
     const { data: permissions } = useStoryPermissions({
@@ -73,7 +78,7 @@ export function StoryPageClient({
             />
 
             <StoryRating
-                ratings={story.ratings}
+                ratings={storyRatings}
                 isbn={story.isbn}
                 userRating={userRating}
             />

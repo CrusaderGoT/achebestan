@@ -1,25 +1,33 @@
 import { notifications } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { rateStoryAction } from "../../actions/rating";
 
 export const useRateStory = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(rateStoryAction, {
-        onSuccess(args) {
-            if (typeof args?.data?.stars == "number") {
-                // fail safe to ensure rating was a success
+        onSuccess({ data, input }) {
+            if (data) {
                 notifications.show({
                     message:
-                        args.data.stars < 3
-                            ? "Sorry You Did Not Like The Story, Hope It Grows On You"
-                            : "Thank You For Rating",
-
+                        data.stars < 3
+                            ? "Sorry you didn't like it!"
+                            : "Thank you for rating!",
                     color: "yellow",
                 });
-            } else {
-                notifications.show({
-                    message: "Your Rating Failed",
-                });
             }
+
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "user-rating",
+                    { userId: input.userId, isbn: input.storyISBN },
+                ],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["story-ratings", { isbn: input.storyISBN }],
+            });
         },
         onError(args) {
             if (args.error.validationErrors) {

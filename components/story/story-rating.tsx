@@ -5,12 +5,12 @@ import { ActionIcon, Group, Rating, TooltipFloating } from "@mantine/core";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { calculateRatingsAverage } from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
+import { StoryRatingProps } from "@/types/story";
 import { useDisclosure, useMounted } from "@mantine/hooks";
 import { IconStar, IconStarOff } from "@tabler/icons-react";
 import cx from "clsx";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { RatingForm } from "../forms/rating/rating-form";
-import { StoryRatingProps } from "@/types/story";
 
 export function StoryRating({
     ratings,
@@ -64,7 +64,7 @@ export function StoryRating({
                             }}
                             className={cx(
                                 publicStyles.boldText,
-                                publicStyles.cursorPointer
+                                publicStyles.cursorPointer,
                             )}
                         >
                             {!opened ? "Rate This Story" : "Close Rating"}
@@ -91,6 +91,7 @@ export function StoryRating({
 
                     {sessionUser.data?.user.id && (
                         <RatingForm
+                            key={userRating?.id ?? "new-form"}
                             userRating={userRating}
                             storyISBN={storyISBN}
                             userId={sessionUser.data.user.id}
@@ -115,6 +116,7 @@ export function StoryRating({
                             fractions={2}
                             readOnly
                             className={cx(opened && publicStyles.hide)}
+                            ml={"auto"}
                         />
                     </TooltipFloating>
                 </>

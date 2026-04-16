@@ -4,7 +4,6 @@ import { db } from "@/drizzle";
 import { rating } from "@/drizzle/schemas/rating";
 import { ratingSelectSchema } from "@/zod-schemas/rating";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { unauthorized } from "next/navigation";
 import z from "zod/v4";
 import { authActionClient } from "../safe-action";
@@ -14,38 +13,37 @@ import { authActionClient } from "../safe-action";
 export const rateStoryAction = authActionClient
     .inputSchema(ratingSelectSchema)
     .action(async ({ parsedInput, ctx }) => {
-        if (typeof parsedInput.id === "string" && parsedInput.id === "new") {
-            // create new rating
+        const userId = ctx.user.id;
+
+        // Use an upsert-like logic based on the Unique constraint (userId + storyISBN)
+        // This prevents the "updating a deleted record" issue
+        const [existing] = await db
+            .select()
+            .from(rating)
+            .where(
+                and(
+                    eq(rating.storyISBN, parsedInput.storyISBN),
+                    eq(rating.userId, userId),
+                ),
+            );
+
+        if (!existing) {
             const [newRate] = await db
                 .insert(rating)
                 .values({
                     storyISBN: parsedInput.storyISBN,
                     stars: parsedInput.stars,
-                    userId: ctx.user.id,
+                    userId: userId,
                 })
                 .returning();
-
-            revalidatePath(`/story/${parsedInput.storyISBN}`);
-
             return newRate;
         } else {
-            // update existing rating
-            const [updateRate] = await db
+            const [updatedRate] = await db
                 .update(rating)
-                .set({
-                    stars: parsedInput.stars,
-                })
-                .where(
-                    and(
-                        eq(rating.storyISBN, parsedInput.storyISBN),
-                        eq(rating.userId, ctx.user.id),
-                    ),
-                )
+                .set({ stars: parsedInput.stars })
+                .where(eq(rating.id, existing.id))
                 .returning();
-
-            revalidatePath(`/story/${parsedInput.storyISBN}`);
-
-            return updateRate;
+            return updatedRate;
         }
     });
 
@@ -70,8 +68,6 @@ export const deleteStoryRating = authActionClient
             )
             .returning();
 
-        revalidatePath(`/story/${parsedInput.storyISBN}`);
-
         return deletedRating;
     });
 
@@ -93,5 +89,20 @@ export const getUserRating = async (userId: string, storyISBN: string) => {
     } catch (e) {
         console.log(e);
         throw new Error("Failed to fetch user rating");
+    }
+};
+
+export const getStoryRatings = async (storyISBN: string) => {
+    try {
+        const userRating = await db.query.rating.findMany({
+            where(fields, operators) {
+                return operators.and(operators.eq(fields.storyISBN, storyISBN));
+            },
+        });
+
+        return userRating;
+    } catch (e) {
+        console.log(e);
+        throw new Error("Failed to fetch story ratings");
     }
 };

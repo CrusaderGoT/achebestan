@@ -1,8 +1,11 @@
 import { notifications } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { deleteStoryRating } from "../../actions/rating";
 
 export const useDeleteRating = () => {
+    const queryClient = useQueryClient();
+
     const action = useAction(deleteStoryRating, {
         onSuccess(args) {
             if (args.data?.id) {
@@ -14,6 +17,17 @@ export const useDeleteRating = () => {
                     message: "This Rating No Longer Exists",
                 });
             }
+
+            queryClient.invalidateQueries({
+                queryKey: [
+                    "user-rating",
+                    { userId: args.data.userId, isbn: args.data.storyISBN },
+                ],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["story-ratings", { isbn: args.data.storyISBN }],
+            });
         },
         onError(args) {
             if (args.error.validationErrors) {

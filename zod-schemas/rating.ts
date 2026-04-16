@@ -7,7 +7,6 @@ import { CommentSelectType } from "./comment";
 
 export const ratingSelectSchema = createSelectSchema(rating, {
     id: z.union([z.number(), z.string()]),
-    userId: (schema) => schema.optional(), // assign via ctx in form action
 });
 
 export type RatingSelectType = z.infer<typeof ratingSelectSchema>;

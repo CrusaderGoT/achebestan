@@ -54,6 +54,7 @@ export function RatingForm({
             storyISBN: storyISBN,
             stars: userRating?.stars || 0,
             id: userRating?.id || "new",
+            userId: userId,
         },
         mode: "uncontrolled",
         validate: zod4Resolver(ratingSelectSchema),
@@ -61,28 +62,29 @@ export function RatingForm({
 
     const { executeAsync: executeAsyncRateStory } = useRateStory();
 
+    const {
+        executeAsync: executeAsyncDeleteRating,
+        isPending: isPendingDeleteRating,
+    } = useDeleteRating();
+
     const { executeAsync: executeAsyncCreateComment } = useCreateComment();
 
     const { executeAsync: executeAsyncUpdateComment } = useUpdateComment();
 
     const { executeAsync: executeAsyncDeleteComment } = useDeleteComment();
 
-    const {
-        executeAsync: executeAsyncDeleteRating,
-        isPending: isPendingDeleteRating,
-    } = useDeleteRating();
-
     const commentChanged =
         (comment?.trim() || "") !== (userRating?.comment?.text?.trim() || "");
 
     async function saveRating(
         data: RatingSelectType,
-        currentRatingId?: number
+        currentRatingId?: number,
     ): Promise<UserRatingWithComment | undefined> {
         const { data: rated } = await executeAsyncRateStory({
             id: currentRatingId || "new",
             stars: data.stars,
             storyISBN: data.storyISBN,
+            userId: userId,
         });
 
         if (!rated) {
@@ -174,34 +176,31 @@ export function RatingForm({
         }
     }
 
-    async function handleSubmit(data: RatingSelectType) {
+    async function handleSubmit(values: RatingSelectType) {
         const trimmedComment = comment?.trim();
         const existingCommentId = userRating?.comment?.id;
 
-        let freshRating = userRating;
-        let freshRatingId =
-            typeof freshRating?.id === "number" ? freshRating.id : undefined;
+        // 1. Save Rating (Always use current userId from props)
+        // We pass "new" if userRating doesn't exist, otherwise use current id
+        const { data: freshRating } = await executeAsyncRateStory({
+            ...values,
+            id: userRating?.id || "new",
+            userId: userId,
+        });
 
-        // Step 1: Save rating first if needed
-        if (form.isDirty()) {
-            freshRating = await saveRating(data, freshRatingId);
-            if (!freshRating) return;
-            freshRatingId =
-                typeof freshRating.id === "number" ? freshRating.id : undefined;
-        }
+        if (!freshRating) return;
 
-        // Step 2: Handle comment - ✅ Only if comment was actually changed
+        // 2. Handle Comment Logic
         if (commentChanged) {
             await saveComment({
                 trimmedComment,
                 existingCommentId,
-                ratingId: freshRatingId,
+                ratingId: freshRating.id, // Use the ID returned from the server
                 storyISBN,
                 userId,
             });
         }
 
-        // Step 3: Close form
         closeRatingForm();
     }
 
@@ -240,7 +239,7 @@ export function RatingForm({
                                     className={cx(
                                         form.isDirty() || commentChanged
                                             ? publicStyles.show
-                                            : publicStyles.hide
+                                            : publicStyles.hide,
                                     )}
                                 >
                                     <IconCheck />
@@ -261,14 +260,14 @@ export function RatingForm({
                                                             storyISBN:
                                                                 storyISBN,
                                                             userId: userId,
-                                                        }
+                                                        },
                                                     );
 
                                                 if (deletedRate) {
                                                     setComment("");
                                                     form.setFieldValue(
                                                         "stars",
-                                                        0
+                                                        0,
                                                     );
                                                     form.resetDirty();
                                                     closeRatingForm();

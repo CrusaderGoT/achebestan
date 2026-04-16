@@ -24,7 +24,5 @@ export const useUserRating = ({
             return data;
         },
         enabled: !!userId,
-        staleTime: 1000 * 60 * 60 * 12, // 12 hours
-        gcTime: 1000 * 60 * 60 * 24, // 1 day before hard reset
     });
 };
