@@ -15,7 +15,7 @@ export const comment = table(
         parentCommentId: t.integer(),
         ratingId: t
             .integer()
-            .references(() => rating.id, { onDelete: "set null" }),
+            .references(() => rating.id, { onDelete: "cascade" }),
 
         storyISBN: t
             .uuid()
