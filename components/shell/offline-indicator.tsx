@@ -11,7 +11,7 @@ type ConnectionStatus = "online" | "offline" | "reconnected";
 
 const RECONNECTED_LINGER_MS = 2500;
 
-export function OfflineIndicators() {
+export function OfflineIndicator() {
     const [status, setStatus] = useState<ConnectionStatus>("online");
 
     useEffect(() => {
@@ -26,7 +26,10 @@ export function OfflineIndicators() {
             clearTimeout(lingerTimer);
             setStatus("reconnected");
             // Let the "back online" indicator breathe before it leaves
-            lingerTimer = setTimeout(() => setStatus("online"), RECONNECTED_LINGER_MS);
+            lingerTimer = setTimeout(
+                () => setStatus("online"),
+                RECONNECTED_LINGER_MS,
+            );
         };
 
         const handleOffline = () => {

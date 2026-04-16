@@ -24,7 +24,7 @@ export async function generateMetadata({
     params: Promise<{ isbn: string }>;
 }): Promise<Metadata> {
     const { isbn } = await params;
-    // Tip: Ensure `readStory` uses React.cache() to avoid a duplicate DB query
+
     const story = await readStory(isbn);
     return await generateStoryMetadata(story);
 }

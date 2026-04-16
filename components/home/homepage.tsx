@@ -31,7 +31,7 @@ export function HomePage({
                             <Grid.Col
                                 span={{ base: 12, xs: 6, md: 4 }}
                                 mt={{ base: 0, xs: index % 2 === 0 ? 0 : 100 }}
-                                key={index}
+                                key={story.isbn}
                             >
                                 <StoryBook {...story} />
                             </Grid.Col>

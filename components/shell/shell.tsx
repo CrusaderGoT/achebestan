@@ -17,7 +17,7 @@ import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { canCreateStory } from "@/lib/auth/policies/story-policy";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useEffect, useState } from "react";
-import { OfflineIndicators } from "../ui/offline-indicator";
+import { OfflineIndicator } from "./offline-indicator";
 
 export function Shell({
     children,
@@ -133,7 +133,7 @@ export function Shell({
             </AppShell.Navbar>
 
             <AppShell.Main pos={"relative"}>
-                <OfflineIndicators />
+                <OfflineIndicator />
                 {children}
                 <AuthenticationDrawer
                     opened={openedAuthModal}

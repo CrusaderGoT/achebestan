@@ -17,4 +17,5 @@ export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
         swSrc: "app/sw.ts",
         // If set to `false`, Serwist will attempt to use `esbuild-wasm`.
         useNativeEsbuild: true,
+        maximumFileSizeToCacheInBytes: 7 * 10 ** 6, // 7mb
     });

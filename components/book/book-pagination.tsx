@@ -6,7 +6,7 @@ import { Group, Loader, Pagination } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useTransition, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 export function BookPagination({
     storyPart,
@@ -33,7 +33,11 @@ export function BookPagination({
     // transition would immediately clobber our optimistic update, making the
     // clicked page appear to "flash" back before settling.
     useEffect(() => {
-        if (typeof storyPart === "number" && storyPart !== activePage && !isPending) {
+        if (
+            typeof storyPart === "number" &&
+            storyPart !== activePage &&
+            !isPending
+        ) {
             setActivePage(storyPart);
         }
         // activePage intentionally omitted — we only want to react to external
@@ -89,8 +93,8 @@ export function BookPagination({
             //    pending state for us. isPending stays true until the new
             //    route has fully rendered, giving us a free disabled + loader signal.
             startTransition(() => {
-    router.replace(`/story/${nextChapter.isbn}`, { scroll: false });
-});
+                router.replace(`/story/${nextChapter.isbn}`, { scroll: false });
+            });
         },
         [chapters, router, isPending, activePage],
     );
