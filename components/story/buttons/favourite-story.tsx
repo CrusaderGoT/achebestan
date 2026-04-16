@@ -7,7 +7,7 @@ import { ActionIcon, Tooltip } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface FavouriteStoryProps {
     userId: string | undefined;
@@ -24,6 +24,10 @@ export function FavouriteStory({
     const [isInitializing, setIsInitializing] = useState(true);
     const [playAnimation, setPlayAnimation] = useState(false);
 
+    // This prevents the action from flipping incorrectly during rapid clicks.
+    const serverStateRef = useRef(false);
+
+    // Initial fetch
     useEffect(() => {
         if (!userId) {
             setIsInitializing(false);
@@ -32,7 +36,9 @@ export function FavouriteStory({
         const fetchStatus = async () => {
             try {
                 const curFav = await getfavouriteUserStory(userId, storyId);
-                setIsFavourited(!!curFav);
+                const favStatus = !!curFav;
+                setIsFavourited(favStatus);
+                serverStateRef.current = favStatus;
             } finally {
                 setIsInitializing(false);
             }
@@ -40,36 +46,53 @@ export function FavouriteStory({
         fetchStatus();
     }, [userId, storyId]);
 
-    const action = isFavourited ? "delete" : "insert";
-    const { executeAsync, isPending } = useFavouriteStory(action);
+    const { executeAsync: insertFav, isPending: isInserting } =
+        useFavouriteStory("insert");
+    const { executeAsync: deleteFav, isPending: isDeleting } =
+        useFavouriteStory("delete");
 
-    const handleToggle = useDebouncedCallback(async () => {
+    const isPending = isInserting || isDeleting;
+
+    const debouncedSync = useDebouncedCallback(async (targetState: boolean) => {
+        // If the user clicked an even number of times and returned to
+        // the original state, do nothing.
+        if (targetState === serverStateRef.current) return;
+
+        try {
+            // Perform the action required to reach the targetState
+            const result = targetState
+                ? await insertFav({ userId: userId!, storyId })
+                : await deleteFav({ userId: userId!, storyId });
+
+            if (result.data) {
+                serverStateRef.current = targetState;
+            }
+        } catch (error) {
+            // Rollback to last known server state on failure
+            setIsFavourited(serverStateRef.current);
+        }
+    }, 800);
+
+    const handleToggle = () => {
         if (!userId) {
             openAuthModal();
             return;
         }
 
-        // Optimistic Update: Change UI immediately
-        const previousState = isFavourited;
-        setIsFavourited(!previousState);
+        const nextState = !isFavourited;
 
-        // Trigger animation logic
-        if (!previousState) {
+        // 1. Instant Visual Update
+        setIsFavourited(nextState);
+
+        // 2. Animation Logic
+        if (nextState) {
             setPlayAnimation(true);
-            setTimeout(() => setPlayAnimation(false), 450); // Reset after animation duration
+            setTimeout(() => setPlayAnimation(false), 450);
         }
 
-        // Background Request
-        try {
-            const result = await executeAsync({ userId, storyId });
-            // Sync state with actual server result if necessary
-            if (result.data?.created) setIsFavourited(true);
-            if (result.data?.deleted) setIsFavourited(false);
-        } catch (error) {
-            // 4. Rollback on error
-            setIsFavourited(previousState);
-        }
-    }, 1000);
+        // 3. Debounced Sync
+        debouncedSync(nextState);
+    };
 
     const Icon = isFavourited ? IconHeartFilled : IconHeart;
     const label = isFavourited ? "Remove from favourites" : "Add to favourites";
@@ -79,7 +102,7 @@ export function FavouriteStory({
             label={label}
             withArrow
             position="top"
-            disabled={isInitializing || isPending}
+            disabled={isInitializing}
         >
             <ActionIcon
                 variant="transparent"
@@ -87,9 +110,8 @@ export function FavouriteStory({
                 size="lg"
                 radius="xl"
                 onClick={handleToggle}
-                className={clsx(classes.root, {
-                    [classes.pending]: isPending,
-                })}
+                disabled={isInitializing}
+                className={clsx(classes.root, { [classes.pending]: isPending })}
                 aria-label={label}
             >
                 <Icon
