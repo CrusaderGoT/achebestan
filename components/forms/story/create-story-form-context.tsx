@@ -3,7 +3,7 @@
 import { Box, Stack, Textarea, TextInput } from "@mantine/core";
 import { createFormContext } from "@mantine/form";
 
-import storypageStyles from "@/styles/story-page.module.css";
+import storypageStyles from "@/styles/story/story-page.module.css";
 
 import { StoryInsertType } from "@/types/story";
 

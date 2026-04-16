@@ -54,7 +54,7 @@ export function StoryActions({
             <Stack>
                 <PushNotificationToggle userExists={!!sessionUser.data?.user} />
 
-                <Group justify="space-between" grow>
+                <Group justify="space-evenly">
                     {!sessionUser.isPending && (
                         <FavouriteStory
                             userId={sessionUser.data?.user.id}

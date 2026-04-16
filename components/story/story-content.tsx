@@ -12,7 +12,7 @@ import {
     formatEstimatedReadingTime,
 } from "@/lib/utils/story/story-utils";
 import publicStyles from "@/styles/public.module.css";
-import storypageStyles from "@/styles/story-page.module.css";
+import storypageStyles from "@/styles/story/story-page.module.css";
 import { StoryContentType } from "@/types/story";
 import { Badge, Box, Group, ScrollArea, Stack } from "@mantine/core";
 import {

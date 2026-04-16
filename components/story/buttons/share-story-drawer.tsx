@@ -12,6 +12,7 @@ import {
     Group,
     Stack,
     Text,
+    Tooltip,
 } from "@mantine/core";
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
 import { StoryTweetButton } from "./story-tweet-btn";
@@ -59,15 +60,18 @@ export function ShareStoryDrawer({
                 </Stack>
             </Drawer>
 
-            <ActionIcon onClick={openStoryShare} variant="subtle" color="cyan">
-                <Group>
-                    <Text visibleFrom="sm" fw={500}>
-                        Share
-                    </Text>
-
-                    <IconShare />
-                </Group>
-            </ActionIcon>
+            <Tooltip label={"Share"} withArrow position="top">
+                <ActionIcon
+                    onClick={openStoryShare}
+                    variant="transparent"
+                    color="cyan"
+                    size="lg"
+                    radius="xl"
+                    aria-label={"Share this story"}
+                >
+                    <IconShare size={24} stroke={1.5} />
+                </ActionIcon>
+            </Tooltip>
         </>
     );
 }

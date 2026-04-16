@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 
 import publicStyles from "@/styles/public.module.css";
-import storypageStyles from "@/styles/story-page.module.css";
+import storypageStyles from "@/styles/story/story-page.module.css";
 import cx from "clsx";
 
 import { StoryContent } from "@/components/story/story-content";

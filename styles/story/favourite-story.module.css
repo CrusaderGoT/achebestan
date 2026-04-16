@@ -1,0 +1,34 @@
+.root {
+  transition: transform 0.1s ease;
+}
+
+.root:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.icon {
+  transition: color 0.2s ease;
+}
+
+/* The animation triggers when this class is added */
+.animate {
+  animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Custom pending state: instead of a spinner, we fade the icon slightly */
+.pending {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

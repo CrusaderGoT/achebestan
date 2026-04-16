@@ -8,7 +8,7 @@ import { ImageDropzone } from "../ui/dropzone";
 
 import { authClient } from "@/lib/auth-client";
 import publicStyles from "@/styles/public.module.css";
-import storypageStyles from "@/styles/story-page.module.css";
+import storypageStyles from "@/styles/story/story-page.module.css";
 import cx from "clsx";
 
 type StoryImageFieldType = {
