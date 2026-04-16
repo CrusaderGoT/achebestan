@@ -30,9 +30,11 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconTrashFilled } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import cx from "clsx";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useState } from "react";
+
 type RatingFormProps = {
     storyISBN: string;
     userId: string;
@@ -47,7 +49,8 @@ export function RatingForm({
     userId,
     ...props
 }: RatingFormProps) {
-    const [comment, setComment] = useState(userRating?.comment?.text);
+    const [comment, setComment] = useState(userRating?.comment?.text || "");
+    const queryClient = useQueryClient();
 
     const form = useRatingForm({
         initialValues: {
@@ -61,50 +64,16 @@ export function RatingForm({
     });
 
     const { executeAsync: executeAsyncRateStory } = useRateStory();
-
     const {
         executeAsync: executeAsyncDeleteRating,
         isPending: isPendingDeleteRating,
     } = useDeleteRating();
-
     const { executeAsync: executeAsyncCreateComment } = useCreateComment();
-
     const { executeAsync: executeAsyncUpdateComment } = useUpdateComment();
-
     const { executeAsync: executeAsyncDeleteComment } = useDeleteComment();
 
     const commentChanged =
         (comment?.trim() || "") !== (userRating?.comment?.text?.trim() || "");
-
-    async function saveRating(
-        data: RatingSelectType,
-        currentRatingId?: number,
-    ): Promise<UserRatingWithComment | undefined> {
-        const { data: rated } = await executeAsyncRateStory({
-            id: currentRatingId || "new",
-            stars: data.stars,
-            storyISBN: data.storyISBN,
-            userId: userId,
-        });
-
-        if (!rated) {
-            notifications.show({
-                message: "An Error Occurred While Adding Your Comment",
-                color: "red",
-            });
-            return undefined; // return the undefined if no rating
-        }
-
-        // ✅ Preserve existing comment when updating rating
-        const ratedWithComment = {
-            ...rated,
-            comment: userRating?.comment,
-        };
-
-        form.resetDirty();
-
-        return ratedWithComment; // ✅ Return merged data
-    }
 
     async function saveComment({
         trimmedComment,
@@ -115,59 +84,43 @@ export function RatingForm({
     }: {
         trimmedComment: string | undefined;
         existingCommentId?: number;
-        ratingId?: number;
+        ratingId: number;
         storyISBN: string;
         userId: string;
     }) {
-        const commentInState = !!trimmedComment;
-
-        // Case A: User typed something → Create or Update
-        if (commentInState) {
+        if (trimmedComment) {
             if (existingCommentId) {
-                // Update
-                const { data: updatedComment } =
-                    await executeAsyncUpdateComment({
-                        text: trimmedComment!,
-                        storyISBN,
-                        userId,
-                        commentId: existingCommentId,
-                    });
-
-                if (!updatedComment) {
-                    notifications.show({
-                        message:
-                            "An Error Occurred While Updating Your Comment",
-                        color: "red",
-                    });
-                }
+                // Update existing comment
+                await executeAsyncUpdateComment({
+                    text: trimmedComment,
+                    storyISBN,
+                    userId,
+                    commentId: existingCommentId,
+                });
             } else {
-                // Create
-                if (!ratingId || typeof ratingId !== "number") {
-                    notifications.show({
-                        message:
-                            "You Must Rate The Story, To Make A Comment Here",
-                    });
-                } else {
-                    const { data: newComment } =
-                        await executeAsyncCreateComment({
-                            storyISBN,
-                            ratingId,
-                            text: trimmedComment!,
-                            userId,
-                        });
+                // Create new comment
+                const { data: newComment } = await executeAsyncCreateComment({
+                    storyISBN,
+                    ratingId,
+                    text: trimmedComment,
+                    userId,
+                });
 
-                    if (!newComment) {
-                        notifications.show({
-                            message:
-                                "An Error Occurred While Adding Your Comment",
-                            color: "red",
-                        });
-                    }
+                if (newComment) {
+                    queryClient.invalidateQueries({
+                        queryKey: [
+                            "single-comment-permissions",
+                            {
+                                isbn: storyISBN,
+                                userId,
+                                commentId: newComment.id,
+                            },
+                        ],
+                    });
                 }
             }
-        }
-        // Case B: User cleared comment → Delete
-        else if (existingCommentId) {
+        } else if (existingCommentId) {
+            // Delete comment if text was cleared
             await executeAsyncDeleteComment({
                 commentId: existingCommentId,
                 userId,
@@ -180,27 +133,38 @@ export function RatingForm({
         const trimmedComment = comment?.trim();
         const existingCommentId = userRating?.comment?.id;
 
-        // 1. Save Rating (Always use current userId from props)
-        // We pass "new" if userRating doesn't exist, otherwise use current id
+        // ✅ REQUIREMENT: Check if stars are selected before allowing a comment
+        if (values.stars === 0) {
+            notifications.show({
+                title: "Rating Required",
+                message: "You must select a star rating to leave a comment.",
+                color: "orange",
+            });
+            return;
+        }
+
+        // 1. Save/Update Rating first
         const { data: freshRating } = await executeAsyncRateStory({
             ...values,
             id: userRating?.id || "new",
             userId: userId,
         });
 
+        // Fail-safe: if the rating action failed, don't proceed to comment
         if (!freshRating) return;
 
-        // 2. Handle Comment Logic
+        // 2. Handle Comment Logic if it changed
         if (commentChanged) {
             await saveComment({
                 trimmedComment,
                 existingCommentId,
-                ratingId: freshRating.id, // Use the ID returned from the server
+                ratingId: freshRating.id,
                 storyISBN,
                 userId,
             });
         }
 
+        form.resetDirty();
         closeRatingForm();
     }
 
@@ -218,12 +182,13 @@ export function RatingForm({
                         <Textarea
                             placeholder="What Did You Think Of The Story?"
                             value={comment}
-                            onChange={(event) => {
-                                setComment(event.currentTarget.value);
-                            }}
+                            onChange={(event) =>
+                                setComment(event.currentTarget.value)
+                            }
                             minRows={2}
                             maxRows={4}
                         />
+
                         <Group gap={"xl"} justify="space-between">
                             <RatingFields fractions={2} />
 
@@ -232,7 +197,7 @@ export function RatingForm({
                                     size={"xs"}
                                     color="green"
                                     type="submit"
-                                    title="submit your rating"
+                                    title="Submit your rating"
                                     variant="light"
                                     loading={form.submitting}
                                     disabled={isPendingDeleteRating}
@@ -244,12 +209,13 @@ export function RatingForm({
                                 >
                                     <IconCheck />
                                 </ActionIcon>
+
                                 {userRating?.id &&
                                     typeof userRating.id === "number" && (
                                         <ActionIcon
                                             size={"xs"}
                                             color="red"
-                                            title="delete your rating"
+                                            title="Delete your rating"
                                             variant="light"
                                             loading={isPendingDeleteRating}
                                             disabled={form.submitting}
@@ -257,9 +223,8 @@ export function RatingForm({
                                                 const deletedRate =
                                                     await executeAsyncDeleteRating(
                                                         {
-                                                            storyISBN:
-                                                                storyISBN,
-                                                            userId: userId,
+                                                            storyISBN,
+                                                            userId,
                                                         },
                                                     );
 

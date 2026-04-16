@@ -108,7 +108,7 @@ export function StoryRating({
                 </>
             )}
 
-            {ratings.length > 0 && (
+            {ratings.length > 0 && rating > 0 && (
                 <>
                     <TooltipFloating label={`${rating.toFixed(1)} stars`}>
                         <Rating
