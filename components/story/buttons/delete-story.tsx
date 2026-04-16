@@ -8,7 +8,7 @@ import {
     Mark,
     Modal,
     Stack,
-    Text,
+    Tooltip,
 } from "@mantine/core";
 
 import { useDeleteStory } from "@/lib/hooks/story/delete-story";
@@ -75,14 +75,18 @@ export function DeleteStory({ isbn, title, authorId }: PickedStoryProps) {
                 </Modal.Body>
             </Modal>
 
-            <ActionIcon onClick={openDeleteModal} variant="subtle" color="red">
-                <Group>
-                    <Text visibleFrom="sm" fw={500}>
-                        Delete
-                    </Text>
-                    <IconTrashX />
-                </Group>
-            </ActionIcon>
+            <Tooltip label={"Delete"} withArrow position="top">
+                <ActionIcon
+                    onClick={openDeleteModal}
+                    variant="transparent"
+                    color="red"
+                    size="lg"
+                    radius="xl"
+                    aria-label={"Delete this story"}
+                >
+                    <IconTrashX size={24} stroke={1.5} />
+                </ActionIcon>
+            </Tooltip>
         </>
     );
 }

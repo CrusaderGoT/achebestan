@@ -2,15 +2,12 @@
 
 import { Box, Group, Stack, Transition } from "@mantine/core";
 
-import { IconCurrencyDollar } from "@tabler/icons-react";
-
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
 import { CommentSelectType } from "@/zod-schemas/comment";
 import {
     useDisclosure,
     UseDisclosureReturnValue,
-    useIsomorphicEffect,
     useMounted,
 } from "@mantine/hooks";
 import { AuthenticationDrawer } from "../auth/auth-drawer";
@@ -20,6 +17,7 @@ import { CommentStory } from "./buttons/comment-story";
 import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";
 import { ShareStoryDrawer } from "./buttons/share-story-drawer";
+import { StoryBuyMeKofi } from "./buttons/story-buymekofi";
 
 export function StoryActions({
     permissions,
@@ -35,12 +33,6 @@ export function StoryActions({
 
     const [openedAuthModal, { open: openAuthModal, close: closeAuthModal }] =
         useDisclosure(false);
-
-    useIsomorphicEffect(() => {
-        if (!!sessionUser.data?.user && permissions?.canComment) {
-            props.commentBoxDisclosure[1].open();
-        }
-    }, [sessionUser.data?.user, permissions?.canComment]);
 
     const mounted = useMounted();
 
@@ -69,7 +61,7 @@ export function StoryActions({
                         />
                     )}
 
-                    <IconCurrencyDollar color="green" />
+                    <StoryBuyMeKofi />
 
                     <ShareStoryDrawer
                         story={{ ...props }}
