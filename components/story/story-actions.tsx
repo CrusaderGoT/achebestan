@@ -1,12 +1,8 @@
 "use client";
 
-import { ActionIcon, Box, Group, Stack, Text, Transition } from "@mantine/core";
+import { Box, Group, Stack, Transition } from "@mantine/core";
 
-import {
-    IconCurrencyDollar,
-    IconMessage2,
-    IconMessage2Off,
-} from "@tabler/icons-react";
+import { IconCurrencyDollar } from "@tabler/icons-react";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { PickedStoryProps, StoryPermissionsType } from "@/types/story";
@@ -20,6 +16,7 @@ import {
 import { AuthenticationDrawer } from "../auth/auth-drawer";
 import { CreateCommentForm } from "../forms/comment/create-comment-form";
 import { PushNotificationToggle } from "../pwa/push-notification-toggle";
+import { CommentStory } from "./buttons/comment-story";
 import { DeleteStory } from "./buttons/delete-story";
 import { FavouriteStory } from "./buttons/favourite-story";
 import { ShareStoryDrawer } from "./buttons/share-story-drawer";
@@ -54,7 +51,7 @@ export function StoryActions({
             <Stack>
                 <PushNotificationToggle userExists={!!sessionUser.data?.user} />
 
-                <Group justify="space-evenly">
+                <Group justify="space-around">
                     {!sessionUser.isPending && (
                         <FavouriteStory
                             userId={sessionUser.data?.user.id}
@@ -64,31 +61,12 @@ export function StoryActions({
                     )}
 
                     {!sessionUser.isPending && permissions?.canComment && (
-                        <ActionIcon
-                            onClick={() => {
-                                if (!sessionUser.data?.user.id) {
-                                    openAuthModal();
-                                } else {
-                                    props.commentBoxDisclosure[1].toggle();
-                                }
-                            }}
-                            color="gray"
-                            variant="subtle"
-                        >
-                            <Group gap={"xs"} wrap="nowrap">
-                                <Text visibleFrom="sm" fw={500}>
-                                    {props.commentBoxDisclosure[0]
-                                        ? "Close"
-                                        : "Comment"}
-                                </Text>
-
-                                {props.commentBoxDisclosure[0] ? (
-                                    <IconMessage2Off />
-                                ) : (
-                                    <IconMessage2 />
-                                )}
-                            </Group>
-                        </ActionIcon>
+                        <CommentStory
+                            userId={sessionUser.data?.user.id}
+                            openAuthModal={openAuthModal}
+                            toggle={props.commentBoxDisclosure[1].toggle}
+                            opened={props.commentBoxDisclosure[0]}
+                        />
                     )}
 
                     <IconCurrencyDollar color="green" />
