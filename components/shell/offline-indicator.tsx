@@ -71,7 +71,7 @@ export function OfflineIndicator() {
                     <Tooltip
                         label={tooltipLabel}
                         multiline
-                        w={200}
+                        maw={200}
                         withArrow
                         arrowSize={8}
                         position="top-end"

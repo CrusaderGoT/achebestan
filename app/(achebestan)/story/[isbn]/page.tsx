@@ -1,5 +1,4 @@
 import { StoryPageClient } from "@/components/story/story-page";
-import { MetaTags } from "@/components/ui/meta-tags";
 import { getBookStories } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
 import { readLatestStoryISBNs, readStory } from "@/lib/actions/story";
@@ -84,7 +83,10 @@ export default async function StoryPage({
             )}
 
             <meta name="author" content={`${story?.author.name}`} />
-            <MetaTags authorName={story?.author.name || ""} />
+            <meta
+                name="copyright"
+                content={`© ${new Date().getFullYear()} ${story?.author.name} (Achebestan)`}
+            />
 
             <HydrationBoundary state={dehydrate(queryClient)}>
                 <StoryPageClient

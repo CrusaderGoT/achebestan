@@ -45,6 +45,7 @@ export const createStoryAction = authActionClient
                 subtitle: inputData.subtitle,
                 content: sanitizeHTML(inputData.content),
                 created: new Date(),
+                blurb: inputData.blurb,
                 ...(inputData.bookId && chapter != undefined // avoid falsy when 0
                     ? {
                           bookId: inputData.bookId,
@@ -181,6 +182,10 @@ export const updateStoryAction = authActionClient
 
                     ...(!!updateData.subtitle?.trim() && {
                         subtitle: updateData.subtitle,
+                    }),
+
+                    ...(!!updateData.blurb?.trim() && {
+                        blurb: updateData.blurb,
                     }),
 
                     ...(updateData.bookId && chapter != undefined // avoid falsy when 0
