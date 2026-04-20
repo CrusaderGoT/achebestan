@@ -61,7 +61,11 @@ export function StoryFormFields({
                 />
 
                 <LoadingOverlayWithText
-                    text="Submitting"
+                    text={
+                        form.submitting
+                            ? "Submitting..."
+                            : "Processing Next Steps..."
+                    }
                     visible={form.submitting || isProcessing}
                 />
             </Box>

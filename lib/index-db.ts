@@ -1,8 +1,4 @@
-import {
-    StoryIndexDbSchema,
-    StoryIndexDbSchemaType,
-    StoryInsertType,
-} from "@/types/story";
+import { StoryIndexDbSchema, StoryIndexDbSchemaType } from "@/types/story";
 import { IDBPDatabase, openDB } from "idb";
 
 let dbInstance: IDBPDatabase<StoryIndexDbSchema> | null = null;
@@ -48,23 +44,24 @@ export const saveDraft = async (
 ): Promise<number> => {
     const db = await getStoryIndexDB();
     const now = Date.now();
+    const { id, ...draftWithoutId } = draft;
 
     // If draft has an id, we're updating; otherwise, we're creating new
-    if (draft.id) {
+    if (id) {
         // Updating existing draft
-        const data: StoryIndexDbSchemaType = {
-            ...(draft as StoryIndexDbSchemaType),
-            id: draft.id,
+        const data = {
+            ...draft,
+            id: id,
             created: draft.created || now,
             updated: now,
         };
-        return await db.put("stories", data);
+        return await db.put("stories", data as StoryIndexDbSchemaType);
     } else {
         // Creating new draft - omit id to let autoIncrement work
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, ...draftWithoutId } = draft;
+
         const data = {
-            ...(draftWithoutId as StoryInsertType),
+            ...draftWithoutId,
             created: draft.created || now,
             updated: now,
         };

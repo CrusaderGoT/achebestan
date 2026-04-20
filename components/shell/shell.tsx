@@ -7,7 +7,7 @@ import { ModeToggle } from "@/components/shell/mode-toggle";
 import { AltNavLinks, NavLinks } from "@/components/shell/navlinks";
 import { SearchSpotlight } from "@/components/shell/search-spotlight";
 import publicStyles from "@/styles/public.module.css";
-import shellStyles from "@/styles/shell.module.css";
+import shellStyles from "@/styles/shell/shell.module.css";
 import { AppShell, Burger, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";

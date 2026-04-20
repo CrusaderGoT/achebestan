@@ -67,13 +67,13 @@ export type StoryIndexDbSchemaType = Omit<StoryInsertType, "bookId"> & {
     id?: number;
     created: number;
     updated: number;
-    bookId?: ComboboxItem | null;
+    book: ComboboxItem | null;
 };
 
 export type StoryIndexDbSchema = DBSchema & {
     stories: {
         value: StoryIndexDbSchemaType;
         key: number;
-        indexes: { "book-id": number; created: number }; // Replaced draft-id with created for better indexing
+        indexes: { "book-id": number; created: number };
     };
 };

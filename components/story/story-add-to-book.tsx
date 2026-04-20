@@ -41,8 +41,8 @@ export function AddStoryToBook({
                 {(styles) => (
                     <div style={styles}>
                         <BooksSelect
-                            bookId={bookIdState}
-                            setBookId={setBookIdState}
+                            book={bookIdState}
+                            setBook={setBookIdState}
                         />
 
                         {showMoveToBookButton && (

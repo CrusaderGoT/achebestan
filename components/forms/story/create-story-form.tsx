@@ -64,7 +64,7 @@ export function CreateStoryForm() {
     const { start: stopSavingDraft, clear: clearOngoingStopSavingDraft } =
         useTimeout(() => setSavingDraft(false), 1000);
 
-    const [bookId, setBookId] = useState<ComboboxItem | null>(null);
+    const [book, setBook] = useState<ComboboxItem | null>(null);
 
     const {
         executeAsync: executeAsyncCreateStory,
@@ -101,7 +101,7 @@ export function CreateStoryForm() {
             if (!currentDraftId) {
                 setCurrentDraft(null);
                 form.reset();
-                setBookId(null);
+                setBook(null);
                 return;
             }
 
@@ -109,14 +109,14 @@ export function CreateStoryForm() {
                 const draftData = await getDraft(currentDraftId);
 
                 if (draftData) {
-                    const { bookId: draftBookId, ...draft } = draftData;
+                    const { book: draftBook, ...draft } = draftData;
 
                     form.reset();
-                    setBookId(draftBookId ?? null); // UI state stays as ComboboxItem
-                    setCurrentDraft(draft);
+                    setCurrentDraft(draftData);
                     form.setValues(draft);
-                    // Single, explicit conversion for form values:
-                    form.setFieldValue("bookId", toFormBookId(draftBookId));
+                    setBook(draftBook ?? null);
+                    // explicit conversion for form values:
+                    form.setFieldValue("bookId", toFormBookId(draftBook));
 
                     if (openedDrafts) {
                         closeDrafts();
@@ -147,22 +147,22 @@ export function CreateStoryForm() {
         try {
             setSavingDraft(true);
 
-            const draftData = {
+            const draftData: Partial<StoryIndexDbSchemaType> = {
                 ...currentFormValues,
                 ...(currentDraft && {
                     id: currentDraft.id,
                     created: currentDraft.created,
                 }),
-                bookId, // store the full ComboboxItem so the label survives reload
+                book: book, // store the full ComboboxItem so the label survives reload
             };
 
-            const newDraftId = await saveDraft(draftData);
+            const savedDraftId = await saveDraft(draftData);
 
             if (!currentDraft) {
-                const newDraft = await getDraft(newDraftId);
+                const newDraft = await getDraft(savedDraftId);
                 if (newDraft) {
                     setCurrentDraft(newDraft);
-                    setCurrentDraftId(newDraftId);
+                    setCurrentDraftId(savedDraftId);
                 }
             }
 
@@ -211,6 +211,7 @@ export function CreateStoryForm() {
         throttledSaveDraft();
     }, 1000);
 
+    // effect for monitoring content rich text editor change; form onChange does not register it.
     form.watch("content", ({ value, previousValue }) => {
         if (previousValue !== value) {
             clearOngoingSaveContentDraft(); // clear any ongoing timeout
@@ -218,13 +219,21 @@ export function CreateStoryForm() {
         }
     });
 
+    // effect for monitoring book combobox change, should only save if form has other values
+    useEffect(() => {
+        if (!form.isDirty()) return;
+
+        throttledSaveDraft();
+    }, [book]);
+
     async function handleSubmit(data: StoryInsertType) {
         await Promise.all([
             await executeAsyncCreateStory({
                 ...data,
-                bookId: toFormBookId(bookId),
+                bookId: toFormBookId(book),
             }),
-            currentDraftId &&
+            !!currentDraftId &&
+                hasSucceededCreateStory &&
                 deleteDraftOnSubmit &&
                 (await handleDeleteDraft(currentDraftId)),
         ]);
@@ -305,7 +314,7 @@ export function CreateStoryForm() {
                         }
                     />
 
-                    <BooksSelect bookId={bookId} setBookId={setBookId} />
+                    <BooksSelect book={book} setBook={setBook} />
 
                     <Group mt="md">
                         <Button

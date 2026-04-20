@@ -1,8 +1,10 @@
 // components/OfflineIndicator.tsx
 "use client";
 
+import styles from "@/styles/shell/offline.module.css";
 import { ActionIcon, Tooltip, Transition } from "@mantine/core";
 import { IconWifi, IconWifiOff } from "@tabler/icons-react";
+import { clsx } from "clsx";
 import { useEffect, useState } from "react";
 
 // Three distinct states so we can show a brief "back online" confirmation
@@ -59,22 +61,6 @@ export function OfflineIndicator() {
 
     return (
         <>
-            {/* Keyframes for the attention-grabbing pulse on the offline state.
-                Scoped inside the component so there are no global style leaks. */}
-            <style>{`
-                @keyframes ob-pulse {
-                    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.55); }
-                    50%       { box-shadow: 0 0 0 8px rgba(250, 82, 82, 0); }
-                }
-                @keyframes ob-pop-in {
-                    0%   { transform: scale(0.6); opacity: 0; }
-                    70%  { transform: scale(1.12); }
-                    100% { transform: scale(1);   opacity: 1; }
-                }
-                .ob-pulse  { animation: ob-pulse 1.8s ease-in-out infinite; }
-                .ob-pop-in { animation: ob-pop-in 0.28s cubic-bezier(.34,1.56,.64,1) both; }
-            `}</style>
-
             <Transition
                 mounted={isVisible}
                 transition="slide-up"
@@ -94,7 +80,10 @@ export function OfflineIndicator() {
                         transitionProps={{ transition: "pop", duration: 180 }}
                     >
                         <ActionIcon
-                            className={`ob-pop-in ${isOffline ? "ob-pulse" : ""}`}
+                            className={clsx(
+                                styles.obPopIn,
+                                isOffline && styles.obPulse,
+                            )}
                             style={{
                                 ...transitionStyles,
                                 position: "fixed",

@@ -17,11 +17,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useState } from "react";
 
 export function BooksSelect({
-    bookId,
-    setBookId,
+    book,
+    setBook,
 }: {
-    bookId: ComboboxItem | null;
-    setBookId: Dispatch<SetStateAction<ComboboxItem | null>>;
+    book: ComboboxItem | null;
+    setBook: Dispatch<SetStateAction<ComboboxItem | null>>;
 }) {
     const { sessionUser } = useCentralizedAuth();
 
@@ -43,9 +43,9 @@ export function BooksSelect({
             {!error && userBooks && (
                 <Select
                     data={userBooks}
-                    value={bookId ? bookId.value : null}
+                    value={book ? book.value : null}
                     onChange={(_value, option) => {
-                        setBookId(option);
+                        setBook(option);
                     }}
                     label="Choose a Book to add this story to"
                     placeholder="Pick Book"

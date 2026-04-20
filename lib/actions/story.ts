@@ -224,10 +224,13 @@ export const readStory = async (isbn: string) => {
             },
         });
 
+        if (!storyDb) {
+            throw new Error(`Story with ISBN ${isbn} not found`);
+        }
+
         return storyDb;
     } catch (e) {
-        console.log(e);
-        throw new Error("Story not found");
+        throw new Error(`Failed to get story with ISBN ${isbn}`);
     }
 };
 
@@ -253,12 +256,15 @@ export const readLatestStories = async (latest: number = 10) => {
 export const readLatestStoryISBNs = async (latest: number = 10) => {
     "use cache";
     cacheTag("readLatestStories"); // same tag as readLatestStories since they share cache invalidation
-
-    return await db
-        .select({ isbn: story.isbn, created: story.created })
-        .from(story)
-        .limit(latest)
-        .orderBy((stories) => desc(stories.created));
+    try {
+        return await db
+            .select({ isbn: story.isbn, created: story.created })
+            .from(story)
+            .limit(latest)
+            .orderBy((stories) => desc(stories.created));
+    } catch (e) {
+        console.log(e);
+    }
 };
 
 export const deleteStoryAction = authActionClient
@@ -301,9 +307,9 @@ export const deleteStoryAction = authActionClient
             }
 
             // revalidate tags/paths once story is created
+            updateTag(`readStory-${deletedStory.isbn}`);
             updateTag("readLatestStories");
             revalidatePath(`/`);
-            updateTag(`readStory-${deletedStory.isbn}`);
 
             // shift all subsequent story chapters down by 1 if deleted story belong to a book
             if (deletedStory.bookId && deletedStory.bookPart) {

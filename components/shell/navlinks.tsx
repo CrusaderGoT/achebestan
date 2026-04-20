@@ -12,7 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 
-import shellStyles from "@/styles/shell.module.css";
+import shellStyles from "@/styles/shell/shell.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import cx from "clsx";
 import { Fragment } from "react";
