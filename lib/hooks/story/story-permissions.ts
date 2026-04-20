@@ -1,4 +1,7 @@
-import { calculateStoryPermissions } from "@/lib/auth/policies/story-policy";
+import {
+    calculateStoryPermissions,
+    canCreateStory,
+} from "@/lib/auth/policies/story-policy";
 import { UserSelectType } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 
@@ -37,5 +40,27 @@ export const useStoryPermissions = ({
         staleTime: 1000 * 60 * 60, // 1 hour fresh
         gcTime: 1000 * 60 * 60 * 24, // keep in cache 24h
         enabled: !!user && !!storyId && !!authorId,
+    });
+};
+
+export const useCanCreateStory = ({
+    userId,
+}: {
+    userId: string | undefined;
+}) => {
+    return useQuery({
+        queryKey: ["can-create-story", { userId }],
+        queryFn: async () => {
+            try {
+                const data = await canCreateStory();
+
+                return data;
+            } catch {
+                throw new Error(
+                    "Failed to check if this user can create stories",
+                );
+            }
+        },
+        enabled: !!userId,
     });
 };

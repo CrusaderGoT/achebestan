@@ -21,12 +21,16 @@ export const storyUpdateSchema = createUpdateSchema(story, {
 
 export const storyInsertSchema = createInsertSchema(story, {
     title: (schema) =>
-        schema.max(256, { error: "title must not exceed 256 characters" }),
+        schema
+            .min(3, { error: "title must atleast be 3 characters" })
+            .max(60, { error: "title must not exceed 60 characters" })
+            .nonempty(),
     content: (schema) =>
-        schema.min(100, {
-            error: "story content must be at least 100 characters",
-        }),
-    authorId: (schema) => schema.optional(), // to allow dynamic assigning from user session,
+        schema
+            .min(100, {
+                error: "story content must be at least 100 characters",
+            })
+            .nonempty(),
     image: z.file().optional(),
 }).omit({
     created: true,

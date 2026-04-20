@@ -46,12 +46,12 @@ export const story = table(
         t.check(
             "book_fields_together",
             sql`(${table.bookId} IS NULL AND ${table.bookPart} IS NULL) OR 
-            (${table.bookId} IS NOT NULL AND ${table.bookPart} IS NOT NULL)`
+            (${table.bookId} IS NOT NULL AND ${table.bookPart} IS NOT NULL)`,
         ),
         t
             .unique("stories_book_id_book_part_uidx")
             .on(table.bookId, table.bookPart),
-    ]
+    ],
 );
 
 export const storyRelations = relations(story, ({ one, many }) => ({

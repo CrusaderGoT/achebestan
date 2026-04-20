@@ -14,9 +14,8 @@ import cx from "clsx";
 import { useRouter } from "next/navigation";
 
 import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
-import { canCreateStory } from "@/lib/auth/policies/story-policy";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useEffect, useState } from "react";
+import { useCanCreateStory } from "@/lib/hooks/story/story-permissions";
 import { OfflineIndicator } from "./offline-indicator";
 
 export function Shell({
@@ -34,18 +33,9 @@ export function Shell({
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
 
-    const [canCreate, setCanCreate] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (sessionUser.isPending) return;
-
-        const checkPermissions = async () => {
-            const result = await canCreateStory();
-            setCanCreate(result);
-        };
-        checkPermissions();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sessionUser.data?.user.id]);
+    const { data: canCreateStory, isPending } = useCanCreateStory({
+        userId: session?.user.id,
+    });
 
     return (
         <AppShell
@@ -82,7 +72,7 @@ export function Shell({
                         visibleFrom="lg"
                     >
                         {!sessionUser.isPending && (
-                            <AltNavLinks canCreateStory={canCreate} />
+                            <AltNavLinks canCreateStory={!!canCreateStory} />
                         )}
                     </Group>
 
@@ -117,7 +107,7 @@ export function Shell({
                 {!sessionUser.isPending && (
                     <NavLinks
                         closeNavbar={closeNavbar}
-                        canCreateStory={canCreate}
+                        canCreateStory={!!canCreateStory}
                     />
                 )}
 

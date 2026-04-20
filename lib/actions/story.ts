@@ -41,7 +41,7 @@ export const createStoryAction = authActionClient
             .insert(story)
             .values({
                 authorId: ctx.user.id,
-                title: inputData.title,
+                title: inputData.title.trim(),
                 subtitle: inputData.subtitle,
                 content: sanitizeHTML(inputData.content),
                 created: new Date(),
