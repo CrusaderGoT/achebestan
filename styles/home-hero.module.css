@@ -1,8 +1,8 @@
 .heroSection {
   justify-content: center;
-  padding: 40px;
+  padding: 30px;
   @mixin larger-than $mantine-breakpoint-xs {
-    padding: 80px;
+    padding: 60px;
   }
 }
 

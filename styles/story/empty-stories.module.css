@@ -1,0 +1,23 @@
+.content {
+  text-align: center;
+  padding: 40px;
+}
+
+.title {
+  font-family: var(--mantine-font-family);
+  font-weight: 900;
+  font-size: rem(42px);
+  letter-spacing: rem(-1px);
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+
+  /* Using Mantine breakpoint mixin */
+  @media (max-width: 48em) {
+    font-size: rem(32px);
+  }
+}
+
+.description {
+  max-width: rem(500px);
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2));
+  line-height: 1.6;
+}

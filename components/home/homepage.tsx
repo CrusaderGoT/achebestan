@@ -1,11 +1,12 @@
 "use client";
 
-import { Container, Grid, Stack } from "@mantine/core";
+import { Container, Grid, Stack, Text } from "@mantine/core";
 
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
 import { useExitOnHomePage } from "@/lib/hooks/home/use-exit-on-home-page";
 import { StoryAuthorProps } from "@/types/story";
+import { EmptyStoriesHero } from "../ui/empty-stories";
 
 export function HomePage({
     stories,
@@ -19,7 +20,7 @@ export function HomePage({
         <Stack>
             <HomeHero />
 
-            {stories && (
+            {stories && stories.length > 0 ? (
                 <Grid
                     component={Container}
                     px={{ base: "md", md: "xl" }}
@@ -38,6 +39,8 @@ export function HomePage({
                         );
                     })}
                 </Grid>
+            ) : (
+                <EmptyStoriesHero />
             )}
         </Stack>
     );

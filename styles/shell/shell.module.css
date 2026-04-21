@@ -9,6 +9,9 @@
 .websiteName {
   cursor: pointer;
   max-width: max-content;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .mobileNavBar {
@@ -17,7 +20,9 @@
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
   border-radius: var(--mantine-radius-md);
   font-weight: 500;
-  transition: background-color 0.2s ease, filter 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    filter 0.2s ease;
   cursor: pointer;
   min-width: max-content;
 }

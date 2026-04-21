@@ -17,6 +17,10 @@ async function testConnection() {
         // Test table access
         const users = await db.select().from(user).limit(1);
         console.log("✅ Table access works", users);
+
+        // delete all stories
+        //const res = await db.execute("TRUNCATE TABLE stories CASCADE;")
+        //console.log("Deleted all stories", res)
     } catch (error) {
         console.error("❌ Database connection failed:");
         console.error(error);

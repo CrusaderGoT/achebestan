@@ -64,6 +64,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.preventUserSelect {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .title {
   text-align: center;
   margin-bottom: var(--mantine-spacing-md);

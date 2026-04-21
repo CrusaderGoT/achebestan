@@ -7,18 +7,29 @@ import { CreateStoryForm } from "../forms/story/create-story-form";
 
 export function NewStory() {
     const {
-        sessionUser: { data: session },
+        sessionUser: { data: session, isPending: isSessionPending },
     } = useCentralizedAuth();
 
-    const { data: canCreateStory, isPending } = useCanCreateStory({
-        userId: session?.user.id,
+    const {
+        data: canCreateStory,
+        isPending: isPermsPending,
+        fetchStatus,
+    } = useCanCreateStory({
+        userId: session?.user?.id,
     });
 
-    if (isPending) return null;
+    const isActivelyChecking =
+        isSessionPending ||
+        (!!session && isPermsPending && fetchStatus !== "idle");
 
-    if (canCreateStory) {
+    if (isActivelyChecking) {
+        return null;
+    }
+
+    if (session && canCreateStory) {
         return <CreateStoryForm />;
     }
 
-    return <NotFound />; // return component instead of notFound to allow for dynamic change, when user is authorized
+    // In all other cases (logged out, no permission), show the 404 immediately.
+    return <NotFound />;
 }

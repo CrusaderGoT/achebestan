@@ -14,7 +14,11 @@ import { connection } from "next/server";
 
 export async function generateStaticParams() {
     const stories = await readLatestStoryISBNs();
-    return stories?.map((story) => ({ isbn: story.isbn })) || [];
+    return (
+        stories?.map((story) => ({ isbn: story.isbn })) || [
+            { isbn: "placeholder" },
+        ]
+    );
 }
 
 export async function generateMetadata({
