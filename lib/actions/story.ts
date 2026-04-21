@@ -336,62 +336,75 @@ export const deleteStoryAction = authActionClient
         },
     );
 
+export async function makeStoryChapter(bookId: number | null | undefined) {
+    // get the current max chapter for this story
+    let chapter: undefined | number = undefined;
+
+    if (bookId) {
+        const [{ max }] = await db
+            .select({
+                max: sql<number>`coalesce(max(${story.bookPart}), 0)`,
+            })
+            .from(story)
+            .where(eq(story.bookId, bookId));
+
+        chapter = max;
+    }
+
+    return chapter;
+}
+
 export async function searchStories(
     searchText: string,
     options: SearchOptions = {},
 ) {
-    // Input validation
-    if (!searchText?.trim()) {
-        return [];
-    }
+    const cleanSearchText = searchText?.trim() || "";
 
-    // Sanitize and prepare search text
-    const cleanSearchText = searchText.trim();
-
-    if (cleanSearchText.length === 0) {
+    if (!cleanSearchText) {
         return [];
     }
 
     const {
-        limit = 50,
+        limit = 20, // Defaulted to 20 to match UI needs
         offset = 0,
         sortBy = "created",
         sortOrder = "desc",
-        fields = ["title", "subtitle", "isbn"],
+        fields = ["title", "subtitle"],
     } = options;
 
-    // Build search conditions based on selected fields
     const searchConditions = [];
+    const searchPattern = `%${cleanSearchText}%`;
 
-    if (fields.includes("title")) {
-        searchConditions.push(ilike(story.title, `%${cleanSearchText}%`));
-    }
+    // Build conditions safely
+    if (fields.includes("title"))
+        searchConditions.push(ilike(story.title, searchPattern));
+    if (fields.includes("subtitle"))
+        searchConditions.push(ilike(story.subtitle, searchPattern));
+    // Include isbn if added to fields later
+    if (fields.includes("isbn"))
+        searchConditions.push(ilike(story.isbn, searchPattern));
 
-    if (fields.includes("subtitle")) {
-        searchConditions.push(ilike(story.subtitle, `%${cleanSearchText}%`));
-    }
+    // Fallback if no valid fields provided
+    if (searchConditions.length === 0) return [];
 
-    // Build order by clause
     const getOrderBy = () => {
         const direction = sortOrder === "asc" ? asc : desc;
-
         switch (sortBy) {
             case "title":
-                return [direction(story.title)];
+                return direction(story.title);
             case "edited":
-                return [direction(story.edited)];
+                return direction(story.edited);
             case "created":
             default:
-                return [direction(story.created)];
+                return direction(story.created);
         }
     };
 
     try {
-        // Execute search with basic conditions (no complex ranking for now)
         const stories = await db.query.story.findMany({
             where: or(...searchConditions),
-            orderBy: getOrderBy(),
-            limit: Math.min(limit, 100), // Cap at 100 for performance
+            orderBy: [getOrderBy()],
+            limit: Math.min(limit, 50), // Hard cap for API protection
             offset: Math.max(offset, 0),
             columns: {
                 id: true,
@@ -409,25 +422,7 @@ export async function searchStories(
 
         return stories;
     } catch (error) {
-        console.error("Search error:", error);
-        throw new Error("Failed to search stories");
+        console.error("[searchStories] Error:", error);
+        throw new Error("Failed to search stories. Please try again.");
     }
-}
-
-export async function makeStoryChapter(bookId: number | null | undefined) {
-    // get the current max chapter for this story
-    let chapter: undefined | number = undefined;
-
-    if (bookId) {
-        const [{ max }] = await db
-            .select({
-                max: sql<number>`coalesce(max(${story.bookPart}), 0)`,
-            })
-            .from(story)
-            .where(eq(story.bookId, bookId));
-
-        chapter = max;
-    }
-
-    return chapter;
 }

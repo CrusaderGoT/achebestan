@@ -33,7 +33,7 @@ export interface SearchOptions {
     offset?: number;
     sortBy?: "created" | "edited" | "title";
     sortOrder?: "asc" | "desc";
-    fields?: Array<"title" | "subtitle">;
+    fields?: Array<"title" | "subtitle" | "isbn">;
 }
 
 export type StoryContentType = {

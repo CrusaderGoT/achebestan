@@ -1,7 +1,6 @@
 "use client";
 
 import { readLatestStories, searchStories } from "@/lib/actions/story";
-import { StorySelectType } from "@/types/story";
 import {
     ActionIcon,
     Badge,
@@ -14,167 +13,100 @@ import {
     Text,
     TextInput,
 } from "@mantine/core";
-import {
-    useDebouncedCallback,
-    useIsFirstRender,
-    useMounted,
-} from "@mantine/hooks";
+import { useDebouncedValue, useMounted } from "@mantine/hooks";
 import { nprogress } from "@mantine/nprogress";
 import { Spotlight, spotlight } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-// Define search options interface to match the improved function
-interface SearchState {
-    results: Omit<StorySelectType, "content" | "bookPart">[];
-    loading: boolean;
-    hasSearched: boolean;
-}
+// Helper function moved outside component to prevent recreation
+const isRecentStory = (createdDate: Date | string | number): boolean => {
+    const days = dayjs().diff(dayjs(createdDate), "day");
+    return days >= 0 && days <= 7;
+};
 
 export function SearchSpotlight() {
     const mounted = useMounted();
-
     const router = useRouter();
-
     const pathname = usePathname();
 
+    // 1. UI State
     const [search, setSearch] = useState("");
-
-    const [searchState, setSearchState] = useState<SearchState>({
-        results: [],
-        loading: false,
-        hasSearched: false,
-    });
-
-    const firstRendered = useIsFirstRender();
-
-    // Load initial stories on first render
-    useEffect(() => {
-        if (!firstRendered || searchState.hasSearched) return;
-
-        async function loadInitialStories() {
-            setSearchState((prev) => ({ ...prev, loading: true }));
-
-            try {
-                const stories = await readLatestStories();
-                if (stories) {
-                    setSearchState({
-                        results: stories,
-                        loading: false,
-                        hasSearched: false, // These are default stories, not search results
-                    });
-                }
-            } catch (error) {
-                console.error("Failed to load initial stories:", error);
-                setSearchState((prev) => ({ ...prev, loading: false }));
-            }
-        }
-
-        loadInitialStories();
-    });
-
-    // Handle search with improved function
-    const performSearch = useCallback(async (query: string) => {
-        if (!query.trim()) {
-            // If search is cleared, reload initial stories
-            const stories = await readLatestStories();
-            setSearchState({
-                results: stories || [],
-                loading: false,
-                hasSearched: false,
-            });
-            return;
-        }
-
-        setSearchState((prev) => ({ ...prev, loading: true }));
-
-        try {
-            const searchResults = await searchStories(query, {
-                limit: 20,
-                sortBy: "created",
-                sortOrder: "desc",
-                fields: ["title", "subtitle"],
-            });
-
-            setSearchState({
-                results: searchResults,
-                loading: false,
-                hasSearched: true,
-            });
-        } catch (error) {
-            console.error("Search failed:", error);
-            setSearchState((prev) => ({
-                ...prev,
-                loading: false,
-                results: [], // Clear results on error
-            }));
-        }
-    }, []);
-
-    // Debounced search handler
-    const debouncedSearch = useDebouncedCallback(performSearch, 500);
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.currentTarget.value;
-        setSearch(value);
-        debouncedSearch(value);
-    };
-
-    // Enhanced filtering - only filter if we haven't performed a server search
-    const filteredResults = searchState.hasSearched
-        ? searchState.results
-        : searchState.results.filter(
-              (item) =>
-                  item.title
-                      .toLowerCase()
-                      .includes(search.toLowerCase().trim()) ||
-                  (item.subtitle &&
-                      item.subtitle
-                          .toLowerCase()
-                          .includes(search.toLowerCase().trim()))
-          );
-
+    const [debouncedSearch] = useDebouncedValue(search, 400);
     const [activeLink, setActiveLink] = useState<string | undefined>(undefined);
 
-    //effect for nav progress for seach menu
+    // 2. Fetch Initial/Default Stories
+    const { data: initialStories = [], isLoading: isInitialLoading } = useQuery(
+        {
+            queryKey: ["stories", "latest"],
+            queryFn: async () => {
+                const res = await readLatestStories();
+                return res || [];
+            },
+            staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+        },
+    );
+
+    // 3. Fetch Search Results
+    const { data: searchResults = [], isFetching: isSearchLoading } = useQuery({
+        queryKey: ["stories", "search", debouncedSearch],
+        queryFn: () => searchStories(debouncedSearch, { limit: 20 }),
+        enabled: debouncedSearch.trim().length > 0, // Only run if there is text
+        staleTime: 1000 * 60 * 2, // Cache search results for 2 minutes
+    });
+
+    // 4. Compute Results to Display
+    const displayItems = useMemo(() => {
+        // If we have an active server search, use those results
+        if (debouncedSearch.trim()) {
+            return searchResults;
+        }
+
+        // Instant client-side filtering while typing (before debounce hits server)
+        if (search.trim() && initialStories.length > 0) {
+            const query = search.toLowerCase().trim();
+            return initialStories.filter(
+                (item) =>
+                    item.title.toLowerCase().includes(query) ||
+                    item.subtitle?.toLowerCase().includes(query),
+            );
+        }
+
+        // Default state: show latest stories
+        return initialStories;
+    }, [search, debouncedSearch, searchResults, initialStories]);
+
+    const isLoading = isInitialLoading || isSearchLoading;
+    const hasSearched = debouncedSearch.trim().length > 0;
+
+    // 5. Navigation Progress Effect
     useEffect(() => {
         if (!activeLink || !mounted) return;
 
         if (pathname === activeLink) {
-            // Complete progress when we reach the target or if already there
-            const timer = setTimeout(() => {
-                nprogress.complete();
-            }, 100);
-
+            const timer = setTimeout(() => nprogress.complete(), 100);
             return () => clearTimeout(timer);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, activeLink]);
+    }, [pathname, activeLink, mounted]);
 
-    // Render spotlight actions
-    const items = filteredResults.map((item) => (
+    // 6. Action Items Mapping
+    const items = displayItems.map((item) => (
         <Spotlight.Action
-            key={`${item.id}-${item.isbn}`} // Better key using ID
+            key={item.id}
             onClick={() => {
-                console.log("Selected story:", item);
-                spotlight.close(); // Close spotlight after selection
-
+                spotlight.close();
                 nprogress.start();
 
                 const targetPath = `/stories/${item.isbn}`;
 
-                // Check if we're already on this path
                 if (pathname === targetPath) {
-                    // Already on this page - complete progress immediately
-                    setTimeout(() => {
-                        nprogress.complete();
-                    }, 100); // Small delay to show the progress
+                    setTimeout(() => nprogress.complete(), 100);
                 } else {
-                    // Different path - normal navigation
                     setActiveLink(targetPath);
-                    router.push(targetPath);
+                    router.push(targetPath); // Prefer push over replace for standard navigation unless strictly necessary
                 }
             }}
         >
@@ -202,23 +134,19 @@ export function SearchSpotlight() {
                         </Text>
                     )}
 
-                    {/* Show ISBN for identification */}
                     {item.blurb && (
-                        <Text opacity={0.4} size="xs" lineClamp={4}>
+                        <Text opacity={0.4} size="xs" lineClamp={2}>
                             {item.blurb}
                         </Text>
                     )}
                 </Box>
 
                 <Stack gap={4} align="flex-end">
-                    {/* Show "new" badge for recent items */}
                     {isRecentStory(item.created) && (
                         <Badge variant="light" color="green" size="xs">
                             New
                         </Badge>
                     )}
-
-                    {/* Show creation date */}
                     <Text size="xs" opacity={0.5}>
                         {dayjs(item.created).format("DD-MMM-YYYY")}
                     </Text>
@@ -241,8 +169,9 @@ export function SearchSpotlight() {
             <TextInput
                 visibleFrom="sm"
                 onClick={spotlight.open}
-                radius={"md"}
+                radius="md"
                 placeholder="Search..."
+                readOnly // Prevent typing in the trigger input to force Spotlight usage
                 leftSection={<IconSearch stroke={1.5} size={15} />}
             />
 
@@ -253,21 +182,19 @@ export function SearchSpotlight() {
                 maxHeight={400}
             >
                 <Spotlight.Search
-                    value={search}
-                    onChange={handleChange}
-                    placeholder="Search stories by title, subtitle, or ISBN..."
+                    placeholder="Search stories by title or subtitle..."
                     leftSection={<IconSearch stroke={1.5} size={16} />}
-                    rightSection={searchState.loading && <Loader size={18} />}
+                    rightSection={isLoading && <Loader size={18} />}
                 />
 
                 <Spotlight.ActionsList>
-                    {searchState.loading && items.length === 0 ? (
+                    {isLoading && items.length === 0 ? (
                         <Center p="md">
                             <Loader size="sm" />
                         </Center>
                     ) : items.length > 0 ? (
                         <>
-                            {searchState.hasSearched && (
+                            {hasSearched && (
                                 <Text size="xs" opacity={0.6} p="xs">
                                     Found {items.length} result
                                     {items.length !== 1 ? "s" : ""}
@@ -277,7 +204,7 @@ export function SearchSpotlight() {
                         </>
                     ) : (
                         <Spotlight.Empty>
-                            {searchState.hasSearched && !!search.trim()
+                            {hasSearched
                                 ? `No stories found for "${search}"`
                                 : "Start typing to search stories..."}
                         </Spotlight.Empty>
@@ -286,9 +213,4 @@ export function SearchSpotlight() {
             </Spotlight.Root>
         </>
     );
-}
-
-function isRecentStory(createdDate: Date | string | number): boolean {
-    const days = dayjs().diff(dayjs(createdDate), "day");
-    return days >= 0 && days <= 7; // consider stories from last 7 days as "new"
 }
