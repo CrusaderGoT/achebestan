@@ -105,7 +105,7 @@ export const createStoryAction = authActionClient
             badge: "/web-app-manifest-96x96.png",
             tag: `story-${createdStory.title}`,
             data: {
-                url: `/story/${createdStory.isbn}`,
+                url: `/stories/${createdStory.isbn}`,
                 storyId: createdStory.isbn,
             },
             actions: [

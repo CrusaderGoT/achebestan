@@ -42,7 +42,7 @@ export default function manifest(): MetadataRoute.Manifest {
                 name: "Create New Story",
                 short_name: "new story +",
                 description: "write a new story and publish it",
-                url: "/story/new",
+                url: "/stories/new",
                 icons: [
                     {
                         src: "/web-app-manifest-96x96.png",

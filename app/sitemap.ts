@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const latestStoriesSiteMap: MetadataRoute.Sitemap = latestStories.map(
         (story) => ({
-            url: `${BASE_URL}/story/${story.isbn}`,
+            url: `${BASE_URL}/stories/${story.isbn}`,
             lastModified: story.edited || story.created,
             changeFrequency: "always",
             priority: 1.0,

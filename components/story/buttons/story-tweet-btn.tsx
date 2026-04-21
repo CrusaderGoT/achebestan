@@ -25,7 +25,7 @@ export function StoryTweetButton({
 }: StoryTweetButtonProps) {
     const shareUrl = useMemo(() => {
         // Create the story URL
-        const storyUrl = `${baseUrl}/story/${story.isbn}`;
+        const storyUrl = `${baseUrl}/stories/${story.isbn}`;
 
         // Create the tweet text
         const tweetText = customText || createTweetText(story);

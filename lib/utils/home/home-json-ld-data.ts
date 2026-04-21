@@ -142,7 +142,7 @@ export async function homeJsonLdData(
                     position: index + 1,
                     item: {
                         "@type": ["CreativeWork", "Article"],
-                        "@id": `${baseUrl}/story/${story.isbn}#article`,
+                        "@id": `${baseUrl}/stories/${story.isbn}#article`,
                         name: story.title,
                         alternateName: story.subtitle || undefined,
                         description:
@@ -156,7 +156,7 @@ export async function homeJsonLdData(
                         },
                         datePublished: story.created,
                         dateModified: story.edited || story.created,
-                        url: `${baseUrl}/story/${story.isbn}`,
+                        url: `${baseUrl}/stories/${story.isbn}`,
                         image: story.image || undefined,
                         genre: [
                             "Dark Fiction",

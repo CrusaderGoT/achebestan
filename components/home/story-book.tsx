@@ -79,7 +79,7 @@ export function StoryBook({
                     <Button
                         variant="outline"
                         className={storybookStyles.navigate}
-                        href={`/story/${isbn}`}
+                        href={`/stories/${isbn}`}
                         component={NavigationLink}
                     >
                         Read

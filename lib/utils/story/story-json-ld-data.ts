@@ -33,10 +33,10 @@ export function storyJsonLdData(
             // Main Creative Work/Article schema
             {
                 "@type": "Article",
-                "@id": `${baseUrl}/story/${story.isbn}#article`,
+                "@id": `${baseUrl}/stories/${story.isbn}#article`,
                 mainEntityOfPage: {
                     "@type": "WebPage",
-                    "@id": `${baseUrl}/story/${story.isbn}`,
+                    "@id": `${baseUrl}/stories/${story.isbn}`,
                 },
                 headline: story.title,
                 alternativeHeadline: story.subtitle || undefined,
@@ -75,7 +75,7 @@ export function storyJsonLdData(
                 inLanguage: "en-US",
                 genre: ["Fiction", "Literature", "Original Story"],
                 keywords: `${story.title}, ${story.author.name}, original story, literature, fiction, achebestan`,
-                url: `${baseUrl}/story/${story.isbn}`,
+                url: `${baseUrl}/stories/${story.isbn}`,
                 identifier: {
                     "@type": "PropertyValue",
                     propertyID: "ISBN",
@@ -137,8 +137,8 @@ export function storyJsonLdData(
                     "@id": `${baseUrl}#organization`,
                 },
                 datePublished: dayjs(story.created).format(),
-                url: `${baseUrl}/story/${story.isbn}`,
-                sameAs: `${baseUrl}/story/${story.isbn}`,
+                url: `${baseUrl}/stories/${story.isbn}`,
+                sameAs: `${baseUrl}/stories/${story.isbn}`,
                 ...(story.image && {
                     image: story.image,
                 }),
@@ -226,7 +226,7 @@ export function storyJsonLdData(
                 "@type": "ReadAction",
                 target: {
                     "@type": "EntryPoint",
-                    urlTemplate: `${baseUrl}/story/${story.isbn}`,
+                    urlTemplate: `${baseUrl}/stories/${story.isbn}`,
                     actionPlatform: [
                         "https://schema.org/DesktopWebPlatform",
                         "https://schema.org/MobileWebPlatform",

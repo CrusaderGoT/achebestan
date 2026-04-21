@@ -28,7 +28,7 @@ export const useCreateStory = (
                 });
             }
 
-            window.location.replace(`/story/${args.data.isbn}`);
+            window.location.replace(`/stories/${args.data.isbn}`);
         },
         onError(args) {
             if (args.error.validationErrors) {

@@ -93,7 +93,7 @@ export function BookPagination({
             //    pending state for us. isPending stays true until the new
             //    route has fully rendered, giving us a free disabled + loader signal.
             startTransition(() => {
-                router.replace(`/story/${nextChapter.isbn}`, { scroll: false });
+                router.replace(`/stories/${nextChapter.isbn}`, { scroll: false });
             });
         },
         [chapters, router, isPending, activePage],

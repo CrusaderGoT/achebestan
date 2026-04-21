@@ -68,7 +68,7 @@ const serwist = new Serwist({
         // Story pages — fast load from cache, refresh in background
         {
             matcher: ({ url }) =>
-                url.pathname.startsWith("/story/") &&
+                url.pathname.startsWith("/stories/") &&
                 !url.pathname.includes("new"),
             handler: new NetworkFirst({
                 cacheName: CACHE_NAMES.STORY,
@@ -226,7 +226,7 @@ self.addEventListener("install", (event: ExtendableEvent) => {
 // ---------------------------------------------------------------------------
 async function cacheStoryPages(stories: StorySelectType[]): Promise<void> {
     const cache = await caches.open(CACHE_NAMES.STORY);
-    const urls = stories.map((story) => `/story/${story.isbn}`);
+    const urls = stories.map((story) => `/stories/${story.isbn}`);
 
     const BATCH_SIZE = 5;
     for (let i = 0; i < urls.length; i += BATCH_SIZE) {
@@ -321,7 +321,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
     const url = new URL(request.url);
 
     // Queue offline story POST/PATCH/DELETE mutations
-    if (url.pathname.startsWith("/story/new")) {
+    if (url.pathname.startsWith("/stories/new")) {
         event.respondWith(
             (async () => {
                 try {

@@ -163,7 +163,7 @@ export function SearchSpotlight() {
 
                 nprogress.start();
 
-                const targetPath = `/story/${item.isbn}`;
+                const targetPath = `/stories/${item.isbn}`;
 
                 // Check if we're already on this path
                 if (pathname === targetPath) {

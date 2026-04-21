@@ -54,7 +54,7 @@ export function ShareStoryDrawer({
                                 title: story.title,
                                 blurb: story.blurb,
                             })}
-                            url={`${BASE_URL}/story/${story.isbn}`}
+                            url={`${BASE_URL}/stories/${story.isbn}`}
                         />
                     </Group>
                 </Stack>
@@ -78,7 +78,7 @@ export function ShareStoryDrawer({
 
 export function CopyStoryUrl({ isbn }: { isbn: string }) {
     return (
-        <CopyButton value={`${BASE_URL}/story/${isbn}`} timeout={2000}>
+        <CopyButton value={`${BASE_URL}/stories/${isbn}`} timeout={2000}>
             {({ copied, copy }) => (
                 <ActionIcon variant="default" onClick={copy}>
                     <Group gap={"xs"} wrap="nowrap">

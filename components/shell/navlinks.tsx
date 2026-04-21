@@ -33,7 +33,7 @@ const baseNavlinkData: NavLinkData[] = [
     {
         icon: IconWriting,
         label: "New Story",
-        href: "/story/new",
+        href: "/stories/new",
         description: "Write a new story",
         rightSection: <IconPlus size={16} stroke={1.5} />,
         requiresCheck: "canCreateStory" as const,
