@@ -33,8 +33,8 @@ export function Shell({
     const [openedAuthModal, { close: closeAuthModal, open: openAuthModal }] =
         useDisclosure(false);
 
-    const { data: canCreateStory, isPending } = useCanCreateStory({
-        userId: session?.user.id,
+    const { data: canCreateStory } = useCanCreateStory({
+        userId: sessionUser.data?.user.id,
     });
 
     return (
