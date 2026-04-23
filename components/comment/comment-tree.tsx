@@ -229,19 +229,25 @@ function CommentTree({
                 onNewComment={onNewComment}
             />
 
-            <Tree
-                data={commentsNodeData}
-                tree={tree}
-                levelOffset={"xl"}
-                expandOnClick={false}
-                expandOnSpace={false}
-                renderNode={renderMainNode}
-                classNames={{
-                    root: publicStyles.noTapHighlight,
-                    node: commentTreeStyles.parentComment,
-                    subtree: commentTreeStyles.childComment,
-                }}
-            />
+            {comments.length === 0 ? (
+                <Center>
+                    <Text c="dimmed">No Comments Yet...</Text>
+                </Center>
+            ) : (
+                <Tree
+                    data={commentsNodeData}
+                    tree={tree}
+                    levelOffset={"xl"}
+                    expandOnClick={false}
+                    expandOnSpace={false}
+                    renderNode={renderMainNode}
+                    classNames={{
+                        root: publicStyles.noTapHighlight,
+                        node: commentTreeStyles.parentComment,
+                        subtree: commentTreeStyles.childComment,
+                    }}
+                />
+            )}
 
             <CommentDrawer
                 drawer={drawer}
@@ -267,14 +273,6 @@ export function CommentSection({
     comments?: CommentTreeProps[];
     storyAuthorId?: string;
 } & NewCommentBoxProps) {
-    if (!comments || comments.length < 1) {
-        return (
-            <Center>
-                <Text c={"dimmed"}>No Comments Yet...</Text>
-            </Center>
-        );
-    }
-
     return (
         <>
             <Divider
@@ -282,7 +280,7 @@ export function CommentSection({
             />
 
             <CommentTree
-                comments={comments}
+                comments={comments ?? []}
                 storyAuthorId={storyAuthorId}
                 storyISBN={storyISBN}
                 commentBoxDisclosure={commentBoxDisclosure}
