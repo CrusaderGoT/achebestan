@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, Grid, Stack, Text } from "@mantine/core";
+import { Container, Grid, Stack } from "@mantine/core";
 
 import HomeHero from "@/components/home/home-hero";
 import { StoryBook } from "@/components/home/story-book";
