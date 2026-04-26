@@ -5,11 +5,28 @@ import { updateStoryAction } from "../../actions/story";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-export const useUpdateStory = (isbn: string, authorId: string) => {
+export const useUpdateStory = ({
+    isbn,
+    authorId,
+    prevBookId,
+    prevBookPart,
+}: {
+    isbn: string;
+    authorId: string;
+    prevBookId: number | null;
+    prevBookPart: number | null;
+}) => {
     const queryClient = useQueryClient();
 
     const boundUpdateStoryAction = useMemo(
-        () => updateStoryAction.bind(null, isbn, authorId),
+        () =>
+            updateStoryAction.bind(
+                null,
+                isbn,
+                authorId,
+                prevBookId,
+                prevBookPart,
+            ),
         [isbn, authorId],
     );
 

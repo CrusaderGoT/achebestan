@@ -173,12 +173,6 @@ export function StoryContent({
 
             {!openedContentField && (
                 <Group justify="space-between">
-                    <StoryTableOfContents
-                        scrollAreaTocRef={scrollAreaTocRef}
-                        content={sanitizedContent}
-                        height={height}
-                        width={width}
-                    />
                     <Badge
                         size="xs"
                         variant="subtle"
@@ -187,6 +181,14 @@ export function StoryContent({
                     >
                         {timeToRead}
                     </Badge>
+
+                    <StoryTableOfContents
+                        scrollAreaTocRef={scrollAreaTocRef}
+                        content={sanitizedContent}
+                        height={height}
+                        width={width}
+                    />
+
                     <BookmarkList
                         bookmarks={bookmarks}
                         onBookmarkClick={scrollToBookmark}

@@ -6,11 +6,8 @@ import {
     useUpdateStoryForm,
 } from "@/components/forms/story/update-story-form-context";
 
-import {
-    storyUpdateSchema,
-} from "@/zod-schemas/story";
-import { StorySelectType } from "@/types/story";
-import { StoryUpdateType } from "@/types/story";
+import { StorySelectType, StoryUpdateType } from "@/types/story";
+import { storyUpdateSchema } from "@/zod-schemas/story";
 
 import { Button, Paper } from "@mantine/core";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -24,9 +21,12 @@ export function UpdateStoryForm({ story }: { story: StorySelectType }) {
         validate: zod4Resolver(storyUpdateSchema),
     });
 
-    const { executeAsync, isPending, hasSucceeded } = useUpdateStory(
-        story.isbn, story.authorId
-    );
+    const { executeAsync, isPending, hasSucceeded } = useUpdateStory({
+        isbn: story.isbn,
+        authorId: story.authorId,
+        prevBookId: story.bookId,
+        prevBookPart: story.bookPart,
+    });
 
     async function handleSubmit(data: StoryUpdateType) {
         await executeAsync({
@@ -51,8 +51,8 @@ export function UpdateStoryForm({ story }: { story: StorySelectType }) {
                             isPending
                                 ? "Submitting Story..."
                                 : hasSucceeded
-                                ? "Redirecting To New Story"
-                                : ""
+                                  ? "Redirecting To New Story"
+                                  : ""
                         }
                         visible={isPending || hasSucceeded}
                     />

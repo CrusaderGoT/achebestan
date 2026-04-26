@@ -41,11 +41,9 @@ export function BookmarkList({
 
     return (
         <>
-            {!opened && (
-                <ActionIcon variant="subtle" size="sm" onClick={toggle}>
-                    <IconBookmarks size={16} />
-                </ActionIcon>
-            )}
+            <ActionIcon variant="subtle" size="sm" onClick={toggle}>
+                <IconBookmarks size={16} />
+            </ActionIcon>
 
             <Affix position={{ top: 70, right: 30 }} withinPortal={false}>
                 <Transition
@@ -145,7 +143,7 @@ export function BookmarkList({
                                                         mt={4}
                                                     >
                                                         {dayjs(
-                                                            bookmark.timestamp
+                                                            bookmark.timestamp,
                                                         ).fromNow()}
                                                     </Text>
                                                 </Stack>
@@ -159,7 +157,7 @@ export function BookmarkList({
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 onBookmarkClick(
-                                                                    bookmark
+                                                                    bookmark,
                                                                 );
                                                                 close();
                                                             }}
@@ -178,7 +176,7 @@ export function BookmarkList({
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 onBookmarkRemove(
-                                                                    bookmark.id
+                                                                    bookmark.id,
                                                                 );
                                                             }}
                                                         >

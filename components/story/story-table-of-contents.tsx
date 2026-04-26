@@ -45,7 +45,7 @@ export function StoryTableOfContents({
 
             for (const selector of selectors) {
                 const element = container.querySelector(
-                    selector
+                    selector,
                 ) as HTMLElement;
                 if (element) {
                     return element;
@@ -70,13 +70,13 @@ export function StoryTableOfContents({
 
             return null;
         },
-        []
+        [],
     );
 
     const updateViewport = useCallback(() => {
         if (scrollAreaTocRef?.current) {
             const foundViewport = findScrollableViewport(
-                scrollAreaTocRef.current
+                scrollAreaTocRef.current,
             );
 
             if (foundViewport) {
@@ -137,11 +137,9 @@ export function StoryTableOfContents({
 
     return (
         <>
-            {!opened && (
-                <ActionIcon variant="subtle" size="sm" onClick={toggle}>
-                    <IconListTree size={16} />
-                </ActionIcon>
-            )}
+            <ActionIcon variant="subtle" size="sm" onClick={toggle}>
+                <IconListTree size={16} />
+            </ActionIcon>
 
             <Affix
                 position={{

@@ -12,6 +12,7 @@ import { UserSelectType } from "@/types/user";
 import { Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notFound } from "next/navigation";
+import { useEffect } from "react";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
 import { Story } from "./story";
@@ -33,7 +34,24 @@ export function StoryPageClient({
         sessionUser: { data: session },
     } = useCentralizedAuth();
 
-    const { data: story = storyPrefetched } = useReadStory({ isbn });
+    const { data: story = storyPrefetched, isSuccess } = useReadStory({ isbn });
+
+    // Restore scroll position after story content is fully loaded.
+    useEffect(() => {
+        if (!isSuccess) return;
+
+        const saved = sessionStorage.getItem(`book-${story?.bookId}-yScroll`);
+        if (!saved) return;
+
+        sessionStorage.removeItem(`book-${story?.bookId}-yScroll`);
+
+        const y = Number(saved);
+        if (!y) return;
+
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: y, behavior: "instant" });
+        });
+    }, [isSuccess, story?.bookId]);
 
     const { data: comments = commentsPrefetched ?? [] } = useReadStoryComments({
         isbn,

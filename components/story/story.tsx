@@ -1,6 +1,10 @@
 "use client";
 
-import { StoryPermAuthorProps, StorySelectType, StoryUpdateType } from "@/types/story";
+import {
+    StoryPermAuthorProps,
+    StorySelectType,
+    StoryUpdateType,
+} from "@/types/story";
 import { storyUpdateSchema } from "@/zod-schemas/story";
 
 import {
@@ -107,7 +111,16 @@ export function Story({
         validate: zod4Resolver(storyUpdateSchema),
     });
 
-    const { executeAsync, isPending } = useUpdateStory(isbn, author.id);
+    const {
+        executeAsync,
+        isPending,
+        reset: resetUpdate,
+    } = useUpdateStory({
+        isbn,
+        authorId: author.id,
+        prevBookId: story.bookId,
+        prevBookPart: story.bookPart,
+    });
 
     async function handleSubmit(data: StoryUpdateType) {
         // check if changed values or if image is present
@@ -164,6 +177,8 @@ export function Story({
 
                     // set story reactively
                     setStory(updatedStory.data);
+
+                    resetUpdate();
                 }
             }
         }

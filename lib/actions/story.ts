@@ -128,14 +128,18 @@ export const updateStoryAction = authActionClient
         handleValidationErrorsShape: async (ve) =>
             flattenValidationErrors(ve).fieldErrors,
     })
-    .bindArgsSchemas<[isbn: z.ZodUUID, authorId: z.ZodString]>([
-        z.uuid(),
-        z.string(),
-    ])
+    .bindArgsSchemas<
+        [
+            isbn: z.ZodUUID,
+            authorId: z.ZodString,
+            prevBookId: z.ZodNullable<z.ZodNumber>,
+            prevBookPart: z.ZodNullable<z.ZodNumber>,
+        ]
+    >([z.uuid(), z.string(), z.int().nullable(), z.int().nullable()])
     .action(
         async ({
             parsedInput: updateData,
-            bindArgsParsedInputs: [isbn, authorId],
+            bindArgsParsedInputs: [isbn, authorId, prevBookId, prevBookPart],
             ctx,
         }) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -208,6 +212,14 @@ export const updateStoryAction = authActionClient
             updateTag(`readStory-${updatedStory.isbn}`);
             updateTag("readLatestStories");
             revalidatePath(`/`);
+
+            // shift all subsequent story chapters down by 1 if deleted story belong to a book
+            if (prevBookId && prevBookPart) {
+                await correctStoriesBookParts({
+                    bookId: prevBookId,
+                    bookPart: prevBookPart,
+                });
+            }
 
             return updatedStory;
         },
@@ -318,18 +330,10 @@ export const deleteStoryAction = authActionClient
 
             // shift all subsequent story chapters down by 1 if deleted story belong to a book
             if (deletedStory.bookId && deletedStory.bookPart) {
-                await db
-                    .update(story)
-                    .set({ bookPart: sql`${story.bookPart} - 1` })
-                    .where(
-                        and(
-                            eq(story.bookId, deletedStory.bookId),
-                            gt(story.bookPart, deletedStory.bookPart),
-                        ),
-                    );
-
-                // revalidate book stories list if this story belong to a book
-                updateTag(`getBookStories-${deletedStory.bookId}`);
+                await correctStoriesBookParts({
+                    bookId: deletedStory.bookId,
+                    bookPart: deletedStory.bookPart,
+                });
             }
 
             return deletedStory;
@@ -425,4 +429,20 @@ export async function searchStories(
         console.error("[searchStories] Error:", error);
         throw new Error("Failed to search stories. Please try again.");
     }
+}
+
+async function correctStoriesBookParts({
+    bookId,
+    bookPart,
+}: {
+    bookPart: number;
+    bookId: number;
+}) {
+    await db
+        .update(story)
+        .set({ bookPart: sql`${story.bookPart} - 1` })
+        .where(and(eq(story.bookId, bookId), gt(story.bookPart, bookPart)));
+
+    // revalidate book stories list if this story belong to a book
+    updateTag(`getBookStories-${bookId}`);
 }

@@ -1,6 +1,4 @@
-import {
-    QueryClient
-} from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 export const getQueryClient = () =>
     new QueryClient({
@@ -16,6 +14,8 @@ export const getQueryClient = () =>
                 // Prevents aggressive refetching when users switch tabs
                 // (Great for reading long stories without jumps).
                 refetchOnWindowFocus: false,
+
+                refetchOnMount: false,
 
                 // Retry failed fetches twice before showing an error.
                 retry: 2,
