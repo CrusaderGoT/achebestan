@@ -3,9 +3,9 @@
 import { readStory } from "@/lib/actions/story";
 import { useBookStories } from "@/lib/hooks/book/book-stories";
 import { Group, Loader, Pagination } from "@mantine/core";
-import { useWindowScroll } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 
 export function BookPagination({
@@ -17,14 +17,14 @@ export function BookPagination({
 }) {
     const queryClient = useQueryClient();
 
+    const router = useRouter();
+
     const [activePage, setActivePage] = useState(storyPart);
     const [isPending, startTransition] = useTransition();
 
     const { data: chapters = [], isPlaceholderData } = useBookStories({
         bookId,
     });
-
-    const [scroll] = useWindowScroll();
 
     useEffect(() => {
         if (
@@ -79,22 +79,18 @@ export function BookPagination({
             setActivePage(page);
 
             startTransition(() => {
-                // Save current scroll position synchronously before navigation
-                sessionStorage.setItem(
-                    `book-${bookId}-yScroll`,
-                    String(scroll.y),
-                );
-                window.location.replace(`/stories/${nextChapter.isbn}`);
+                router.replace(`/stories/${nextChapter.isbn}`, {
+                    scroll: false,
+                });
             });
         },
-        [chapters, isPending, activePage, bookId, scroll.y],
+        [chapters, isPending, activePage, bookId],
     );
 
     if (chapters.length === 0) return null;
 
     return (
         <Group gap="xs" align="center" wrap="nowrap">
-            {JSON.stringify([bookId, storyPart])}
             <Pagination
                 value={activePage}
                 onChange={handleNextBookPage}
