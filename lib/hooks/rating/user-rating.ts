@@ -24,5 +24,6 @@ export const useUserRating = ({
             return data;
         },
         enabled: !!userId,
+        staleTime: 10 * 60 * 1000, // 10 minutes
     });
 };

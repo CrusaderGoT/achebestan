@@ -1,13 +1,15 @@
 "use client";
 
-import { getfavouriteUserStory } from "@/lib/actions/favourite";
-import { useFavouriteStory } from "@/lib/hooks/favourite/favourite-story-hook";
+import {
+    useFavouriteStatus,
+    useFavouriteStory,
+} from "@/lib/hooks/favourite/favourite-story-hook";
 import classes from "@/styles/story/favourite-story.module.css";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface FavouriteStoryProps {
     userId: string | undefined;
@@ -21,30 +23,21 @@ export function FavouriteStory({
     openAuthModal,
 }: FavouriteStoryProps) {
     const [isFavourited, setIsFavourited] = useState(false);
-    const [isInitializing, setIsInitializing] = useState(true);
     const [playAnimation, setPlayAnimation] = useState(false);
 
     // This prevents the action from flipping incorrectly during rapid clicks.
     const serverStateRef = useRef(false);
 
-    // Initial fetch
-    useEffect(() => {
-        if (!userId) {
-            setIsInitializing(false);
-            return;
-        }
-        const fetchStatus = async () => {
-            try {
-                const curFav = await getfavouriteUserStory(userId, storyId);
-                const favStatus = !!curFav;
-                setIsFavourited(favStatus);
-                serverStateRef.current = favStatus;
-            } finally {
-                setIsInitializing(false);
-            }
-        };
-        fetchStatus();
-    }, [userId, storyId]);
+    function postProcessInitialFetch(favStatus: boolean) {
+        setIsFavourited(favStatus);
+        serverStateRef.current = favStatus;
+    }
+
+    const { isLoading: isInitializing } = useFavouriteStatus({
+        userId,
+        storyId,
+        postProcessInitialFetch,
+    });
 
     const { executeAsync: insertFav, isPending: isInserting } =
         useFavouriteStory("insert");

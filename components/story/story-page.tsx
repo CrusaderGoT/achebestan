@@ -33,7 +33,7 @@ export function StoryPageClient({
         sessionUser: { data: session },
     } = useCentralizedAuth();
 
-    const { data: story = storyPrefetched, isSuccess } = useReadStory({ isbn });
+    const { data: story = storyPrefetched } = useReadStory({ isbn });
 
     const { data: comments = commentsPrefetched ?? [] } = useReadStoryComments({
         isbn,

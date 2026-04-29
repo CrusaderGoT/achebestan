@@ -1,6 +1,9 @@
 "use client";
 
-import { readLatestStories, searchStories } from "@/lib/actions/story";
+import {
+    useReadLatestStories,
+    useSearchStory,
+} from "@/lib/hooks/story/read-story";
 import {
     ActionIcon,
     Badge,
@@ -17,7 +20,6 @@ import { useDebouncedValue, useMounted } from "@mantine/hooks";
 import { nprogress } from "@mantine/nprogress";
 import { Spotlight, spotlight } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -39,24 +41,12 @@ export function SearchSpotlight() {
     const [activeLink, setActiveLink] = useState<string | undefined>(undefined);
 
     // 2. Fetch Initial/Default Stories
-    const { data: initialStories = [], isLoading: isInitialLoading } = useQuery(
-        {
-            queryKey: ["stories", "latest"],
-            queryFn: async () => {
-                const res = await readLatestStories();
-                return res || [];
-            },
-            staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-        },
-    );
+    const { data: initialStories = [], isLoading: isInitialLoading } =
+        useReadLatestStories();
 
     // 3. Fetch Search Results
-    const { data: searchResults = [], isFetching: isSearchLoading } = useQuery({
-        queryKey: ["stories", "search", debouncedSearch],
-        queryFn: () => searchStories(debouncedSearch, { limit: 20 }),
-        enabled: debouncedSearch.trim().length > 0, // Only run if there is text
-        staleTime: 1000 * 60 * 2, // Cache search results for 2 minutes
-    });
+    const { data: searchResults = [], isFetching: isSearchLoading } =
+        useSearchStory({ query: debouncedSearch });
 
     // 4. Compute Results to Display
     const displayItems = useMemo(() => {

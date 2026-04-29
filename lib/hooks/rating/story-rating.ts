@@ -13,5 +13,6 @@ export const useStoryRating = ({ isbn }: { isbn: string }) => {
 
             return data;
         },
+        staleTime: 10 * 60 * 1000, // 10 minutes
     });
 };

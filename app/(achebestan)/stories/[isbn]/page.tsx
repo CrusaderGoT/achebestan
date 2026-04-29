@@ -9,6 +9,7 @@ import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";
 import { CommentTreeProps } from "@/types/comment";
 import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import type { Metadata } from "next";
 import { connection } from "next/server";
 
@@ -89,7 +90,7 @@ export default async function StoryPage({
             <meta name="author" content={`${story?.author.name}`} />
             <meta
                 name="copyright"
-                content={`© ${new Date().getFullYear()} ${story?.author.name} (Achebestan)`}
+                content={`© ${dayjs().year()} ${story?.author.name} (Achebestan)`}
             />
 
             <HydrationBoundary state={dehydrate(queryClient)}>

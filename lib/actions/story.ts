@@ -241,10 +241,6 @@ export const readStory = async (isbn: string) => {
             },
         });
 
-        if (!storyDb) {
-            throw new Error(`Story with ISBN ${isbn} not found`);
-        }
-
         return storyDb;
     } catch (e) {
         throw new Error(`Failed to get story with ISBN ${isbn}`);
@@ -267,6 +263,7 @@ export const readLatestStories = async (latest: number = 10) => {
         return latestStories;
     } catch (e) {
         console.log(e);
+        throw new Error("Failed to get latest stories");
     }
 };
 
