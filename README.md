@@ -14,7 +14,7 @@
 
 <br />
 
-> *A place built for fiction that earns its readers.*
+> *There are no happy endings here🙃.*
 
 <br />
 
@@ -54,6 +54,7 @@ No separate backend. No unnecessary complexity. Everything — auth, data, serve
 - **Offline Support** — Progressive Web App capabilities via a custom Serwist 9.x service worker
 - **Authentication** — Secure, session-based user auth with `better-auth`
 - **Optimized Performance** — Static prerendering where possible, with fine-grained dynamic boundaries via `"use cache"`
+- **Light and Dark mode**
 
 ---
 
