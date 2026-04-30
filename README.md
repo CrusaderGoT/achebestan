@@ -26,8 +26,6 @@
 
 ![Achebestan — add a screenshot here](https://placehold.co/900x480/0d0d0d/444444?text=Add+a+screenshot+of+the+reader+UI)
 
-> 💡 Replace the image above with an actual screenshot of the platform.
-
 ---
 
 </div>
@@ -154,7 +152,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Built and written by **[Achebestan](https://achebestan.vercel.app)**
 
-*Fiction that earns its readers.*
+*Imagination supplements reality.*
 
 <br />
 
