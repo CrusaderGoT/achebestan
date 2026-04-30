@@ -1,80 +1,114 @@
-# Achebestan
+<div align="center">
 
-Welcome to **Achebestan**—a world of imagination, created by Enemchukwu Chukwuemeka (also known as _Achebestan_). This is my Mind’s Palace: a place for fictional stories, personal reflections, and maybe a programming standard or two.
+<br />
+
+# ◈ Achebestan
+
+**A modern web fiction reading platform — where stories live.**
+
+[![Status](https://img.shields.io/badge/status-live-brightgreen?style=flat-square&labelColor=0d0d0d)](https://achebestan.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white&labelColor=0d0d0d)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=0d0d0d)](https://www.typescriptlang.org)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel&logoColor=white&labelColor=0d0d0d)](https://achebestan.vercel.app)
+
+<br />
+
+[**→ Visit Achebestan**](https://achebestan.vercel.app)
+
+<br />
+
+</div>
 
 ---
 
-## Table of Contents
+## Overview
 
-- [Live Site](#live-site)
-- [Features](#features)
-- [Stories & Books](#stories--books)
-- [Tech Stack](#tech-stack)
-- [How to Run Locally](#how-to-run-locally)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-
----
-
-## Live Site
-
-Check it out here: [achebestan.vercel.app](https://achebestan.vercel.app/)
+Achebestan is a full-stack web fiction platform built for immersive reading. It hosts serialized fiction with a focus on clean typography, fast page loads, and a distraction-free experience. Currently home to **IQ** — a multi-POV crime and tragedy series.
 
 ---
 
 ## Features
 
-- New stories published regularly
-- A collection of “Books” — grouped stories
-- Contact page for business inquiries or fan mail
-- “Buy Me Coffee” support option
-- Clean layout, visual covers, ISBN tracking for stories
-
----
-
-## Stories & Books
-
-Some highlighted works currently featured:
-
-| Title                              | Subtitle / Tagline | Author      | ISBN                                 |
-| ---------------------------------- | ------------------ | ----------- | ------------------------------------ |
-| _IQ_                               | “Once Upon a Cop”  | Achebestan  | 1045b5c1-c9ae-4d0a-9d48-5cf87167a15c |
-| _The Mind at the Edge of Darkness_ |                    | CrusaderGoT | 737ac3b7-ff82-4b2a-8074-ba95e97892ff |
-| _The War That Wasn’t_              | My dream of war    | Achebestan  | 145b8d8d-afd5-4c47-8f01-d980c26261db |
-| _The Hierarchy of Things_          | A tale of destiny  | Achebestan  | 9b1e6282-d844-40fe-9dfc-112cbb9d39f6 |
+- **Serialized Fiction Reader** — Chapter-based navigation with a clean, focused reading UI
+- **Multi-POV Series Support** — Structured to handle complex narrative arcs across multiple perspectives
+- **Tag-based Cache Invalidation** — Instant content updates powered by Next.js `cacheTag` / `revalidateTag`
+- **Offline Support** — Progressive Web App capabilities via a custom Serwist 9.x service worker
+- **Authentication** — Secure user sessions with `better-auth`
+- **Optimized Performance** — Static prerendering where possible, with fine-grained dynamic boundaries
 
 ---
 
 ## Tech Stack
 
-This section could include what you used to build the site. Here are some suggestions to fill in or modify:
-
-- **Frontend / Static Site Generator:** _(e.g. Next.js, React, etc.)_
-- **Hosting:** Vercel
-- **Styling:** _(CSS, Mantine etc.)_
-- **Fonts / Assets:** _(any notable fonts, cloudinary , etc.)_
-- **Data / Content Management:** (Postgres, custom backend, Cloudinary etc.)
+| Layer | Technology |
+|---|---|
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript 5 |
+| **Styling** | Mantine v8 |
+| **Database** | PostgreSQL (Neon) |
+| **ORM** | Drizzle ORM |
+| **Auth** | better-auth |
+| **Service Worker** | Serwist 9.x |
+| **Deployment** | Vercel |
 
 ---
 
-## How to Run Locally
+## Getting Started
 
-If someone wants to download and run a local copy, you could include instructions like:
+### Prerequisites
+
+- **Node.js** `>= 20`
+- **pnpm** (recommended) or npm
+- A **PostgreSQL** connection string (e.g. [Neon](https://neon.tech))
+
+### 1. Clone the repository
 
 ```bash
-# Clone this repo
-git clone https://github.com/CrusaderGoT/achebestan.git
-
-# Move into project directory
+git clone https://github.com/YOUR_USERNAME/achebestan.git
 cd achebestan
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
 ```
+
+### 2. Install dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env.local` file at the root of the project:
+
+```env
+# Database
+DATABASE_URL=your_neon_postgres_connection_string
+
+# Auth
+BETTER_AUTH_SECRET=your_secret_key
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+> ⚠️ Never commit `.env.local` to version control.
+
+### 4. Run database migrations
+
+```bash
+pnpm drizzle-kit migrate
+```
+
+### 5. Start the development server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+<div align="center">
+
+<br />
+
+Built by [Achebestan](https://achebestan.vercel.app) · Fiction first.
+
+</div>
