@@ -10,6 +10,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white&labelColor=0d0d0d)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=0d0d0d)](https://www.typescriptlang.org)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel&logoColor=white&labelColor=0d0d0d)](https://achebestan.vercel.app)
+[![Last Commit](https://img.shields.io/github/last-commit/CrusaderGoT/achebestan?style=flat-square&labelColor=0d0d0d&color=555)](https://github.com/CrusaderGoT/achebestan/commits/main)
 
 > *There are no happy endings here 🙃*
 
@@ -70,14 +71,14 @@ By leveraging the latest Next.js features, the platform eliminates the need for 
 achebestan/
 ├── app/                # Next.js App Router (pages, layouts, loading states)
 │   ├── (auth)/         # Authentication routes
-│   └── (reader)/       # Fiction reader & content routes
+│   └── (achebestan)/       # Fiction reader & content routes
+    └── sw.ts               # Serwist service worker entry
 ├── components/         # Reusable UI components
 ├── lib/
-│   ├── db/             # Drizzle schema and migrations
+│   ├── drizzle/             # Drizzle schema and migrations
 │   ├── auth/           # better-auth configuration
 │   └── actions/        # next-safe-action server actions
 ├── public/             # Static assets and PWA manifest
-└── sw.ts               # Serwist service worker entry
 ```
 
 ---
@@ -87,7 +88,7 @@ achebestan/
 ### Prerequisites
 
 - **Node.js** `>= 20`
-- **npm** (recommended) or npm
+- **npm** (recommended) or pnpm
 - **PostgreSQL** database (Neon recommended)
 
 ### 1. Clone the repository
@@ -108,24 +109,27 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```env
-# Database
-DATABASE_URL=your_neon_postgres_connection_string
+BETTER_AUTH_SECRET=your-better-auth-secret
+LOCAL_DATABASE_URL=postgresql://your-local-db
 
-# Auth (better-auth)
-BETTER_AUTH_SECRET=your_secret_key
-BETTER_AUTH_URL=http://localhost:3000
+VAPID_SUBJECT="https://achebestan.vercel.app"
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your-vapid-public-key
+VAPID_PRIVATE_KEY=your-vapid-private-key
+
+ADMIN_IDS=["user_id"]
+CODE=0000
 ```
 
 ### 4. Database Setup
 
 ```bash
-npm drizzle-kit migrate
+npm run upgrade
 ```
 
 ### 5. Run the development server
 
 ```bash
-npm dev
+npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) to see the result.
 
