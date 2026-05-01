@@ -2,7 +2,7 @@
 
 <img src="https://github.com/user-attachments/assets/c75e3435-0c0b-46c6-be74-0f9ab276a36a" width="60" height="60" alt="Achebestan Logo" />
 
-# Achebestan
+# Achebestan™
 
 **A modern web fiction reading platform — where stories live.**
 
@@ -32,7 +32,7 @@
 
 ## 📖 Overview
 
-Achebestan is a full-stack web fiction platform designed for an immersive, distraction-free reading experience. It is optimized for serialized fiction, featuring multi-POV narratives and chapter-based progression.
+Achebestan is a full-stack web fiction platform designed for an immersive, distraction-free reading experience. It is optimized for serialized fiction, and chapter-based progression.
 
 By leveraging the latest Next.js features, the platform eliminates the need for a separate backend, running everything—from authentication to server actions—within a single unified application deployed to the edge.
 
@@ -41,8 +41,7 @@ By leveraging the latest Next.js features, the platform eliminates the need for 
 ## ✨ Features
 
 - **Serialized Reader** – Clean UI focused entirely on the reading experience.
-- **Multi-POV Support** – Built-in structure for complex narratives with multiple perspectives.
-- **Advanced Caching** – Instant content invalidation using Next.js `cacheTag` and `revalidateTag`.
+- **Advanced Caching** – Instant content invalidation using Tanstack with Next.js `cacheTag` and `revalidateTag`.
 - **Type-Safe Actions** – End-to-end type safety for all mutations via `next-safe-action`.
 - **Offline Support** – Progressive Web App (PWA) capabilities powered by **Serwist 9.x**.
 - **Secure Auth** – Reliable session management with `better-auth`.
@@ -61,6 +60,7 @@ By leveraging the latest Next.js features, the platform eliminates the need for 
 | **ORM** | Drizzle ORM |
 | **Auth** | better-auth |
 | **Service Worker** | Serwist 9.x |
+| **State Management** | Tanstack v5
 | **Deployment** | Vercel |
 
 ---
@@ -139,13 +139,13 @@ Open [http://localhost:3000](http://localhost:3000) to see the result.
 
 - **Experimental Caching**: The `"use cache"` directive requires strict `Suspense` boundary placement. Missing boundaries will result in static prerender failures during build.
 - **PWA Performance**: Service worker caching behavior is experimental and may require tuning based on your specific deployment environment.
-- **Migration Hashes**: To prevent schema mismatches, always ensure you run `drizzle-kit generate` before applying migrations.
+- **Migration Hashes**: To prevent schema mismatches, always ensure you run `drizzle-kit generate` before applying migrations or `npm run upgrade`.
 
 ---
 
 <div align="center">
 
-Built and written by **[Achebestan](https://achebestan.vercel.app)**
+Built and written by **[CrusaderGoT](https://crusadergot.vercel.app)**
 
 *"Imagination supplements reality."*
 
