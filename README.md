@@ -2,7 +2,12 @@
 
 <br />
 
-# ◈ Achebestan
+<span>
+  <img width="20" height="20" alt="achebestan_logo__2_-removebg-preview" src="https://github.com/user-attachments/assets/c75e3435-0c0b-46c6-be74-0f9ab276a36a" />
+  # ◈ Achebestan
+</span>
+
+
 
 **A modern web fiction reading platform — where stories live.**
 
@@ -24,14 +29,18 @@
 
 ---
 
-![Achebestan — homepage screenshot](https://private-user-images.githubusercontent.com/133652764/586296742-21a1fe58-3356-4c66-9a70-5aeb78ba0cea.jpg?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Nzc1ODg2NzEsIm5iZiI6MTc3NzU4ODM3MSwicGF0aCI6Ii8xMzM2NTI3NjQvNTg2Mjk2NzQyLTIxYTFmZTU4LTMzNTYtNGM2Ni05YTcwLTVhZWI3OGJhMGNlYS5qcGc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwNDMwJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDQzMFQyMjMyNTFaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xOWQ2ZTVkMDljNDExNGU4YWRiOWIwZTU4MTNiYzYyMDVkNmZlYWE5OGVjNDJjYTI4OGI2NjJhMTIxYzc0ZmI1JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZyZXNwb25zZS1jb250ZW50LXR5cGU9aW1hZ2UlMkZqcGVnIn0.OV22g86TBEgBsjPfdkuQZfu-tT2slJXoQhBRsyyxeBE)
+<img width="1321" height="571" alt="Achebestan — Home Page Screenshot" src="https://github.com/user-attachments/assets/64489499-850e-4a04-b4f9-fbe7889e91d2" />
 > Home Page
 
-![Achebestan — story screenshot](https://private-user-images.githubusercontent.com/133652764/586296890-ca2ee26c-c7c2-4109-a38f-ee0d1943b0ee.jpg?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Nzc1ODg5NDQsIm5iZiI6MTc3NzU4ODY0NCwicGF0aCI6Ii8xMzM2NTI3NjQvNTg2Mjk2ODkwLWNhMmVlMjZjLWM3YzItNDEwOS1hMzhmLWVlMGQxOTQzYjBlZS5qcGc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwNDMwJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDQzMFQyMjM3MjRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iZGVlYTBjZTA2ZmU0ZWRjODNiM2YxYTU4NGFmMTA4MmZlM2VjYjRiNjU1ODhiNzM3Y2E3MjdlNDU4MWMzYTlkJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZyZXNwb25zZS1jb250ZW50LXR5cGU9aW1hZ2UlMkZqcGVnIn0.KBxJiDi0XUqMpv3HUo_9BFSGkfjlrNBfXMJaK3HhdF0)
+<img width="1323" height="654" alt="Achebestan — Story Page Screenshot" src="https://github.com/user-attachments/assets/c26155ae-b457-4396-becf-ccddfcffac51" />
 > Story Page
 
-![Achebestan — story actions screenshot](https://private-user-images.githubusercontent.com/133652764/586296977-8cec6062-83c7-4d3f-8404-6e60da89cc57.jpg?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Nzc1ODg5NDQsIm5iZiI6MTc3NzU4ODY0NCwicGF0aCI6Ii8xMzM2NTI3NjQvNTg2Mjk2OTc3LThjZWM2MDYyLTgzYzctNGQzZi04NDA0LTZlNjBkYTg5Y2M1Ny5qcGc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwNDMwJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDQzMFQyMjM3MjRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT00MGVlOGRjNGQ2MWI5M2ZiYjJmMTg4ZjE1NDU1ZTIwNmYxYjZmOWI2OGJkOTYyNmI3MjljMThhZGE0ZjA0MTgzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZyZXNwb25zZS1jb250ZW50LXR5cGU9aW1hZ2UlMkZqcGVnIn0.DvhZVtQoLWoSgq6k6JlkX8BBhPNU09sJznzxOnDgaJI)
+<img width="1328" height="653" alt="Achebestan — Story Page Actions Screenshot" src="https://github.com/user-attachments/assets/72462e6c-8acb-44e8-a4e6-11bc1e8b8330" />
 > Story Actions
+
+<img width="1326" height="630" alt="Achebestan — Stories Grid Screenshot" src="https://github.com/user-attachments/assets/b0ed8432-cf85-4fd5-b69e-843a45acc6b0" />
+> Stories Grid
+
 
 ---
 
