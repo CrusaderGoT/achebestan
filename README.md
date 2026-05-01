@@ -1,13 +1,8 @@
 <div align="center">
 
-<br />
+<img src="https://github.com/user-attachments/assets/c75e3435-0c0b-46c6-be74-0f9ab276a36a" width="60" height="60" alt="Achebestan Logo" />
 
-<span>
-  <img width="20" height="20" alt="achebestan_logo__2_-removebg-preview" src="https://github.com/user-attachments/assets/c75e3435-0c0b-46c6-be74-0f9ab276a36a" />
-  # ◈ Achebestan
-</span>
-
-
+# Achebestan
 
 **A modern web fiction reading platform — where stories live.**
 
@@ -15,118 +10,102 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white&labelColor=0d0d0d)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=0d0d0d)](https://www.typescriptlang.org)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel&logoColor=white&labelColor=0d0d0d)](https://achebestan.vercel.app)
-[![Last Commit](https://img.shields.io/github/last-commit/CrusaderGoT/achebestan?style=flat-square&labelColor=0d0d0d&color=555)](https://github.com/CrusaderGoT/achebestan/commits/main)
 
-<br />
+> *There are no happy endings here 🙃*
 
-> *There are no happy endings here🙃.*
-
-<br />
-
-[**→ Visit Achebestan**](https://achebestan.vercel.app)
-
-<br />
-
----
-
-<img width="1321" height="571" alt="Achebestan — Home Page Screenshot" src="https://github.com/user-attachments/assets/64489499-850e-4a04-b4f9-fbe7889e91d2" />
-> Home Page
-
-<img width="1323" height="654" alt="Achebestan — Story Page Screenshot" src="https://github.com/user-attachments/assets/c26155ae-b457-4396-becf-ccddfcffac51" />
-> Story Page
-
-<img width="1328" height="653" alt="Achebestan — Story Page Actions Screenshot" src="https://github.com/user-attachments/assets/72462e6c-8acb-44e8-a4e6-11bc1e8b8330" />
-> Story Actions
-
-<img width="1326" height="630" alt="Achebestan — Stories Grid Screenshot" src="https://github.com/user-attachments/assets/b0ed8432-cf85-4fd5-b69e-843a45acc6b0" />
-> Stories Grid
-
-
----
+[**Visit Achebestan →**](https://achebestan.vercel.app)
 
 </div>
 
-## Overview
+---
 
-Achebestan is a full-stack web fiction platform built for immersive, distraction-free reading. It hosts serialized fiction — structured around multi-POV narratives, chapter-based progression, and a reading experience that gets out of the way and lets the story speak.
+## 📱 Previews
 
-No separate backend. No unnecessary complexity. Everything — auth, data, server actions — runs within a single Next.js application, deployed to the edge.
+| Home Page | Story View |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/64489499-850e-4a04-b4f9-fbe7889e91d2" width="100%" alt="Home Page" /> | <img src="https://github.com/user-attachments/assets/c26155ae-b457-4396-becf-ccddfcffac51" width="100%" alt="Story Page" /> |
+| **Story Actions** | **Stories Grid** |
+| <img src="https://github.com/user-attachments/assets/72462e6c-8acb-44e8-a4e6-11bc1e8b8330" width="100%" alt="Actions" /> | <img src="https://github.com/user-attachments/assets/b0ed8432-cf85-4fd5-b69e-843a45acc6b0" width="100%" alt="Grid" /> |
 
 ---
 
-## Features
+## 📖 Overview
 
-- **Serialized Fiction Reader** — Chapter-based navigation with a clean, focused reading UI
-- **Multi-POV Series Support** — Structured to handle complex narrative arcs across multiple perspectives
-- **Tag-based Cache Invalidation** — Instant content updates powered by Next.js `cacheTag` / `revalidateTag` / `updateTag`
-- **Type-safe Server Actions** — Mutations handled via `next-safe-action` with full end-to-end type safety
-- **Offline Support** — Progressive Web App capabilities via a custom Serwist 9.x service worker
-- **Authentication** — Secure, session-based user auth with `better-auth`
-- **Optimized Performance** — Static prerendering where possible, with fine-grained dynamic boundaries via `"use cache"`
-- **Light and Dark mode**
+Achebestan is a full-stack web fiction platform designed for an immersive, distraction-free reading experience. It is optimized for serialized fiction, featuring multi-POV narratives and chapter-based progression.
+
+By leveraging the latest Next.js features, the platform eliminates the need for a separate backend, running everything—from authentication to server actions—within a single unified application deployed to the edge.
 
 ---
 
-## Tech Stack
+## ✨ Features
 
-| Layer | Technology | Version |
-|---|---|---|
-| **Framework** | Next.js (App Router) | 16 |
-| **Language** | TypeScript | 5 |
-| **Styling** | Mantine | v8 |
-| **Database** | PostgreSQL (Neon) | — |
-| **ORM** | Drizzle ORM | latest |
-| **Auth** | better-auth | latest |
-| **Server Actions** | next-safe-action | latest |
-| **Service Worker** | Serwist | 9.x |
-| **Deployment** | Vercel | — |
+- **Serialized Reader** – Clean UI focused entirely on the reading experience.
+- **Multi-POV Support** – Built-in structure for complex narratives with multiple perspectives.
+- **Advanced Caching** – Instant content invalidation using Next.js `cacheTag` and `revalidateTag`.
+- **Type-Safe Actions** – End-to-end type safety for all mutations via `next-safe-action`.
+- **Offline Support** – Progressive Web App (PWA) capabilities powered by **Serwist 9.x**.
+- **Secure Auth** – Reliable session management with `better-auth`.
+- **Modern UI** – Beautifully crafted with **Mantine v8**, supporting both Light and Dark modes.
 
 ---
 
-## Project Structure
+## 🛠 Tech Stack
 
-```
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript 5 |
+| **Styling** | Mantine v8 |
+| **Database** | PostgreSQL (Neon) |
+| **ORM** | Drizzle ORM |
+| **Auth** | better-auth |
+| **Service Worker** | Serwist 9.x |
+| **Deployment** | Vercel |
+
+---
+
+## 📂 Project Structure
+
+```bash
 achebestan/
-├── app/                  # Next.js App Router — pages, layouts, loading states
-│   ├── (auth)/           # Auth-gated routes
-│   └── (reader)/         # Fiction reader routes
-├── components/           # Shared UI components
+├── app/                # Next.js App Router (pages, layouts, loading states)
+│   ├── (auth)/         # Authentication routes
+│   └── (reader)/       # Fiction reader & content routes
+├── components/         # Reusable UI components
 ├── lib/
-│   ├── db/               # Drizzle schema, migrations, client
-│   ├── auth/             # better-auth config
-│   └── actions/          # next-safe-action server actions
-├── public/               # Static assets + service worker
-└── sw.ts                 # Serwist service worker entry
+│   ├── db/             # Drizzle schema and migrations
+│   ├── auth/           # better-auth configuration
+│   └── actions/        # next-safe-action server actions
+├── public/             # Static assets and PWA manifest
+└── sw.ts               # Serwist service worker entry
 ```
-
-> Structure may vary slightly. Refer to the source for the latest layout.
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - **Node.js** `>= 20`
-- **pnpm** (recommended) or npm
-- A **PostgreSQL** connection string — [Neon](https://neon.tech) recommended
+- **npm** (recommended) or npm
+- **PostgreSQL** database (Neon recommended)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/CrusaderGoT/achebestan.git
+git clone [https://github.com/CrusaderGoT/achebestan.git](https://github.com/CrusaderGoT/achebestan.git)
 cd achebestan
 ```
 
 ### 2. Install dependencies
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3. Configure environment variables
 
-Create a `.env.local` file at the root:
+Create a `.env.local` file in the root directory:
 
 ```env
 # Database
@@ -137,40 +116,33 @@ BETTER_AUTH_SECRET=your_secret_key
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
-> ⚠️ Never commit `.env.local` to version control. Verify these key names match your `auth.ts` config exactly.
-
-### 4. Run database migrations
+### 4. Database Setup
 
 ```bash
-pnpm drizzle-kit migrate
+npm drizzle-kit migrate
 ```
 
-### 5. Start the development server
+### 5. Run the development server
 
 ```bash
-pnpm dev
+npm dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) to see the result.
 
 ---
 
-## Known Limitations
+## ⚠️ Known Limitations
 
-- Service worker caching behaviour is experimental and may need tuning per deployment environment
-- `"use cache"` directives require careful Suspense boundary placement — missing boundaries will cause static prerender failures at build time
-- Drizzle migration hash mismatches can occur if schema and migration files fall out of sync — always run `drizzle-kit generate` before `migrate`
+- **Experimental Caching**: The `"use cache"` directive requires strict `Suspense` boundary placement. Missing boundaries will result in static prerender failures during build.
+- **PWA Performance**: Service worker caching behavior is experimental and may require tuning based on your specific deployment environment.
+- **Migration Hashes**: To prevent schema mismatches, always ensure you run `drizzle-kit generate` before applying migrations.
 
 ---
 
 <div align="center">
 
-<br />
-
 Built and written by **[Achebestan](https://achebestan.vercel.app)**
 
-*Imagination supplements reality.*
-
-<br />
+*"Imagination supplements reality."*
 
 </div>
