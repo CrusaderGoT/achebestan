@@ -10,14 +10,12 @@ export const getStoryIndexDB = async () => {
 
     dbInstance = await openDB<StoryIndexDbSchema>("Stories", 1, {
         upgrade(db) {
-            // Create a store of objects
             const store = db.createObjectStore("stories", {
                 keyPath: "id",
                 autoIncrement: true,
             });
-            // Create indexes
             store.createIndex("book-id", "bookId");
-            store.createIndex("created", "created"); // Index by creation date
+            store.createIndex("created", "created");
         },
     });
 
@@ -46,9 +44,7 @@ export const saveDraft = async (
     const now = Date.now();
     const { id, ...draftWithoutId } = draft;
 
-    // If draft has an id, we're updating; otherwise, we're creating new
     if (id) {
-        // Updating existing draft
         const data = {
             ...draft,
             id: id,
@@ -57,9 +53,6 @@ export const saveDraft = async (
         };
         return await db.put("stories", data as StoryIndexDbSchemaType);
     } else {
-        // Creating new draft - omit id to let autoIncrement work
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
         const data = {
             ...draftWithoutId,
             created: draft.created || now,
@@ -81,8 +74,10 @@ export const deleteAllDrafts = async (): Promise<void> => {
     await tx.done;
 };
 
+// Fix: getAllFromIndex returns ascending (oldest first). Reversing here keeps
+// the name accurate and stays consistent with the merge hook's sort order.
 export const getDraftsByDate = async (): Promise<StoryIndexDbSchemaType[]> => {
     const db = await getStoryIndexDB();
-    // Get all drafts sorted by creation date (newest first)
-    return await db.getAllFromIndex("stories", "created");
+    const all = await db.getAllFromIndex("stories", "created");
+    return all.reverse(); // newest first
 };
