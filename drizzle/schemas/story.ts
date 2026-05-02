@@ -73,6 +73,11 @@ export const storyDraft = table("story_drafts", {
         value: string;
         disabled?: boolean;
     }>(),
+
+    authorId: t
+        .text()
+        .references(() => user.id, { onDelete: "cascade" })
+        .notNull(),
 });
 
 export const storyRelations = relations(story, ({ one, many }) => ({

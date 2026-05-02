@@ -1,0 +1,2 @@
+ALTER TABLE "story_drafts" ADD COLUMN "author_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "story_drafts" ADD CONSTRAINT "story_drafts_author_id_user_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;

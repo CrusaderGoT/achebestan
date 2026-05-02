@@ -23,13 +23,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 
-import {
-    deleteDraft,
-    getDraft,
-    getDraftsByDate,
-    saveDraft,
-    storyIndexDB,
-} from "@/lib/index-db";
+import { deleteDraft, getDraft, saveDraft } from "@/lib/index-db";
 import { StoryIndexDbSchemaType } from "@/types/story";
 import {
     useDisclosure,
@@ -40,14 +34,20 @@ import { IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 import { BooksSelect } from "@/components/book/books-select";
+import { deleteStoryDraftFromDb } from "@/lib/actions/story";
 import { useCreateStory } from "@/lib/hooks/story/create-story";
+import {
+    useMergedDrafts,
+    useSyncStoryDraftToDb,
+} from "@/lib/hooks/story/story-draft";
 import { toFormBookId } from "@/lib/utils/book/book-part-id-conversion";
+import { useQueryClient } from "@tanstack/react-query";
 import { Drafts } from "./drafts";
 
-export function CreateStoryForm() {
-    const [synced, setSynced] = useState(false);
+export function CreateStoryForm({ authorId }: { authorId: string }) {
+    const queryclient = useQueryClient();
 
-    const [drafts, setDrafts] = useState<StoryIndexDbSchemaType[]>([]);
+    const [synced, setSynced] = useState(false);
 
     const [currentDraft, setCurrentDraft] =
         useState<StoryIndexDbSchemaType | null>(null);
@@ -60,6 +60,8 @@ export function CreateStoryForm() {
     const [deleteDraftOnSubmit, setDeleteDraftOnSubmit] = useState(false);
 
     const [savingDraft, setSavingDraft] = useState(false);
+
+    const [savingDraftToDb, setSavingDraftToDb] = useState(false);
 
     const { start: stopSavingDraft, clear: clearOngoingStopSavingDraft } =
         useTimeout(() => setSavingDraft(false), 1000);
@@ -80,20 +82,29 @@ export function CreateStoryForm() {
         }),
     });
 
-    // Load all drafts on mount
-    useEffect(() => {
-        async function loadDrafts() {
-            try {
-                const drafts = await getDraftsByDate();
-                if (drafts.length > 0) {
-                    setDrafts(drafts);
+    const { executeAsync: executeAsyncSyncStoryDraftToDb } =
+        useSyncStoryDraftToDb();
+
+    const throttledSaveDraftToDb = useThrottledCallback(
+        async (draftData: StoryIndexDbSchemaType) => {
+            {
+                try {
+                    await executeAsyncSyncStoryDraftToDb(draftData);
+
+                    queryclient.invalidateQueries({
+                        queryKey: ["user-story-drafts", { userId: authorId }],
+                    });
+                } catch (e) {
+                    console.log("Couldn't save draft to database", e);
+                } finally {
+                    setSavingDraftToDb(false);
                 }
-            } catch (error) {
-                console.error("Failed to load drafts:", error);
             }
-        }
-        loadDrafts();
-    }, []);
+        },
+        1000,
+    );
+
+    const { data: drafts } = useMergedDrafts({ authorId });
 
     // Load selected draft when currentDraftId changes or clear it
     useEffect(() => {
@@ -154,6 +165,7 @@ export function CreateStoryForm() {
                     created: currentDraft.created,
                 }),
                 book: book, // store the full ComboboxItem so the label survives reload
+                authorId: authorId,
             };
 
             const savedDraftId = await saveDraft(draftData);
@@ -166,9 +178,12 @@ export function CreateStoryForm() {
                 }
             }
 
-            // Refresh drafts list
-            const { drafts: updatedDrafts } = await storyIndexDB();
-            setDrafts(updatedDrafts);
+            // sync to db
+            setSavingDraftToDb(true);
+
+            queryclient.invalidateQueries({
+                queryKey: ["indexdb-drafts"],
+            });
         } catch (error) {
             console.error("Failed to save draft:", error);
         } finally {
@@ -181,9 +196,15 @@ export function CreateStoryForm() {
         try {
             await deleteDraft(draftId);
 
-            // Refresh drafts list
-            const { drafts: updatedDrafts } = await storyIndexDB();
-            setDrafts(updatedDrafts);
+            await deleteStoryDraftFromDb(draftId);
+
+            queryclient.invalidateQueries({
+                queryKey: ["indexdb-drafts"],
+            });
+
+            queryclient.invalidateQueries({
+                queryKey: ["user-story-drafts", { userId: authorId }],
+            });
 
             // If we deleted the current draft, reset the form
             if (currentDraft?.id === draftId) {
@@ -204,18 +225,10 @@ export function CreateStoryForm() {
         }
     }
 
-    const {
-        start: startSaveContentDraft,
-        clear: clearOngoingSaveContentDraft,
-    } = useTimeout(() => {
-        throttledSaveDraft();
-    }, 1000);
-
     // effect for monitoring content rich text editor change; form onChange does not register it.
     form.watch("content", ({ value, previousValue }) => {
         if (previousValue !== value) {
-            clearOngoingSaveContentDraft(); // clear any ongoing timeout
-            startSaveContentDraft();
+            throttledSaveDraft();
         }
     });
 
@@ -225,6 +238,13 @@ export function CreateStoryForm() {
 
         throttledSaveDraft();
     }, [book]);
+
+    // effect for syncing draft to database
+    useEffect(() => {
+        if (!currentDraft || !savingDraftToDb) return;
+
+        throttledSaveDraftToDb(currentDraft);
+    }, [currentDraft, savingDraftToDb]);
 
     async function handleSubmit(data: StoryInsertType) {
         await Promise.all([
@@ -258,7 +278,18 @@ export function CreateStoryForm() {
                         {currentDraft?.id
                             ? `Editing Draft #${currentDraft.id}`
                             : "New Draft"}{" "}
-                        {savingDraft && <Loader size={10} />}
+                        {(savingDraft || savingDraftToDb) && (
+                            <Loader
+                                size={10}
+                                color={
+                                    savingDraft
+                                        ? "yellow"
+                                        : savingDraftToDb
+                                          ? "blue"
+                                          : "green"
+                                }
+                            />
+                        )}
                     </Text>
 
                     {(currentDraftId || currentDraft) && (

@@ -1,8 +1,12 @@
 "use server";
 
 import { db } from "@/drizzle";
-import { story } from "@/drizzle/schemas/story";
-import { storyInsertSchema, storyUpdateSchema } from "@/zod-schemas/story";
+import { story, storyDraft } from "@/drizzle/schemas/story";
+import {
+    storyDraftInsertSchema,
+    storyInsertSchema,
+    storyUpdateSchema,
+} from "@/zod-schemas/story";
 import { and, asc, desc, eq, gt, ilike, or, sql } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
 import { authActionClient } from "../safe-action";
@@ -442,4 +446,49 @@ async function correctStoriesBookParts({
 
     // revalidate book stories list if this story belong to a book
     updateTag(`getBookStories-${bookId}`);
+}
+
+export const syncStoryDraftToDbAction = authActionClient
+    .inputSchema(storyDraftInsertSchema)
+    .action(async ({ parsedInput, ctx }) => {
+        // check if draft exists
+        const [existing] = await db
+            .select({ id: storyDraft.id })
+            .from(storyDraft)
+            .where(eq(storyDraft.id, parsedInput.id));
+
+        if (existing) {
+            // update draft instead
+            await db
+                .update(storyDraft)
+                .set({ ...parsedInput, authorId: ctx.user.id })
+                .where(eq(storyDraft.id, parsedInput.id));
+        } else {
+            // create new draft
+            await db
+                .insert(storyDraft)
+                .values({ ...parsedInput, authorId: ctx.user.id });
+        }
+    });
+
+export async function getUserStoryDraftsFromDb(userId: string) {
+    try {
+        const drafts = await db.query.storyDraft.findMany({
+            where(fields, operators) {
+                return operators.eq(fields.authorId, userId);
+            },
+        });
+
+        return drafts;
+    } catch {
+        throw new Error("Failed to get story drafts");
+    }
+}
+
+export async function deleteStoryDraftFromDb(draftId: number) {
+    try {
+        await db.delete(storyDraft).where(eq(storyDraft.id, draftId));
+    } catch {
+        throw new Error("Failed to delete story draft from database");
+    }
 }

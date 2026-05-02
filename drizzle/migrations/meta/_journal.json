@@ -309,6 +309,13 @@
       "when": 1777703468243,
       "tag": "0043_powerful_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1777709477780,
+      "tag": "0044_little_monster_badoon",
+      "breakpoints": true
     }
   ]
 }
