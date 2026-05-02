@@ -1,5 +1,5 @@
 import { favouriteUserStories } from "@/drizzle/schemas/favourite";
-import { story } from "@/drizzle/schemas/story";
+import { story, storyDraft } from "@/drizzle/schemas/story";
 import {
     createInsertSchema,
     createSelectSchema,
@@ -41,3 +41,7 @@ export const storyInsertSchema = createInsertSchema(story, {
 });
 
 export const favouriteInserSchema = createInsertSchema(favouriteUserStories);
+
+export const storyDraftInsertSchema = createInsertSchema(storyDraft);
+
+export const storyDraftSelectSchema = createSelectSchema(storyDraft);

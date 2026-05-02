@@ -54,6 +54,27 @@ export const story = table(
     ],
 );
 
+export const storyDraft = table("story_drafts", {
+    id: t.integer("id").primaryKey(),
+
+    title: t.text("title").notNull(),
+
+    subtitle: t.text("subtitle"),
+
+    content: t.text("content").notNull(),
+
+    blurb: t.text("blurb"),
+
+    created: t.integer("created").notNull(),
+    updated: t.integer("updated").notNull(),
+
+    book: t.jsonb("book").$type<{
+        label: string;
+        value: string;
+        disabled?: boolean;
+    }>(),
+});
+
 export const storyRelations = relations(story, ({ one, many }) => ({
     author: one(user, {
         fields: [story.authorId],

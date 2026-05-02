@@ -1,6 +1,7 @@
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     favouriteInserSchema,
+    storyDraftInsertSchema,
     storyInsertSchema,
     storySelectSchema,
     storyUpdateSchema,
@@ -63,12 +64,7 @@ export type StoryRatingProps = {
     userRating?: UserRatingWithComment;
 };
 
-export type StoryIndexDbSchemaType = Omit<StoryInsertType, "bookId"> & {
-    id?: number;
-    created: number;
-    updated: number;
-    book: ComboboxItem | null;
-};
+export type StoryIndexDbSchemaType = z.infer<typeof storyDraftInsertSchema>;
 
 export type StoryIndexDbSchema = DBSchema & {
     stories: {
@@ -76,4 +72,14 @@ export type StoryIndexDbSchema = DBSchema & {
         key: number;
         indexes: { "book-id": number; created: number };
     };
+};
+
+export type StoryIndexDbSchemaTypess = Omit<
+    StoryInsertType,
+    "bookId" | "image"
+> & {
+    id?: number;
+    created: number;
+    updated: number;
+    book: ComboboxItem | null;
 };
