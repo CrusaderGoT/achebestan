@@ -31,13 +31,13 @@ import {
     useTimeout,
 } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BooksSelect } from "@/components/book/books-select";
 import { deleteStoryDraftFromDb } from "@/lib/actions/story";
 import { useCreateStory } from "@/lib/hooks/story/create-story";
 import {
-    useMergedDrafts,
+    useNewMergedDrafts,
     useSyncStoryDraftToDb,
 } from "@/lib/hooks/story/story-draft";
 import { toFormBookId } from "@/lib/utils/book/book-part-id-conversion";
@@ -102,7 +102,32 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
         1000,
     );
 
-    const { data: drafts } = useMergedDrafts({ authorId });
+    const { data: mergedData = [] } = useNewMergedDrafts({ userId: authorId });
+
+    const drafts = useMemo(() => {
+        if (!mergedData) return [];
+
+        const map = new Map<number, StoryIndexDbSchemaType>();
+
+        // fix 3: local first so remote can overwrite it
+        mergedData.forEach((incomingItem) => {
+            const id = incomingItem.id;
+
+            // fix 4: == null catches undefined/null but not 0
+            if (id == null) return;
+
+            const existingItem = map.get(id);
+
+            if (!existingItem) {
+                map.set(id, incomingItem);
+            } else if (incomingItem.updated >= existingItem.updated) {
+                // >= so remote (later in spread) wins ties
+                map.set(id, incomingItem);
+            }
+        });
+
+        return Array.from(map.values()).sort((a, b) => b.updated - a.updated);
+    }, [mergedData]);
 
     // Load selected draft when currentDraftId changes or clear it.
     // Fix: if IndexedDB has no record for this id (cross-device scenario),

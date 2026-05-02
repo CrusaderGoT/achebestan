@@ -89,3 +89,15 @@ export function useMergedDrafts({ authorId }: { authorId: string }) {
         isLocalLoading: localQuery.isLoading, // fix 5
     };
 }
+
+export const useNewMergedDrafts = ({ userId }: { userId: string }) => {
+    return useQuery({
+        queryKey: ["user-story-drafts", { userId }],
+        queryFn: async () => {
+            const localDrafts = await getDraftsByDate();
+            const dbDrafts = await getUserStoryDraftsFromDb(userId);
+
+            return [...localDrafts, ...dbDrafts];
+        },
+    });
+};
