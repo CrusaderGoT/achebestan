@@ -58,5 +58,7 @@ export const useMergedDrafts = ({ userId }: { userId: string }) => {
 
             return [...localDrafts, ...remoteDrafts];
         },
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
     });
 };
