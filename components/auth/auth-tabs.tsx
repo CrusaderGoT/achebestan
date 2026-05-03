@@ -4,6 +4,7 @@
 import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useSitePermissions } from "@/lib/hooks/auth/site-permissions";
+import publicStyles from "@/styles/public.module.css";
 import { LoginFormState } from "@/types/user";
 import {
     Center,
@@ -24,7 +25,6 @@ import { SuperAdminForm } from "../forms/user/super-admin-form";
 import { ListOrganizations } from "../organization/list-organizations";
 import { MembersTable } from "../organization/manage-members";
 import { LogoutButton } from "./logout-btn";
-import publicStyles from "@/styles/public.module.css"
 
 type AuthTabsProps = {
     closeDrawer?: () => void;
@@ -175,6 +175,7 @@ export function AuthTabs({
                                 canUpdateMembers={
                                     permissions?.canManageOrganization
                                 }
+                                canCreateOwner={permissions?.canCreateOwner}
                             />
                         </Tabs.Panel>
                     </>
@@ -188,7 +189,7 @@ export function AuthTabs({
                         </Text>
                         {sessionUser.data?.user && (
                             <Group justify="space-around">
-                                <Mark className={publicStyles.highlight}>
+                                <Mark className={publicStyles.highlightText}>
                                     current user: {sessionUser.data.user.name}
                                 </Mark>
                                 <LogoutButton session={sessionUser} />

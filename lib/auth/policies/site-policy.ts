@@ -35,7 +35,7 @@ export async function canCreateSuperAdmin(): Promise<boolean> {
 /**
  * Check if user can create super admin users
  */
-export async function canMakeOwner(): Promise<boolean> {
+export async function canCreateOwner(): Promise<boolean> {
     return hasPermission("site", ["update:role"]);
 }
 
@@ -51,6 +51,7 @@ export async function getSitePermissions({
         canCreateSuperAdmin: false,
         canManageOrganization: false,
         canDeleteOrganization: false,
+        canCreateOwner: false,
     };
 
     if (!currentOrganizationId || !userId) {
@@ -62,11 +63,13 @@ export async function getSitePermissions({
         manageOrganization,
         deleteOrganization,
         createSuperAdmin,
+        makeOwner,
     ] = await Promise.all([
         await canCreateOrganization(),
         await canManageOrganization(),
         await canDeleteOrganization(),
         await canCreateSuperAdmin(),
+        await canCreateOwner(),
     ]);
 
     return {
@@ -74,6 +77,7 @@ export async function getSitePermissions({
         canManageOrganization: manageOrganization,
         canDeleteOrganization: deleteOrganization,
         canCreateSuperAdmin: createSuperAdmin,
+        canCreateOwner: makeOwner,
     };
 }
 
@@ -82,4 +86,5 @@ export type SitePermissionsType = {
     canDeleteOrganization: boolean;
     canManageOrganization: boolean;
     canCreateSuperAdmin: boolean;
+    canCreateOwner: boolean;
 };

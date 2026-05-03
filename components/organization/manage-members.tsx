@@ -2,6 +2,7 @@
 
 import { makeUserOwnerOfOrganizationIfNonExist } from "@/lib/actions/auth";
 import { authClient } from "@/lib/auth-client";
+import { ORG_ROLES } from "@/lib/constants";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import {
     ActionIcon,
@@ -20,8 +21,10 @@ import { useMemo } from "react";
 
 export function MembersTable({
     canUpdateMembers,
+    canCreateOwner,
 }: {
     canUpdateMembers: boolean | undefined;
+    canCreateOwner: boolean | undefined;
 }) {
     const orgData = useCentralizedAuth().currentOrganization;
 
@@ -37,25 +40,34 @@ export function MembersTable({
         return <Text>No Members Yet...</Text>;
     }
 
-    const rows = orgData.data.members.map((m) => (
-        <Table.Tr key={m.id}>
-            <Table.Td>
-                <Avatar size={"sm"} src={m.user.image} />
-            </Table.Td>
+    const rows = useMemo(
+        () =>
+            orgData.data?.members.map((m) => (
+                <Table.Tr key={m.id}>
+                    <Table.Td>
+                        <Avatar size={"sm"} src={m.user.image} />
+                    </Table.Td>
 
-            <Table.Td>{m.user.name}</Table.Td>
+                    <Table.Td>{m.user.name}</Table.Td>
 
-            <Table.Td>{m.role}</Table.Td>
+                    <Table.Td>{m.role}</Table.Td>
 
-            <Table.Td>{dayjs(m.createdAt).format("DD/MM/YYYY")}</Table.Td>
+                    <Table.Td>
+                        {dayjs(m.createdAt).format("DD/MM/YYYY")}
+                    </Table.Td>
 
-            {canUpdateMembers && (
-                <Table.Td>
-                    <ManageMembers {...m} />
-                </Table.Td>
-            )}
-        </Table.Tr>
-    ));
+                    {canUpdateMembers && (
+                        <Table.Td>
+                            <ManageMembers
+                                {...m}
+                                canCreateOwner={canCreateOwner}
+                            />
+                        </Table.Td>
+                    )}
+                </Table.Tr>
+            )) || [],
+        [orgData.data?.members.length],
+    );
 
     return (
         <Table.ScrollContainer minWidth={300} maxHeight={300}>
@@ -83,7 +95,7 @@ export function MembersTable({
     );
 }
 
-type OrgRole = "member" | "admin" | "owner" | "writer";
+type OrgRole = (typeof ORG_ROLES)[keyof typeof ORG_ROLES];
 
 type ManageMemberProps = {
     member: NonNullable<
@@ -94,7 +106,10 @@ type ManageMemberProps = {
     action: "add" | "remove";
 };
 
-export function ManageMembers({ ...member }: ManageMemberProps["member"]) {
+export function ManageMembers({
+    canCreateOwner,
+    ...member
+}: ManageMemberProps["member"] & { canCreateOwner: boolean | undefined }) {
     const [availableRolesToAdd, availableRolesToRemove, existingMemberRoles] =
         useMemo(() => {
             const allRoles: OrgRole[] = ["member", "admin", "writer"];
@@ -167,7 +182,7 @@ export function ManageMembers({ ...member }: ManageMemberProps["member"]) {
                     </Menu.Sub.Dropdown>
                 </Menu.Sub>
 
-                <MakeMemberOwner {...member} />
+                {canCreateOwner && <MakeMemberOwner {...member} />}
             </Menu.Dropdown>
         </Menu>
     );

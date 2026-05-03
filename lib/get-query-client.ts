@@ -15,8 +15,6 @@ export const getQueryClient = () =>
                 // (Great for reading long stories without jumps).
                 refetchOnWindowFocus: false,
 
-                refetchOnMount: false,
-
                 // Retry failed fetches twice before showing an error.
                 retry: 2,
             },

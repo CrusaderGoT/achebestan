@@ -5,4 +5,5 @@ export const ORG_ROLES = {
     superAdmin: "superAdmin", // platform owner
     admin: "admin", // org specific
     member: "member", // default user
+    owner: "owner", // org specific
 } as const;

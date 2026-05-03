@@ -6,7 +6,7 @@ import { StoryIndexDbSchemaType } from "@/types/story";
 import { ActionIcon, Box, Group, Radio, Stack, Text } from "@mantine/core";
 import { randomId } from "@mantine/hooks";
 import { IconTrash } from "@tabler/icons-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export function Drafts({
     drafts,
@@ -19,6 +19,8 @@ export function Drafts({
     setCurrentDraftId: Dispatch<SetStateAction<number | null>>;
     onDeleteDraft: (id: number) => void;
 }) {
+    const [disabled, setDisabled] = useState(false);
+
     const cards = drafts.map((draft) => (
         <Group key={draft.id || randomId()} wrap="nowrap">
             <Radio.Card
@@ -53,12 +55,14 @@ export function Drafts({
             <ActionIcon
                 variant="outline"
                 onClick={(e) => {
+                    setDisabled(true);
                     e.stopPropagation();
                     e.preventDefault();
                     if (draft.id) {
                         onDeleteDraft(draft.id);
                     }
                 }}
+                loading={disabled}
                 size="sm"
                 color="red"
             >

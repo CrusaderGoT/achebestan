@@ -4,7 +4,7 @@ import { db } from "@/drizzle";
 import * as authSchemas from "@/drizzle/schemas/user";
 import { generateId } from "better-auth";
 import { and, eq } from "drizzle-orm";
-import { canMakeOwner } from "../auth/policies/site-policy";
+import { canCreateOwner } from "../auth/policies/site-policy";
 
 export async function getUserRole(userId: string) {
     const role = await db.query.user
@@ -48,7 +48,7 @@ export async function makeUserOwnerOfOrganizationIfNonExist(
     orgId: string
 ) {
     try {
-        const perm = await canMakeOwner();
+        const perm = await canCreateOwner();
 
         if (!perm) return { sucess: false, failure: true, error: false };
 
