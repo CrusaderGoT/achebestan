@@ -37,7 +37,7 @@ import { BooksSelect } from "@/components/book/books-select";
 import { deleteStoryDraftFromDb } from "@/lib/actions/story";
 import { useCreateStory } from "@/lib/hooks/story/create-story";
 import {
-    useNewMergedDrafts,
+    useMergedDrafts,
     useSyncStoryDraftToDb,
 } from "@/lib/hooks/story/story-draft";
 import { toFormBookId } from "@/lib/utils/book/book-part-id-conversion";
@@ -88,13 +88,37 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
     const throttledSaveDraftToDb = useThrottledCallback(
         async (draftData: StoryIndexDbSchemaType) => {
             try {
-                await executeAsyncSyncStoryDraftToDb(draftData);
+                const result = await executeAsyncSyncStoryDraftToDb(draftData);
+                const serverId = result?.data?.id;
+
+                if (!serverId) {
+                    // Action failed validation or threw — don't invalidate,
+                    // don't pretend the sync succeeded.
+                    console.error(
+                        "Draft sync failed:",
+                        result?.serverError ?? result?.validationErrors,
+                    );
+                    return;
+                }
+
+                // Server may have assigned a different ID than IndexedDB did
+                // (e.g. first draft on a new browser always gets local id=1,
+                // but server may already have id=1 from another browser).
+                // Reconcile: delete the old local entry, re-save with server id.
+                if (draftData.id && serverId !== draftData.id) {
+                    await deleteDraft(draftData.id);
+                    await saveDraft({ ...draftData, id: serverId }, authorId);
+                    setCurrentDraft((prev) =>
+                        prev ? { ...prev, id: serverId } : null,
+                    );
+                    setCurrentDraftId(serverId);
+                }
 
                 queryclient.invalidateQueries({
                     queryKey: ["user-story-drafts", { userId: authorId }],
                 });
             } catch (e) {
-                console.log("Couldn't save draft to database", e);
+                console.error("Couldn't save draft to database:", e);
             } finally {
                 setSavingDraftToDb(false);
             }
@@ -102,18 +126,14 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
         1000,
     );
 
-    const { data: mergedData = [] } = useNewMergedDrafts({ userId: authorId });
+    const { data: mergedData = [] } = useMergedDrafts({ userId: authorId });
 
     const drafts = useMemo(() => {
-        if (!mergedData) return [];
-
         const map = new Map<number, StoryIndexDbSchemaType>();
 
-        // fix 3: local first so remote can overwrite it
         mergedData.forEach((incomingItem) => {
             const id = incomingItem.id;
 
-            // fix 4: == null catches undefined/null but not 0
             if (id == null) return;
 
             const existingItem = map.get(id);
@@ -129,10 +149,6 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
         return Array.from(map.values()).sort((a, b) => b.updated - a.updated);
     }, [mergedData]);
 
-    // Load selected draft when currentDraftId changes or clear it.
-    // Fix: if IndexedDB has no record for this id (cross-device scenario),
-    // fall back to the already-fetched merged drafts (which includes remote DB
-    // data) and seed local IndexedDB from it so future reads on this device work.
     useEffect(() => {
         async function loadCurrentDraft() {
             if (!currentDraftId) {
@@ -145,16 +161,13 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
             try {
                 let draftData = await getDraft(currentDraftId);
 
-                // Cross-device fallback: IndexedDB is empty on a fresh device.
-                // Find the draft in the remote-inclusive merged list and seed
-                // this device's IndexedDB so subsequent reads work locally.
                 if (!draftData) {
                     const remoteFallback = drafts.find(
                         (d) => d.id === currentDraftId,
                     );
 
                     if (remoteFallback) {
-                        await saveDraft(remoteFallback);
+                        await saveDraft(remoteFallback, authorId);
                         draftData = await getDraft(currentDraftId);
                     }
                 }
@@ -166,10 +179,6 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
                     setCurrentDraft(draftData);
                     form.setValues(draft);
 
-                    // draftBook is only stored in IndexedDB — it won't exist on
-                    // a fresh device. Fall back to bookId so the field value is
-                    // correct even if the ComboboxItem label is temporarily missing
-                    // (BooksSelect will re-hydrate the label on its own).
                     if (draftBook) {
                         setBook(draftBook);
                         form.setFieldValue("bookId", toFormBookId(draftBook));
@@ -214,12 +223,11 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
                 authorId: authorId,
             };
 
-            const savedDraftId = await saveDraft(draftData);
+            const savedDraftId = await saveDraft(
+                draftData as StoryIndexDbSchemaType,
+                authorId,
+            );
 
-            // Fix: always refresh currentDraft from IndexedDB after every save,
-            // not just for new drafts. Without this, the sync effect receives
-            // a stale closure — the version before the last edit — and the DB
-            // ends up one keystroke behind forever.
             const refreshedDraft = await getDraft(savedDraftId);
             if (refreshedDraft) {
                 setCurrentDraft(refreshedDraft);
@@ -228,12 +236,11 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
                 }
             }
 
-            setSavingDraftToDb(true);
-
-            // Fix: invalidate with the user-scoped key to match useMergedDrafts
             queryclient.invalidateQueries({
-                queryKey: ["indexdb-drafts", { userId: authorId }],
+                queryKey: ["user-story-drafts", { userId: authorId }],
             });
+
+            setSavingDraftToDb(true);
         } catch (error) {
             console.error("Failed to save draft:", error);
         } finally {
@@ -245,13 +252,7 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
     async function handleDeleteDraft(draftId: number) {
         try {
             await deleteDraft(draftId);
-
             await deleteStoryDraftFromDb(draftId);
-
-            // Fix: both invalidations now use the user-scoped key
-            queryclient.invalidateQueries({
-                queryKey: ["indexdb-drafts", { userId: authorId }],
-            });
 
             queryclient.invalidateQueries({
                 queryKey: ["user-story-drafts", { userId: authorId }],
@@ -263,15 +264,24 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
                 form.reset();
             }
 
-            notifications.show({
-                message: "Draft deleted successfully",
-            });
+            notifications.show({ message: "Draft deleted successfully" });
         } catch (error) {
             console.error("Failed to delete draft:", error);
             notifications.show({
                 message: "Failed to delete draft",
                 color: "red",
             });
+        }
+    }
+
+    async function handleSubmit(data: StoryInsertType) {
+        const result = await executeAsyncCreateStory({
+            ...data,
+            bookId: toFormBookId(book),
+        });
+
+        if (result?.data && currentDraftId && deleteDraftOnSubmit) {
+            await handleDeleteDraft(currentDraftId);
         }
     }
 
@@ -287,22 +297,10 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
     }, [book]);
 
     useEffect(() => {
-        if (!currentDraft || !savingDraftToDb) return;
+        if (!currentDraft || !savingDraftToDb || !form.isDirty("content"))
+            return;
         throttledSaveDraftToDb(currentDraft);
     }, [currentDraft, savingDraftToDb]);
-
-    async function handleSubmit(data: StoryInsertType) {
-        await Promise.all([
-            await executeAsyncCreateStory({
-                ...data,
-                bookId: toFormBookId(book),
-            }),
-            !!currentDraftId &&
-                hasSucceededCreateStory &&
-                deleteDraftOnSubmit &&
-                (await handleDeleteDraft(currentDraftId)),
-        ]);
-    }
 
     return (
         <StoryFormProvider form={form}>

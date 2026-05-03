@@ -3,9 +3,9 @@
 import { db } from "@/drizzle";
 import { story, storyDraft } from "@/drizzle/schemas/story";
 import {
-    storyDraftInsertSchema,
     storyInsertSchema,
     storyUpdateSchema,
+    syncStoryDraftActionSchema,
 } from "@/zod-schemas/story";
 import { and, asc, desc, eq, gt, ilike, or, sql } from "drizzle-orm";
 import { flattenValidationErrors } from "next-safe-action";
@@ -14,7 +14,7 @@ import { handleFileUpload } from "../utils/image-upload";
 
 import z from "zod/v4";
 
-import { SearchOptions } from "@/types/story";
+import { SearchOptions, StoryIndexDbSchemaType } from "@/types/story";
 import { UserSelectType } from "@/types/user";
 import { cacheTag, revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -449,29 +449,54 @@ async function correctStoriesBookParts({
 }
 
 export const syncStoryDraftToDbAction = authActionClient
-    .inputSchema(storyDraftInsertSchema)
+    .inputSchema(syncStoryDraftActionSchema)
     .action(async ({ parsedInput, ctx }) => {
-        // check if draft exists
-        const [existing] = await db
-            .select({ id: storyDraft.id })
-            .from(storyDraft)
-            .where(eq(storyDraft.id, parsedInput.id));
+        const userId = ctx.user.id;
+        const { id: clientId, ...draftData } = parsedInput;
+
+        // Does this user already have this draft on the server?
+        const [existing] = clientId
+            ? await db
+                  .select({ id: storyDraft.id })
+                  .from(storyDraft)
+                  .where(
+                      and(
+                          eq(storyDraft.id, clientId),
+                          eq(storyDraft.authorId, userId), // ownership check
+                      ),
+                  )
+            : [];
 
         if (existing) {
-            // update draft instead
-            await db
+            const [updated] = await db
                 .update(storyDraft)
-                .set({ ...parsedInput, authorId: ctx.user.id })
-                .where(eq(storyDraft.id, parsedInput.id));
-        } else {
-            // create new draft
-            await db
-                .insert(storyDraft)
-                .values({ ...parsedInput, authorId: ctx.user.id });
+                .set({ ...draftData, authorId: userId })
+                .where(
+                    and(
+                        eq(storyDraft.id, existing.id),
+                        eq(storyDraft.authorId, userId),
+                    ),
+                )
+                .returning({ id: storyDraft.id });
+
+            return { id: updated.id };
         }
+
+        // New draft — never pass the client's IndexedDB id to the server.
+        // IndexedDB auto-increments from 1 on every browser independently,
+        // so passing it causes PostgreSQL unique constraint violations when
+        // two browsers create their first draft (both get id=1 locally).
+        const [inserted] = await db
+            .insert(storyDraft)
+            .values({ ...draftData, authorId: userId })
+            .returning({ id: storyDraft.id });
+
+        return { id: inserted.id };
     });
 
-export async function getUserStoryDraftsFromDb(userId: string) {
+export async function getUserStoryDraftsFromDb(
+    userId: string,
+): Promise<StoryIndexDbSchemaType[]> {
     try {
         const drafts = await db.query.storyDraft.findMany({
             where(fields, operators) {

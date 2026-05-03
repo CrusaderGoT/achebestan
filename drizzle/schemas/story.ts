@@ -55,7 +55,7 @@ export const story = table(
 );
 
 export const storyDraft = table("story_drafts", {
-    id: t.integer("id").primaryKey(),
+    id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
 
     title: t.text("title").notNull(),
 
@@ -65,8 +65,8 @@ export const storyDraft = table("story_drafts", {
 
     blurb: t.text("blurb"),
 
-    created: t.integer("created").notNull(),
-    updated: t.integer("updated").notNull(),
+    created: t.bigint("created", { mode: "number" }).notNull(),
+    updated: t.bigint("updated", { mode: "number" }).notNull(),
 
     book: t.jsonb("book").$type<{
         label: string;

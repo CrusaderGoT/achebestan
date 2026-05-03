@@ -1,0 +1,1 @@
+ALTER TABLE "story_drafts" ALTER COLUMN "id" DROP IDENTITY;

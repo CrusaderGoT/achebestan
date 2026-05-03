@@ -3,63 +3,73 @@ import { IDBPDatabase, openDB } from "idb";
 
 let dbInstance: IDBPDatabase<StoryIndexDbSchema> | null = null;
 
-export const getStoryIndexDB = async () => {
-    if (dbInstance) {
-        return dbInstance;
-    }
+export const getStoryIndexDB = async (): Promise<
+    IDBPDatabase<StoryIndexDbSchema>
+> => {
+    if (dbInstance) return dbInstance;
 
-    dbInstance = await openDB<StoryIndexDbSchema>("Stories", 1, {
-        upgrade(db) {
-            const store = db.createObjectStore("stories", {
-                keyPath: "id",
-                autoIncrement: true,
-            });
-            store.createIndex("book-id", "bookId");
-            store.createIndex("created", "created");
+    dbInstance = await openDB<StoryIndexDbSchema>("Stories", 2, {
+        upgrade(db, oldVersion, _newVersion, tx) {
+            if (oldVersion === 0) {
+                const store = db.createObjectStore("stories", {
+                    keyPath: "id",
+                    autoIncrement: true,
+                });
+                store.createIndex("created", "created");
+                store.createIndex("author-id", "authorId");
+                return;
+            }
+
+            if (oldVersion === 1) {
+                const store = tx.objectStore("stories");
+                if (!store.indexNames.contains("created")) {
+                    store.createIndex("created", "created");
+                }
+                if (!store.indexNames.contains("author-id")) {
+                    store.createIndex("author-id", "authorId");
+                }
+            }
         },
     });
 
     return dbInstance;
 };
 
-export const storyIndexDB = async () => {
+export const getDraft = async (
+    id: number,
+): Promise<StoryIndexDbSchemaType | undefined> => {
     const db = await getStoryIndexDB();
-    const drafts = await db.getAll("stories");
-
-    return {
-        db,
-        drafts,
-    };
-};
-
-export const getDraft = async (id: number) => {
-    const db = await getStoryIndexDB();
-    return await db.get("stories", id);
+    return db.get("stories", id);
 };
 
 export const saveDraft = async (
-    draft: Partial<StoryIndexDbSchemaType>,
+    draft: StoryIndexDbSchemaType,
+    userId: string,
 ): Promise<number> => {
+    if (!draft.authorId || draft.authorId !== userId) {
+        throw new Error(
+            "Unauthorized: draft authorId does not match the current user.",
+        );
+    }
+
     const db = await getStoryIndexDB();
     const now = Date.now();
     const { id, ...draftWithoutId } = draft;
 
     if (id) {
-        const data = {
+        return db.put("stories", {
             ...draft,
-            id: id,
-            created: draft.created || now,
+            id,
+            created: draft.created ?? now,
             updated: now,
-        };
-        return await db.put("stories", data as StoryIndexDbSchemaType);
-    } else {
-        const data = {
-            ...draftWithoutId,
-            created: draft.created || now,
-            updated: now,
-        };
-        return await db.add("stories", data as StoryIndexDbSchemaType);
+        });
     }
+
+    return db.add("stories", {
+        ...draftWithoutId,
+        created: draft.created ?? now,
+        updated: now,
+    } as StoryIndexDbSchemaType);
 };
 
 export const deleteDraft = async (id: number): Promise<void> => {
@@ -67,17 +77,28 @@ export const deleteDraft = async (id: number): Promise<void> => {
     await db.delete("stories", id);
 };
 
-export const deleteAllDrafts = async (): Promise<void> => {
+export const deleteAllUserDrafts = async (userId: string): Promise<void> => {
     const db = await getStoryIndexDB();
     const tx = db.transaction("stories", "readwrite");
-    await tx.store.clear();
+    const index = tx.store.index("author-id");
+    let cursor = await index.openCursor(IDBKeyRange.only(userId));
+
+    while (cursor) {
+        await cursor.delete();
+        cursor = await cursor.continue();
+    }
+
     await tx.done;
 };
 
-// Fix: getAllFromIndex returns ascending (oldest first). Reversing here keeps
-// the name accurate and stays consistent with the merge hook's sort order.
-export const getDraftsByDate = async (): Promise<StoryIndexDbSchemaType[]> => {
+export const getDraftsByUserId = async (
+    userId: string,
+): Promise<StoryIndexDbSchemaType[]> => {
     const db = await getStoryIndexDB();
-    const all = await db.getAllFromIndex("stories", "created");
-    return all.reverse(); // newest first
+    const drafts = await db.getAllFromIndex(
+        "stories",
+        "author-id",
+        IDBKeyRange.only(userId),
+    );
+    return drafts.sort((a, b) => b.created - a.created);
 };

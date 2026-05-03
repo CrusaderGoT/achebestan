@@ -45,3 +45,7 @@ export const favouriteInserSchema = createInsertSchema(favouriteUserStories);
 export const storyDraftInsertSchema = createInsertSchema(storyDraft);
 
 export const storyDraftSelectSchema = createSelectSchema(storyDraft);
+
+export const syncStoryDraftActionSchema = storyDraftInsertSchema.extend({
+    id: storyDraftSelectSchema.shape.id.optional(),
+});

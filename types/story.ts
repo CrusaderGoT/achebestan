@@ -1,7 +1,7 @@
 import { RatingSelectType, UserRatingWithComment } from "@/zod-schemas/rating";
 import {
     favouriteInserSchema,
-    storyDraftInsertSchema,
+    storyDraftSelectSchema,
     storyInsertSchema,
     storySelectSchema,
     storyUpdateSchema,
@@ -64,13 +64,13 @@ export type StoryRatingProps = {
     userRating?: UserRatingWithComment;
 };
 
-export type StoryIndexDbSchemaType = z.infer<typeof storyDraftInsertSchema>;
+export type StoryIndexDbSchemaType = z.infer<typeof storyDraftSelectSchema>;
 
 export type StoryIndexDbSchema = DBSchema & {
     stories: {
         value: StoryIndexDbSchemaType;
         key: number;
-        indexes: { "book-id": number; created: number };
+        indexes: { "author-id": string; created: number };
     };
 };
 
