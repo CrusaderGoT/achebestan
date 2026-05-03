@@ -159,39 +159,48 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
             }
 
             try {
-                let draftData = await getDraft(currentDraftId);
+                // 1. Fetch local draft and find remote draft
+                const localDraft = await getDraft(currentDraftId);
+                const remoteDraft = drafts.find((d) => d.id === currentDraftId);
 
-                if (!draftData) {
-                    const remoteFallback = drafts.find(
-                        (d) => d.id === currentDraftId,
-                    );
+                // 2. Determine the absolute latest draft
+                // (Using new Date() ensures safe comparison if 'updated' is an ISO string)
+                const latestDraft =
+                    localDraft && remoteDraft
+                        ? new Date(localDraft.updated) >=
+                          new Date(remoteDraft.updated)
+                            ? localDraft
+                            : remoteDraft
+                        : (localDraft ?? remoteDraft);
 
-                    if (remoteFallback) {
-                        await saveDraft(remoteFallback, authorId);
-                        draftData = await getDraft(currentDraftId);
-                    }
-                }
-
-                if (draftData) {
-                    const { book: draftBook, ...draft } = draftData;
-
-                    form.reset();
-                    setCurrentDraft(draftData);
-                    form.setValues(draft);
-
-                    if (draftBook) {
-                        setBook(draftBook);
-                        form.setFieldValue("bookId", toFormBookId(draftBook));
-                    }
-
-                    if (openedDrafts) {
-                        closeDrafts();
-                    }
-                } else {
+                // 3. Handle 404 case
+                if (!latestDraft) {
                     notifications.show({
                         message: "Draft not found",
                         color: "red",
                     });
+                    return;
+                }
+
+                // 4. Sync local storage if the remote draft was newer or local was missing
+                if (latestDraft === remoteDraft && latestDraft !== localDraft) {
+                    await saveDraft(latestDraft, authorId);
+                }
+
+                // 5. Populate the form using the LATEST data, not just the local data
+                const { book: draftBook, ...draft } = latestDraft;
+
+                form.reset();
+                setCurrentDraft(latestDraft);
+                form.setValues(draft);
+
+                if (draftBook) {
+                    setBook(draftBook);
+                    form.setFieldValue("bookId", toFormBookId(draftBook));
+                }
+
+                if (openedDrafts) {
+                    closeDrafts();
                 }
             } catch (error) {
                 console.error("Failed to load draft:", error);
@@ -201,6 +210,7 @@ export function CreateStoryForm({ authorId }: { authorId: string }) {
                 });
             }
         }
+
         loadCurrentDraft();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDraftId]);
