@@ -22,7 +22,7 @@ export const story = table(
             .notNull(),
         isbn: t.uuid().defaultRandom().notNull(),
         content: t.text().notNull(),
-        bookId: t.integer(),
+        bookId: t.integer().references(() => book.id, { onDelete: "set null" }),
         bookPart: t.integer(),
         ...timestamps,
         ...image,
@@ -30,19 +30,9 @@ export const story = table(
     },
     (table) => [
         t.index("stories_title_idx").on(table.title),
-        t.index("stories_subtitle_idx").on(table.subtitle),
         t.index("stories_author_id_idx").on(table.authorId),
-        t.index("stories_created_idx").on(table.created),
-        t.index("stories_edited_idx").on(table.edited),
         t.index("stories_book_id_idx").on(table.bookId),
         t.uniqueIndex("stories_isbn_uidx").on(table.isbn),
-        t
-            .foreignKey({
-                name: "stories_book_id_book_id_fk",
-                columns: [table.bookId],
-                foreignColumns: [book.id],
-            })
-            .onDelete("set null"),
         t.check(
             "book_fields_together",
             sql`(${table.bookId} IS NULL AND ${table.bookPart} IS NULL) OR 

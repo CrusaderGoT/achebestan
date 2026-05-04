@@ -1,0 +1,379 @@
+/* ── Root & Layout ───────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  /* background-color and gradient are handled by global.css body */
+  color: var(--color-text-primary);
+  font-family: "DM Sans", sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Grain Overlay - Adjusted for theme compatibility */
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3; /* Subtle grain */
+}
+
+/* ── User Hero ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  z-index: 1;
+  padding: 4.5rem 0 3.5rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  overflow: hidden;
+  animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.heroGlow {
+  position: absolute;
+  top: -160px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  /* Switched from blue to theme accent */
+  background: radial-gradient(
+    ellipse,
+    var(--color-accent-subtle) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.heroInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+/* ── Avatar ──────────────────────────────────────────────────── */
+.avatarWrap {
+  position: relative;
+}
+
+.avatarOuter {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 4px var(--color-accent-subtle),
+    0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.avatarOuter img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarStatus {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #34d399; /* Maintain status green */
+  border: 2px solid var(--mantine-color-body);
+}
+
+/* ── Text ────────────────────────────────────────────────────── */
+.userEyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.userName {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.userNameHighlight {
+  font-style: italic;
+  color: var(--color-accent);
+}
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.8rem;
+  border-radius: 2px;
+}
+
+.rolePillDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.userMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.userMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.userMetaSep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-border-default);
+}
+
+/* ── Stats ───────────────────────────────────────────────────── */
+.statsRow {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 0.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.statNumber {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.statSep {
+  width: 1px;
+  height: 36px;
+  background: var(--color-border-subtle);
+  align-self: center;
+}
+
+/* ── Books Section ───────────────────────────────────────────── */
+.booksSection {
+  position: relative;
+  z-index: 1;
+  padding: 3rem 0 5rem;
+}
+
+.sectionHeadRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sectionHeading {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+.sectionRule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-border-default),
+    transparent
+  );
+}
+
+/* ── Book Card ───────────────────────────────────────────────── */
+.bookCard {
+  background: var(--color-surface-0);
+  border: 1px solid var(--color-border-default);
+  border-radius: 4px;
+  padding: 1.75rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.bookCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--color-accent), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.bookCard:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.bookCard:hover::before {
+  opacity: 1;
+}
+
+.bookCardIndex {
+  position: absolute;
+  top: -0.5rem;
+  right: 1rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 5rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--color-accent-subtle);
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.bookCardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.bookCardName {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.bookCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.bookCardFooter {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bookCardCta {
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.bookCardIsbn {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+.empty {
+  padding: 5rem 0;
+  color: var(--color-text-muted);
+}
+
+.emptyGlyph {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 4.5rem;
+  font-style: italic;
+  color: var(--color-accent);
+  opacity: 0.2;
+}
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .statsRow {
+    gap: 1.5rem;
+  }
+  .userMeta {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .userMetaSep {
+    display: none;
+  }
+}

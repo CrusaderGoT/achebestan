@@ -1,4 +1,4 @@
-import { getStoryBook } from "@/lib/actions/book";
+import { getBookAndStories } from "@/lib/actions/book";
 import { useQuery } from "@tanstack/react-query";
 
 export const useStoryBook = ({ bookId }: { bookId: number | null }) => {
@@ -11,7 +11,7 @@ export const useStoryBook = ({ bookId }: { bookId: number | null }) => {
                 );
             }
 
-            const data = await getStoryBook(bookId);
+            const data = await getBookAndStories(bookId);
 
             if (!data) {
                 throw new Error("The story book could not be found");

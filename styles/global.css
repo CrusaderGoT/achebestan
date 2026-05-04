@@ -1,54 +1,140 @@
+/* ═══════════════════════════════════════════════════════════════
+   ACHEBESTAN — Global Styles
+ */
+
 :root {
   @mixin light-root {
-    --mantine-color-body: hsla(0, 0%, 95%, 1);
+    --mantine-color-body: hsl(36, 20%, 96%);
 
-    /* Apply a linear gradient for the shiny effect */
-    background-image: linear-gradient(
-      to bottom,
-      /* Highlight at the top with a semi-transparent white */
-        hsla(0, 0%, 100%, 0.5) 0%,
-      /* A translucent gray to create depth */ hsla(0, 0%, 80%, 0.1) 50%,
-      /* Subtle shadow at the bottom with a dark, transparent color */
-        hsla(0, 0%, 0%, 0.05) 100%
+    /* Surfaces */
+    --color-surface-0: hsl(36, 20%, 98%);
+    --color-surface-1: hsl(36, 16%, 93%);
+    --color-surface-2: hsl(36, 12%, 88%);
+
+    /* Borders */
+    --color-border-subtle: rgba(0, 0, 0, 0.06);
+    --color-border-default: rgba(0, 0, 0, 0.1);
+
+    /* Text (use in your own components — don't apply globally) */
+    --color-text-primary: hsl(25, 15%, 12%);
+    --color-text-secondary: hsl(25, 10%, 40%);
+    --color-text-muted: hsl(25, 8%, 60%);
+
+    /* Accent — warm gold */
+    --color-accent: hsl(40, 65%, 45%);
+    --color-accent-subtle: hsla(40, 65%, 45%, 0.1);
+
+    /* Scrollbar */
+    --scrollbar-thumb: hsl(36, 12%, 75%);
+
+    /* Page gradient — soft warm paper */
+    --bg-gradient: linear-gradient(
+      160deg,
+      hsl(36, 28%, 97%) 0%,
+      hsl(36, 20%, 96%) 40%,
+      hsl(36, 16%, 93%) 100%
     );
 
-    /* Ensure the background covers the entire page */
-    min-height: 100vh;
-    background-attachment: fixed;
-    background-size: cover;
+    /* Selection */
+    --selection-bg: hsla(40, 65%, 45%, 0.2);
+    --selection-text: hsl(25, 15%, 12%);
+
+    /* Broken image fallback */
+    --img-fallback: hsl(36, 12%, 90%);
   }
 
   @mixin dark-root {
-    --mantine-color-body: hsla(240, 50%, 5%, 1);
-    /* Add the linear gradient for the shiny effect */
-    background-image: linear-gradient(
-      to bottom,
-      hsla(0, 0%, 100%, 0.1) 0%,
-      /* A subtle, semi-transparent white highlight at the top */ transparent
-        50%,
-      /* Fully transparent in the middle */ hsla(0, 0%, 0%, 0.5) 100%
-        /* A dark semi-transparent shadow at the bottom */
+    --mantine-color-body: hsl(240, 18%, 6%);
+
+    /* Surfaces */
+    --color-surface-0: hsl(240, 18%, 7%);
+    --color-surface-1: hsl(240, 14%, 10%);
+    --color-surface-2: hsl(240, 12%, 14%);
+
+    /* Borders */
+    --color-border-subtle: rgba(255, 255, 255, 0.04);
+    --color-border-default: rgba(255, 255, 255, 0.08);
+
+    /* Text */
+    --color-text-primary: hsl(36, 18%, 90%);
+    --color-text-secondary: hsl(36, 10%, 60%);
+    --color-text-muted: hsl(36, 8%, 38%);
+
+    /* Accent — gold */
+    --color-accent: hsl(40, 60%, 55%);
+    --color-accent-subtle: hsla(40, 60%, 55%, 0.1);
+
+    /* Scrollbar */
+    --scrollbar-thumb: hsl(240, 12%, 22%);
+
+    /* Page gradient — deep ink */
+    --bg-gradient: linear-gradient(
+      160deg,
+      hsl(240, 20%, 8%) 0%,
+      hsl(240, 18%, 6%) 50%,
+      hsl(240, 22%, 5%) 100%
     );
-    /* Ensure the background covers the entire page */
-    background-attachment: fixed;
-    background-size: cover;
-    min-height: 100vh;
+
+    /* Selection */
+    --selection-bg: hsla(40, 60%, 55%, 0.2);
+    --selection-text: hsl(36, 18%, 90%);
+
+    /* Broken image fallback */
+    --img-fallback: hsl(240, 12%, 18%);
   }
 }
 
+/* ── Body ────────────────────────────────────────────────────── */
+/*
+   Mantine sets background-color from --mantine-color-body automatically.
+   We only add the gradient on top and pin it so it doesn't scroll.
+*/
+body {
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* ── Text Selection ──────────────────────────────────────────── */
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ── Images ──────────────────────────────────────────────────── */
 img {
   position: relative;
 }
 
-/* style this to fit your needs */
-/* and remove [alt] to apply to all images*/
-img:after {
+/* Broken image fallback — same pattern as original */
+img::after {
   display: block;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: light-dark(#f9f9f9, #333);
+  background-color: var(--img-fallback);
   content: "";
+  border-radius: inherit;
 }

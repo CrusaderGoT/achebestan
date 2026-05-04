@@ -1,6 +1,5 @@
 import { book } from "@/drizzle/schemas/book";
-import z from "@/node_modules/zod/v4/classic/external.cjs";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const bookInsertSchema = createInsertSchema(book).omit({
     created: true,
@@ -8,4 +7,4 @@ export const bookInsertSchema = createInsertSchema(book).omit({
     authorId: true,
 });
 
-export type bookInsertType = z.infer<typeof bookInsertSchema>;
+export const bookSelectSchema = createSelectSchema(book);

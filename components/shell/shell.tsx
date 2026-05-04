@@ -17,6 +17,7 @@ import { PWAInstallPrompt } from "@/components/pwa/pwa-install-prompt";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useCanCreateStory } from "@/lib/hooks/story/story-permissions";
 import { OfflineIndicator } from "./offline-indicator";
+import { Suspense } from "react";
 
 export function Shell({
     children,
@@ -83,7 +84,9 @@ export function Shell({
                             session={sessionUser}
                         />
 
-                        <SearchSpotlight />
+                        <Suspense fallback={"loading"}>
+                            <SearchSpotlight />
+                        </Suspense>
 
                         <ModeToggle size="md" visibleFrom="lg" />
 

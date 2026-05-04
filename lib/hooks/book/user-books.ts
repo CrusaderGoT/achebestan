@@ -1,4 +1,4 @@
-import { getUserBooks } from "@/lib/actions/book";
+import { getUserBooks } from "@/lib/actions/user";
 import { ComboboxData } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 

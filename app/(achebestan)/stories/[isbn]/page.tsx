@@ -1,5 +1,5 @@
 import { StoryPageClient } from "@/components/story/story-page";
-import { getBookStories } from "@/lib/actions/book";
+import { getStoriesFromBook } from "@/lib/actions/book";
 import { readStoryComments } from "@/lib/actions/comment";
 import { readLatestStoryISBNs, readStory } from "@/lib/actions/story";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -67,7 +67,7 @@ export default async function StoryPage({
     if (story?.bookId) {
         await queryClient.prefetchQuery({
             queryKey: ["book-stories", { bookId: story.bookId }],
-            queryFn: () => getBookStories(story.bookId!),
+            queryFn: () => getStoriesFromBook(story.bookId!),
         });
     }
 
