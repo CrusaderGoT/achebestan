@@ -3,9 +3,30 @@
 import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
-import { cacheTag } from "next/cache";
+import { cacheTag, updateTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { authActionClient } from "../safe-action";
+
+export const createBookAction = authActionClient
+    .inputSchema(bookInsertSchema)
+    .action(async ({ parsedInput, ctx }) => {
+        const [newBook] = await db
+            .insert(book)
+            .values({
+                authorId: ctx.user.id,
+                name: parsedInput.name,
+                created: new Date(),
+            })
+            .returning({
+                authorId: book.authorId,
+                name: book.name,
+                id: book.id,
+            });
+
+        updateTag(`userAndBooks-${ctx.user.id}`);
+
+        return newBook;
+    });
 
 export async function getStoriesFromBook(
     bookId: number,
@@ -13,7 +34,7 @@ export async function getStoriesFromBook(
     limit: number = 10,
 ) {
     "use cache";
-    cacheTag(`getBookStories-${bookId}`);
+    cacheTag(`bookAndStories-${bookId}`);
 
     const fetchStories = async () => {
         try {
@@ -41,25 +62,6 @@ export async function getStoriesFromBook(
 
     return fetchStories();
 }
-
-export const createBookAction = authActionClient
-    .inputSchema(bookInsertSchema)
-    .action(async ({ parsedInput, ctx }) => {
-        const [newBook] = await db
-            .insert(book)
-            .values({
-                authorId: ctx.user.id,
-                name: parsedInput.name,
-                created: new Date(),
-            })
-            .returning({
-                authorId: book.authorId,
-                name: book.name,
-                id: book.id,
-            });
-
-        return newBook;
-    });
 
 export async function getBookAndStories(bookId: number) {
     "use cache";
@@ -93,5 +95,3 @@ export async function getBookAndStories(bookId: number) {
         throw new Error("Failed to get story's book");
     }
 }
-
-

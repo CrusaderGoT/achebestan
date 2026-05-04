@@ -71,7 +71,8 @@ export const createStoryAction = authActionClient
 
         if (createdStory.bookId) {
             // revalidate book stories list if this story belong to a book
-            updateTag(`getBookStories-${createdStory.bookId}`);
+            updateTag(`bookAndStories-${createdStory.bookId}`);
+            updateTag(`userAndBooks-${ctx.user.id}`);
         }
 
         // upload image using isbn as public id
@@ -211,6 +212,7 @@ export const updateStoryAction = authActionClient
             if (updatedStory.bookId) {
                 // revalidate book stories list if this story belong to a book
                 updateTag(`getBookStories-${updatedStory.bookId}`);
+                updateTag(`userAndBooks-${ctx.user.id}`);
             }
 
             updateTag(`readStory-${updatedStory.isbn}`);
@@ -222,6 +224,7 @@ export const updateStoryAction = authActionClient
                 await correctStoriesBookParts({
                     bookId: prevBookId,
                     bookPart: prevBookPart,
+                    userId: ctx.user.id,
                 });
             }
 
@@ -334,6 +337,7 @@ export const deleteStoryAction = authActionClient
                 await correctStoriesBookParts({
                     bookId: deletedStory.bookId,
                     bookPart: deletedStory.bookPart,
+                    userId: ctx.user.id,
                 });
             }
 
@@ -432,20 +436,32 @@ export async function searchStories(
     }
 }
 
+/**
+ * Corrects the book parts of stories in a book by decrementing the `bookPart` value for all stories
+ * that belong to the specified book and have a `bookPart` greater than the given `bookPart`.
+ * Additionally, revalidates cache tags for the book and user.
+ *
+ * @param bookId - The unique identifier of the book whose stories need correction.
+ * @param bookPart - The book part number from which to decrement subsequent parts.
+ * @param userId - The unique identifier of the user associated with the book.
+ * @returns A Promise that resolves when the database update and tag revalidation are complete.
+ */
 async function correctStoriesBookParts({
     bookId,
     bookPart,
+    userId,
 }: {
     bookPart: number;
     bookId: number;
+    userId: string;
 }) {
     await db
         .update(story)
         .set({ bookPart: sql`${story.bookPart} - 1` })
         .where(and(eq(story.bookId, bookId), gt(story.bookPart, bookPart)));
 
-    // revalidate book stories list if this story belong to a book
-    updateTag(`getBookStories-${bookId}`);
+    updateTag(`bookAndStories-${bookId}`);
+    updateTag(`userAndBooks-${userId}`);
 }
 
 export const syncStoryDraftToDbAction = authActionClient

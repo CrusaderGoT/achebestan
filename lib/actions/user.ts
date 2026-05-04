@@ -5,11 +5,14 @@ import { book } from "@/drizzle/schemas/book";
 import { story } from "@/drizzle/schemas/story";
 import { user } from "@/drizzle/schemas/user";
 import { eq } from "drizzle-orm";
+import { cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 export async function getUserAndBooksWithStoryCount(userId: string) {
+    "use cache";
+    cacheTag(`userAndBooks-${userId}`);
+
     try {
-        // 🚀 OPTIMIZATION: Run both queries simultaneously
         const [userResult, books] = await Promise.all([
             db.select({ user }).from(user).where(eq(user.id, userId)).limit(1),
             db
