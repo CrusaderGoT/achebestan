@@ -1,15 +1,49 @@
 "use client";
 
-import { getUserAndBooksWithStoryCount } from "@/lib/actions/user";
-import classes from "@/styles/user-page.module.css";
-import { Container, Grid } from "@mantine/core";
+import { Box, Text, Title } from "@mantine/core";
+import {
+    IconArrowUpRight,
+    IconBrandGithub,
+    IconBrandTwitter,
+    IconCalendar,
+    IconMail,
+    IconShieldCheck,
+} from "@tabler/icons-react";
 import Link from "next/link";
+import classes from "@/styles/user-page.module.css";
 
-export type UserAndBooksWithStoryCountType = Awaited<
-    ReturnType<typeof getUserAndBooksWithStoryCount>
->;
+// ── Types ─────────────────────────────────────────────────────
 
-function UserAvatar({
+export type UserAndBooksWithStoryCountType = {
+    books: {
+        book: {
+            created: Date;
+            edited: Date | null;
+            id: number;
+            authorId: string;
+            name: string;
+        };
+        bookStoriesCount: number;
+    }[];
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        emailVerified: boolean;
+        image: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        role: string | null;
+        banned: boolean | null;
+        banReason: string | null;
+        banExpires: Date | null;
+        isAnonymous: boolean | null;
+    };
+};
+
+// ── Avatar Component ──────────────────────────────────────────
+
+function AuthorAvatar({
     user,
 }: {
     user: UserAndBooksWithStoryCountType["user"];
@@ -22,168 +56,206 @@ function UserAvatar({
         .toUpperCase();
 
     return (
-        <div className={classes.avatarWrap}>
-            <div className={classes.avatarOuter}>
-                {user.image ? (
-                    <img src={user.image} alt={user.name} />
-                ) : (
-                    initials
-                )}
-            </div>
-            {/* Online indicator — always shown for the user's own page */}
-            <span className={classes.avatarStatus} />
-        </div>
+        <Box className={classes.avatar}>
+            <Box className={classes.avatarRing} />
+            {user.image ? (
+                <img
+                    src={user.image}
+                    alt={user.name}
+                    className={classes.avatarImage}
+                />
+            ) : (
+                <Box className={classes.avatarFallback}>{initials}</Box>
+            )}
+            <Box className={classes.statusDot} />
+        </Box>
     );
 }
 
-function BookCard({
-    index,
-    ...bookData
+// ── Navigation Item ───────────────────────────────────────────
+
+function NavItem({
+    label,
+    active,
+    onClick,
+}: {
+    label: string;
+    active?: boolean;
+    onClick?: () => void;
+}) {
+    return (
+        <Box
+            component="button"
+            className={`${classes.navItem} ${active ? classes.active : ""}`}
+            onClick={onClick}
+        >
+            <Box className={classes.navLine} />
+            <Text inherit>{label}</Text>
+        </Box>
+    );
+}
+
+// ── Book Item ─────────────────────────────────────────────────
+
+function BookItem({
+    book,
 }: {
     book: UserAndBooksWithStoryCountType["books"][0];
-    index: number;
 }) {
-    const book = bookData.book.book;
-    const storyCount = bookData.book.bookStoriesCount;
-
-    const year = new Date(book.created).getFullYear();
-
-    // Truncate name for the decorative background number
-    const nameParts = book.name.trim().split(" ");
-    const displayInitial = nameParts[0].charAt(0).toUpperCase();
+    const { book: bookData, bookStoriesCount } = book;
+    const year = new Date(bookData.created).getFullYear();
 
     return (
-        <Link
-            href={`/books/${book.id}`}
-            className={classes.bookCard}
-            style={{ animationDelay: `${0.1 + index * 0.09}s` }}
-        >
-            {/* Decorative index */}
-            <span className={classes.bookCardIndex}>
-                {String(index + 1).padStart(2, "0")}
-            </span>
-
-            {/* Icon */}
-            <div className={classes.bookCardIcon}>{displayInitial}</div>
-
-            {/* Name */}
-            <h3 className={classes.bookCardName}>{book.name}</h3>
-
-            {/* Meta */}
-            <div className={classes.bookCardMeta}>
-                <span>
-                    {storyCount} {storyCount === 1 ? "story" : "stories"}
-                </span>
-                <span className={classes.bookCardMetaSep} />
-                <span>{year}</span>
-            </div>
-
-            {/* Footer */}
-            <div className={classes.bookCardFooter}>
-                <span className={classes.bookCardIsbn}>#{book.id}</span>
-                <span className={classes.bookCardCta}>View book →</span>
-            </div>
+        <Link href={`/books/${bookData.id}`} className={classes.bookItem}>
+            <Text className={classes.bookYear}>{year}</Text>
+            <Box className={classes.bookInfo}>
+                <Title order={3} className={classes.bookName}>
+                    {bookData.name}
+                </Title>
+                <Text className={classes.bookMeta}>
+                    {bookStoriesCount}{" "}
+                    {bookStoriesCount === 1 ? "story" : "stories"}
+                </Text>
+            </Box>
+            <IconArrowUpRight size={18} className={classes.bookArrow} />
         </Link>
     );
 }
 
-// ── Page ──────────────────────────────────────────────────────
+// ── Stat Card ─────────────────────────────────────────────────
+
+function StatCard({ value, label }: { value: string | number; label: string }) {
+    return (
+        <Box className={classes.statCard}>
+            <Text className={classes.statValue}>{value}</Text>
+            <Text className={classes.statLabel}>{label}</Text>
+        </Box>
+    );
+}
+
+// ── Main Page Component ───────────────────────────────────────
 
 export function UserPage({ user, books }: UserAndBooksWithStoryCountType) {
     const joinYear = new Date(user.createdAt).getFullYear();
-
-    // Split name: first + italic last word
-    const nameParts = user.name.trim().split(" ");
-    const firstName = nameParts.slice(0, -1).join(" ");
-    const lastName = nameParts[nameParts.length - 1];
+    const totalStories = books.reduce((sum, b) => sum + b.bookStoriesCount, 0);
 
     return (
-        <div className={classes.page}>
-            {/* ── Hero ────────────────────────────────────── */}
-            <section className={classes.hero}>
-                <div className={classes.heroGlow} />
-                <Container size="md">
-                    <div className={classes.heroInner}>
-                        <UserAvatar user={user} />
+        <Box className={classes.page}>
+            <Box className={classes.layout}>
+                {/* ── Sidebar ─────────────────────────────────── */}
+                <Box component="aside" className={classes.sidebar}>
+                    <Box className={classes.authorHeader}>
+                        <AuthorAvatar user={user} />
 
-                        <p className={classes.userEyebrow}>Author</p>
-
-                        <h1 className={classes.userName}>
-                            {firstName && <>{firstName} </>}
-                            <span className={classes.userNameHighlight}>
-                                {lastName}
-                            </span>
-                        </h1>
-
-                        {user.role && (
-                            <span className={classes.rolePill}>
-                                <span className={classes.rolePillDot} />
-                                {user.role}
-                            </span>
-                        )}
-
-                        <div className={classes.userMeta}>
-                            <span>{user.email}</span>
-                            <span className={classes.userMetaSep} />
-                            <span>Joined {joinYear}</span>
-                            {user.emailVerified && (
-                                <>
-                                    <span className={classes.userMetaSep} />
-                                    <span>Verified</span>
-                                </>
+                        <Box>
+                            <Title order={1} className={classes.authorName}>
+                                {user.name}
+                            </Title>
+                            {user.role && (
+                                <Text className={classes.authorTitle}>
+                                    {user.role}
+                                </Text>
                             )}
-                        </div>
+                        </Box>
 
-                        <div className={classes.statsRow}>
-                            <div className={classes.stat}>
-                                <span className={classes.statNumber}>
-                                    {books.length}
-                                </span>
-                                <span className={classes.statLabel}>
-                                    {books.length === 1 ? "Book" : "Books"}
-                                </span>
-                            </div>
-                            <div className={classes.statSep} />
-                            <div className={classes.stat}>
-                                <span className={classes.statNumber}>
-                                    {joinYear}
-                                </span>
-                                <span className={classes.statLabel}>Since</span>
-                            </div>
-                        </div>
-                    </div>
-                </Container>
-            </section>
+                        <Text className={classes.authorBio}>
+                            A storyteller weaving narratives that explore the
+                            depths of human experience. Currently crafting{" "}
+                            <strong>{books.length} published works</strong> with{" "}
+                            <strong>{totalStories} stories</strong> that span
+                            genres and emotions.
+                        </Text>
 
-            {/* ── Books ───────────────────────────────────── */}
-            <section className={classes.booksSection}>
-                <Container size="lg">
-                    <div className={classes.sectionHeadRow}>
-                        <h2 className={classes.sectionHeading}>Library</h2>
-                        <div className={classes.sectionRule} />
-                    </div>
+                        {/* Contact Info */}
+                        <Box className={classes.contactInfo}>
+                            <Box className={classes.contactItem}>
+                                <IconMail
+                                    size={16}
+                                    className={classes.contactIcon}
+                                />
+                                <Text inherit>{user.email}</Text>
+                            </Box>
+                            <Box className={classes.contactItem}>
+                                <IconCalendar
+                                    size={16}
+                                    className={classes.contactIcon}
+                                />
+                                <Text inherit>Member since {joinYear}</Text>
+                            </Box>
+                            {user.emailVerified && (
+                                <Box className={classes.verifiedBadge}>
+                                    <IconShieldCheck size={12} />
+                                    <Text inherit>Verified</Text>
+                                </Box>
+                            )}
+                        </Box>
+                    </Box>
 
-                    {books.length === 0 ? (
-                        <div className={classes.empty}>
-                            <span className={classes.emptyGlyph}>✦</span>
-                            <p className={classes.emptyText}>
-                                No books published yet
-                            </p>
-                        </div>
-                    ) : (
-                        <Grid gutter={{ base: "sm", sm: "md", lg: "xl" }}>
-                            {books.map((book, index) => (
-                                <Grid.Col
-                                    key={book.book.id}
-                                    span={{ base: 12, xs: 6, md: 4 }}
-                                >
-                                    <BookCard book={book} index={index} />
-                                </Grid.Col>
-                            ))}
-                        </Grid>
-                    )}
-                </Container>
-            </section>
-        </div>
+                    {/* Navigation */}
+                    <Box component="nav" className={classes.nav}>
+                        <NavItem label="About" active />
+                        <NavItem label="Published" />
+                        <NavItem label="Stats" />
+                    </Box>
+
+                    {/* Social Links */}
+                    <Box className={classes.socialLinks}>
+                        <Link href="#" className={classes.socialLink}>
+                            <IconBrandGithub size={20} />
+                        </Link>
+                        <Link href="#" className={classes.socialLink}>
+                            <IconBrandTwitter size={20} />
+                        </Link>
+                    </Box>
+                </Box>
+
+                {/* ── Main Content ────────────────────────────── */}
+                <Box component="main" className={classes.main}>
+                    {/* Stats Section */}
+                    <Box className={classes.section}>
+                        <Box className={classes.sectionHeader}>
+                            <Title order={2} className={classes.sectionTitle}>
+                                Overview
+                            </Title>
+                            <Box className={classes.sectionLine} />
+                        </Box>
+
+                        <Box className={classes.statsGrid}>
+                            <StatCard value={books.length} label="Books" />
+                            <StatCard value={totalStories} label="Stories" />
+                            <StatCard value={joinYear} label="Since" />
+                        </Box>
+                    </Box>
+
+                    {/* Published Books Section */}
+                    <Box className={classes.section}>
+                        <Box className={classes.sectionHeader}>
+                            <Title order={2} className={classes.sectionTitle}>
+                                Published
+                            </Title>
+                            <Box className={classes.sectionLine} />
+                        </Box>
+
+                        {books.length === 0 ? (
+                            <Box className={classes.empty}>
+                                <Text className={classes.emptyIcon}>B</Text>
+                                <Text className={classes.emptyText}>
+                                    No books published yet
+                                </Text>
+                            </Box>
+                        ) : (
+                            <Box className={classes.bookList}>
+                                {books.map((bookData) => (
+                                    <BookItem
+                                        key={bookData.book.id}
+                                        book={bookData}
+                                    />
+                                ))}
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
     );
 }
