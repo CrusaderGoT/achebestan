@@ -1,5 +1,7 @@
 "use client";
 
+import { getUserAndBooksWithStoryCount } from "@/lib/actions/user";
+import classes from "@/styles/user-page.module.css";
 import { Box, Text, Title } from "@mantine/core";
 import {
     IconArrowUpRight,
@@ -10,36 +12,12 @@ import {
     IconShieldCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import classes from "@/styles/user-page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────
 
-export type UserAndBooksWithStoryCountType = {
-    books: {
-        book: {
-            created: Date;
-            edited: Date | null;
-            id: number;
-            authorId: string;
-            name: string;
-        };
-        bookStoriesCount: number;
-    }[];
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        emailVerified: boolean;
-        image: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        role: string | null;
-        banned: boolean | null;
-        banReason: string | null;
-        banExpires: Date | null;
-        isAnonymous: boolean | null;
-    };
-};
+export type UserAndBooksWithStoryCountType = Awaited<
+    ReturnType<typeof getUserAndBooksWithStoryCount>
+>;
 
 // ── Avatar Component ──────────────────────────────────────────
 
