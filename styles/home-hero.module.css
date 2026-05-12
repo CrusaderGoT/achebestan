@@ -1,55 +1,160 @@
+.heroContainer {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+@media (min-width: 768px) {
+  .heroContainer {
+    flex-direction: row;
+  }
+}
+
 .heroSection {
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  padding: 30px;
-  @mixin larger-than $mantine-breakpoint-xs {
-    padding: 60px;
+}
+
+@media (min-width: 768px) {
+  .heroSection {
+    padding: 80px;
   }
 }
 
+/* Text Side */
+.heroDescSection {
+  flex: 1;
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .title {
+    display: block;
+  }
+}
+
+.highlightText {
+  /* Simplified Gradient: smoother transition or solid accent */
+  background: linear-gradient(
+    120deg,
+    var(--color-accent) 0%,
+    var(--color-accent) 100%
+  );
+
+  /* Modern Clipping */
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Improved Legibility */
+  font-weight: 800;
+  display: inline-block;
+
+  /* Aesthetic touch: subtle glow or shadow to keep it sharp */
+  filter: drop-shadow(0px 1px 0px var(--selection-bg));
+
+  /* Adds a very subtle bottom border for extra emphasis */
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.description {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.accentText {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.05em;
+}
+
+/* Image Side */
 .heroImageSection {
-  min-width: 50%;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--mantine-color-gray-1);
-  @mixin dark {
-    background-color: var(--mantine-color-gray-9);
-  }
-  overflow: hidden;
+  flex: 1.2;
+  background-color: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border-subtle);
+  position: relative;
 }
 
-.heroImage img {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  width: auto !important;
-  height: auto !important;
-  min-height: 200px !important;
-  min-width: 300px !important;
-  object-fit: contain !important;
-  @mixin larger-than $mantine-breakpoint-xs {
-    min-height: 300px !important;
-    min-width: 400px !important;
+@media (min-width: 768px) {
+  .heroImageSection {
+    border-bottom: none;
+    border-left: 1px solid var(--color-border-subtle);
   }
+}
+
+.heroImageContainer {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+}
+
+.heroImageContainer:hover {
+  transform: translateY(-5px);
+}
+
+.userImage {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 40px; /* More stylized than 24px */
+  border: 1px solid var(--color-border-default);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+.imageCaption {
+  margin-top: 1.5rem;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.dropzoneContainer {
+  border: 2px dashed var(--color-border-default);
+  background: var(--color-surface-2);
+  border-radius: 40px;
+  padding: 2rem;
 }
 
 .heroSignature {
+  margin-top: 2rem;
   margin-left: auto;
-  transform: rotateZ(-20deg) translateY(-20px);
-  letter-spacing: 0.3rem;
-  font-size: 20px;
   font-family: "Brush Script MT", "Lucida Handwriting", cursive;
-  font-style: italic;
-}
-
-.heroDescSection {
-  background-color: var(--mantine-color-gray-4);
-  @mixin dark {
-    background-color: var(--mantine-color-gray-filled);
-  }
+  font-size: clamp(24px, 4vw, 32px);
+  color: var(--color-accent);
+  transform: rotate(-6deg);
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .imageFieldToggle {
   position: absolute;
   z-index: 20;
   right: 20px;
-  top: 5px;
+  top: 20px;
+  /* Glass effect */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.imageFieldToggle:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
