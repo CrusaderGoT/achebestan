@@ -1,5 +1,6 @@
 import { BookPage } from "@/components/book/book-page";
 import { getBookAndStories } from "@/lib/actions/book";
+import { notFound } from "next/navigation";
 
 export default async function BookStories({
     params,
@@ -9,6 +10,8 @@ export default async function BookStories({
     const { bookId } = await params;
 
     const book = await getBookAndStories(bookId);
+
+    if (!book) notFound();
 
     return <BookPage {...book} />;
 }
