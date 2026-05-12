@@ -9,6 +9,7 @@ import storypageStyles from "@/styles/story/story-page.module.css";
 import cx from "clsx";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/navigation";
 
 dayjs.extend(relativeTime);
 
@@ -29,6 +30,8 @@ export function StoryImage({
     created,
     edited,
 }: StoryImageType) {
+    const router = useRouter();
+
     return (
         <Box className={cx(openedImageField && publicStyles.hide)}>
             <Box className={storypageStyles.storyImage}>
@@ -42,6 +45,7 @@ export function StoryImage({
                             <IconUserCircle />
                         </Avatar>
                     }
+                    onClick={() => router.push(`/users/${author.id}`)}
                 >
                     {author.name}
                 </Badge>

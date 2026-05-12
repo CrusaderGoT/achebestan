@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserAndBooksWithStoryCount } from "@/lib/actions/user";
+import { maskEmail } from "@/lib/utils/user/mask-email";
 import classes from "@/styles/user-page.module.css";
 import { Box, Text, Title, UnstyledButton } from "@mantine/core";
 import {
@@ -42,6 +43,8 @@ function AuthorAvatar({
                     src={user.image}
                     alt={user.name}
                     className={classes.avatarImage}
+                    width={400}
+                    height={400}
                 />
             ) : (
                 <Box className={classes.avatarFallback}>{initials}</Box>
@@ -152,7 +155,7 @@ export function UserPage({ user, books }: UserAndBooksWithStoryCountType) {
                                     size={16}
                                     className={classes.contactIcon}
                                 />
-                                <Text inherit>{user.email}</Text>
+                                <Text inherit>{maskEmail(user.email)}</Text>
                             </Box>
                             <Box className={classes.contactItem}>
                                 <IconCalendar
@@ -171,11 +174,11 @@ export function UserPage({ user, books }: UserAndBooksWithStoryCountType) {
                     </Box>
 
                     {/* Navigation */}
-                    <Box component="nav" className={classes.nav}>
+                    {/*<Box component="nav" className={classes.nav}>
                         <NavItem label="About" active />
                         <NavItem label="Published" />
                         <NavItem label="Stats" />
-                    </Box>
+                    </Box>*/}
 
                     {/* Social Links */}
                     <Box className={classes.socialLinks}>

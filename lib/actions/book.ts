@@ -4,7 +4,6 @@ import { db } from "@/drizzle";
 import { book } from "@/drizzle/schemas/book";
 import { bookInsertSchema } from "@/zod-schemas/book";
 import { cacheTag, updateTag } from "next/cache";
-import { notFound } from "next/navigation";
 import { authActionClient } from "../safe-action";
 
 export const createBookAction = authActionClient
@@ -86,8 +85,6 @@ export async function getBookAndStories(bookId: number) {
                 author: true,
             },
         });
-
-        if (!storyBook) notFound();
 
         return storyBook;
     } catch (error) {
