@@ -35,6 +35,7 @@ export const userUpdateSchema = z.object({
         .regex(/^[A-Za-z]+$/, { error: "name must be only letters" })
         .optional(),
     image: z.url().optional(),
+    email: z.email({ error: "enter a valid email" }).optional(),
 });
 
 export const userSelectSchema = createSelectSchema(user);

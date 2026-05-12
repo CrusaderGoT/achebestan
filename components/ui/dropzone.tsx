@@ -26,7 +26,6 @@ import {
 
 import stylesPublic from "@/styles/public.module.css";
 
-import { authClient } from "@/lib/auth-client";
 import { handleFileUpload } from "@/lib/utils/image-upload";
 import { StoryInsertType, StoryUpdateType } from "@/types/story";
 import { UseFormReturnType } from "@mantine/form";
@@ -211,7 +210,7 @@ function FormDropZone({ form, field, ...props }: FormDropZoneType) {
 
 export type UploadImageDropZoneProps = {
     imageUniqueId?: string;
-    onSetttled?: () => void;
+    onSetttled: (url: string) => Promise<void>;
 } & Partial<DropzoneProps>;
 
 function UploadImageDropZone({
@@ -248,21 +247,17 @@ function UploadImageDropZone({
             });
 
             if (!newUserImage) {
-                throw new Error("Upload Failed");
+                notifications.show({
+                    title: "User Image Update Failed",
+                    message: "Failed to upload user image",
+                    color: "red",
+                });
+                return;
             }
 
-            const { data } = await authClient.updateUser({
-                image: newUserImage.secure_url,
-            });
+            onSetttled(newUserImage.secure_url);
 
-            if (!data?.status) {
-                throw new Error("Failed To Update User Image");
-            } else {
-                if (onSetttled) {
-                    onSetttled();
-                }
-                setImage(null);
-            }
+            setImage(null);
         } catch (e) {
             const errMsg =
                 e instanceof Error

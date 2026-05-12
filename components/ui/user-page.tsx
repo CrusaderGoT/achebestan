@@ -2,7 +2,7 @@
 
 import { getUserAndBooksWithStoryCount } from "@/lib/actions/user";
 import classes from "@/styles/user-page.module.css";
-import { Box, Text, Title } from "@mantine/core";
+import { Box, Text, Title, UnstyledButton } from "@mantine/core";
 import {
     IconArrowUpRight,
     IconBrandGithub,
@@ -11,6 +11,7 @@ import {
     IconMail,
     IconShieldCheck,
 } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 
 // ── Types ─────────────────────────────────────────────────────
@@ -37,7 +38,7 @@ function AuthorAvatar({
         <Box className={classes.avatar}>
             <Box className={classes.avatarRing} />
             {user.image ? (
-                <img
+                <Image
                     src={user.image}
                     alt={user.name}
                     className={classes.avatarImage}
@@ -62,14 +63,14 @@ function NavItem({
     onClick?: () => void;
 }) {
     return (
-        <Box
+        <UnstyledButton
             component="button"
             className={`${classes.navItem} ${active ? classes.active : ""}`}
             onClick={onClick}
         >
             <Box className={classes.navLine} />
             <Text inherit>{label}</Text>
-        </Box>
+        </UnstyledButton>
     );
 }
 

@@ -51,7 +51,7 @@ export function UpdateStoryForm({ story }: { story: StorySelectType }) {
                             isPending
                                 ? "Submitting Story..."
                                 : hasSucceeded
-                                  ? "Redirecting To New Story"
+                                  ? "Redirecting To Updated Story"
                                   : ""
                         }
                         visible={isPending || hasSucceeded}

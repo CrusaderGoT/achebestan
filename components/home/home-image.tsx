@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageDropzone, UploadImageDropZoneProps } from "../ui/dropzone";
+import { ImageDropzone } from "../ui/dropzone";
 
 import { ActionIcon, Box, Image as MantineImage } from "@mantine/core";
 
@@ -10,20 +10,19 @@ import homeStyles from "@/styles/home-hero.module.css";
 import publicStyles from "@/styles/public.module.css";
 import cx from "clsx";
 
+import { updateUserImage } from "@/lib/utils/user/update-user-image";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPhotoEdit } from "@tabler/icons-react";
 import dayjs from "dayjs";
+import Image from "next/image";
 
-export function HomeImageUpload({ ...props }: UploadImageDropZoneProps) {
-    return <ImageDropzone action="uploadImage" {...props} />;
-}
-
-export function HomeImage({ userImage }: { userImage?: string | null }) {
+function HomeImage({ userImage }: { userImage?: string | null }) {
     return (
         <figure>
             <MantineImage
                 src={userImage ? userImage : "/images/iq_detailed.png"}
                 alt="image"
+                component={Image}
             />
             <figcaption>
                 Put the pen to the brain, {dayjs().year()} AC
@@ -45,9 +44,13 @@ export function HomeImageBox({
     return (
         <Box className={cx(publicStyles.relative, homeStyles.heroImage)}>
             {openedImageField && session?.user && !session.user.isAnonymous ? (
-                <HomeImageUpload
+                <ImageDropzone
+                    action="uploadImage"
                     imageUniqueId={session.user.id}
-                    onSetttled={closeImageField}
+                    onSetttled={async (url) => {
+                        await updateUserImage(url);
+                        closeImageField();
+                    }}
                     maxFiles={1}
                 />
             ) : (

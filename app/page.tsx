@@ -1,4 +1,4 @@
-import { HomePage } from "@/components/home/homepage";
+import { HomePage } from "@/components/home/home-page";
 import { readStoryComments } from "@/lib/actions/comment";
 import { readLatestStories, readStory } from "@/lib/actions/story";
 import { getQueryClient } from "@/lib/get-query-client";
