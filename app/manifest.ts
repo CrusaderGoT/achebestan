@@ -3,11 +3,11 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
     return {
         name: "Achebestan",
-        short_name: "achebestan",
-        description: "A Place To Read Intriguing Stories.",
-        theme_color: "black",
-        background_color: "#EFBF04",
+        short_name: "Achebestan",
+        theme_color: "#000000",
+        background_color: "#000000",
         display: "standalone",
+        description: "A Place To Read Intriguing Stories.",
         orientation: "portrait-primary",
         start_url: "/",
         icons: [
@@ -23,7 +23,6 @@ export default function manifest(): MetadataRoute.Manifest {
                 type: "image/png",
                 purpose: "any",
             },
-            // Optional: maskable versions if available
             {
                 src: "/web-app-manifest-192x192.png",
                 sizes: "192x192",
@@ -45,8 +44,8 @@ export default function manifest(): MetadataRoute.Manifest {
                 url: "/stories/new",
                 icons: [
                     {
-                        src: "/web-app-manifest-96x96.png",
-                        sizes: "96x96",
+                        src: "/web-app-manifest-192x192.png",
+                        sizes: "192x192",
                         type: "image/png",
                     },
                 ],
@@ -58,8 +57,8 @@ export default function manifest(): MetadataRoute.Manifest {
                 url: "/books",
                 icons: [
                     {
-                        src: "/web-app-manifest-96x96.png",
-                        sizes: "96x96",
+                        src: "/web-app-manifest-192x192.png",
+                        sizes: "192x192",
                         type: "image/png",
                     },
                 ],
@@ -72,8 +71,8 @@ export default function manifest(): MetadataRoute.Manifest {
                 url: "/favourites",
                 icons: [
                     {
-                        src: "/web-app-manifest-96x96.png",
-                        sizes: "96x96",
+                        src: "/web-app-manifest-192x192.png",
+                        sizes: "192x192",
                         type: "image/png",
                     },
                 ],
@@ -85,8 +84,8 @@ export default function manifest(): MetadataRoute.Manifest {
                 url: "/",
                 icons: [
                     {
-                        src: "/web-app-manifest-96x96.png",
-                        sizes: "96x96",
+                        src: "/web-app-manifest-192x192.png",
+                        sizes: "192x192",
                         type: "image/png",
                     },
                 ],
