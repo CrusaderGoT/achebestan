@@ -22,6 +22,7 @@ function HomeImage({ userImage }: { userImage?: string | null }) {
                 width={500}
                 height={500}
                 className={homeStyles.userImage}
+                loading="eager"
             />
             <figcaption className={homeStyles.imageCaption}>
                 Archive Ref: {dayjs().year()} AC — Brain Core

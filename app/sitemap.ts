@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         (story) => ({
             url: `${BASE_URL}/stories/${story.isbn}`,
             lastModified: story.edited || story.created,
-            changeFrequency: "always",
+            changeFrequency: "weekly",
             priority: 1.0,
             ...(story.image ? { images: [story.image] } : {}),
         })
