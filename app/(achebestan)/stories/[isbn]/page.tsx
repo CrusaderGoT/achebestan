@@ -6,9 +6,12 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { sanitizeHTML } from "@/lib/utils/sanitize-html";
 import { generateStoryMetadata } from "@/lib/utils/story/generate-story-metadata";
 import { storyJsonLdData } from "@/lib/utils/story/story-json-ld-data";
+import publicStyles from "@/styles/public.module.css";
+import storypageStyles from "@/styles/story/story-page.module.css";
 import { CommentTreeProps } from "@/types/comment";
 import { StoryPermAuthorProps, StoryRatingProps } from "@/types/story";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import cx from "clsx";
 import dayjs from "dayjs";
 import type { Metadata } from "next";
 import { connection } from "next/server";
@@ -76,6 +79,25 @@ export default async function StoryPage({
         ? storyJsonLdData(story, comments || [])
         : null;
 
+    // === SERVER-SIDE RENDERING OF STORY CONTENT ===
+    const serverSanitizedHTML = story?.content
+        ? sanitizeHTML(story.content)
+        : "";
+
+    const storyContentNode = story?.content ? (
+        <div
+            dangerouslySetInnerHTML={{ __html: serverSanitizedHTML }}
+            className={cx(storypageStyles.storyContent)}
+            data-story-content="true"
+            style={{
+                userSelect: "text",
+                WebkitUserSelect: "text",
+                MozUserSelect: "text",
+                msUserSelect: "text",
+            }}
+        />
+    ) : null;
+
     return (
         <>
             {structuredData && (
@@ -98,6 +120,8 @@ export default async function StoryPage({
                     isbn={isbn}
                     storyPrefetched={story}
                     commentsPrefetched={comments}
+                    storyContentNode={storyContentNode}
+                    serverSanitizedHTML={serverSanitizedHTML}
                 />
             </HydrationBoundary>
         </>

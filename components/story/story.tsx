@@ -40,8 +40,13 @@ import {
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useStoryBook } from "@/lib/hooks/book/story-book";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { AddStoryToBook } from "./story-add-to-book";
+
+export type StoryComponentProps = StoryPermAuthorProps & {
+    storyContentNode?: ReactNode;
+    serverSanitizedHTML?: string;
+};
 
 export function Story({
     image,
@@ -57,7 +62,9 @@ export function Story({
     bookPart,
     blurb,
     permissions,
-}: StoryPermAuthorProps) {
+    storyContentNode,
+    serverSanitizedHTML,
+}: StoryComponentProps) {
     const { sessionUser } = useCentralizedAuth();
 
     const [story, setStory] = useState<StorySelectType>({
@@ -163,13 +170,16 @@ export function Story({
             if (isNotEmpty) {
                 const updatedStory = await executeAsync({
                     ...submitData,
+                    bookId: null,
                 });
 
                 if (updatedStory.data) {
+                    resetUpdate();
+
                     // reset neccessary form status;
                     form.setInitialValues(submitData);
                     form.setValues(submitData);
-                    form.resetDirty();
+                    form.resetDirty(submitData);
 
                     // clear and close dropzone
                     form.setFieldValue("image", undefined);
@@ -177,8 +187,6 @@ export function Story({
 
                     // set story reactively
                     setStory(updatedStory.data);
-
-                    resetUpdate();
                 }
             }
         }
@@ -294,6 +302,8 @@ export function Story({
                             form={form}
                             storyISBN={story.isbn}
                             permissions={permissions}
+                            storyContentNode={storyContentNode}
+                            serverSanitizedHTML={serverSanitizedHTML}
                         />
                     </Stack>
                 </Card>

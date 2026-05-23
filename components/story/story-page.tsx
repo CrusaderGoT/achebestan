@@ -1,7 +1,6 @@
 "use client";
 
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
-import { useReadStoryComments } from "@/lib/hooks/comment/read-story-comments";
 import { useStoryRating } from "@/lib/hooks/rating/story-rating";
 import { useUserRating } from "@/lib/hooks/rating/user-rating";
 import { useReadStory } from "@/lib/hooks/story/read-story";
@@ -12,6 +11,7 @@ import { UserSelectType } from "@/types/user";
 import { Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notFound } from "next/navigation";
+import { ReactNode } from "react";
 import { BookPagination } from "../book/book-pagination";
 import { CommentSection } from "../comment/comment-tree";
 import { Story } from "./story";
@@ -22,22 +22,22 @@ export type StoryPageClientProps = {
     isbn: string;
     storyPrefetched?: StoryPermAuthorProps & StoryRatingProps;
     commentsPrefetched?: CommentTreeProps[];
+    storyContentNode?: ReactNode;
+    serverSanitizedHTML?: string;
 };
 
 export function StoryPageClient({
     isbn,
     storyPrefetched,
     commentsPrefetched,
+    storyContentNode,
+    serverSanitizedHTML,
 }: StoryPageClientProps) {
     const {
         sessionUser: { data: session },
     } = useCentralizedAuth();
 
     const { data: story = storyPrefetched } = useReadStory({ isbn });
-
-    const { data: comments = commentsPrefetched ?? [] } = useReadStoryComments({
-        isbn,
-    });
 
     const { data: userRating } = useUserRating({
         isbn,
@@ -75,6 +75,8 @@ export function StoryPageClient({
                 bookPart={story.bookPart}
                 blurb={story.blurb}
                 permissions={permissions}
+                storyContentNode={storyContentNode}
+                serverSanitizedHTML={serverSanitizedHTML}
             />
 
             <StoryRating
@@ -97,7 +99,7 @@ export function StoryPageClient({
             />
 
             <CommentSection
-                comments={comments}
+                commentsPrefetched={commentsPrefetched}
                 storyAuthorId={story.authorId}
                 storyISBN={story.isbn}
                 commentBoxDisclosure={commentBoxDisclosure}

@@ -23,12 +23,17 @@ import {
 } from "@mantine/hooks";
 import { IconClock } from "@tabler/icons-react";
 import cx from "clsx";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { BookmarkContextMenu } from "../bookmark/bookmark-context-menu";
 import { BookmarkList } from "../bookmark/bookmark-list";
 import { BookmarkModal } from "../bookmark/bookmark-modal";
 import { StoryContentButtons } from "./buttons/story-content-btns";
 import { StoryTableOfContents } from "./story-table-of-contents";
+
+export type StoryContentProps = StoryContentType & {
+    storyContentNode?: ReactNode;
+    serverSanitizedHTML?: string;
+};
 
 export function StoryContent({
     toggleContentField,
@@ -37,13 +42,9 @@ export function StoryContent({
     form,
     storyISBN,
     permissions,
-}: StoryContentType) {
-    const [dirty, setDirty] = useState(false);
-
-    form.watch("content", ({ dirty }) => {
-        setDirty(dirty);
-    });
-
+    storyContentNode,
+    serverSanitizedHTML,
+}: StoryContentProps) {
     const {
         showContextMenu,
         menuPosition,
@@ -130,13 +131,21 @@ export function StoryContent({
         }
     }, [hideContextMenu, bookmarks, renderBookmarks, openedContentField]);
 
-    // Memoize expensive calculations
+    // Track the initial payload content to fallback to client-rendering if edited optimistically
+    const initialContentRef = useRef(content);
+    const isContentUpdated = content !== initialContentRef.current;
+
     const timeToRead = useMemo(
         () => formatEstimatedReadingTime(estimateReadingTime(content)),
         [content],
     );
 
-    const sanitizedContent = useMemo(() => sanitizeHTML(content), [content]);
+    const sanitizedContent = useMemo(() => {
+        if (!isContentUpdated && serverSanitizedHTML !== undefined) {
+            return serverSanitizedHTML;
+        }
+        return sanitizeHTML(content);
+    }, [content, isContentUpdated, serverSanitizedHTML]);
 
     const {
         ref: fullscreenRef,
@@ -208,10 +217,9 @@ export function StoryContent({
                     className={cx(storypageStyles.storyContentBtns)}
                 >
                     <StoryContentButtons
+                        form={form}
                         permissions={permissions}
-                        isFormSubmiting={form.submitting}
                         openedContentField={openedContentField}
-                        dirty={dirty}
                         toggleContentField={toggleContentField}
                         toggleFullscreen={toggleFullscreen}
                         fullscreen={fullscreen}
@@ -243,22 +251,32 @@ export function StoryContent({
                             : { height: "100dvh" }),
                     }}
                 >
-                    <Box
-                        dangerouslySetInnerHTML={{
-                            __html: sanitizedContent,
-                        }}
-                        className={cx(
-                            storypageStyles.storyContent,
-                            openedContentField && publicStyles.hide,
-                        )}
-                        data-story-content="true"
-                        style={{
-                            userSelect: "text",
-                            WebkitUserSelect: "text",
-                            MozUserSelect: "text",
-                            msUserSelect: "text",
-                        }}
-                    />
+                    {isContentUpdated || !storyContentNode ? (
+                        <Box
+                            dangerouslySetInnerHTML={{
+                                __html: sanitizedContent,
+                            }}
+                            className={cx(
+                                storypageStyles.storyContent,
+                                openedContentField && publicStyles.hide,
+                            )}
+                            data-story-content="true"
+                            style={{
+                                userSelect: "text",
+                                WebkitUserSelect: "text",
+                                MozUserSelect: "text",
+                                msUserSelect: "text",
+                            }}
+                        />
+                    ) : (
+                        <Box
+                            className={cx(
+                                openedContentField && publicStyles.hide,
+                            )}
+                        >
+                            {storyContentNode}
+                        </Box>
+                    )}
                     <UpdateStoryContent
                         className={cx(
                             storypageStyles.storyContent,

@@ -44,7 +44,6 @@ export const useCreateStory = (
                     },
                 );
             } else if (args.error.serverError) {
-                console.error(args.error.serverError);
                 notifications.show({
                     message: "A Server Error Occured",
                 });

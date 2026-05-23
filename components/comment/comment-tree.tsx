@@ -47,6 +47,7 @@ import {
 } from "@/lib/hooks/comment/get-comments-permissions";
 import { flattenCommentsIds } from "@/lib/utils/comment/flatten-comments-ids";
 
+import { useReadStoryComments } from "@/lib/hooks/comment/read-story-comments";
 import { UserSelectType } from "@/types/user";
 import { CommentSelectType } from "@/zod-schemas/comment";
 import { NewCommentBox, NewCommentBoxProps } from "../story/story-actions";
@@ -264,15 +265,19 @@ function CommentTree({
 }
 
 export function CommentSection({
-    comments,
+    commentsPrefetched,
     storyAuthorId,
     storyISBN,
     commentBoxDisclosure,
     canComment,
 }: {
-    comments?: CommentTreeProps[];
+    commentsPrefetched?: CommentTreeProps[];
     storyAuthorId?: string;
 } & NewCommentBoxProps) {
+    const { data: comments = commentsPrefetched ?? [] } = useReadStoryComments({
+        isbn: storyISBN,
+    });
+
     return (
         <>
             <Divider

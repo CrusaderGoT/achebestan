@@ -2,8 +2,7 @@
 import "dotenv/config";
 
 import { defineConfig } from "drizzle-kit";
-
-export const isProduction = process.env.NODE_ENV === "production";
+import { isProduction } from "./lib/constants";
 
 const url = isProduction
     ? process.env.NEON_DATABASE_URL

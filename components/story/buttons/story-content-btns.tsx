@@ -10,30 +10,36 @@ import {
 } from "@tabler/icons-react";
 
 import publicStyles from "@/styles/public.module.css";
-import { StoryPermissionsType } from "@/types/story";
+import { StoryPermissionsType, StoryUpdateType } from "@/types/story";
+import { UseFormReturnType } from "@mantine/form";
 import { useMounted } from "@mantine/hooks";
 import cx from "clsx";
+import { useState } from "react";
 
 type StoryContentButtonsProps = {
-    isFormSubmiting: boolean;
     openedContentField: boolean;
-    dirty: boolean;
     toggleContentField: () => void;
     toggleFullscreen: () => Promise<void>;
     fullscreen: boolean;
     permissions?: StoryPermissionsType;
+    form: UseFormReturnType<StoryUpdateType>;
 };
 
 export function StoryContentButtons({
-    isFormSubmiting,
+    form,
     openedContentField,
-    dirty,
     toggleContentField,
     toggleFullscreen,
     fullscreen,
     permissions,
 }: StoryContentButtonsProps) {
     const mounted = useMounted();
+
+    const [dirty, setDirty] = useState(false);
+
+    form.watch("content", ({ dirty }) => {
+        setDirty(dirty);
+    });
 
     if (!mounted) return null;
 
@@ -48,7 +54,7 @@ export function StoryContentButtons({
                     variant="light"
                     color="yellow"
                     size="sm"
-                    disabled={isFormSubmiting}
+                    disabled={form.submitting}
                     className={cx(!permissions?.canUpdate && publicStyles.hide)}
                 >
                     {!openedContentField ? (
@@ -59,14 +65,14 @@ export function StoryContentButtons({
                 </ActionIcon>
 
                 <ActionIcon
-                    loading={isFormSubmiting}
+                    loading={form.submitting}
                     title="Submit Update"
                     variant="light"
                     size={"sm"}
                     type="submit"
                     color="green"
                     className={cx(
-                        (!openedContentField || !dirty) && publicStyles.hide
+                        (!openedContentField || !dirty) && publicStyles.hide,
                     )}
                 >
                     <IconCheck size={16} />
