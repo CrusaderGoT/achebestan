@@ -1,4 +1,8 @@
-export const BASE_URL = "https://achebestan.vercel.app";
+import { isProduction } from "@/drizzle.config";
+
+export const BASE_URL = !!isProduction
+    ? "https://achebestan.vercel.app"
+    : "http://localhost:3000";
 
 export const ORG_ROLES = {
     writer: "writer",

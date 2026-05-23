@@ -1,4 +1,0 @@
-User-agent: Googlebot
-Disallow: /api/
-
-Sitemap: https://achebestan.vercel.app/sitemap.xml

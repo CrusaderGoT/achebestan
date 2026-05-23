@@ -288,6 +288,25 @@ export const readLatestStoryISBNs = async (latest: number = 10) => {
     }
 };
 
+export const readLatestStorySiteMap = async (latest: number = 10) => {
+    "use cache";
+    cacheTag("readLatestStories"); // same tag as readLatestStories since they share cache invalidation
+    try {
+        return await db
+            .select({
+                isbn: story.isbn,
+                created: story.created,
+                edited: story.edited,
+                image: story.image,
+            })
+            .from(story)
+            .limit(latest)
+            .orderBy((stories) => desc(stories.created));
+    } catch (e) {
+        console.log(e);
+    }
+};
+
 export const deleteStoryAction = authActionClient
     .inputSchema(
         z.object({
