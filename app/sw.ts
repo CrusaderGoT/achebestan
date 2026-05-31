@@ -70,7 +70,7 @@ const serwist = new Serwist({
             matcher: ({ url }) =>
                 url.pathname.startsWith("/stories/") &&
                 !url.pathname.includes("new"),
-            handler: new NetworkFirst({
+            handler: new StaleWhileRevalidate({
                 cacheName: CACHE_NAMES.STORY,
                 plugins: [
                     new CacheableResponsePlugin({ statuses: [0, 200] }),
