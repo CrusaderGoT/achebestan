@@ -29,6 +29,7 @@ import { BASE_URL } from "@/lib/constants";
 import { QueryProvider } from "@/lib/contexts/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 const APP_NAME = "Achebestan";
 const APP_DEFAULT_TITLE =
@@ -123,6 +124,7 @@ export default function RootLayout({
                         </MantineProvider>
                     </QueryProvider>
                 </SerwistProvider>
+                <Analytics />
             </body>
         </html>
     );
