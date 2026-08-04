@@ -3,18 +3,17 @@
 /// <reference lib="webworker" />
 
 import { defaultCache } from "@serwist/turbopack/worker";
-import type {
-    BackgroundSyncQueueEntry,
-    PrecacheEntry,
-    SerwistGlobalConfig,
-} from "serwist";
 import {
     BackgroundSyncQueue,
+    BackgroundSyncQueueEntry,
     CacheableResponsePlugin,
     CacheFirst,
     ExpirationPlugin,
     NetworkFirst,
+    PrecacheEntry,
     Serwist,
+    SerwistGlobalConfig,
+    StaleWhileRevalidate,
 } from "serwist";
 import type { StorySelectType } from "../types/story";
 
@@ -80,7 +79,6 @@ const serwist = new Serwist({
                         purgeOnQuotaError: true,
                     }),
                 ],
-                networkTimeoutSeconds: 3,
             }),
         },
 
