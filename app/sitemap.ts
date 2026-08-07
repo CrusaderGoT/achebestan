@@ -3,10 +3,6 @@ import { readLatestStorySiteMap } from "@/lib/actions/story";
 import { BASE_URL } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 
-// Force dynamic execution if stories change constantly,
-// or leverage Next.js caching revalidate options if appropriate
-export const revalidate = 3600; // Revalidate at most every hour
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 1. Define Root/Static Pages
     const rootSiteMap: MetadataRoute.Sitemap = [

@@ -13,7 +13,7 @@ function HomeHero() {
     const showSkeleton = !mounted || sessionUser.isPending;
 
     const displayName =
-        mounted && sessionUser.data?.user && !sessionUser.data.user.isAnonymous
+        mounted && sessionUser.data?.user
             ? sessionUser.data.user.name
             : "Achebestan";
 

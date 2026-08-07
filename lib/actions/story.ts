@@ -301,7 +301,7 @@ export const readLatestStorySiteMap = async (latest: number = 10) => {
             })
             .from(story)
             .limit(latest)
-            .orderBy((stories) => desc(stories.created));
+            .orderBy(desc(story.created))
     } catch (e) {
         console.log(e);
     }

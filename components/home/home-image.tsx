@@ -43,7 +43,7 @@ export function HomeImageBox({
 
     return (
         <Box className={cx(publicStyles.relative, homeStyles.heroImage)}>
-            {openedImageField && session?.user && !session.user.isAnonymous ? (
+            {openedImageField && session?.user ? (
                 <Box className={homeStyles.dropzoneContainer}>
                     <ImageDropzone
                         action="uploadImage"
@@ -59,7 +59,7 @@ export function HomeImageBox({
                 <HomeImage userImage={session?.user.image} />
             )}
 
-            {session?.user && !session.user.isAnonymous && (
+            {session?.user && (
                 <ActionIcon
                     onClick={toggleImageField}
                     className={homeStyles.imageFieldToggle}
