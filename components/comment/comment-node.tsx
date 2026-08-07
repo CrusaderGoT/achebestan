@@ -159,8 +159,12 @@ export function CommentNode({
                         )}
 
                         {isReplyOpen && !comment.hasBeenDeleted && (
-                            <Box ml={28} mt="xs" ref={focusTrapRef}>
+                            <Box
+                                ref={focusTrapRef}
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <CreateCommentForm
+                                    data-autofocus
                                     storyISBN={comment.storyISBN}
                                     text=""
                                     parentCommentId={comment.id}

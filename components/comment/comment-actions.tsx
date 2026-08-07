@@ -39,7 +39,7 @@ export function CommentActions({
     if (hasBeenDeleted && !perms.canDeleteAll) return null;
 
     return (
-        <Group gap="xs">
+        <Group gap="xs" my="xs">
             {!hasBeenDeleted && (
                 <>
                     {perms.canCreate && (
