@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrashFilled } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ListOrganizationsProps = { id: string; slug: string } | null;
 
@@ -23,18 +23,31 @@ export function ListOrganizations({
 }: {
     canDeleteOrg: boolean | undefined;
 }) {
-    const orgData = useCentralizedAuth().currentOrganization;
+    const { currentOrganization: orgData } = useCentralizedAuth();
 
-    const activeOrg = orgData.data
-        ? {
-              id: orgData.data.id,
-              slug: orgData.data.slug,
-          }
-        : null;
+    const activeOrg = useMemo(
+        () =>
+            orgData.data
+                ? {
+                      id: orgData.data.id,
+                      slug: orgData.data.slug,
+                  }
+                : null,
+        [orgData.data?.id, orgData.data?.slug],
+    );
 
     const { data: organizations } = authClient.useListOrganizations();
 
     const [value, setValue] = useState<ListOrganizationsProps>(activeOrg);
+
+    useEffect(() => {
+        if (!value && organizations && organizations.length > 0) {
+            setValue({
+                id: organizations[0].id,
+                slug: organizations[0].slug,
+            });
+        }
+    }, [organizations, value]);
 
     useEffect(() => {
         async function handleSwitchActiveOrg() {
@@ -56,7 +69,6 @@ export function ListOrganizations({
             });
         }
         handleSwitchActiveOrg();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value?.id]);
 
     if (!organizations || organizations.length === 0)

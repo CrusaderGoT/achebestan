@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 const eslintConfig = [
   ...nextCoreWebVitals,
   ...nextTypescript,
-  "plugin:@tanstack/eslint-plugin-query/recommended",
+  ...tanstackQuery.configs["flat/recommended"],
   {
     ignores: [
       "node_modules/**",

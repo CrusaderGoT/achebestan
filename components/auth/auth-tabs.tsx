@@ -1,17 +1,13 @@
 // For file /tabs/[activeTab].tsx
 "use client";
 
-import { AnonymousSignin } from "@/components/auth/anonymous-signin";
 import { useCentralizedAuth } from "@/lib/contexts/centralized-auth-context-provider";
 import { useSitePermissions } from "@/lib/hooks/auth/site-permissions";
-import publicStyles from "@/styles/public.module.css";
 import { LoginFormState } from "@/types/user";
 import {
     Center,
-    Divider,
     Group,
     Loader,
-    Mark,
     ScrollArea,
     Stack,
     Tabs,
@@ -134,9 +130,6 @@ export function AuthTabs({
                                     formState={signupFormState}
                                     setFormState={setSignupFormState}
                                 />
-
-                                <Divider label="or" />
-                                <AnonymousSignin mx={"auto"} />
                             </Stack>
                         </Tabs.Panel>
                     </>
@@ -189,10 +182,14 @@ export function AuthTabs({
                         </Text>
                         {sessionUser.data?.user && (
                             <Group justify="space-around">
-                                <Mark className={publicStyles.highlightText}>
-                                    current user: {sessionUser.data.user.name}
-                                </Mark>
-                                <LogoutButton session={sessionUser} />
+                                <Text c="dimmed" size="sm">
+                                    Current user: {sessionUser.data.user.name}
+                                </Text>
+                                <LogoutButton
+                                    session={sessionUser}
+                                    size={"sm"}
+                                    variant="transparent"
+                                />
                             </Group>
                         )}
                     </Stack>

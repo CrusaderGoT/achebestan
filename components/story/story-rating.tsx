@@ -116,20 +116,19 @@ export function StoryRating({
             )}
 
             {ratings.length > 0 && rating > 0 && (
-                <>
+                <Box ml={"auto"}>
                     <TooltipFloating label={`${rating.toFixed(1)}/5 stars`}>
-                        <Box>
-                            <Rating
-                                value={rating}
-                                fractions={2}
-                                readOnly
-                                className={cx(opened && publicStyles.hide)}
-                                ml={"auto"}
-                            />
-                            <Text ta={"right"}>{ratings.length} votes</Text>
-                        </Box>
+                        <Rating
+                            value={rating}
+                            fractions={2}
+                            readOnly
+                            className={cx(opened && publicStyles.hide)}
+                        />
                     </TooltipFloating>
-                </>
+                    <Text ta={"right"} size={"sm"} c={"dimmed"}>
+                        {ratings.length} votes
+                    </Text>
+                </Box>
             )}
         </Group>
     );

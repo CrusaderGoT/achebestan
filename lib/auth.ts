@@ -5,9 +5,8 @@ import { betterAuth, generateId } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
 
-import { user } from "@/drizzle/schemas/user";
 import { nextCookies } from "better-auth/next-js";
-import { admin, anonymous, organization } from "better-auth/plugins";
+import { admin, organization } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import {
     addUserToOrganization,
@@ -97,34 +96,6 @@ export const auth = betterAuth({
                         },
                     };
                 },
-            },
-        }),
-        anonymous({
-            disableDeleteAnonymousUser: true,
-            onLinkAccount: async ({ anonymousUser, newUser }) => {
-                await db.transaction(async (tx) => {
-                    // Delete new user
-                    const [deletedNewUser] = await tx
-                        .delete(user)
-                        .where(eq(user.id, newUser.user.id))
-                        .returning();
-
-                    if (!deletedNewUser)
-                        throw new Error("Failed to delete new user");
-
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { id, ...details } = deletedNewUser;
-
-                    // Update anonymous user
-                    await tx
-                        .update(user)
-                        .set({
-                            ...details,
-                            role: "user",
-                            isAnonymous: false,
-                        })
-                        .where(eq(user.id, anonymousUser.user.id));
-                });
             },
         }),
         nextCookies(),
